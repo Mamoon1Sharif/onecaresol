@@ -36,6 +36,18 @@ export function useUpdateCareGiver() {
   });
 }
 
+export function useCareGiver(id: string | undefined) {
+  return useQuery({
+    queryKey: ["care_givers", id],
+    enabled: !!id,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("care_givers").select("*").eq("id", id!).single();
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
 // ── Care Receivers ──
 export function useCareReceivers() {
   return useQuery({

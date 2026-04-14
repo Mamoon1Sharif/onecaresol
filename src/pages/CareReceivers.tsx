@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/table";
 import { Search, Plus } from "lucide-react";
 import { useCareReceivers } from "@/hooks/use-care-data";
-import { CareReceiverProfileDialog } from "@/components/CareReceiverProfileDialog";
 
 const statusStyles: Record<string, string> = {
   Active: "bg-success/15 text-success border-0 hover:bg-success/20",
@@ -22,7 +21,6 @@ const statusStyles: Record<string, string> = {
 const CareReceivers = () => {
   const { data: careReceivers = [], isLoading } = useCareReceivers();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCR, setSelectedCR] = useState<any>(null);
   const navigate = useNavigate();
 
   const filtered = careReceivers.filter((cr) =>
@@ -63,7 +61,7 @@ const CareReceivers = () => {
                   <TableRow><TableCell colSpan={4} className="text-center py-12 text-muted-foreground">No care receivers found.</TableCell></TableRow>
                 ) : (
                   filtered.map((cr) => (
-                    <TableRow key={cr.id} className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => setSelectedCR(cr)}>
+                    <TableRow key={cr.id} className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/carereceivers/${cr.id}`)}>
                       <TableCell>
                         <div>
                           <p className="font-medium text-foreground">{cr.name}</p>
@@ -88,12 +86,6 @@ const CareReceivers = () => {
           </CardContent>
         </Card>
       </div>
-
-      <CareReceiverProfileDialog
-        open={!!selectedCR}
-        onOpenChange={(open) => { if (!open) setSelectedCR(null); }}
-        receiver={selectedCR}
-      />
     </AppLayout>
   );
 };
