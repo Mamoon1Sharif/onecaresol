@@ -1,12 +1,12 @@
 import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, HeartHandshake, CalendarDays, Activity } from "lucide-react";
+import { Users, HeartHandshake, CalendarDays, AlertTriangle } from "lucide-react";
 
 const stats = [
-  { title: "Total Care Givers", value: "124", change: "+12%", icon: Users, color: "text-primary" },
-  { title: "Care Receivers", value: "348", change: "+8%", icon: HeartHandshake, color: "text-success" },
-  { title: "Active Rosters", value: "56", change: "+3%", icon: CalendarDays, color: "text-info" },
-  { title: "Tasks Completed", value: "1,205", change: "+18%", icon: Activity, color: "text-warning" },
+  { title: "Total Care Givers", value: "124", change: "+12%", icon: Users, iconBg: "bg-primary/10", color: "text-primary", borderAccent: "" },
+  { title: "Active Care Receivers", value: "348", change: "+8%", icon: HeartHandshake, iconBg: "bg-success/10", color: "text-success", borderAccent: "" },
+  { title: "Visits Today", value: "56", change: "+3%", icon: CalendarDays, iconBg: "bg-info/10", color: "text-info", borderAccent: "" },
+  { title: "Active Incidents", value: "7", change: "+2", icon: AlertTriangle, iconBg: "bg-destructive/10", color: "text-destructive", borderAccent: "border-l-4 border-l-destructive" },
 ];
 
 const recentActivity = [
@@ -28,16 +28,16 @@ const Dashboard = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((stat) => (
-            <Card key={stat.title} className="border border-border shadow-sm">
+            <Card key={stat.title} className={`border border-border shadow-md hover:shadow-lg transition-shadow bg-card ${stat.borderAccent}`}>
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{stat.title}</p>
                     <p className="text-2xl font-bold text-foreground mt-1">{stat.value}</p>
-                    <p className="text-xs text-success mt-1">{stat.change} this month</p>
+                    <p className={`text-xs mt-1 ${stat.color}`}>{stat.change} this month</p>
                   </div>
-                  <div className="h-11 w-11 rounded-lg bg-accent flex items-center justify-center">
-                    <stat.icon className={`h-5 w-5 ${stat.color}`} />
+                  <div className={`h-12 w-12 rounded-xl ${stat.iconBg} flex items-center justify-center`}>
+                    <stat.icon className={`h-6 w-6 ${stat.color}`} />
                   </div>
                 </div>
               </CardContent>
@@ -77,7 +77,7 @@ const Dashboard = () => {
                 { label: "Add Care Giver", icon: Users },
                 { label: "Add Care Receiver", icon: HeartHandshake },
                 { label: "Create Roster", icon: CalendarDays },
-                { label: "View Reports", icon: Activity },
+                { label: "View Reports", icon: AlertTriangle },
               ].map((action) => (
                 <button
                   key={action.label}
