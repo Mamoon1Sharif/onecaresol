@@ -14,7 +14,377 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      care_givers: {
+        Row: {
+          created_at: string
+          email: string | null
+          id: string
+          last_check_in: string | null
+          name: string
+          phone: string | null
+          skills: string[] | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          last_check_in?: string | null
+          name: string
+          phone?: string | null
+          skills?: string[] | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          id?: string
+          last_check_in?: string | null
+          name?: string
+          phone?: string | null
+          skills?: string[] | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      care_receivers: {
+        Row: {
+          address: string | null
+          age: number | null
+          care_plan: string | null
+          care_status: string
+          care_type: string
+          created_at: string
+          dnacpr: boolean
+          id: string
+          name: string
+          next_of_kin: string | null
+          next_of_kin_phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          age?: number | null
+          care_plan?: string | null
+          care_status?: string
+          care_type?: string
+          created_at?: string
+          dnacpr?: boolean
+          id?: string
+          name: string
+          next_of_kin?: string | null
+          next_of_kin_phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          age?: number | null
+          care_plan?: string | null
+          care_status?: string
+          care_type?: string
+          created_at?: string
+          dnacpr?: boolean
+          id?: string
+          name?: string
+          next_of_kin?: string | null
+          next_of_kin_phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      daily_visits: {
+        Row: {
+          care_giver_id: string | null
+          care_receiver_id: string | null
+          created_at: string
+          duration: number
+          id: string
+          start_hour: number
+          status: string
+          updated_at: string
+          visit_date: string
+        }
+        Insert: {
+          care_giver_id?: string | null
+          care_receiver_id?: string | null
+          created_at?: string
+          duration?: number
+          id?: string
+          start_hour?: number
+          status?: string
+          updated_at?: string
+          visit_date?: string
+        }
+        Update: {
+          care_giver_id?: string | null
+          care_receiver_id?: string | null
+          created_at?: string
+          duration?: number
+          id?: string
+          start_hour?: number
+          status?: string
+          updated_at?: string
+          visit_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_visits_care_giver_id_fkey"
+            columns: ["care_giver_id"]
+            isOneToOne: false
+            referencedRelation: "care_givers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_visits_care_receiver_id_fkey"
+            columns: ["care_receiver_id"]
+            isOneToOne: false
+            referencedRelation: "care_receivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dashboard_visits: {
+        Row: {
+          assigned_member: string
+          care_giver: string
+          check_in_status: string
+          created_at: string
+          id: string
+          scheduled_time: string
+          visit_date: string
+        }
+        Insert: {
+          assigned_member: string
+          care_giver: string
+          check_in_status?: string
+          created_at?: string
+          id?: string
+          scheduled_time: string
+          visit_date?: string
+        }
+        Update: {
+          assigned_member?: string
+          care_giver?: string
+          check_in_status?: string
+          created_at?: string
+          id?: string
+          scheduled_time?: string
+          visit_date?: string
+        }
+        Relationships: []
+      }
+      health_goals: {
+        Row: {
+          care_receiver_id: string
+          created_at: string
+          goal: string
+          id: string
+          notes: string | null
+          status: string
+          target: string | null
+        }
+        Insert: {
+          care_receiver_id: string
+          created_at?: string
+          goal: string
+          id?: string
+          notes?: string | null
+          status?: string
+          target?: string | null
+        }
+        Update: {
+          care_receiver_id?: string
+          created_at?: string
+          goal?: string
+          id?: string
+          notes?: string | null
+          status?: string
+          target?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "health_goals_care_receiver_id_fkey"
+            columns: ["care_receiver_id"]
+            isOneToOne: false
+            referencedRelation: "care_receivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medications: {
+        Row: {
+          administered_by: string | null
+          care_receiver_id: string
+          created_at: string
+          date: string
+          dosage: string
+          id: string
+          medication: string
+          notes: string | null
+        }
+        Insert: {
+          administered_by?: string | null
+          care_receiver_id: string
+          created_at?: string
+          date: string
+          dosage: string
+          id?: string
+          medication: string
+          notes?: string | null
+        }
+        Update: {
+          administered_by?: string | null
+          care_receiver_id?: string
+          created_at?: string
+          date?: string
+          dosage?: string
+          id?: string
+          medication?: string
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medications_care_receiver_id_fkey"
+            columns: ["care_receiver_id"]
+            isOneToOne: false
+            referencedRelation: "care_receivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      risk_assessments: {
+        Row: {
+          care_receiver_id: string
+          category: string
+          created_at: string
+          description: string
+          id: string
+          last_reviewed: string | null
+          level: string
+          mitigations: string | null
+        }
+        Insert: {
+          care_receiver_id: string
+          category: string
+          created_at?: string
+          description?: string
+          id?: string
+          last_reviewed?: string | null
+          level?: string
+          mitigations?: string | null
+        }
+        Update: {
+          care_receiver_id?: string
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          last_reviewed?: string | null
+          level?: string
+          mitigations?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_assessments_care_receiver_id_fkey"
+            columns: ["care_receiver_id"]
+            isOneToOne: false
+            referencedRelation: "care_receivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shifts: {
+        Row: {
+          care_giver_id: string | null
+          care_receiver_id: string | null
+          created_at: string
+          day: number
+          end_time: string
+          id: string
+          notes: string | null
+          shift_type: string
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          care_giver_id?: string | null
+          care_receiver_id?: string | null
+          created_at?: string
+          day?: number
+          end_time?: string
+          id?: string
+          notes?: string | null
+          shift_type?: string
+          start_time?: string
+          updated_at?: string
+        }
+        Update: {
+          care_giver_id?: string | null
+          care_receiver_id?: string | null
+          created_at?: string
+          day?: number
+          end_time?: string
+          id?: string
+          notes?: string | null
+          shift_type?: string
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shifts_care_giver_id_fkey"
+            columns: ["care_giver_id"]
+            isOneToOne: false
+            referencedRelation: "care_givers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shifts_care_receiver_id_fkey"
+            columns: ["care_receiver_id"]
+            isOneToOne: false
+            referencedRelation: "care_receivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      visit_notes: {
+        Row: {
+          care_receiver_id: string
+          caregiver: string
+          created_at: string
+          date: string
+          id: string
+          note: string
+        }
+        Insert: {
+          care_receiver_id: string
+          caregiver: string
+          created_at?: string
+          date: string
+          id?: string
+          note: string
+        }
+        Update: {
+          care_receiver_id?: string
+          caregiver?: string
+          created_at?: string
+          date?: string
+          id?: string
+          note?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visit_notes_care_receiver_id_fkey"
+            columns: ["care_receiver_id"]
+            isOneToOne: false
+            referencedRelation: "care_receivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
