@@ -28,16 +28,16 @@ const Dashboard = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((stat) => (
-            <Card key={stat.title} className="border border-border shadow-sm">
+            <Card key={stat.title} className={`border border-border shadow-md hover:shadow-lg transition-shadow bg-card ${stat.borderAccent}`}>
               <CardContent className="p-5">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{stat.title}</p>
                     <p className="text-2xl font-bold text-foreground mt-1">{stat.value}</p>
-                    <p className="text-xs text-success mt-1">{stat.change} this month</p>
+                    <p className={`text-xs mt-1 ${stat.color}`}>{stat.change} this month</p>
                   </div>
-                  <div className="h-11 w-11 rounded-lg bg-accent flex items-center justify-center">
-                    <stat.icon className={`h-5 w-5 ${stat.color}`} />
+                  <div className={`h-12 w-12 rounded-xl ${stat.iconBg} flex items-center justify-center`}>
+                    <stat.icon className={`h-6 w-6 ${stat.color}`} />
                   </div>
                 </div>
               </CardContent>
