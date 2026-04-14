@@ -283,7 +283,7 @@ const DailyRoster = () => {
             <div style={{ minWidth: 24 * COL_WIDTH + 200 }}>
               <div className="flex sticky top-0 z-10 bg-background border-b border-border">
                 <div className="w-[200px] shrink-0 border-r border-border p-2 flex items-center">
-                  <span className="text-[10px] text-muted-foreground font-medium">CARE RECEIVER</span>
+                  <span className="text-[10px] text-muted-foreground font-medium">SERVICE MEMBER</span>
                 </div>
                 {HOURS_24.map((h) => (
                   <div key={h} className={`border-r border-border flex items-center justify-center ${h >= 6 && h < 18 ? "bg-background" : "bg-muted/30"}`} style={{ width: COL_WIDTH, minWidth: COL_WIDTH }}>

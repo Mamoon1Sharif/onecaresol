@@ -27,7 +27,7 @@ import {
 const topItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Care Givers", url: "/caregivers", icon: Users },
-  { title: "Care Receivers", url: "/carereceivers", icon: HeartHandshake },
+  { title: "Service Members", url: "/carereceivers", icon: HeartHandshake },
 ];
 
 const rosterSubItems = [
