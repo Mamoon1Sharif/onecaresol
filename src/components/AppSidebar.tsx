@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, HeartHandshake, CalendarDays } from "lucide-react";
+import { LayoutDashboard, Users, HeartHandshake, CalendarDays, CalendarClock } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import {
@@ -19,6 +19,7 @@ const navItems = [
   { title: "Care Givers", url: "/caregivers", icon: Users },
   { title: "Care Receivers", url: "/carereceivers", icon: HeartHandshake },
   { title: "Roster", url: "/roster", icon: CalendarDays },
+  { title: "Daily Roster", url: "/daily-roster", icon: CalendarClock },
 ];
 
 export function AppSidebar() {

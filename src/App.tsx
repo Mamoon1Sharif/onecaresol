@@ -8,6 +8,7 @@ import CareGivers from "./pages/CareGivers.tsx";
 import CareReceivers from "./pages/CareReceivers.tsx";
 import MemberProfile from "./pages/MemberProfile.tsx";
 import Roster from "./pages/Roster.tsx";
+import DailyRoster from "./pages/DailyRoster.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/carereceivers" element={<CareReceivers />} />
           <Route path="/carereceivers/:id" element={<MemberProfile />} />
           <Route path="/roster" element={<Roster />} />
+          <Route path="/daily-roster" element={<DailyRoster />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
