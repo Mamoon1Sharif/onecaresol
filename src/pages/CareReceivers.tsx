@@ -2,19 +2,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-} from "@/components/ui/table";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, User, MapPin, Phone, Heart } from "lucide-react";
 import { useCareReceivers } from "@/hooks/use-care-data";
 
 const statusStyles: Record<string, string> = {
-  Active: "bg-success/15 text-success border-0 hover:bg-success/20",
-  "On Hold": "bg-warning/15 text-warning border-0 hover:bg-warning/20",
+  Active: "bg-success/15 text-success border-0",
+  "On Hold": "bg-warning/15 text-warning border-0",
   Discharged: "bg-muted text-muted-foreground border-0",
 };
 
@@ -32,59 +28,73 @@ const CareReceivers = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Care Receivers</h1>
+            <h1 className="text-2xl font-bold text-foreground">Service Members</h1>
             <p className="text-sm text-muted-foreground mt-1">Manage patients and care recipients · {careReceivers.length} total</p>
           </div>
-          <Button className="gap-2"><Plus className="h-4 w-4" /> Add Care Receiver</Button>
+          <Button className="gap-2"><Plus className="h-4 w-4" /> Add Service Member</Button>
         </div>
 
-        <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search by name..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 bg-card border-border" />
+        <div className="flex items-center gap-3">
+          <div className="relative max-w-sm flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input placeholder="Search by name..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 bg-card border-border" />
+          </div>
+          <Badge variant="outline" className="text-sm px-3 py-1.5">
+            <Search className="h-3.5 w-3.5 mr-1.5" /> {filtered.length} results
+          </Badge>
         </div>
 
-        <Card className="border border-border shadow-sm overflow-hidden">
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50 hover:bg-muted/50">
-                  <TableHead className="font-semibold text-foreground">Member Name</TableHead>
-                  <TableHead className="font-semibold text-foreground">Address</TableHead>
-                  <TableHead className="font-semibold text-foreground">Next of Kin</TableHead>
-                  <TableHead className="font-semibold text-foreground">Care Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
-                  <TableRow><TableCell colSpan={4} className="text-center py-12 text-muted-foreground">Loading...</TableCell></TableRow>
-                ) : filtered.length === 0 ? (
-                  <TableRow><TableCell colSpan={4} className="text-center py-12 text-muted-foreground">No care receivers found.</TableCell></TableRow>
-                ) : (
-                  filtered.map((cr) => (
-                    <TableRow key={cr.id} className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/carereceivers/${cr.id}`)}>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium text-foreground">{cr.name}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">Age {cr.age}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-sm text-foreground">{cr.address}</TableCell>
-                      <TableCell>
-                        <div>
-                          <p className="text-sm text-foreground">{cr.next_of_kin}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">{cr.next_of_kin_phone}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="default" className={statusStyles[cr.care_status] ?? ""}>{cr.care_status}</Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        {isLoading ? (
+          <div className="text-center py-12 text-muted-foreground">Loading...</div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">No service members found.</div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filtered.map((cr) => (
+              <div
+                key={cr.id}
+                onClick={() => navigate(`/carereceivers/${cr.id}`)}
+                className="group border border-border rounded-xl bg-card p-4 cursor-pointer hover:shadow-md hover:border-primary/30 transition-all duration-200"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <h3 className="font-semibold text-foreground text-sm truncate">{cr.name}</h3>
+                    {cr.dnacpr && (
+                      <Badge variant="destructive" className="shrink-0 text-[10px] px-1.5 py-0 gap-0.5">
+                        <Heart className="h-2.5 w-2.5" /> DNACPR
+                      </Badge>
+                    )}
+                  </div>
+                  <Badge
+                    variant="default"
+                    className={`shrink-0 text-[10px] px-2 py-0.5 ${statusStyles[cr.care_status] ?? ""}`}
+                  >
+                    {cr.care_status}
+                  </Badge>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="h-16 w-16 rounded-full bg-muted border-2 border-border flex items-center justify-center shrink-0">
+                    <User className="h-7 w-7 text-muted-foreground" />
+                  </div>
+                  <div className="min-w-0 space-y-1.5 text-sm">
+                    {cr.address && (
+                      <p className="text-muted-foreground text-xs leading-tight line-clamp-2 flex items-start gap-1.5">
+                        <MapPin className="h-3 w-3 shrink-0 mt-0.5" />
+                        {cr.address}
+                      </p>
+                    )}
+                    {cr.next_of_kin_phone && (
+                      <p className="flex items-center gap-1.5 text-foreground">
+                        <Phone className="h-3 w-3 text-muted-foreground shrink-0" />
+                        <span className="text-xs">{cr.next_of_kin_phone}</span>
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </AppLayout>
   );
