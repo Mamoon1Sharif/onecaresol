@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Search, Plus, Phone, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useCareGivers, useAddCareGiver } from "@/hooks/use-care-data";
+import { CareGiverProfileDialog } from "@/components/CareGiverProfileDialog";
 
 const CareGivers = () => {
   const { data: careGivers = [], isLoading } = useCareGivers();
@@ -24,6 +26,7 @@ const CareGivers = () => {
   const [formEmail, setFormEmail] = useState("");
   const [formPhone, setFormPhone] = useState("");
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const [selectedCG, setSelectedCG] = useState<any>(null);
   const { toast } = useToast();
 
   const filtered = careGivers.filter((cg) =>
@@ -88,7 +91,7 @@ const CareGivers = () => {
                   <TableRow><TableCell colSpan={4} className="text-center py-12 text-muted-foreground">No care givers found.</TableCell></TableRow>
                 ) : (
                   filtered.map((cg) => (
-                    <TableRow key={cg.id} className="hover:bg-muted/30 transition-colors">
+                    <TableRow key={cg.id} className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => setSelectedCG(cg)}>
                       <TableCell>
                         <div>
                           <p className="font-medium text-foreground">{cg.name}</p>
@@ -110,6 +113,12 @@ const CareGivers = () => {
           </CardContent>
         </Card>
       </div>
+
+      <CareGiverProfileDialog
+        open={!!selectedCG}
+        onOpenChange={(open) => { if (!open) setSelectedCG(null); }}
+        caregiver={selectedCG}
+      />
 
       <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <SheetContent className="sm:max-w-md">
