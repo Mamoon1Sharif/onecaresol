@@ -61,7 +61,61 @@ const goalStatusStyles: Record<string, string> = {
 const MemberProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const member = careReceiversData.find((cr) => cr.id === Number(id));
+
+  const [carePlanText, setCarePlanText] = useState(member?.carePlan ?? "");
+  const [isEditingPlan, setIsEditingPlan] = useState(false);
+
+  const [risks, setRisks] = useState<RiskAssessment[]>([
+    { id: 1, category: "Falls", description: "History of falls in bathroom", level: "High", mitigations: "Non-slip mats installed, grab rails fitted, mobility aid assessment scheduled", lastReviewed: "2025-04-10" },
+    { id: 2, category: "Medication", description: "Complex medication regime with 5+ prescriptions", level: "Medium", mitigations: "Dosette box in use, weekly pharmacy review", lastReviewed: "2025-04-08" },
+    { id: 3, category: "Nutrition", description: "Low appetite and weight loss noted", level: "Medium", mitigations: "Fortified meals, weekly weight monitoring, dietitian referral pending", lastReviewed: "2025-04-05" },
+  ]);
+
+  const [goals, setGoals] = useState<HealthGoal[]>([
+    { id: 1, goal: "Improve mobility", target: "Walk 100m unaided within 3 months", status: "In Progress", notes: "Physiotherapy twice weekly" },
+    { id: 2, goal: "Medication compliance", target: "100% adherence for 30 consecutive days", status: "In Progress", notes: "Using reminder app" },
+    { id: 3, goal: "Social engagement", target: "Attend day centre twice per week", status: "Not Started", notes: "Transport to be arranged" },
+  ]);
+
+  const [riskDialog, setRiskDialog] = useState(false);
+  const [editingRisk, setEditingRisk] = useState<RiskAssessment | null>(null);
+  const [riskForm, setRiskForm] = useState({ category: "", description: "", level: "Low" as RiskAssessment["level"], mitigations: "" });
+
+  const [goalDialog, setGoalDialog] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<HealthGoal | null>(null);
+  const [goalForm, setGoalForm] = useState({ goal: "", target: "", status: "Not Started" as HealthGoal["status"], notes: "" });
+
+  const openRiskDialog = (r?: RiskAssessment) => {
+    if (r) { setEditingRisk(r); setRiskForm({ category: r.category, description: r.description, level: r.level, mitigations: r.mitigations }); }
+    else { setEditingRisk(null); setRiskForm({ category: "", description: "", level: "Low", mitigations: "" }); }
+    setRiskDialog(true);
+  };
+
+  const saveRisk = () => {
+    if (!riskForm.category) return;
+    const entry: RiskAssessment = { id: editingRisk?.id ?? Date.now(), ...riskForm, lastReviewed: new Date().toISOString().slice(0, 10) };
+    if (editingRisk) setRisks((p) => p.map((r) => r.id === editingRisk.id ? entry : r));
+    else setRisks((p) => [...p, entry]);
+    setRiskDialog(false);
+    toast({ title: editingRisk ? "Risk Updated" : "Risk Added" });
+  };
+
+  const openGoalDialog = (g?: HealthGoal) => {
+    if (g) { setEditingGoal(g); setGoalForm({ goal: g.goal, target: g.target, status: g.status, notes: g.notes }); }
+    else { setEditingGoal(null); setGoalForm({ goal: "", target: "", status: "Not Started", notes: "" }); }
+    setGoalDialog(true);
+  };
+
+  const saveGoal = () => {
+    if (!goalForm.goal) return;
+    const entry: HealthGoal = { id: editingGoal?.id ?? Date.now(), ...goalForm };
+    if (editingGoal) setGoals((p) => p.map((g) => g.id === editingGoal.id ? entry : g));
+    else setGoals((p) => [...p, entry]);
+    setGoalDialog(false);
+    toast({ title: editingGoal ? "Goal Updated" : "Goal Added" });
+  };
 
   if (!member) {
     return (
