@@ -63,8 +63,8 @@ export function useCareReceiver(id: string | undefined) {
 export function useUpdateCareReceiver() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ id, ...updates }: { id: string; care_plan?: string }) => {
-      const { error } = await supabase.from("care_receivers").update(updates).eq("id", id);
+    mutationFn: async ({ id, ...updates }: { id: string } & Record<string, any>) => {
+      const { error } = await supabase.from("care_receivers").update(updates as any).eq("id", id);
       if (error) throw error;
     },
     onSuccess: (_, vars) => {
