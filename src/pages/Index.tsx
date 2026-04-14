@@ -5,10 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Users, HeartHandshake, CalendarDays, AlertTriangle, Radio, CheckCircle2, Clock } from "lucide-react";
+import { Users, HeartHandshake, CalendarDays, AlertTriangle, Radio, CheckCircle2, Clock, ListChecks, Bell, UserCheck, Cake, Pill, Palmtree, UmbrellaOff, AlertOctagon, Eye } from "lucide-react";
 import { useDashboardStats, useDashboardVisits, useCompletedVisitsToday } from "@/hooks/use-care-data";
 import { supabase } from "@/integrations/supabase/client";
 import { ShiftDetailDialog } from "@/components/ShiftDetailDialog";
+import { Button } from "@/components/ui/button";
 
 type CheckInStatus = "On Time" | "Late" | "Not Arrived";
 
