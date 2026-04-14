@@ -38,6 +38,8 @@ const rosterSubItems = [
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const { signOut } = useAuth();
+  const nav = useNavigate();
   const location = useLocation();
 
   const isActive = (path: string) =>
