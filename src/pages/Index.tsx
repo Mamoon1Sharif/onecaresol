@@ -1,12 +1,12 @@
 import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, HeartHandshake, CalendarDays, Activity } from "lucide-react";
+import { Users, HeartHandshake, CalendarDays, AlertTriangle } from "lucide-react";
 
 const stats = [
-  { title: "Total Care Givers", value: "124", change: "+12%", icon: Users, color: "text-primary" },
-  { title: "Care Receivers", value: "348", change: "+8%", icon: HeartHandshake, color: "text-success" },
-  { title: "Active Rosters", value: "56", change: "+3%", icon: CalendarDays, color: "text-info" },
-  { title: "Tasks Completed", value: "1,205", change: "+18%", icon: Activity, color: "text-warning" },
+  { title: "Total Care Givers", value: "124", change: "+12%", icon: Users, iconBg: "bg-primary/10", color: "text-primary", borderAccent: "" },
+  { title: "Active Care Receivers", value: "348", change: "+8%", icon: HeartHandshake, iconBg: "bg-success/10", color: "text-success", borderAccent: "" },
+  { title: "Visits Today", value: "56", change: "+3%", icon: CalendarDays, iconBg: "bg-info/10", color: "text-info", borderAccent: "" },
+  { title: "Active Incidents", value: "7", change: "+2", icon: AlertTriangle, iconBg: "bg-destructive/10", color: "text-destructive", borderAccent: "border-l-4 border-l-destructive" },
 ];
 
 const recentActivity = [
