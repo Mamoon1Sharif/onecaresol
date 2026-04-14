@@ -29,7 +29,7 @@ const CareReceivers = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Service Members</h1>
-            <p className="text-sm text-muted-foreground mt-1">Manage patients and care recipients · {careReceivers.length} total</p>
+            <p className="text-sm text-muted-foreground mt-1">Manage service members · {careReceivers.length} total</p>
           </div>
           <Button className="gap-2"><Plus className="h-4 w-4" /> Add Service Member</Button>
         </div>
