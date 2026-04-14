@@ -14,7 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Search, Plus, Phone, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useCareGivers, useAddCareGiver } from "@/hooks/use-care-data";
+import { useCareGivers, useAddCareGiver, useUpdateCareGiver } from "@/hooks/use-care-data";
 import { CareGiverProfileDialog } from "@/components/CareGiverProfileDialog";
 
 const CareGivers = () => {
