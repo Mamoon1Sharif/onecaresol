@@ -1,6 +1,8 @@
-import { LayoutDashboard, Users, HeartHandshake, CalendarDays, CalendarClock, ChevronDown } from "lucide-react";
+import { LayoutDashboard, Users, HeartHandshake, CalendarDays, CalendarClock, ChevronDown, LogOut } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/use-auth";
+import { Button } from "@/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -131,6 +133,19 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <div className="mt-auto p-3 border-t border-sidebar-border">
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-2 text-sidebar-foreground/70 hover:text-sidebar-foreground"
+          onClick={async () => {
+            await signOut();
+            nav("/login");
+          }}
+        >
+          <LogOut className="h-4 w-4" /> Sign Out
+        </Button>
+      </div>
     </Sidebar>
   );
 }
