@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Users, HeartHandshake, CalendarDays, AlertTriangle, Radio, CheckCircle2, Clock, ListChecks, Bell, UserCheck, Cake, Pill, Palmtree, UmbrellaOff, AlertOctagon, Eye } from "lucide-react";
+import { Users, HeartHandshake, CalendarDays, AlertTriangle, Radio, CheckCircle2, Clock, ListChecks, Pill, Palmtree, UmbrellaOff, AlertOctagon, Eye } from "lucide-react";
 import { useDashboardStats, useDashboardVisits, useCompletedVisitsToday } from "@/hooks/use-care-data";
 import { supabase } from "@/integrations/supabase/client";
 import { ShiftDetailDialog } from "@/components/ShiftDetailDialog";
@@ -112,47 +112,6 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* Live Visit Monitor */}
-        <Card className="border border-border shadow-sm overflow-hidden">
-          <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
-              <Radio className="h-4 w-4 text-destructive animate-pulse" />
-              <CardTitle className="text-base font-semibold">Live Visit Monitor</CardTitle>
-              <span className="text-xs text-muted-foreground ml-auto">Real-time from database</span>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/50 hover:bg-muted/50">
-                  <TableHead className="font-semibold text-foreground">Care Giver</TableHead>
-                  <TableHead className="font-semibold text-foreground">Assigned Member</TableHead>
-                  <TableHead className="font-semibold text-foreground">Scheduled Time</TableHead>
-                  <TableHead className="font-semibold text-foreground">Check-in Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {visits.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No live visits today</TableCell>
-                  </TableRow>
-                ) : visits.map((visit) => (
-                  <TableRow key={visit.id} className="hover:bg-muted/30 transition-colors">
-                    <TableCell className="font-medium text-foreground">{visit.care_giver}</TableCell>
-                    <TableCell className="text-sm text-foreground">{visit.assigned_member}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{visit.scheduled_time}</TableCell>
-                    <TableCell>
-                      <Badge variant="default" className={statusStyles[visit.check_in_status as CheckInStatus] ?? ""}>
-                        {visit.check_in_status}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-
         {/* Completed Shifts */}
         <Card className="border border-border shadow-sm overflow-hidden">
           <CardHeader className="pb-3">
@@ -207,6 +166,47 @@ const Dashboard = () => {
                     <TableCell>
                       <Badge className="bg-success/15 text-success border-0 text-xs">
                         {diffMinutes(v.check_in_time, v.check_out_time)}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+
+        {/* Live Visit Monitor */}
+        <Card className="border border-border shadow-sm overflow-hidden">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <Radio className="h-4 w-4 text-destructive animate-pulse" />
+              <CardTitle className="text-base font-semibold">Live Visit Monitor</CardTitle>
+              <span className="text-xs text-muted-foreground ml-auto">Real-time from database</span>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50 hover:bg-muted/50">
+                  <TableHead className="font-semibold text-foreground">Care Giver</TableHead>
+                  <TableHead className="font-semibold text-foreground">Assigned Member</TableHead>
+                  <TableHead className="font-semibold text-foreground">Scheduled Time</TableHead>
+                  <TableHead className="font-semibold text-foreground">Check-in Status</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {visits.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No live visits today</TableCell>
+                  </TableRow>
+                ) : visits.map((visit) => (
+                  <TableRow key={visit.id} className="hover:bg-muted/30 transition-colors">
+                    <TableCell className="font-medium text-foreground">{visit.care_giver}</TableCell>
+                    <TableCell className="text-sm text-foreground">{visit.assigned_member}</TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{visit.scheduled_time}</TableCell>
+                    <TableCell>
+                      <Badge variant="default" className={statusStyles[visit.check_in_status as CheckInStatus] ?? ""}>
+                        {visit.check_in_status}
                       </Badge>
                     </TableCell>
                   </TableRow>
