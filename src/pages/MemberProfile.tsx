@@ -1,24 +1,61 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, MapPin, Phone, User, FileText, Pill, ClipboardList } from "lucide-react";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  ArrowLeft, MapPin, Phone, User, FileText, Pill, ClipboardList, Plus, Edit2, Trash2,
+  AlertTriangle, Target, Shield,
+} from "lucide-react";
 import { careReceiversData } from "./CareReceivers";
+import { useToast } from "@/hooks/use-toast";
+
+interface RiskAssessment {
+  id: number;
+  category: string;
+  description: string;
+  level: "Low" | "Medium" | "High" | "Critical";
+  mitigations: string;
+  lastReviewed: string;
+}
+
+interface HealthGoal {
+  id: number;
+  goal: string;
+  target: string;
+  status: "Not Started" | "In Progress" | "Achieved";
+  notes: string;
+}
 
 const statusStyles: Record<string, string> = {
   Active: "bg-success/15 text-success border-0",
   "On Hold": "bg-warning/15 text-warning border-0",
   Discharged: "bg-muted text-muted-foreground border-0",
+};
+
+const riskLevelStyles: Record<string, string> = {
+  Low: "bg-success/15 text-success",
+  Medium: "bg-warning/15 text-warning",
+  High: "bg-orange-100 text-orange-700",
+  Critical: "bg-destructive/15 text-destructive",
+};
+
+const goalStatusStyles: Record<string, string> = {
+  "Not Started": "bg-muted text-muted-foreground",
+  "In Progress": "bg-primary/15 text-primary",
+  Achieved: "bg-success/15 text-success",
 };
 
 const MemberProfile = () => {
