@@ -5,9 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Users, HeartHandshake, CalendarDays, AlertTriangle, Radio } from "lucide-react";
-import { useDashboardStats, useDashboardVisits } from "@/hooks/use-care-data";
+import { Users, HeartHandshake, CalendarDays, AlertTriangle, Radio, CheckCircle2, Clock } from "lucide-react";
+import { useDashboardStats, useDashboardVisits, useCompletedVisitsToday } from "@/hooks/use-care-data";
 import { supabase } from "@/integrations/supabase/client";
+import { ShiftDetailDialog } from "@/components/ShiftDetailDialog";
 
 type CheckInStatus = "On Time" | "Late" | "Not Arrived";
 
@@ -17,28 +18,35 @@ const statusStyles: Record<CheckInStatus, string> = {
   "Not Arrived": "bg-destructive/15 text-destructive border-0 hover:bg-destructive/20",
 };
 
-const recentActivity = [
-  { name: "Sarah Johnson", action: "Shift completed for Mary W.", time: "2 min ago" },
-  { name: "Dr. Mike Patel", action: "Updated care plan for John D.", time: "15 min ago" },
-  { name: "Lisa Chen", action: "New roster assignment created", time: "1 hr ago" },
-  { name: "Tom Harris", action: "Care receiver intake completed", time: "2 hrs ago" },
-  { name: "Anna Garcia", action: "Time-off request submitted", time: "3 hrs ago" },
-];
+function fmtTime(iso: string | null) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+}
+
+function diffMinutes(start: string | null, end: string | null) {
+  if (!start || !end) return "—";
+  const ms = new Date(end).getTime() - new Date(start).getTime();
+  if (ms < 0) return "—";
+  const totalMin = Math.floor(ms / 60000);
+  const hrs = Math.floor(totalMin / 60);
+  const mins = totalMin % 60;
+  return `${hrs}h ${String(mins).padStart(2, "0")}m`;
+}
 
 const Dashboard = () => {
   const { data: stats } = useDashboardStats();
   const { data: dbVisits, refetch } = useDashboardVisits();
+  const { data: completedVisits = [], refetch: refetchCompleted } = useCompletedVisitsToday();
+  const [selectedVisit, setSelectedVisit] = useState<any>(null);
 
-  // Subscribe to realtime updates
   useEffect(() => {
     const channel = supabase
       .channel("dashboard-visits-realtime")
-      .on("postgres_changes", { event: "*", schema: "public", table: "dashboard_visits" }, () => {
-        refetch();
-      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "dashboard_visits" }, () => refetch())
+      .on("postgres_changes", { event: "*", schema: "public", table: "daily_visits" }, () => refetchCompleted())
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [refetch]);
+  }, [refetch, refetchCompleted]);
 
   const visits = dbVisits ?? [];
 
@@ -46,7 +54,7 @@ const Dashboard = () => {
     { title: "Total Care Givers", value: String(stats?.totalCareGivers ?? "—"), icon: Users, iconBg: "bg-primary/10", color: "text-primary", borderAccent: "" },
     { title: "Active Care Receivers", value: String(stats?.activeCareReceivers ?? "—"), icon: HeartHandshake, iconBg: "bg-success/10", color: "text-success", borderAccent: "" },
     { title: "Visits Today", value: String(stats?.visitsToday ?? "—"), icon: CalendarDays, iconBg: "bg-info/10", color: "text-info", borderAccent: "" },
-    { title: "Active Incidents", value: "7", icon: AlertTriangle, iconBg: "bg-destructive/10", color: "text-destructive", borderAccent: "border-l-4 border-l-destructive" },
+    { title: "Completed Shifts", value: String(completedVisits.length), icon: CheckCircle2, iconBg: "bg-success/10", color: "text-success", borderAccent: "border-l-4 border-l-success" },
   ];
 
   return (
@@ -75,6 +83,7 @@ const Dashboard = () => {
           ))}
         </div>
 
+        {/* Live Visit Monitor */}
         <Card className="border border-border shadow-sm overflow-hidden">
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
@@ -94,7 +103,11 @@ const Dashboard = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {visits.map((visit) => (
+                {visits.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No live visits today</TableCell>
+                  </TableRow>
+                ) : visits.map((visit) => (
                   <TableRow key={visit.id} className="hover:bg-muted/30 transition-colors">
                     <TableCell className="font-medium text-foreground">{visit.care_giver}</TableCell>
                     <TableCell className="text-sm text-foreground">{visit.assigned_member}</TableCell>
@@ -111,52 +124,98 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="border border-border shadow-sm">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">Recent Activity</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-0">
-              {recentActivity.map((item, i) => (
-                <div key={i} className="flex items-start gap-3 py-3 border-b border-border last:border-0">
-                  <div className="h-8 w-8 rounded-full bg-accent flex items-center justify-center shrink-0 mt-0.5">
-                    <span className="text-xs font-semibold text-accent-foreground">
-                      {item.name.split(" ").map(n => n[0]).join("")}
-                    </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground">{item.name}</p>
-                    <p className="text-xs text-muted-foreground">{item.action}</p>
-                  </div>
-                  <span className="text-[11px] text-muted-foreground shrink-0">{item.time}</span>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+        {/* Completed Shifts */}
+        <Card className="border border-border shadow-sm overflow-hidden">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-success" />
+              <CardTitle className="text-base font-semibold">Completed Shifts Today</CardTitle>
+              <Badge variant="secondary" className="ml-1 text-xs">{completedVisits.length}</Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/50 hover:bg-muted/50">
+                  <TableHead className="font-semibold text-foreground">Care Giver</TableHead>
+                  <TableHead className="font-semibold text-foreground">Care Receiver</TableHead>
+                  <TableHead className="font-semibold text-foreground">Scheduled</TableHead>
+                  <TableHead className="font-semibold text-foreground">Checked In</TableHead>
+                  <TableHead className="font-semibold text-foreground">Clocked Out</TableHead>
+                  <TableHead className="font-semibold text-foreground">Total Worked</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {completedVisits.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">No completed shifts yet today</TableCell>
+                  </TableRow>
+                ) : completedVisits.map((v) => (
+                  <TableRow
+                    key={v.id}
+                    className="hover:bg-muted/30 transition-colors cursor-pointer"
+                    onClick={() => setSelectedVisit(v)}
+                  >
+                    <TableCell className="font-medium text-foreground">
+                      {(v.care_givers as any)?.name ?? "—"}
+                    </TableCell>
+                    <TableCell className="text-sm text-foreground">
+                      <div className="flex items-center gap-1.5">
+                        {(v.care_receivers as any)?.name ?? "—"}
+                        {(v.care_receivers as any)?.dnacpr && (
+                          <Badge variant="destructive" className="text-[9px] px-1 py-0">DNACPR</Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-3 w-3" />
+                        {String(v.start_hour).padStart(2, "0")}:00 – {String(v.start_hour + v.duration).padStart(2, "0")}:00
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm text-foreground">{fmtTime(v.check_in_time)}</TableCell>
+                    <TableCell className="text-sm text-foreground">{fmtTime(v.check_out_time)}</TableCell>
+                    <TableCell>
+                      <Badge className="bg-success/15 text-success border-0 text-xs">
+                        {diffMinutes(v.check_in_time, v.check_out_time)}
+                      </Badge>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
 
-          <Card className="border border-border shadow-sm">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold">Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-3">
-              {[
-                { label: "Add Care Giver", icon: Users },
-                { label: "Add Care Receiver", icon: HeartHandshake },
-                { label: "Create Roster", icon: CalendarDays },
-                { label: "View Reports", icon: AlertTriangle },
-              ].map((action) => (
-                <button
-                  key={action.label}
-                  className="flex flex-col items-center gap-2 p-4 rounded-lg border border-border hover:bg-accent hover:border-primary/20 transition-colors"
-                >
-                  <action.icon className="h-5 w-5 text-primary" />
-                  <span className="text-xs font-medium text-foreground">{action.label}</span>
-                </button>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
+        {/* Quick Actions */}
+        <Card className="border border-border shadow-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base font-semibold">Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: "Add Care Giver", icon: Users },
+              { label: "Add Care Receiver", icon: HeartHandshake },
+              { label: "Create Roster", icon: CalendarDays },
+              { label: "View Reports", icon: AlertTriangle },
+            ].map((action) => (
+              <button
+                key={action.label}
+                className="flex flex-col items-center gap-2 p-4 rounded-lg border border-border hover:bg-accent hover:border-primary/20 transition-colors"
+              >
+                <action.icon className="h-5 w-5 text-primary" />
+                <span className="text-xs font-medium text-foreground">{action.label}</span>
+              </button>
+            ))}
+          </CardContent>
+        </Card>
       </div>
+
+      <ShiftDetailDialog
+        open={!!selectedVisit}
+        onOpenChange={(o) => { if (!o) setSelectedVisit(null); }}
+        visit={selectedVisit}
+      />
     </AppLayout>
   );
 };
