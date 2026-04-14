@@ -222,6 +222,8 @@ export type Database = {
         Row: {
           care_giver_id: string | null
           care_receiver_id: string | null
+          check_in_time: string | null
+          check_out_time: string | null
           created_at: string
           duration: number
           id: string
@@ -233,6 +235,8 @@ export type Database = {
         Insert: {
           care_giver_id?: string | null
           care_receiver_id?: string | null
+          check_in_time?: string | null
+          check_out_time?: string | null
           created_at?: string
           duration?: number
           id?: string
@@ -244,6 +248,8 @@ export type Database = {
         Update: {
           care_giver_id?: string | null
           care_receiver_id?: string | null
+          check_in_time?: string | null
+          check_out_time?: string | null
           created_at?: string
           duration?: number
           id?: string
@@ -442,6 +448,76 @@ export type Database = {
             columns: ["care_receiver_id"]
             isOneToOne: false
             referencedRelation: "care_receivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shift_notes: {
+        Row: {
+          author: string
+          created_at: string
+          daily_visit_id: string
+          id: string
+          note: string
+        }
+        Insert: {
+          author?: string
+          created_at?: string
+          daily_visit_id: string
+          id?: string
+          note: string
+        }
+        Update: {
+          author?: string
+          created_at?: string
+          daily_visit_id?: string
+          id?: string
+          note?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_notes_daily_visit_id_fkey"
+            columns: ["daily_visit_id"]
+            isOneToOne: false
+            referencedRelation: "daily_visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shift_tasks: {
+        Row: {
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          daily_visit_id: string
+          id: string
+          is_completed: boolean
+          title: string
+        }
+        Insert: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          daily_visit_id: string
+          id?: string
+          is_completed?: boolean
+          title: string
+        }
+        Update: {
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          daily_visit_id?: string
+          id?: string
+          is_completed?: boolean
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_tasks_daily_visit_id_fkey"
+            columns: ["daily_visit_id"]
+            isOneToOne: false
+            referencedRelation: "daily_visits"
             referencedColumns: ["id"]
           },
         ]

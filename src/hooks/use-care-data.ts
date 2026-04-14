@@ -248,12 +248,93 @@ export function useDailyVisits(dateStr?: string) {
 export function useUpdateDailyVisit() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (updates: { id: string; care_giver_id?: string | null; start_hour?: number; duration?: number; status?: string }) => {
+    mutationFn: async (updates: { id: string; care_giver_id?: string | null; start_hour?: number; duration?: number; status?: string; check_in_time?: string | null; check_out_time?: string | null }) => {
       const { id, ...rest } = updates;
-      const { error } = await supabase.from("daily_visits").update(rest).eq("id", id);
+      const { error } = await supabase.from("daily_visits").update(rest as any).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["daily_visits"] }),
+  });
+}
+
+// ── Shift Notes ──
+export function useShiftNotes(dailyVisitId: string | undefined) {
+  return useQuery({
+    queryKey: ["shift_notes", dailyVisitId],
+    enabled: !!dailyVisitId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("shift_notes").select("*").eq("daily_visit_id", dailyVisitId!).order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useAddShiftNote() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (n: { daily_visit_id: string; note: string; author: string }) => {
+      const { error } = await supabase.from("shift_notes").insert(n);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["shift_notes"] }),
+  });
+}
+
+// ── Shift Tasks ──
+export function useShiftTasks(dailyVisitId: string | undefined) {
+  return useQuery({
+    queryKey: ["shift_tasks", dailyVisitId],
+    enabled: !!dailyVisitId,
+    queryFn: async () => {
+      const { data, error } = await supabase.from("shift_tasks").select("*").eq("daily_visit_id", dailyVisitId!).order("created_at");
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
+export function useAddShiftTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (t: { daily_visit_id: string; title: string }) => {
+      const { error } = await supabase.from("shift_tasks").insert(t);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["shift_tasks"] }),
+  });
+}
+
+export function useToggleShiftTask() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, is_completed, completed_by }: { id: string; is_completed: boolean; completed_by?: string }) => {
+      const { error } = await supabase.from("shift_tasks").update({
+        is_completed,
+        completed_by: is_completed ? (completed_by ?? "") : null,
+        completed_at: is_completed ? new Date().toISOString() : null,
+      } as any).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["shift_tasks"] }),
+  });
+}
+
+// ── Completed Visits (for dashboard) ──
+export function useCompletedVisitsToday() {
+  return useQuery({
+    queryKey: ["completed_visits_today"],
+    queryFn: async () => {
+      const today = new Date().toISOString().slice(0, 10);
+      const { data, error } = await supabase
+        .from("daily_visits")
+        .select("*, care_receivers(*), care_givers(*)")
+        .eq("visit_date", today)
+        .not("check_out_time", "is", null)
+        .order("check_out_time", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
   });
 }
 
