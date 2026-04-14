@@ -25,6 +25,17 @@ export function useAddCareGiver() {
   });
 }
 
+export function useUpdateCareGiver() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: { id: string; [key: string]: any }) => {
+      const { error } = await supabase.from("care_givers").update(updates).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["care_givers"] }),
+  });
+}
+
 // ── Care Receivers ──
 export function useCareReceivers() {
   return useQuery({
