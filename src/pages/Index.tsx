@@ -52,7 +52,7 @@ const Dashboard = () => {
 
   const statCards = [
     { title: "Total Care Givers", value: String(stats?.totalCareGivers ?? "—"), icon: Users, iconBg: "bg-primary/10", color: "text-primary", borderAccent: "" },
-    { title: "Active Care Receivers", value: String(stats?.activeCareReceivers ?? "—"), icon: HeartHandshake, iconBg: "bg-success/10", color: "text-success", borderAccent: "" },
+    { title: "Active Service Members", value: String(stats?.activeCareReceivers ?? "—"), icon: HeartHandshake, iconBg: "bg-success/10", color: "text-success", borderAccent: "" },
     { title: "Visits Today", value: String(stats?.visitsToday ?? "—"), icon: CalendarDays, iconBg: "bg-info/10", color: "text-info", borderAccent: "" },
     { title: "Completed Shifts", value: String(completedVisits.length), icon: CheckCircle2, iconBg: "bg-success/10", color: "text-success", borderAccent: "border-l-4 border-l-success" },
   ];
@@ -138,7 +138,7 @@ const Dashboard = () => {
               <TableHeader>
                 <TableRow className="bg-muted/50 hover:bg-muted/50">
                   <TableHead className="font-semibold text-foreground">Care Giver</TableHead>
-                  <TableHead className="font-semibold text-foreground">Care Receiver</TableHead>
+                  <TableHead className="font-semibold text-foreground">Service Member</TableHead>
                   <TableHead className="font-semibold text-foreground">Scheduled</TableHead>
                   <TableHead className="font-semibold text-foreground">Checked In</TableHead>
                   <TableHead className="font-semibold text-foreground">Clocked Out</TableHead>
@@ -195,7 +195,7 @@ const Dashboard = () => {
           <CardContent className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               { label: "Add Care Giver", icon: Users },
-              { label: "Add Care Receiver", icon: HeartHandshake },
+              { label: "Add Service Member", icon: HeartHandshake },
               { label: "Create Roster", icon: CalendarDays },
               { label: "View Reports", icon: AlertTriangle },
             ].map((action) => (

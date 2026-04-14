@@ -156,7 +156,7 @@ const CareReceiverProfile = () => {
         {/* Top Bar */}
         <div className="flex items-center justify-between">
           <Button variant="ghost" onClick={() => navigate("/carereceivers")} className="gap-2 text-muted-foreground">
-            <ArrowLeft className="h-4 w-4" /> Back to Care Receivers
+            <ArrowLeft className="h-4 w-4" /> Back to Service Members
           </Button>
           {!editing ? (
             <Button variant="outline" onClick={() => setEditing(true)} className="gap-2">
