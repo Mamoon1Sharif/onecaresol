@@ -23,9 +23,9 @@ const CareReceivers = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
-  const filtered = careReceivers.filter((cr) =>
-    cr.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filtered = careReceivers
+    .filter((cr) => cr.care_status !== "Discharged")
+    .filter((cr) => cr.name.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
     <AppLayout>
