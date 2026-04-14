@@ -77,7 +77,7 @@ const Dashboard = () => {
                 { label: "Add Care Giver", icon: Users },
                 { label: "Add Care Receiver", icon: HeartHandshake },
                 { label: "Create Roster", icon: CalendarDays },
-                { label: "View Reports", icon: Activity },
+                { label: "View Reports", icon: AlertTriangle },
               ].map((action) => (
                 <button
                   key={action.label}
