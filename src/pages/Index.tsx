@@ -66,6 +66,37 @@ const Dashboard = () => {
           <p className="text-sm text-muted-foreground mt-1">Welcome back, Admin. Here's your overview.</p>
         </div>
 
+        {/* Operational Overview */}
+        <div>
+          <h2 className="text-base font-semibold text-foreground mb-3">Operational Overview</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {[
+              { label: "Overdue Tasks", value: 2, icon: ListChecks, color: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/30" },
+              { label: "Reminders", value: 118, icon: Bell, color: "text-info", bg: "bg-info/10", border: "border-info/30" },
+              { label: "Assigned To Me", value: 0, icon: UserCheck, color: "text-muted-foreground", bg: "bg-muted", border: "border-border" },
+              { label: "Birthdays Today", value: 1, icon: Cake, color: "text-warning", bg: "bg-warning/10", border: "border-warning/30" },
+              { label: "Unverified Meds", value: 56, icon: Pill, color: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/30" },
+              { label: "Holiday Requests", value: 1, icon: UmbrellaOff, color: "text-purple-500", bg: "bg-purple-500/10", border: "border-purple-500/30" },
+              { label: "Team Holidays", value: 9, icon: Palmtree, color: "text-teal-500", bg: "bg-teal-500/10", border: "border-teal-500/30" },
+              { label: "Member Holidays", value: 0, icon: CalendarDays, color: "text-muted-foreground", bg: "bg-muted", border: "border-border" },
+              { label: "New Incidents", value: 8, icon: AlertOctagon, color: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/30" },
+            ].map((item) => (
+              <Card key={item.label} className={`border ${item.border} shadow-sm hover:shadow-md transition-shadow`}>
+                <CardContent className="p-4 flex flex-col items-center text-center gap-2">
+                  <div className={`h-10 w-10 rounded-lg ${item.bg} flex items-center justify-center`}>
+                    <item.icon className={`h-5 w-5 ${item.color}`} />
+                  </div>
+                  <span className={`text-2xl font-bold ${item.color}`}>{item.value}</span>
+                  <span className="text-xs text-muted-foreground font-medium leading-tight">{item.label}</span>
+                  <Button variant="ghost" size="sm" className={`h-6 px-2 text-[10px] font-semibold ${item.color} hover:${item.bg} mt-1`}>
+                    <Eye className="h-3 w-3 mr-1" /> View
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {statCards.map((stat) => (
             <Card key={stat.title} className={`border border-border shadow-md hover:shadow-lg transition-shadow bg-card ${stat.borderAccent}`}>
