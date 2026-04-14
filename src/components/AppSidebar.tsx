@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, HeartHandshake, CalendarDays, CalendarClock } from "lucide-react";
+import { LayoutDashboard, Users, HeartHandshake, CalendarDays, CalendarClock, ChevronDown } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
 import {
@@ -10,16 +10,27 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   SidebarHeader,
   useSidebar,
 } from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
-const navItems = [
+const topItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Care Givers", url: "/caregivers", icon: Users },
   { title: "Care Receivers", url: "/carereceivers", icon: HeartHandshake },
-  { title: "Roster", url: "/roster", icon: CalendarDays },
-  { title: "Daily Roster", url: "/daily-roster", icon: CalendarClock },
+];
+
+const rosterSubItems = [
+  { title: "Weekly Roster", url: "/roster" },
+  { title: "Daily Roster", url: "/daily-roster" },
 ];
 
 export function AppSidebar() {
@@ -29,6 +40,8 @@ export function AppSidebar() {
 
   const isActive = (path: string) =>
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
+
+  const rosterOpen = location.pathname === "/roster" || location.pathname === "/daily-roster";
 
   return (
     <Sidebar collapsible="icon">
@@ -57,7 +70,7 @@ export function AppSidebar() {
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => (
+              {topItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
@@ -76,6 +89,44 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+
+              {/* Roster with sub-items */}
+              <Collapsible defaultOpen={rosterOpen} className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                      isActive={rosterOpen}
+                      tooltip="Roster"
+                      className="hover:bg-sidebar-accent"
+                    >
+                      <CalendarDays className="h-4 w-4" />
+                      {!collapsed && (
+                        <>
+                          <span className="flex-1">Roster</span>
+                          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                        </>
+                      )}
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {rosterSubItems.map((sub) => (
+                        <SidebarMenuSubItem key={sub.title}>
+                          <SidebarMenuSubButton asChild isActive={isActive(sub.url)}>
+                            <NavLink
+                              to={sub.url}
+                              className="hover:bg-sidebar-accent"
+                              activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                            >
+                              {sub.title}
+                            </NavLink>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
