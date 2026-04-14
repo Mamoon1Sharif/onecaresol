@@ -1,0 +1,47 @@
+
+-- Care Givers: add detailed profile fields
+ALTER TABLE public.care_givers
+  ADD COLUMN IF NOT EXISTS address text,
+  ADD COLUMN IF NOT EXISTS login_code text,
+  ADD COLUMN IF NOT EXISTS permission text DEFAULT 'Field User',
+  ADD COLUMN IF NOT EXISTS role_title text DEFAULT 'Homecare Assistant',
+  ADD COLUMN IF NOT EXISTS sage_num text,
+  ADD COLUMN IF NOT EXISTS dob date,
+  ADD COLUMN IF NOT EXISTS is_driver boolean DEFAULT false,
+  ADD COLUMN IF NOT EXISTS dbs_ref text,
+  ADD COLUMN IF NOT EXISTS ethnicity text,
+  ADD COLUMN IF NOT EXISTS dbs_update_service boolean DEFAULT false,
+  ADD COLUMN IF NOT EXISTS dbs_type text DEFAULT 'Adult & Children',
+  ADD COLUMN IF NOT EXISTS allergies text,
+  ADD COLUMN IF NOT EXISTS next_of_kin_name text,
+  ADD COLUMN IF NOT EXISTS next_of_kin_address text,
+  ADD COLUMN IF NOT EXISTS next_of_kin_phone text,
+  ADD COLUMN IF NOT EXISTS care_giver_references jsonb DEFAULT '[]'::jsonb,
+  ADD COLUMN IF NOT EXISTS requested_hours jsonb DEFAULT '{"week1":"00:00","week2":"00:00","week3":"00:00","week4":"00:00"}'::jsonb,
+  ADD COLUMN IF NOT EXISTS templated_hours jsonb DEFAULT '{"week1":"00:00","week2":"00:00","week3":"00:00","week4":"00:00"}'::jsonb;
+
+-- Care Receivers: add detailed profile fields
+ALTER TABLE public.care_receivers
+  ADD COLUMN IF NOT EXISTS ethnicity text,
+  ADD COLUMN IF NOT EXISTS preferred_hours text,
+  ADD COLUMN IF NOT EXISTS nfc_code text,
+  ADD COLUMN IF NOT EXISTS language text DEFAULT 'English',
+  ADD COLUMN IF NOT EXISTS preference text DEFAULT 'Either',
+  ADD COLUMN IF NOT EXISTS risk_rating text DEFAULT 'None',
+  ADD COLUMN IF NOT EXISTS nhs_number text,
+  ADD COLUMN IF NOT EXISTS patient_number text,
+  ADD COLUMN IF NOT EXISTS health_care_number text,
+  ADD COLUMN IF NOT EXISTS community_health_index text,
+  ADD COLUMN IF NOT EXISTS allergies text,
+  ADD COLUMN IF NOT EXISTS diagnoses text,
+  ADD COLUMN IF NOT EXISTS next_of_kin_email text,
+  ADD COLUMN IF NOT EXISTS next_of_kin_address text,
+  ADD COLUMN IF NOT EXISTS doctor_name text,
+  ADD COLUMN IF NOT EXISTS doctor_contact text,
+  ADD COLUMN IF NOT EXISTS doctor_address text,
+  ADD COLUMN IF NOT EXISTS doctor_phone text,
+  ADD COLUMN IF NOT EXISTS pharmacy_name text,
+  ADD COLUMN IF NOT EXISTS pharmacy_address text,
+  ADD COLUMN IF NOT EXISTS pharmacy_phone text,
+  ADD COLUMN IF NOT EXISTS consent_flags jsonb DEFAULT '{}'::jsonb,
+  ADD COLUMN IF NOT EXISTS requested_hours jsonb DEFAULT '{"week1":"00:00","week2":"00:00","week3":"00:00","week4":"00:00"}'::jsonb;

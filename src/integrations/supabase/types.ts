@@ -16,36 +16,90 @@ export type Database = {
     Tables: {
       care_givers: {
         Row: {
+          address: string | null
+          allergies: string | null
+          care_giver_references: Json | null
           created_at: string
+          dbs_ref: string | null
+          dbs_type: string | null
+          dbs_update_service: boolean | null
+          dob: string | null
           email: string | null
+          ethnicity: string | null
           id: string
+          is_driver: boolean | null
           last_check_in: string | null
+          login_code: string | null
           name: string
+          next_of_kin_address: string | null
+          next_of_kin_name: string | null
+          next_of_kin_phone: string | null
+          permission: string | null
           phone: string | null
+          requested_hours: Json | null
+          role_title: string | null
+          sage_num: string | null
           skills: string[] | null
           status: string
+          templated_hours: Json | null
           updated_at: string
         }
         Insert: {
+          address?: string | null
+          allergies?: string | null
+          care_giver_references?: Json | null
           created_at?: string
+          dbs_ref?: string | null
+          dbs_type?: string | null
+          dbs_update_service?: boolean | null
+          dob?: string | null
           email?: string | null
+          ethnicity?: string | null
           id?: string
+          is_driver?: boolean | null
           last_check_in?: string | null
+          login_code?: string | null
           name: string
+          next_of_kin_address?: string | null
+          next_of_kin_name?: string | null
+          next_of_kin_phone?: string | null
+          permission?: string | null
           phone?: string | null
+          requested_hours?: Json | null
+          role_title?: string | null
+          sage_num?: string | null
           skills?: string[] | null
           status?: string
+          templated_hours?: Json | null
           updated_at?: string
         }
         Update: {
+          address?: string | null
+          allergies?: string | null
+          care_giver_references?: Json | null
           created_at?: string
+          dbs_ref?: string | null
+          dbs_type?: string | null
+          dbs_update_service?: boolean | null
+          dob?: string | null
           email?: string | null
+          ethnicity?: string | null
           id?: string
+          is_driver?: boolean | null
           last_check_in?: string | null
+          login_code?: string | null
           name?: string
+          next_of_kin_address?: string | null
+          next_of_kin_name?: string | null
+          next_of_kin_phone?: string | null
+          permission?: string | null
           phone?: string | null
+          requested_hours?: Json | null
+          role_title?: string | null
+          sage_num?: string | null
           skills?: string[] | null
           status?: string
+          templated_hours?: Json | null
           updated_at?: string
         }
         Relationships: []
@@ -54,43 +108,112 @@ export type Database = {
         Row: {
           address: string | null
           age: number | null
+          allergies: string | null
           care_plan: string | null
           care_status: string
           care_type: string
+          community_health_index: string | null
+          consent_flags: Json | null
           created_at: string
+          diagnoses: string | null
           dnacpr: boolean
+          doctor_address: string | null
+          doctor_contact: string | null
+          doctor_name: string | null
+          doctor_phone: string | null
+          ethnicity: string | null
+          health_care_number: string | null
           id: string
+          language: string | null
           name: string
           next_of_kin: string | null
+          next_of_kin_address: string | null
+          next_of_kin_email: string | null
           next_of_kin_phone: string | null
+          nfc_code: string | null
+          nhs_number: string | null
+          patient_number: string | null
+          pharmacy_address: string | null
+          pharmacy_name: string | null
+          pharmacy_phone: string | null
+          preference: string | null
+          preferred_hours: string | null
+          requested_hours: Json | null
+          risk_rating: string | null
           updated_at: string
         }
         Insert: {
           address?: string | null
           age?: number | null
+          allergies?: string | null
           care_plan?: string | null
           care_status?: string
           care_type?: string
+          community_health_index?: string | null
+          consent_flags?: Json | null
           created_at?: string
+          diagnoses?: string | null
           dnacpr?: boolean
+          doctor_address?: string | null
+          doctor_contact?: string | null
+          doctor_name?: string | null
+          doctor_phone?: string | null
+          ethnicity?: string | null
+          health_care_number?: string | null
           id?: string
+          language?: string | null
           name: string
           next_of_kin?: string | null
+          next_of_kin_address?: string | null
+          next_of_kin_email?: string | null
           next_of_kin_phone?: string | null
+          nfc_code?: string | null
+          nhs_number?: string | null
+          patient_number?: string | null
+          pharmacy_address?: string | null
+          pharmacy_name?: string | null
+          pharmacy_phone?: string | null
+          preference?: string | null
+          preferred_hours?: string | null
+          requested_hours?: Json | null
+          risk_rating?: string | null
           updated_at?: string
         }
         Update: {
           address?: string | null
           age?: number | null
+          allergies?: string | null
           care_plan?: string | null
           care_status?: string
           care_type?: string
+          community_health_index?: string | null
+          consent_flags?: Json | null
           created_at?: string
+          diagnoses?: string | null
           dnacpr?: boolean
+          doctor_address?: string | null
+          doctor_contact?: string | null
+          doctor_name?: string | null
+          doctor_phone?: string | null
+          ethnicity?: string | null
+          health_care_number?: string | null
           id?: string
+          language?: string | null
           name?: string
           next_of_kin?: string | null
+          next_of_kin_address?: string | null
+          next_of_kin_email?: string | null
           next_of_kin_phone?: string | null
+          nfc_code?: string | null
+          nhs_number?: string | null
+          patient_number?: string | null
+          pharmacy_address?: string | null
+          pharmacy_name?: string | null
+          pharmacy_phone?: string | null
+          preference?: string | null
+          preferred_hours?: string | null
+          requested_hours?: Json | null
+          risk_rating?: string | null
           updated_at?: string
         }
         Relationships: []
