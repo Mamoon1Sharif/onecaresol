@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,8 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Search, Plus, Phone, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useCareGivers, useAddCareGiver, useUpdateCareGiver } from "@/hooks/use-care-data";
-import { CareGiverProfileDialog } from "@/components/CareGiverProfileDialog";
+import { useCareGivers, useAddCareGiver } from "@/hooks/use-care-data";
 
 const CareGivers = () => {
   const { data: careGivers = [], isLoading } = useCareGivers();
@@ -26,8 +26,8 @@ const CareGivers = () => {
   const [formEmail, setFormEmail] = useState("");
   const [formPhone, setFormPhone] = useState("");
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const [selectedCG, setSelectedCG] = useState<any>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const filtered = careGivers.filter((cg) =>
     cg.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -91,7 +91,7 @@ const CareGivers = () => {
                   <TableRow><TableCell colSpan={4} className="text-center py-12 text-muted-foreground">No care givers found.</TableCell></TableRow>
                 ) : (
                   filtered.map((cg) => (
-                    <TableRow key={cg.id} className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => setSelectedCG(cg)}>
+                    <TableRow key={cg.id} className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/caregivers/${cg.id}`)}>
                       <TableCell>
                         <div>
                           <p className="font-medium text-foreground">{cg.name}</p>
@@ -113,12 +113,6 @@ const CareGivers = () => {
           </CardContent>
         </Card>
       </div>
-
-      <CareGiverProfileDialog
-        open={!!selectedCG}
-        onOpenChange={(open) => { if (!open) setSelectedCG(null); }}
-        caregiver={selectedCG}
-      />
 
       <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <SheetContent className="sm:max-w-md">
