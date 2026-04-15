@@ -248,15 +248,15 @@ const CareGiverProfile = () => {
                       <InfoItem icon={Calendar} label="DOB (Age)" value={cg.dob ? `${new Date(cg.dob).toLocaleDateString("en-GB")} (${age})` : null} />
                       <InfoItem icon={User} label="Ethnicity" value={cg.ethnicity} />
                       <InfoItem icon={Car} label="Is Driver?" value={cg.is_driver ? "Yes" : "No"} />
-                      <InfoItem icon={AlertTriangle} label="Allergies" value={cg.allergies || "None"} />
+                      <InfoItem icon={Stethoscope} label="Allergies" value={cg.allergies || "None"} />
                     </div>
 
                     <SectionTitle title="Work Details" />
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-8 gap-y-1">
-                      <InfoItem icon={Shield} label="Login Code" value={cg.login_code} />
-                      <InfoItem icon={User} label="Permission" value={cg.permission} />
-                      <InfoItem icon={User} label="Role" value={cg.role_title} />
-                      <InfoItem icon={User} label="Sage Num" value={cg.sage_num} />
+                      <InfoItem icon={KeyRound} label="Login Code" value={cg.login_code} />
+                      <InfoItem icon={UserCog} label="Permission" value={cg.permission} />
+                      <InfoItem icon={Briefcase} label="Role" value={cg.role_title} />
+                      <InfoItem icon={Hash} label="Sage Num" value={cg.sage_num} />
                     </div>
 
                     <SectionTitle title="DBS Information" />
