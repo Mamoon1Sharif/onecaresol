@@ -62,6 +62,15 @@ const MARITAL_STATUS_OPTIONS = [
   "Not applicable","Not disclosed","Not known","Separated","Single","Widowed/Surviving Civil Partner",
 ];
 
+const RELIGION_OPTIONS = [
+  "Christianity","Islam","Hinduism","Sikhism","Judaism","Buddhism",
+  "No Religion","Other","Prefer not to say",
+];
+
+const MANAGER_OPTIONS = ["Manager 1","Manager 2","Manager 3"];
+
+const ROLE_OPTIONS = ["Homecare Assistant","Senior Carer","Team Leader","Care Coordinator","Nurse","Support Worker","Other"];
+
 type FormData = {
   title: string; forename: string; surname: string; preferred_name: string; alias: string; suffix: string;
   sex_assigned_at_birth: string; gender: string; sexual_orientation: string; dob: string; ethnicity: string;
@@ -259,7 +268,7 @@ export default function AddCareGiver() {
             <FieldRow label="DOB" required>{inputField("dob", "", "date")}</FieldRow>
             <FieldRow label="Ethnicity" required>{selectField("ethnicity", "Choose one...", ETHNICITY_OPTIONS)}</FieldRow>
             <FieldRow label="Marital Status">{selectField("marital_status", "Choose one...", MARITAL_STATUS_OPTIONS)}</FieldRow>
-            <FieldRow label="Religion">{inputField("religion", "Religion")}</FieldRow>
+            <FieldRow label="Religion">{selectField("religion", "Choose one...", RELIGION_OPTIONS)}</FieldRow>
             <FieldRow label="NI Number">{inputField("ni_number", "e.g. AB123456C")}</FieldRow>
             <FieldRow label="Is Driver?" required>{selectField("is_driver", "Choose one...", ["Yes","No"])}</FieldRow>
           </CardContent>
@@ -311,8 +320,8 @@ export default function AddCareGiver() {
             <FieldRow label="Start Date" required>{inputField("start_date", "", "date")}</FieldRow>
             <FieldRow label="Employment Status" required>{selectField("employment_status", "Choose one...", EMPLOYMENT_STATUS_OPTIONS)}</FieldRow>
             <FieldRow label="Employment Type" required>{selectField("employment_type", "Choose one...", EMPLOYMENT_TYPE_OPTIONS)}</FieldRow>
-            <FieldRow label="Manager">{inputField("manager", "Manager name")}</FieldRow>
-            <FieldRow label="Role">{inputField("role_title", "Role title")}</FieldRow>
+            <FieldRow label="Manager">{selectField("manager", "Choose one...", MANAGER_OPTIONS)}</FieldRow>
+            <FieldRow label="Role">{selectField("role_title", "Choose one...", ROLE_OPTIONS)}</FieldRow>
             <FieldRow label="Salary" required>{inputField("salary", "e.g. £25,000")}</FieldRow>
           </CardContent>
         </Card>
