@@ -4,7 +4,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Phone, User, Clock, CalendarDays, Filter } from "lucide-react";
+import { Search, Plus, Phone, User, Clock, CalendarDays, Filter, Tag } from "lucide-react";
 import { useCareGivers } from "@/hooks/use-care-data";
 
 const STATUS_FILTERS = ["All", "Active", "Non-Active", "Onboarding"] as const;
@@ -113,6 +113,20 @@ const CareGivers = () => {
                     </p>
                   </div>
                 </div>
+                {/* Tags 2x2 grid */}
+                {Array.isArray((cg as any).tags) && (cg as any).tags.length > 0 && (
+                  <div className="mt-3 grid grid-cols-2 gap-1.5">
+                    {(cg as any).tags.slice(0, 4).map((tag: string) => (
+                      <span key={tag} className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground bg-muted rounded-md px-2 py-1 truncate">
+                        <Tag className="h-2.5 w-2.5 shrink-0" />
+                        {tag}
+                      </span>
+                    ))}
+                    {(cg as any).tags.length > 4 && (
+                      <span className="text-[10px] text-muted-foreground px-2 py-1">+{(cg as any).tags.length - 4} more</span>
+                    )}
+                  </div>
+                )}
               </div>
             ))}
           </div>
