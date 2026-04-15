@@ -135,6 +135,7 @@ function FieldRow({ label, required, children }: { label: string; required?: boo
 
 export default function AddCareGiver() {
   const [form, setForm] = useState<FormData>({ ...initialForm });
+  const [tags, setTags] = useState<string[]>([]);
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [submitting, setSubmitting] = useState(false);
   const [showDiscard, setShowDiscard] = useState(false);
