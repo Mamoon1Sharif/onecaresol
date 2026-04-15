@@ -1,55 +1,20 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import {
-  Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFooter,
-} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Search, Plus, Phone, User, Clock } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useCareGivers, useAddCareGiver } from "@/hooks/use-care-data";
+import { useCareGivers } from "@/hooks/use-care-data";
 
 const CareGivers = () => {
   const { data: careGivers = [], isLoading } = useCareGivers();
-  const addMutation = useAddCareGiver();
   const [searchQuery, setSearchQuery] = useState("");
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [formName, setFormName] = useState("");
-  const [formEmail, setFormEmail] = useState("");
-  const [formPhone, setFormPhone] = useState("");
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   const filtered = careGivers.filter((cg) =>
     cg.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  const validateForm = () => {
-    const errors: Record<string, string> = {};
-    if (!formName.trim()) errors.name = "Name is required";
-    if (!formEmail.trim()) errors.email = "Email is required";
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formEmail.trim())) errors.email = "Invalid email";
-    if (!formPhone.trim()) errors.phone = "Phone is required";
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
-  const handleAdd = async () => {
-    if (!validateForm()) return;
-    try {
-      await addMutation.mutateAsync({ name: formName.trim(), email: formEmail.trim(), phone: formPhone.trim() });
-      setFormName(""); setFormEmail(""); setFormPhone(""); setFormErrors({});
-      setIsDrawerOpen(false);
-      toast({ title: "Care Giver Added", description: `${formName.trim()} has been added successfully.` });
-    } catch {
-      toast({ title: "Error", description: "Failed to add care giver.", variant: "destructive" });
-    }
-  };
 
   return (
     <AppLayout>
@@ -59,7 +24,7 @@ const CareGivers = () => {
             <h1 className="text-2xl font-bold text-foreground">Care Givers</h1>
             <p className="text-sm text-muted-foreground mt-1">Manage your care giving staff · {careGivers.length} total</p>
           </div>
-          <Button onClick={() => { setFormName(""); setFormEmail(""); setFormPhone(""); setFormErrors({}); setIsDrawerOpen(true); }} className="gap-2">
+          <Button onClick={() => navigate("/caregivers/new")} className="gap-2">
             <Plus className="h-4 w-4" /> Add New Care Giver
           </Button>
         </div>
@@ -120,36 +85,6 @@ const CareGivers = () => {
           </div>
         )}
       </div>
-
-      <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <SheetContent className="sm:max-w-md">
-          <SheetHeader>
-            <SheetTitle>Add New Care Giver</SheetTitle>
-            <SheetDescription>Fill in the details to register a new care giver.</SheetDescription>
-          </SheetHeader>
-          <div className="space-y-5 py-6">
-            <div className="space-y-2">
-              <Label htmlFor="cg-name">Full Name</Label>
-              <Input id="cg-name" placeholder="e.g. Jane Smith" value={formName} onChange={(e) => setFormName(e.target.value)} maxLength={100} />
-              {formErrors.name && <p className="text-xs text-destructive">{formErrors.name}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="cg-email">Email Address</Label>
-              <Input id="cg-email" type="email" placeholder="e.g. jane@care.com" value={formEmail} onChange={(e) => setFormEmail(e.target.value)} maxLength={255} />
-              {formErrors.email && <p className="text-xs text-destructive">{formErrors.email}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="cg-phone">Phone Number</Label>
-              <Input id="cg-phone" type="tel" placeholder="e.g. (555) 123-4567" value={formPhone} onChange={(e) => setFormPhone(e.target.value)} maxLength={20} />
-              {formErrors.phone && <p className="text-xs text-destructive">{formErrors.phone}</p>}
-            </div>
-          </div>
-          <SheetFooter className="gap-2 sm:gap-0">
-            <Button variant="outline" onClick={() => setIsDrawerOpen(false)}>Cancel</Button>
-            <Button onClick={handleAdd} disabled={addMutation.isPending}>{addMutation.isPending ? "Adding..." : "Add Care Giver"}</Button>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
     </AppLayout>
   );
 };
