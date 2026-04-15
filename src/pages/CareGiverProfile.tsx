@@ -52,11 +52,14 @@ function EditField({ label, value, onChange, type = "text", className = "" }: {
 function HoursRow({ hours }: { hours: any }) {
   const h = hours ? (typeof hours === "string" ? JSON.parse(hours) : hours) : {};
   return (
-    <div className="flex gap-6 flex-wrap">
+    <div className="grid grid-cols-2 gap-3">
       {["week1", "week2", "week3", "week4"].map((w, i) => (
-        <div key={w}>
-          <span className="text-xs text-muted-foreground font-medium">Week {i + 1}:</span>{" "}
-          <span className="text-sm font-semibold text-foreground">{h[w] || "00:00"}</span>
+        <div key={w} className="bg-muted/50 rounded-lg p-3 text-center">
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-1">Week {i + 1}</p>
+          <p className="text-lg font-bold text-foreground flex items-center justify-center gap-1.5">
+            <Clock className="h-3.5 w-3.5 text-primary" />
+            {h[w] || "00:00"}
+          </p>
         </div>
       ))}
     </div>
@@ -293,22 +296,33 @@ const CareGiverProfile = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* Hours */}
-            <Card className="border border-border">
-              <CardContent className="p-6">
-                <h3 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Requested Hours</h3>
-                <Separator className="mb-3" />
-                <HoursRow hours={cg.requested_hours} />
-                <h3 className="text-sm font-bold uppercase tracking-widest text-primary mt-5 mb-3">Templated Hours</h3>
-                <Separator className="mb-3" />
-                <HoursRow hours={cg.templated_hours} />
+            <Card className="border border-border overflow-hidden">
+              <div className="bg-gradient-to-r from-primary/10 to-transparent px-6 py-3">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                  <Clock className="h-4 w-4" /> Hours Overview
+                </h3>
+              </div>
+              <CardContent className="p-5 space-y-5">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Requested Hours</p>
+                  <HoursRow hours={cg.requested_hours} />
+                </div>
+                <Separator />
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Templated Hours</p>
+                  <HoursRow hours={cg.templated_hours} />
+                </div>
               </CardContent>
             </Card>
 
             {/* Next of Kin */}
-            <Card className="border border-border">
-              <CardContent className="p-6">
-                <h3 className="text-sm font-bold uppercase tracking-widest text-primary mb-3">Next of Kin</h3>
-                <Separator className="mb-3" />
+            <Card className="border border-border overflow-hidden">
+              <div className="bg-gradient-to-r from-warning/10 to-transparent px-6 py-3">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-warning flex items-center gap-2">
+                  <Users className="h-4 w-4" /> Emergency Contact
+                </h3>
+              </div>
+              <CardContent className="p-5">
                 {editing ? (
                   <div className="space-y-3">
                     <EditField label="Name" value={form.next_of_kin_name} onChange={set("next_of_kin_name")} />
@@ -316,11 +330,27 @@ const CareGiverProfile = () => {
                     <EditField label="Phone" value={form.next_of_kin_phone} onChange={set("next_of_kin_phone")} type="tel" />
                   </div>
                 ) : (
-                  <>
-                    <InfoItem icon={Users} label="Name" value={cg.next_of_kin_name} />
-                    <InfoItem icon={MapPin} label="Address" value={cg.next_of_kin_address} />
-                    <InfoItem icon={Phone} label="Phone" value={cg.next_of_kin_phone} />
-                  </>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-3 py-2">
+                      <div className="h-10 w-10 rounded-full bg-warning/10 flex items-center justify-center shrink-0">
+                        <Users className="h-5 w-5 text-warning" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-foreground">{cg.next_of_kin_name || "—"}</p>
+                        <p className="text-xs text-muted-foreground">Next of Kin</p>
+                      </div>
+                    </div>
+                    <div className="ml-[52px] space-y-2 border-l-2 border-border pl-4">
+                      <div>
+                        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Phone</p>
+                        <p className="text-sm text-foreground">{cg.next_of_kin_phone || "—"}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Address</p>
+                        <p className="text-sm text-foreground">{cg.next_of_kin_address || "—"}</p>
+                      </div>
+                    </div>
+                  </div>
                 )}
               </CardContent>
             </Card>
