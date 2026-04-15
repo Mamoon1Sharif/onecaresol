@@ -194,6 +194,7 @@ export default function AddCareGiver() {
         employment_type: form.employment_type, manager: form.manager || null,
         role_title: form.role_title || null, salary: form.salary || null,
         status: "Active",
+        tags: tags,
       } as any);
       if (error) throw error;
       toast({ title: "Team Member Added", description: `${name} has been added successfully.` });
@@ -336,7 +337,27 @@ export default function AddCareGiver() {
           </CardContent>
         </Card>
 
-        {/* Bottom actions */}
+        {/* Tags */}
+        <Card>
+          <SectionHeader icon={Tags} title="Tags" />
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-3">Select applicable tags for this team member</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {TAG_OPTIONS.map((tag) => (
+                <label key={tag} className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border bg-card hover:bg-muted/50 cursor-pointer transition-colors">
+                  <Checkbox
+                    checked={tags.includes(tag)}
+                    onCheckedChange={(checked) => {
+                      setTags(checked ? [...tags, tag] : tags.filter((t) => t !== tag));
+                    }}
+                  />
+                  <span className="text-sm font-medium text-foreground">{tag}</span>
+                </label>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="flex justify-end gap-3 pb-8">
           <Button variant="outline" onClick={handleDiscard}>Discard</Button>
           <Button onClick={handleSubmit} disabled={submitting} className="gap-2">
