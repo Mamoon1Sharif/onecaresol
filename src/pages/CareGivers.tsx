@@ -4,7 +4,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Phone, User, Clock } from "lucide-react";
+import { Search, Plus, Phone, User, Clock, CalendarDays } from "lucide-react";
 import { useCareGivers } from "@/hooks/use-care-data";
 
 const CareGivers = () => {
@@ -53,12 +53,22 @@ const CareGivers = () => {
               >
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-semibold text-foreground text-sm truncate pr-2">{cg.name}</h3>
-                  <Badge
-                    variant={cg.status === "Active" ? "default" : "secondary"}
-                    className={`shrink-0 text-[10px] px-2 py-0.5 ${cg.status === "Active" ? "bg-success/15 text-success border-0" : "bg-muted text-muted-foreground border-0"}`}
-                  >
-                    {cg.status}
-                  </Badge>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <Badge
+                      variant={cg.status === "Active" ? "default" : "secondary"}
+                      className={`text-[10px] px-2 py-0.5 ${cg.status === "Active" ? "bg-success/15 text-success border-0" : "bg-muted text-muted-foreground border-0"}`}
+                    >
+                      {cg.status}
+                    </Badge>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-muted-foreground hover:text-primary"
+                      onClick={(e) => { e.stopPropagation(); navigate(`/caregivers/${cg.id}/schedule`); }}
+                    >
+                      <CalendarDays className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <div className="h-16 w-16 rounded-full bg-muted border-2 border-border flex items-center justify-center shrink-0">
