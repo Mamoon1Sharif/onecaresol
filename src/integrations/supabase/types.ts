@@ -32,8 +32,12 @@ export type Database = {
           login_code: string | null
           name: string
           next_of_kin_address: string | null
+          next_of_kin_email: string | null
           next_of_kin_name: string | null
+          next_of_kin_notes: string | null
           next_of_kin_phone: string | null
+          next_of_kin_relationship: string | null
+          next_of_kin_secondary_phone: string | null
           permission: string | null
           phone: string | null
           requested_hours: Json | null
@@ -61,8 +65,12 @@ export type Database = {
           login_code?: string | null
           name: string
           next_of_kin_address?: string | null
+          next_of_kin_email?: string | null
           next_of_kin_name?: string | null
+          next_of_kin_notes?: string | null
           next_of_kin_phone?: string | null
+          next_of_kin_relationship?: string | null
+          next_of_kin_secondary_phone?: string | null
           permission?: string | null
           phone?: string | null
           requested_hours?: Json | null
@@ -90,8 +98,12 @@ export type Database = {
           login_code?: string | null
           name?: string
           next_of_kin_address?: string | null
+          next_of_kin_email?: string | null
           next_of_kin_name?: string | null
+          next_of_kin_notes?: string | null
           next_of_kin_phone?: string | null
+          next_of_kin_relationship?: string | null
+          next_of_kin_secondary_phone?: string | null
           permission?: string | null
           phone?: string | null
           requested_hours?: Json | null
