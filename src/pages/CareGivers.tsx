@@ -32,9 +32,24 @@ const CareGivers = () => {
             <h1 className="text-2xl font-bold text-foreground">Care Givers</h1>
             <p className="text-sm text-muted-foreground mt-1">Manage your care giving staff · {careGivers.length} total</p>
           </div>
-          <Button onClick={() => navigate("/caregivers/new")} className="gap-2">
-            <Plus className="h-4 w-4" /> Add New Care Giver
-          </Button>
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1 border border-border rounded-lg p-1">
+              {STATUS_FILTERS.map((sf) => (
+                <Button
+                  key={sf}
+                  variant={statusFilter === sf ? "default" : "ghost"}
+                  size="sm"
+                  className="h-7 text-xs px-3"
+                  onClick={() => setStatusFilter(sf)}
+                >
+                  {sf}
+                </Button>
+              ))}
+            </div>
+            <Button onClick={() => navigate("/caregivers/new")} className="gap-2">
+              <Plus className="h-4 w-4" /> Add New Care Giver
+            </Button>
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
