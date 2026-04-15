@@ -137,8 +137,8 @@ const CareGivers = () => {
                 {Array.isArray((cg as any).tags) && (cg as any).tags.length > 0 && (() => {
                   const tags = (cg as any).tags as string[];
                   const isExpanded = expandedTags[cg.id];
-                  const visibleTags = isExpanded ? tags : tags.slice(0, 2);
-                  const hasMore = tags.length > 2;
+                  const visibleTags = isExpanded ? tags : tags.slice(0, 3);
+                  const hasMore = tags.length > 3;
                   return (
                     <div className="mt-3 flex flex-wrap gap-1.5">
                       {visibleTags.map((tag: string) => (
