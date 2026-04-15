@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index.tsx";
 import CareGivers from "./pages/CareGivers.tsx";
 import CareGiverProfile from "./pages/CareGiverProfile.tsx";
+import AddCareGiver from "./pages/AddCareGiver.tsx";
 import CareReceivers from "./pages/CareReceivers.tsx";
 import CareReceiverProfile from "./pages/CareReceiverProfile.tsx";
 import MemberProfile from "./pages/MemberProfile.tsx";
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/caregivers" element={<ProtectedRoute><CareGivers /></ProtectedRoute>} />
+            <Route path="/caregivers/new" element={<ProtectedRoute><AddCareGiver /></ProtectedRoute>} />
             <Route path="/caregivers/:id" element={<ProtectedRoute><CareGiverProfile /></ProtectedRoute>} />
             <Route path="/carereceivers" element={<ProtectedRoute><CareReceivers /></ProtectedRoute>} />
             <Route path="/carereceivers/:id" element={<ProtectedRoute><CareReceiverProfile /></ProtectedRoute>} />
