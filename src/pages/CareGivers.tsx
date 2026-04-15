@@ -121,22 +121,20 @@ const CareGivers = () => {
                       <User className="h-9 w-9 text-muted-foreground" />
                     </div>
                     <h3 className="font-semibold text-foreground text-sm">{cg.name}</h3>
-                  </div>
-                  <div className="space-y-1.5 text-sm">
-                    {cg.address && (
-                      <p className="text-muted-foreground text-xs leading-tight line-clamp-1">{cg.address}</p>
-                    )}
                     {cg.phone && (
-                      <p className="flex items-center gap-1.5 text-foreground">
-                        <Phone className="h-3 w-3 text-muted-foreground shrink-0" />
+                      <p className="flex items-center gap-1.5 text-muted-foreground mt-1">
+                        <Phone className="h-3 w-3 shrink-0" />
                         <span className="text-xs">{cg.phone}</span>
                       </p>
                     )}
-                    <p className="flex items-center gap-1.5 text-muted-foreground">
+                    <p className="flex items-center gap-1.5 text-muted-foreground mt-0.5">
                       <Clock className="h-3 w-3 shrink-0" />
                       <span className="text-xs">{cg.last_check_in || "Never"}</span>
                     </p>
                   </div>
+                  {cg.address && (
+                    <p className="text-muted-foreground text-xs leading-tight line-clamp-1 text-center mt-auto">{cg.address}</p>
+                  )}
                 </div>
                 {Array.isArray((cg as any).tags) && (cg as any).tags.length > 0 && (() => {
                   const tags = (cg as any).tags as string[];
