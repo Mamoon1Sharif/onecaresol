@@ -90,6 +90,10 @@ const CareGiverProfile = () => {
         next_of_kin_name: cg.next_of_kin_name ?? "",
         next_of_kin_address: cg.next_of_kin_address ?? "",
         next_of_kin_phone: cg.next_of_kin_phone ?? "",
+        next_of_kin_relationship: (cg as any).next_of_kin_relationship ?? "",
+        next_of_kin_email: (cg as any).next_of_kin_email ?? "",
+        next_of_kin_secondary_phone: (cg as any).next_of_kin_secondary_phone ?? "",
+        next_of_kin_notes: (cg as any).next_of_kin_notes ?? "",
         status: cg.status ?? "Active",
       });
     }
