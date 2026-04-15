@@ -14,7 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowLeft, Pencil, Save, X, User, MapPin, Phone, Mail,
-  Shield, Car, Calendar, AlertTriangle, Users, Clock,
+  Shield, Car, Calendar, AlertTriangle, Clock, Heart,
+  Briefcase, Hash, KeyRound, UserCog, Stethoscope, Home,
 } from "lucide-react";
 
 function SectionTitle({ title }: { title: string }) {
