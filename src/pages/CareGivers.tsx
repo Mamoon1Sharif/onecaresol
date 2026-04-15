@@ -16,13 +16,22 @@ const CareGivers = () => {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("All");
   const navigate = useNavigate();
 
-  const filtered = careGivers.filter((cg) => {
+  // Sort so "mamoon" (case-insensitive) appears last
+  const sorted = [...careGivers].sort((a, b) => {
+    const aIsMamoon = a.name.toLowerCase().includes("mamoon") ? 1 : 0;
+    const bIsMamoon = b.name.toLowerCase().includes("mamoon") ? 1 : 0;
+    return aIsMamoon - bIsMamoon;
+  });
+
+  const filtered = sorted.filter((cg) => {
     const matchesSearch = cg.name.toLowerCase().includes(searchQuery.toLowerCase());
     if (!matchesSearch) return false;
     if (statusFilter === "All") return true;
     if (statusFilter === "Non-Active") return cg.status === "Non-Active" || cg.status === "Inactive";
     return cg.status === statusFilter;
   });
+
+  const showResultCount = searchQuery.trim().length > 0;
 
   return (
     <AppLayout>
@@ -32,34 +41,34 @@ const CareGivers = () => {
             <h1 className="text-2xl font-bold text-foreground">Care Givers</h1>
             <p className="text-sm text-muted-foreground mt-1">Manage your care giving staff · {careGivers.length} total</p>
           </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex items-center gap-1 border border-border rounded-lg p-1">
-              {STATUS_FILTERS.map((sf) => (
-                <Button
-                  key={sf}
-                  variant={statusFilter === sf ? "default" : "ghost"}
-                  size="sm"
-                  className="h-7 text-xs px-3"
-                  onClick={() => setStatusFilter(sf)}
-                >
-                  {sf}
-                </Button>
-              ))}
-            </div>
-            <Button onClick={() => navigate("/caregivers/new")} className="gap-2">
-              <Plus className="h-4 w-4" /> Add New Care Giver
-            </Button>
-          </div>
+          <Button onClick={() => navigate("/caregivers/new")} className="gap-2 shrink-0">
+            <Plus className="h-4 w-4" /> Add New Care Giver
+          </Button>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="relative max-w-sm flex-1">
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="relative max-w-sm flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Search by name..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 bg-card border-border" />
           </div>
-          <Badge variant="outline" className="text-sm px-3 py-1.5">
-            <Search className="h-3.5 w-3.5 mr-1.5" /> {filtered.length} results
-          </Badge>
+          <div className="flex items-center gap-1 border border-border rounded-lg p-1">
+            {STATUS_FILTERS.map((sf) => (
+              <Button
+                key={sf}
+                variant={statusFilter === sf ? "default" : "ghost"}
+                size="sm"
+                className="h-7 text-xs px-3"
+                onClick={() => setStatusFilter(sf)}
+              >
+                {sf}
+              </Button>
+            ))}
+          </div>
+          {showResultCount && (
+            <Badge variant="outline" className="text-sm px-3 py-1.5">
+              <Search className="h-3.5 w-3.5 mr-1.5" /> {filtered.length} results
+            </Badge>
+          )}
         </div>
 
         {isLoading ? (
