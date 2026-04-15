@@ -81,7 +81,7 @@ const CareGivers = () => {
               <div
                 key={cg.id}
                 onClick={() => navigate(`/caregivers/${cg.id}`)}
-                className="group border border-border rounded-xl bg-card p-4 cursor-pointer hover:shadow-md hover:border-primary/30 transition-all duration-200"
+                className="group border border-border rounded-xl bg-card p-4 cursor-pointer hover:shadow-md hover:border-primary/30 transition-all duration-200 flex flex-col h-[220px]"
               >
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-semibold text-foreground text-sm truncate pr-2">{cg.name}</h3>
