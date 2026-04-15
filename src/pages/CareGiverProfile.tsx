@@ -16,7 +16,7 @@ import {
   ArrowLeft, Pencil, Save, X, User, MapPin, Phone, Mail,
   Shield, Car, Calendar, AlertTriangle, Clock, Heart,
   Briefcase, Hash, KeyRound, UserCog, Stethoscope, Home,
-  PhoneCall, StickyNote, Link2,
+  PhoneCall, StickyNote, Link2, CalendarDays,
 } from "lucide-react";
 
 function SectionTitle({ title }: { title: string }) {
