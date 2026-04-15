@@ -72,6 +72,7 @@ export type Database = {
           status: string
           suffix: string | null
           surname: string | null
+          tags: string[] | null
           templated_hours: Json | null
           title: string | null
           town: string | null
@@ -136,6 +137,7 @@ export type Database = {
           status?: string
           suffix?: string | null
           surname?: string | null
+          tags?: string[] | null
           templated_hours?: Json | null
           title?: string | null
           town?: string | null
@@ -200,6 +202,7 @@ export type Database = {
           status?: string
           suffix?: string | null
           surname?: string | null
+          tags?: string[] | null
           templated_hours?: Json | null
           title?: string | null
           town?: string | null

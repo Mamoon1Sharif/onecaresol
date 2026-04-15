@@ -10,12 +10,21 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useUpdateCareGiver } from "@/hooks/use-care-data";
 import {
   MapPin, Phone, Mail, Shield, Car, Calendar, User, Heart,
-  AlertTriangle, Clock, Users, Pencil, Save, X,
+  AlertTriangle, Clock, Users, Pencil, Save, X, Tag,
 } from "lucide-react";
+
+const TAG_OPTIONS = [
+  "COS Letter Received",
+  "DBS Adult & Children",
+  "DBS Disclaimer",
+  "Has Full UK Driving Licence",
+  "Registered to DBS Update Service",
+];
 
 interface CareGiverProfile {
   id: string;
@@ -42,6 +51,7 @@ interface CareGiverProfile {
   requested_hours?: any;
   templated_hours?: any;
   created_at?: string;
+  tags?: string[] | null;
 }
 
 interface Props {
@@ -148,6 +158,7 @@ export function CareGiverProfileDialog({ open, onOpenChange, caregiver }: Props)
         requested_hours: caregiver.requested_hours ?? { week1: "00:00", week2: "00:00", week3: "00:00", week4: "00:00" },
         templated_hours: caregiver.templated_hours ?? { week1: "00:00", week2: "00:00", week3: "00:00", week4: "00:00" },
         status: caregiver.status ?? "Active",
+        tags: caregiver.tags ?? [],
       });
       setEditing(false);
     }
@@ -238,6 +249,9 @@ export function CareGiverProfileDialog({ open, onOpenChange, caregiver }: Props)
               <TabsTrigger value="emergency" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 pb-2 text-sm">
                 Emergency
               </TabsTrigger>
+              <TabsTrigger value="tags" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 pb-2 text-sm">
+                Tags
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -317,6 +331,39 @@ export function CareGiverProfileDialog({ open, onOpenChange, caregiver }: Props)
                     </div>
                   ))}
                 </>
+              )}
+            </TabsContent>
+
+            {/* Tags Tab */}
+            <TabsContent value="tags" className="px-6 pb-6 mt-0">
+              <SectionTitle title="Tags" />
+              {editing ? (
+                <div className="grid grid-cols-2 gap-2.5 pt-2">
+                  {TAG_OPTIONS.map((tag) => (
+                    <label key={tag} className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border bg-card hover:bg-muted/50 cursor-pointer transition-colors">
+                      <Checkbox
+                        checked={(form.tags || []).includes(tag)}
+                        onCheckedChange={(checked) => {
+                          const current = form.tags || [];
+                          setForm({ ...form, tags: checked ? [...current, tag] : current.filter((t: string) => t !== tag) });
+                        }}
+                      />
+                      <span className="text-sm font-medium text-foreground">{tag}</span>
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2 pt-2">
+                  {TAG_OPTIONS.map((tag) => {
+                    const active = (caregiver?.tags || []).includes(tag);
+                    return (
+                      <div key={tag} className={`flex items-center gap-2 p-2.5 rounded-lg border text-sm ${active ? "border-primary/30 bg-primary/5 text-foreground font-medium" : "border-border bg-muted/30 text-muted-foreground"}`}>
+                        <Tag className={`h-3.5 w-3.5 shrink-0 ${active ? "text-primary" : ""}`} />
+                        {tag}
+                      </div>
+                    );
+                  })}
+                </div>
               )}
             </TabsContent>
 
