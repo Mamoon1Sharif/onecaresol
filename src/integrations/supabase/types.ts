@@ -17,19 +17,32 @@ export type Database = {
       care_givers: {
         Row: {
           address: string | null
+          address_2: string | null
+          address_3: string | null
+          alias: string | null
           allergies: string | null
           care_giver_references: Json | null
+          country: string | null
+          county: string | null
           created_at: string
           dbs_ref: string | null
           dbs_type: string | null
           dbs_update_service: boolean | null
           dob: string | null
           email: string | null
+          employment_status: string | null
+          employment_type: string | null
           ethnicity: string | null
+          forename: string | null
+          gender: string | null
+          home_phone: string | null
+          house_street: string | null
           id: string
           is_driver: boolean | null
           last_check_in: string | null
           login_code: string | null
+          manager: string | null
+          marital_status: string | null
           name: string
           next_of_kin_address: string | null
           next_of_kin_email: string | null
@@ -38,31 +51,62 @@ export type Database = {
           next_of_kin_phone: string | null
           next_of_kin_relationship: string | null
           next_of_kin_secondary_phone: string | null
+          ni_number: string | null
+          payroll_number: string | null
           permission: string | null
+          personal_email: string | null
+          personal_number: string | null
           phone: string | null
+          postcode: string | null
+          preferred_name: string | null
+          reference_no: string | null
+          religion: string | null
           requested_hours: Json | null
           role_title: string | null
           sage_num: string | null
+          salary: string | null
+          sex_assigned_at_birth: string | null
+          sexual_orientation: string | null
           skills: string[] | null
+          start_date: string | null
           status: string
+          suffix: string | null
+          surname: string | null
           templated_hours: Json | null
+          title: string | null
+          town: string | null
           updated_at: string
+          work_email: string | null
+          work_number: string | null
         }
         Insert: {
           address?: string | null
+          address_2?: string | null
+          address_3?: string | null
+          alias?: string | null
           allergies?: string | null
           care_giver_references?: Json | null
+          country?: string | null
+          county?: string | null
           created_at?: string
           dbs_ref?: string | null
           dbs_type?: string | null
           dbs_update_service?: boolean | null
           dob?: string | null
           email?: string | null
+          employment_status?: string | null
+          employment_type?: string | null
           ethnicity?: string | null
+          forename?: string | null
+          gender?: string | null
+          home_phone?: string | null
+          house_street?: string | null
           id?: string
           is_driver?: boolean | null
           last_check_in?: string | null
           login_code?: string | null
+          manager?: string | null
+          marital_status?: string | null
           name: string
           next_of_kin_address?: string | null
           next_of_kin_email?: string | null
@@ -71,31 +115,62 @@ export type Database = {
           next_of_kin_phone?: string | null
           next_of_kin_relationship?: string | null
           next_of_kin_secondary_phone?: string | null
+          ni_number?: string | null
+          payroll_number?: string | null
           permission?: string | null
+          personal_email?: string | null
+          personal_number?: string | null
           phone?: string | null
+          postcode?: string | null
+          preferred_name?: string | null
+          reference_no?: string | null
+          religion?: string | null
           requested_hours?: Json | null
           role_title?: string | null
           sage_num?: string | null
+          salary?: string | null
+          sex_assigned_at_birth?: string | null
+          sexual_orientation?: string | null
           skills?: string[] | null
+          start_date?: string | null
           status?: string
+          suffix?: string | null
+          surname?: string | null
           templated_hours?: Json | null
+          title?: string | null
+          town?: string | null
           updated_at?: string
+          work_email?: string | null
+          work_number?: string | null
         }
         Update: {
           address?: string | null
+          address_2?: string | null
+          address_3?: string | null
+          alias?: string | null
           allergies?: string | null
           care_giver_references?: Json | null
+          country?: string | null
+          county?: string | null
           created_at?: string
           dbs_ref?: string | null
           dbs_type?: string | null
           dbs_update_service?: boolean | null
           dob?: string | null
           email?: string | null
+          employment_status?: string | null
+          employment_type?: string | null
           ethnicity?: string | null
+          forename?: string | null
+          gender?: string | null
+          home_phone?: string | null
+          house_street?: string | null
           id?: string
           is_driver?: boolean | null
           last_check_in?: string | null
           login_code?: string | null
+          manager?: string | null
+          marital_status?: string | null
           name?: string
           next_of_kin_address?: string | null
           next_of_kin_email?: string | null
@@ -104,15 +179,33 @@ export type Database = {
           next_of_kin_phone?: string | null
           next_of_kin_relationship?: string | null
           next_of_kin_secondary_phone?: string | null
+          ni_number?: string | null
+          payroll_number?: string | null
           permission?: string | null
+          personal_email?: string | null
+          personal_number?: string | null
           phone?: string | null
+          postcode?: string | null
+          preferred_name?: string | null
+          reference_no?: string | null
+          religion?: string | null
           requested_hours?: Json | null
           role_title?: string | null
           sage_num?: string | null
+          salary?: string | null
+          sex_assigned_at_birth?: string | null
+          sexual_orientation?: string | null
           skills?: string[] | null
+          start_date?: string | null
           status?: string
+          suffix?: string | null
+          surname?: string | null
           templated_hours?: Json | null
+          title?: string | null
+          town?: string | null
           updated_at?: string
+          work_email?: string | null
+          work_number?: string | null
         }
         Relationships: []
       }
