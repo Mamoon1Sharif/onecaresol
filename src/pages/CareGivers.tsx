@@ -4,17 +4,25 @@ import { AppLayout } from "@/components/AppLayout";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Phone, User, Clock, CalendarDays } from "lucide-react";
+import { Search, Plus, Phone, User, Clock, CalendarDays, Filter } from "lucide-react";
 import { useCareGivers } from "@/hooks/use-care-data";
+
+const STATUS_FILTERS = ["All", "Active", "Non-Active", "Onboarding"] as const;
+type StatusFilter = (typeof STATUS_FILTERS)[number];
 
 const CareGivers = () => {
   const { data: careGivers = [], isLoading } = useCareGivers();
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("All");
   const navigate = useNavigate();
 
-  const filtered = careGivers.filter((cg) =>
-    cg.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filtered = careGivers.filter((cg) => {
+    const matchesSearch = cg.name.toLowerCase().includes(searchQuery.toLowerCase());
+    if (!matchesSearch) return false;
+    if (statusFilter === "All") return true;
+    if (statusFilter === "Non-Active") return cg.status === "Non-Active" || cg.status === "Inactive";
+    return cg.status === statusFilter;
+  });
 
   return (
     <AppLayout>
@@ -24,9 +32,24 @@ const CareGivers = () => {
             <h1 className="text-2xl font-bold text-foreground">Care Givers</h1>
             <p className="text-sm text-muted-foreground mt-1">Manage your care giving staff · {careGivers.length} total</p>
           </div>
-          <Button onClick={() => navigate("/caregivers/new")} className="gap-2">
-            <Plus className="h-4 w-4" /> Add New Care Giver
-          </Button>
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1 border border-border rounded-lg p-1">
+              {STATUS_FILTERS.map((sf) => (
+                <Button
+                  key={sf}
+                  variant={statusFilter === sf ? "default" : "ghost"}
+                  size="sm"
+                  className="h-7 text-xs px-3"
+                  onClick={() => setStatusFilter(sf)}
+                >
+                  {sf}
+                </Button>
+              ))}
+            </div>
+            <Button onClick={() => navigate("/caregivers/new")} className="gap-2">
+              <Plus className="h-4 w-4" /> Add New Care Giver
+            </Button>
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
