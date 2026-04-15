@@ -312,8 +312,15 @@ const CareGiverProfile = () => {
                 {editing ? (
                   <div className="space-y-3">
                     <EditField label="Name" value={form.next_of_kin_name} onChange={set("next_of_kin_name")} />
-                    <EditField label="Address" value={form.next_of_kin_address} onChange={set("next_of_kin_address")} />
+                    <EditField label="Relationship" value={form.next_of_kin_relationship} onChange={set("next_of_kin_relationship")} />
                     <EditField label="Phone" value={form.next_of_kin_phone} onChange={set("next_of_kin_phone")} type="tel" />
+                    <EditField label="Secondary Phone" value={form.next_of_kin_secondary_phone} onChange={set("next_of_kin_secondary_phone")} type="tel" />
+                    <EditField label="Email" value={form.next_of_kin_email} onChange={set("next_of_kin_email")} type="email" />
+                    <EditField label="Address" value={form.next_of_kin_address} onChange={set("next_of_kin_address")} />
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Notes</Label>
+                      <Textarea value={form.next_of_kin_notes} onChange={(e) => setForm({ ...form, next_of_kin_notes: e.target.value })} className="min-h-[60px] text-sm" placeholder="Any additional notes..." />
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -323,7 +330,7 @@ const CareGiverProfile = () => {
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-foreground">{cg.next_of_kin_name || "—"}</p>
-                        <p className="text-xs text-muted-foreground">Next of Kin</p>
+                        <p className="text-xs text-muted-foreground">{(cg as any).next_of_kin_relationship || "Next of Kin"}</p>
                       </div>
                     </div>
                     <div className="ml-[52px] space-y-3 border-l-2 border-border pl-4">
@@ -331,10 +338,28 @@ const CareGiverProfile = () => {
                         <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Phone</p>
                         <p className="text-sm text-foreground flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 text-muted-foreground" />{cg.next_of_kin_phone || "—"}</p>
                       </div>
+                      {(cg as any).next_of_kin_secondary_phone && (
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Secondary Phone</p>
+                          <p className="text-sm text-foreground flex items-center gap-1.5"><PhoneCall className="h-3.5 w-3.5 text-muted-foreground" />{(cg as any).next_of_kin_secondary_phone}</p>
+                        </div>
+                      )}
+                      {(cg as any).next_of_kin_email && (
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Email</p>
+                          <p className="text-sm text-foreground flex items-center gap-1.5"><Mail className="h-3.5 w-3.5 text-muted-foreground" />{(cg as any).next_of_kin_email}</p>
+                        </div>
+                      )}
                       <div>
                         <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Address</p>
                         <p className="text-sm text-foreground flex items-center gap-1.5"><Home className="h-3.5 w-3.5 text-muted-foreground" />{cg.next_of_kin_address || "—"}</p>
                       </div>
+                      {(cg as any).next_of_kin_notes && (
+                        <div>
+                          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Notes</p>
+                          <p className="text-sm text-foreground flex items-center gap-1.5"><StickyNote className="h-3.5 w-3.5 text-muted-foreground" />{(cg as any).next_of_kin_notes}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
