@@ -1,29 +1,36 @@
 import { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
-import { useCareGiver } from "@/hooks/use-care-data";
-import { useShifts } from "@/hooks/use-care-data";
-import { useDailyVisits } from "@/hooks/use-care-data";
+import { useCareGiver, useShifts, useDailyVisits } from "@/hooks/use-care-data";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
 import {
   ArrowLeft, ChevronLeft, ChevronRight, CalendarDays, Clock,
-  User, MapPin, CheckCircle2, XCircle, AlertCircle, Search,
+  User, CheckCircle2, XCircle, AlertCircle, Search, Timer,
+  ClipboardList, TrendingUp, Hourglass, ArrowRightLeft,
 } from "lucide-react";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-const statusConfig: Record<string, { icon: typeof CheckCircle2; className: string; label: string }> = {
-  Complete: { icon: CheckCircle2, className: "text-success", label: "Complete" },
-  Completed: { icon: CheckCircle2, className: "text-success", label: "Complete" },
-  "In Progress": { icon: AlertCircle, className: "text-warning", label: "In Progress" },
-  Pending: { icon: Clock, className: "text-muted-foreground", label: "Pending" },
-  Cancelled: { icon: XCircle, className: "text-destructive", label: "Cancelled" },
-  Due: { icon: Clock, className: "text-info", label: "Due" },
+const statusConfig: Record<string, { icon: typeof CheckCircle2; bg: string; text: string; label: string }> = {
+  Complete:      { icon: CheckCircle2, bg: "bg-success/10", text: "text-success", label: "Complete" },
+  Completed:     { icon: CheckCircle2, bg: "bg-success/10", text: "text-success", label: "Complete" },
+  "In Progress": { icon: Timer, bg: "bg-warning/10", text: "text-warning", label: "In Progress" },
+  Pending:       { icon: Clock, bg: "bg-muted", text: "text-muted-foreground", label: "Pending" },
+  Cancelled:     { icon: XCircle, bg: "bg-destructive/10", text: "text-destructive", label: "Cancelled" },
+  Due:           { icon: AlertCircle, bg: "bg-info/10", text: "text-info", label: "Due" },
+};
+
+const shiftTypeColors: Record<string, string> = {
+  Morning: "bg-amber-100 text-amber-800 border-amber-200",
+  Afternoon: "bg-sky-100 text-sky-800 border-sky-200",
+  Night: "bg-indigo-100 text-indigo-800 border-indigo-200",
+  "Live-in": "bg-emerald-100 text-emerald-800 border-emerald-200",
 };
 
 function getDateStr(offset: number) {
@@ -43,11 +50,23 @@ function getWeekDates(offset: number) {
   });
 }
 
-const shiftTypeColors: Record<string, string> = {
-  Morning: "bg-amber-100 text-amber-800 border-amber-200",
-  Afternoon: "bg-sky-100 text-sky-800 border-sky-200",
-  Night: "bg-indigo-100 text-indigo-800 border-indigo-200",
-  "Live-in": "bg-emerald-100 text-emerald-800 border-emerald-200",
+function fmtTime(iso: string | null) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+}
+
+function diffDisplay(start: string | null, end: string | null) {
+  if (!start || !end) return "—";
+  const mins = (new Date(end).getTime() - new Date(start).getTime()) / 60000;
+  const h = Math.floor(mins / 60);
+  const m = Math.round(mins % 60);
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+const fmtMins = (m: number) => {
+  const h = Math.floor(m / 60);
+  const mins = Math.round(m % 60);
+  return `${String(h).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
 };
 
 const CareGiverSchedule = () => {
@@ -59,6 +78,8 @@ const CareGiverSchedule = () => {
   const [weekOffset, setWeekOffset] = useState(0);
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"daily" | "weekly">("daily");
+  const [fromDate, setFromDate] = useState(() => getDateStr(0));
+  const [toDate, setToDate] = useState(() => getDateStr(0));
 
   const dateStr = useMemo(() => getDateStr(dayOffset), [dayOffset]);
   const { data: dailyVisits = [] } = useDailyVisits(dateStr);
@@ -71,7 +92,6 @@ const CareGiverSchedule = () => {
 
   const weekDates = useMemo(() => getWeekDates(weekOffset), [weekOffset]);
 
-  // Filter shifts & visits for this caregiver
   const myShifts = useMemo(() => allShifts.filter((s) => s.care_giver_id === id), [allShifts, id]);
   const myVisits = useMemo(() => dailyVisits.filter((v) => v.care_giver_id === id), [dailyVisits, id]);
 
@@ -84,7 +104,6 @@ const CareGiverSchedule = () => {
     );
   }, [myVisits, search]);
 
-  // Compute scheduled and actual hours
   const scheduledMinutes = myVisits.reduce((sum, v) => sum + (v.duration ?? 0) * 60, 0);
   const clockedMinutes = myVisits.reduce((sum, v) => {
     if (v.check_in_time && v.check_out_time) {
@@ -93,12 +112,23 @@ const CareGiverSchedule = () => {
     return sum;
   }, 0);
 
-  const fmtMins = (m: number) => `${Math.floor(m / 60)}h ${Math.round(m % 60)}m`;
+  const completedCount = myVisits.filter((v) => v.status === "Completed" || v.status === "Complete").length;
+  const inProgressCount = myVisits.filter((v) => v.status === "In Progress").length;
+  const cancelledCount = myVisits.filter((v) => v.status === "Cancelled").length;
+  const dueCount = myVisits.filter((v) => v.status === "Due" || v.status === "Pending").length;
+
+  const handleDateUpdate = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const from = new Date(fromDate);
+    const diff = Math.round((from.getTime() - today.getTime()) / 86400000);
+    setDayOffset(diff);
+  };
 
   if (cgLoading) {
     return (
       <AppLayout>
-        <div className="max-w-6xl mx-auto space-y-6">
+        <div className="max-w-7xl mx-auto space-y-6">
           <Skeleton className="h-10 w-48" />
           <Skeleton className="h-[400px] w-full" />
         </div>
@@ -119,128 +149,228 @@ const CareGiverSchedule = () => {
 
   return (
     <AppLayout>
-      <div className="max-w-6xl mx-auto space-y-6">
-        {/* Header */}
+      <div className="max-w-7xl mx-auto space-y-5">
+        {/* Top bar */}
         <div className="flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate("/caregivers")}>
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Schedule — {cg.name}</h1>
-              <p className="text-sm text-muted-foreground">{cg.role_title ?? "Team Member"} · {cg.status}</p>
-            </div>
-          </div>
+          <Button variant="ghost" onClick={() => navigate("/caregivers")} className="gap-2 text-muted-foreground">
+            <ArrowLeft className="h-4 w-4" /> Back to Care Givers
+          </Button>
           <div className="flex items-center gap-2">
             <Button variant={view === "daily" ? "default" : "outline"} size="sm" onClick={() => setView("daily")}>
-              Daily
+              <ClipboardList className="h-4 w-4 mr-1.5" /> Daily View
             </Button>
             <Button variant={view === "weekly" ? "default" : "outline"} size="sm" onClick={() => setView("weekly")}>
-              Weekly
+              <CalendarDays className="h-4 w-4 mr-1.5" /> Weekly View
             </Button>
           </div>
         </div>
 
+        {/* Team member banner */}
+        <Card className="border border-border">
+          <CardContent className="py-4 px-6">
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div className="flex items-center gap-4">
+                <div className="h-12 w-12 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center">
+                  <User className="h-6 w-6 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Team Member</p>
+                  <h2 className="text-xl font-bold text-foreground">{cg.name}</h2>
+                  <p className="text-sm text-muted-foreground">{cg.role_title ?? "Homecare Assistant"}</p>
+                </div>
+              </div>
+              <Badge
+                className={`text-sm px-3 py-1 ${cg.status === "Active" ? "bg-success/15 text-success border-success/30" : "bg-muted text-muted-foreground"}`}
+                variant="outline"
+              >
+                {cg.status}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+
         {view === "daily" ? (
           <>
-            {/* Date navigation */}
-            <div className="flex items-center justify-between">
-              <Button variant="outline" size="icon" onClick={() => setDayOffset((o) => o - 1)}>
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <div className="flex items-center gap-2 font-medium text-foreground">
-                <CalendarDays className="h-4 w-4 text-primary" />
-                {currentDate.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+            {/* Date selector bar */}
+            <Card className="border border-border">
+              <CardContent className="py-3 px-4">
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setDayOffset((o) => o - 1)}>
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <div className="text-sm font-semibold text-primary">
+                      {currentDate.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                    </div>
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setDayOffset((o) => o + 1)}>
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                    {dayOffset !== 0 && (
+                      <Button variant="ghost" size="sm" className="text-xs" onClick={() => setDayOffset(0)}>Today</Button>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="h-8 text-xs w-[130px]" />
+                    <span className="text-xs text-muted-foreground">to</span>
+                    <Input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className="h-8 text-xs w-[130px]" />
+                    <Button size="sm" className="h-8 gap-1.5" onClick={handleDateUpdate}>
+                      <CalendarDays className="h-3.5 w-3.5" /> Update
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Stats strip */}
+            <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+              <Card className="border border-border">
+                <CardContent className="py-3 px-4 flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <ClipboardList className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-foreground leading-none">{myVisits.length}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide mt-0.5">Total</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border border-border">
+                <CardContent className="py-3 px-4 flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-lg bg-success/10 flex items-center justify-center">
+                    <CheckCircle2 className="h-4 w-4 text-success" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-success leading-none">{completedCount}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide mt-0.5">Complete</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border border-border">
+                <CardContent className="py-3 px-4 flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-lg bg-warning/10 flex items-center justify-center">
+                    <Timer className="h-4 w-4 text-warning" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-warning leading-none">{inProgressCount}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide mt-0.5">In Progress</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border border-border">
+                <CardContent className="py-3 px-4 flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-lg bg-info/10 flex items-center justify-center">
+                    <AlertCircle className="h-4 w-4 text-info" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-info leading-none">{dueCount}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide mt-0.5">Due</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border border-border">
+                <CardContent className="py-3 px-4 flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <Hourglass className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-foreground leading-none">{fmtMins(scheduledMinutes)}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide mt-0.5">Sched Hrs</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border border-border">
+                <CardContent className="py-3 px-4 flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <TrendingUp className="h-4 w-4 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-foreground leading-none">{fmtMins(clockedMinutes)}</p>
+                    <p className="text-[10px] text-muted-foreground uppercase tracking-wide mt-0.5">Clock Hrs</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Search bar */}
+            <div className="flex items-center justify-between gap-3">
+              <div className="relative max-w-xs flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Search by service user or status..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
               </div>
-              <div className="flex gap-2">
-                {dayOffset !== 0 && (
-                  <Button variant="ghost" size="sm" onClick={() => setDayOffset(0)}>Today</Button>
-                )}
-                <Button variant="outline" size="icon" onClick={() => setDayOffset((o) => o + 1)}>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
+              <Badge variant="outline" className="text-xs px-2.5 py-1">
+                {filteredVisits.length} visit{filteredVisits.length !== 1 ? "s" : ""}
+              </Badge>
             </div>
 
-            {/* Stats row */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Card>
-                <CardContent className="pt-4 pb-3 text-center">
-                  <p className="text-2xl font-bold text-foreground">{myVisits.length}</p>
-                  <p className="text-xs text-muted-foreground">Total Visits</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-4 pb-3 text-center">
-                  <p className="text-2xl font-bold text-success">{myVisits.filter((v) => v.status === "Completed" || v.status === "Complete").length}</p>
-                  <p className="text-xs text-muted-foreground">Completed</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-4 pb-3 text-center">
-                  <p className="text-2xl font-bold text-foreground">{fmtMins(scheduledMinutes)}</p>
-                  <p className="text-xs text-muted-foreground">Scheduled Hrs</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="pt-4 pb-3 text-center">
-                  <p className="text-2xl font-bold text-foreground">{fmtMins(clockedMinutes)}</p>
-                  <p className="text-xs text-muted-foreground">Clocked Hrs</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Search */}
-            <div className="relative max-w-xs">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search visits..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
-            </div>
-
-            {/* Visit table */}
-            <Card className="border border-border shadow-sm">
-              <CardContent className="p-0">
+            {/* Visits table */}
+            <Card className="border border-border shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Service User</TableHead>
-                      <TableHead>Scheduled</TableHead>
-                      <TableHead>Duration</TableHead>
-                      <TableHead>Check In</TableHead>
-                      <TableHead>Check Out</TableHead>
-                      <TableHead>Status</TableHead>
+                    <TableRow className="bg-muted/30">
+                      <TableHead className="font-semibold">Status</TableHead>
+                      <TableHead className="font-semibold">Service User</TableHead>
+                      <TableHead className="font-semibold text-center">Scheduled Start</TableHead>
+                      <TableHead className="font-semibold text-center">Scheduled End</TableHead>
+                      <TableHead className="font-semibold text-center">Duration</TableHead>
+                      <TableHead className="font-semibold text-center">Check In</TableHead>
+                      <TableHead className="font-semibold text-center">Check Out</TableHead>
+                      <TableHead className="font-semibold text-center">Actual Duration</TableHead>
+                      <TableHead className="font-semibold">Shift Type</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredVisits.length === 0 && (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center text-muted-foreground py-12">
-                          No visits scheduled for this day
+                        <TableCell colSpan={9} className="text-center text-muted-foreground py-16">
+                          <div className="flex flex-col items-center gap-2">
+                            <CalendarDays className="h-8 w-8 text-muted-foreground/40" />
+                            <p>No visits scheduled for this day</p>
+                          </div>
                         </TableCell>
                       </TableRow>
                     )}
                     {filteredVisits.map((v) => {
                       const st = statusConfig[v.status] ?? statusConfig.Pending;
                       const StIcon = st.icon;
+                      const schedEnd = `${String(v.start_hour + v.duration).padStart(2, "0")}:00`;
+                      const isCancelled = v.status === "Cancelled";
                       return (
-                        <TableRow key={v.id}>
-                          <TableCell className="font-medium">
-                            <div className="flex items-center gap-2">
-                              <User className="h-4 w-4 text-muted-foreground" />
-                              {(v.care_receivers as any)?.name ?? "—"}
+                        <TableRow key={v.id} className={isCancelled ? "bg-destructive/5" : "hover:bg-muted/30"}>
+                          <TableCell>
+                            <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${st.bg} ${st.text}`}>
+                              <StIcon className="h-3.5 w-3.5" />
+                              {st.label}
                             </div>
                           </TableCell>
-                          <TableCell>{String(v.start_hour).padStart(2, "0")}:00</TableCell>
-                          <TableCell>{v.duration}h</TableCell>
-                          <TableCell className="text-sm">
-                            {v.check_in_time ? new Date(v.check_in_time).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : "—"}
+                          <TableCell>
+                            <div className="flex items-center gap-2 font-medium">
+                              <User className="h-4 w-4 text-muted-foreground shrink-0" />
+                              <span className={isCancelled ? "line-through text-muted-foreground" : ""}>
+                                {(v.care_receivers as any)?.name ?? "—"}
+                              </span>
+                            </div>
                           </TableCell>
-                          <TableCell className="text-sm">
-                            {v.check_out_time ? new Date(v.check_out_time).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : "—"}
+                          <TableCell className="text-center font-mono text-sm">
+                            {String(v.start_hour).padStart(2, "0")}:00
+                          </TableCell>
+                          <TableCell className="text-center font-mono text-sm">{schedEnd}</TableCell>
+                          <TableCell className="text-center font-mono text-sm">
+                            {String(v.duration).padStart(2, "0")}:00
+                          </TableCell>
+                          <TableCell className="text-center font-mono text-sm">
+                            {fmtTime(v.check_in_time)}
+                          </TableCell>
+                          <TableCell className="text-center font-mono text-sm">
+                            {fmtTime(v.check_out_time)}
+                          </TableCell>
+                          <TableCell className="text-center font-mono text-sm">
+                            {diffDisplay(v.check_in_time, v.check_out_time)}
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline" className={`gap-1 ${st.className}`}>
-                              <StIcon className="h-3 w-3" />
-                              {st.label}
+                            {/* Derive shift type from start_hour */}
+                            <Badge variant="outline" className="text-[10px]">
+                              {v.start_hour < 12 ? "Morning" : v.start_hour < 17 ? "Afternoon" : "Night"}
                             </Badge>
                           </TableCell>
                         </TableRow>
@@ -248,7 +378,28 @@ const CareGiverSchedule = () => {
                     })}
                   </TableBody>
                 </Table>
-              </CardContent>
+              </div>
+              {/* Footer totals */}
+              <Separator />
+              <div className="flex items-center gap-6 px-4 py-3 bg-muted/20 text-sm">
+                <div className="flex items-center gap-2">
+                  <Hourglass className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Sched Hrs:</span>
+                  <span className="font-semibold font-mono">{fmtMins(scheduledMinutes)}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Clock Hrs:</span>
+                  <span className="font-semibold font-mono">{fmtMins(clockedMinutes)}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <ArrowRightLeft className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">Variance:</span>
+                  <span className={`font-semibold font-mono ${clockedMinutes > scheduledMinutes ? "text-warning" : "text-success"}`}>
+                    {clockedMinutes >= scheduledMinutes ? "+" : "-"}{fmtMins(Math.abs(clockedMinutes - scheduledMinutes))}
+                  </span>
+                </div>
+              </div>
             </Card>
           </>
         ) : (
