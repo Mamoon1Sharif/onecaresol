@@ -9,6 +9,7 @@ import Index from "./pages/Index.tsx";
 import CareGivers from "./pages/CareGivers.tsx";
 import CareGiverProfile from "./pages/CareGiverProfile.tsx";
 import AddCareGiver from "./pages/AddCareGiver.tsx";
+import CareGiverSchedule from "./pages/CareGiverSchedule.tsx";
 import CareReceivers from "./pages/CareReceivers.tsx";
 import CareReceiverProfile from "./pages/CareReceiverProfile.tsx";
 import MemberProfile from "./pages/MemberProfile.tsx";
