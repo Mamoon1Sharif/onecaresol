@@ -249,6 +249,9 @@ export function CareGiverProfileDialog({ open, onOpenChange, caregiver }: Props)
               <TabsTrigger value="emergency" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 pb-2 text-sm">
                 Emergency
               </TabsTrigger>
+              <TabsTrigger value="tags" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-1 pb-2 text-sm">
+                Tags
+              </TabsTrigger>
             </TabsList>
           </div>
 
