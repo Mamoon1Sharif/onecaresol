@@ -137,8 +137,8 @@ const CareGivers = () => {
                 {Array.isArray((cg as any).tags) && (cg as any).tags.length > 0 && (() => {
                   const tags = (cg as any).tags as string[];
                   const isExpanded = expandedTags[cg.id];
-                  const visibleTags = isExpanded ? tags : tags.slice(0, 2);
-                  const hasMore = tags.length > 2;
+                  const visibleTags = isExpanded ? tags : tags.slice(0, 3);
+                  const hasMore = tags.length > 3;
                   return (
                     <div className="mt-3 flex flex-wrap gap-1.5">
                       {visibleTags.map((tag: string) => (
@@ -151,7 +151,7 @@ const CareGivers = () => {
                           onClick={(e) => { e.stopPropagation(); setExpandedTags(prev => ({ ...prev, [cg.id]: !prev[cg.id] })); }}
                           className="text-[10px] font-medium text-primary hover:text-primary/80 px-2 py-1"
                         >
-                          {isExpanded ? "Show less" : `+${tags.length - 2} more`}
+                          {isExpanded ? "Show less" : `+${tags.length - 3} more`}
                         </button>
                       )}
                     </div>
