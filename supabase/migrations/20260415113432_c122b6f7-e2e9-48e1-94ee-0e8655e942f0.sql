@@ -1,0 +1,1 @@
+ALTER TABLE public.care_givers ADD COLUMN tags text[] DEFAULT '{}'::text[];
