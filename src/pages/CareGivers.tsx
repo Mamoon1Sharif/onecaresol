@@ -4,7 +4,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Phone, User, Clock, CalendarDays, Filter, Tag } from "lucide-react";
+import { Search, Plus, Phone, User, Clock, CalendarDays, Filter } from "lucide-react";
 import { useCareGivers } from "@/hooks/use-care-data";
 
 const STATUS_FILTERS = ["All", "Active", "Non-Active", "Onboarding"] as const;
@@ -14,7 +14,19 @@ const CareGivers = () => {
   const { data: careGivers = [], isLoading } = useCareGivers();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("All");
+  const [expandedTags, setExpandedTags] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
+
+  const shortenTag = (tag: string) => {
+    const map: Record<string, string> = {
+      "Has Full UK Driving Licence": "UK Licence",
+      "Registered to DBS Update Service": "DBS Update",
+      "DBS Adult & Children": "DBS A&C",
+      "COS Letter Received": "COS Letter",
+      "DBS Disclaimer": "DBS Discl.",
+    };
+    return map[tag] || tag;
+  };
 
   // Sort so "mamoon" (case-insensitive) appears last
   const sorted = [...careGivers].sort((a, b) => {
@@ -81,7 +93,7 @@ const CareGivers = () => {
               <div
                 key={cg.id}
                 onClick={() => navigate(`/caregivers/${cg.id}`)}
-                className="group border border-border rounded-xl bg-card p-4 cursor-pointer hover:shadow-md hover:border-primary/30 transition-all duration-200 flex flex-col h-[220px]"
+                className="group border border-border rounded-xl bg-card p-4 cursor-pointer hover:shadow-md hover:border-primary/30 transition-all duration-200 flex flex-col min-h-[220px]"
               >
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="font-semibold text-foreground text-sm truncate pr-2">{cg.name}</h3>
@@ -122,20 +134,29 @@ const CareGivers = () => {
                     </p>
                   </div>
                 </div>
-                {/* Tags 2x2 grid */}
-                {Array.isArray((cg as any).tags) && (cg as any).tags.length > 0 && (
-                  <div className="mt-3 grid grid-cols-2 gap-1.5">
-                    {(cg as any).tags.slice(0, 4).map((tag: string) => (
-                      <span key={tag} className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground bg-muted rounded-md px-2 py-1 truncate">
-                        <Tag className="h-2.5 w-2.5 shrink-0" />
-                        {tag}
-                      </span>
-                    ))}
-                    {(cg as any).tags.length > 4 && (
-                      <span className="text-[10px] text-muted-foreground px-2 py-1">+{(cg as any).tags.length - 4} more</span>
-                    )}
-                  </div>
-                )}
+                {Array.isArray((cg as any).tags) && (cg as any).tags.length > 0 && (() => {
+                  const tags = (cg as any).tags as string[];
+                  const isExpanded = expandedTags[cg.id];
+                  const visibleTags = isExpanded ? tags : tags.slice(0, 2);
+                  const hasMore = tags.length > 2;
+                  return (
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {visibleTags.map((tag: string) => (
+                        <span key={tag} className="text-[10px] font-medium text-muted-foreground bg-muted rounded-md px-2 py-1 truncate max-w-[120px]">
+                          {shortenTag(tag)}
+                        </span>
+                      ))}
+                      {hasMore && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); setExpandedTags(prev => ({ ...prev, [cg.id]: !prev[cg.id] })); }}
+                          className="text-[10px] font-medium text-primary hover:text-primary/80 px-2 py-1"
+                        >
+                          {isExpanded ? "Show less" : `+${tags.length - 2} more`}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             ))}
           </div>
