@@ -151,7 +151,7 @@ const CareGivers = () => {
                           onClick={(e) => { e.stopPropagation(); setExpandedTags(prev => ({ ...prev, [cg.id]: !prev[cg.id] })); }}
                           className="text-[10px] font-medium text-primary hover:text-primary/80 px-2 py-1"
                         >
-                          {isExpanded ? "Show less" : `+${tags.length - 2} more`}
+                          {isExpanded ? "Show less" : `+${tags.length - 3} more`}
                         </button>
                       )}
                     </div>
