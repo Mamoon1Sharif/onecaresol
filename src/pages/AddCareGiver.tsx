@@ -72,6 +72,14 @@ const MANAGER_OPTIONS = ["Manager 1","Manager 2","Manager 3"];
 
 const ROLE_OPTIONS = ["Homecare Assistant","Senior Carer","Team Leader","Care Coordinator","Nurse","Support Worker","Other"];
 
+const TAG_OPTIONS = [
+  "COS Letter Received",
+  "DBS Adult & Children",
+  "DBS Disclaimer",
+  "Has Full UK Driving Licence",
+  "Registered to DBS Update Service",
+];
+
 type FormData = {
   title: string; forename: string; surname: string; preferred_name: string; alias: string; suffix: string;
   sex_assigned_at_birth: string; gender: string; sexual_orientation: string; dob: string; ethnicity: string;
