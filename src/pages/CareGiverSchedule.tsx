@@ -123,7 +123,7 @@ const CareGiverSchedule = () => {
         {/* Header */}
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate(`/caregivers/${id}`)}>
+            <Button variant="ghost" size="icon" onClick={() => navigate("/caregivers")}>
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div>
