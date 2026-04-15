@@ -295,26 +295,6 @@ const CareGiverProfile = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Hours */}
-            <Card className="border border-border overflow-hidden">
-              <div className="bg-gradient-to-r from-primary/10 to-transparent px-6 py-3">
-                <h3 className="text-sm font-bold uppercase tracking-widest text-primary flex items-center gap-2">
-                  <Clock className="h-4 w-4" /> Hours Overview
-                </h3>
-              </div>
-              <CardContent className="p-5 space-y-5">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Requested Hours</p>
-                  <HoursRow hours={cg.requested_hours} />
-                </div>
-                <Separator />
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Templated Hours</p>
-                  <HoursRow hours={cg.templated_hours} />
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Next of Kin */}
             <Card className="border border-border overflow-hidden">
               <div className="bg-gradient-to-r from-warning/10 to-transparent px-6 py-3">
@@ -352,6 +332,26 @@ const CareGiverProfile = () => {
                     </div>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+
+            {/* Hours */}
+            <Card className="border border-border overflow-hidden">
+              <div className="bg-gradient-to-r from-primary/10 to-transparent px-6 py-3">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                  <Clock className="h-4 w-4" /> Hours Overview
+                </h3>
+              </div>
+              <CardContent className="p-5 space-y-5">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Requested Hours</p>
+                  <HoursRow hours={cg.requested_hours} />
+                </div>
+                <Separator />
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Templated Hours</p>
+                  <HoursRow hours={cg.templated_hours} />
+                </div>
               </CardContent>
             </Card>
           </div>
