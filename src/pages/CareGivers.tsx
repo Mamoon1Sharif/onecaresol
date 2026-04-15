@@ -92,18 +92,21 @@ const CareGivers = () => {
             {filtered.map((cg) => (
               <div
                 key={cg.id}
-                onClick={() => navigate(`/caregivers/${cg.id}`)}
-                className="group border border-border rounded-xl bg-card p-4 cursor-pointer hover:shadow-md hover:border-primary/30 transition-all duration-200 flex flex-col min-h-[220px]"
+                className="group border border-border rounded-xl bg-card cursor-pointer hover:shadow-md hover:border-primary/30 transition-all duration-200 flex flex-col min-h-[220px]"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-foreground text-sm truncate pr-2">{cg.name}</h3>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <Badge
-                      variant={cg.status === "Active" ? "default" : "secondary"}
-                      className={`text-[10px] px-2 py-0.5 ${cg.status === "Active" ? "bg-success/15 text-success border-0" : "bg-muted text-muted-foreground border-0"}`}
-                    >
-                      {cg.status}
-                    </Badge>
+                <div
+                  className="p-4 flex-1"
+                  onClick={() => navigate(`/caregivers/${cg.id}`)}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <Badge
+                        variant={cg.status === "Active" ? "default" : "secondary"}
+                        className={`text-[10px] px-2 py-0.5 ${cg.status === "Active" ? "bg-success/15 text-success border-0" : "bg-muted text-muted-foreground border-0"}`}
+                      >
+                        {cg.status}
+                      </Badge>
+                    </div>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -113,14 +116,15 @@ const CareGivers = () => {
                       <CalendarDays className="h-4 w-4" />
                     </Button>
                   </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="h-16 w-16 rounded-full bg-muted border-2 border-border flex items-center justify-center shrink-0">
-                    <User className="h-7 w-7 text-muted-foreground" />
+                  <div className="flex flex-col items-center text-center mb-3">
+                    <div className="h-20 w-20 rounded-full bg-muted border-2 border-border flex items-center justify-center mb-2">
+                      <User className="h-9 w-9 text-muted-foreground" />
+                    </div>
+                    <h3 className="font-semibold text-foreground text-sm">{cg.name}</h3>
                   </div>
-                  <div className="min-w-0 space-y-1.5 text-sm">
+                  <div className="space-y-1.5 text-sm">
                     {cg.address && (
-                      <p className="text-muted-foreground text-xs leading-tight line-clamp-2">{cg.address}</p>
+                      <p className="text-muted-foreground text-xs leading-tight line-clamp-1">{cg.address}</p>
                     )}
                     {cg.phone && (
                       <p className="flex items-center gap-1.5 text-foreground">
@@ -140,7 +144,10 @@ const CareGivers = () => {
                   const visibleTags = isExpanded ? tags : tags.slice(0, 3);
                   const hasMore = tags.length > 3;
                   return (
-                    <div className="mt-3 flex flex-wrap gap-1.5">
+                    <div
+                      className="border-t border-border px-4 py-2.5 flex flex-wrap gap-1.5"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       {visibleTags.map((tag: string) => (
                         <span key={tag} className="text-[10px] font-medium text-muted-foreground bg-muted rounded-md px-2 py-1 truncate max-w-[120px]">
                           {shortenTag(tag)}
@@ -148,7 +155,7 @@ const CareGivers = () => {
                       ))}
                       {hasMore && (
                         <button
-                          onClick={(e) => { e.stopPropagation(); setExpandedTags(prev => ({ ...prev, [cg.id]: !prev[cg.id] })); }}
+                          onClick={() => setExpandedTags(prev => ({ ...prev, [cg.id]: !prev[cg.id] }))}
                           className="text-[10px] font-medium text-primary hover:text-primary/80 px-2 py-1"
                         >
                           {isExpanded ? "Show less" : `+${tags.length - 3} more`}
