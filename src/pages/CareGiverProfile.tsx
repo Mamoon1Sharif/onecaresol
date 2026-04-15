@@ -14,7 +14,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowLeft, Pencil, Save, X, User, MapPin, Phone, Mail,
-  Shield, Car, Calendar, AlertTriangle, Users, Clock,
+  Shield, Car, Calendar, AlertTriangle, Clock, Heart,
+  Briefcase, Hash, KeyRound, UserCog, Stethoscope, Home,
 } from "lucide-react";
 
 function SectionTitle({ title }: { title: string }) {
@@ -247,15 +248,15 @@ const CareGiverProfile = () => {
                       <InfoItem icon={Calendar} label="DOB (Age)" value={cg.dob ? `${new Date(cg.dob).toLocaleDateString("en-GB")} (${age})` : null} />
                       <InfoItem icon={User} label="Ethnicity" value={cg.ethnicity} />
                       <InfoItem icon={Car} label="Is Driver?" value={cg.is_driver ? "Yes" : "No"} />
-                      <InfoItem icon={AlertTriangle} label="Allergies" value={cg.allergies || "None"} />
+                      <InfoItem icon={Stethoscope} label="Allergies" value={cg.allergies || "None"} />
                     </div>
 
                     <SectionTitle title="Work Details" />
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-8 gap-y-1">
-                      <InfoItem icon={Shield} label="Login Code" value={cg.login_code} />
-                      <InfoItem icon={User} label="Permission" value={cg.permission} />
-                      <InfoItem icon={User} label="Role" value={cg.role_title} />
-                      <InfoItem icon={User} label="Sage Num" value={cg.sage_num} />
+                      <InfoItem icon={KeyRound} label="Login Code" value={cg.login_code} />
+                      <InfoItem icon={UserCog} label="Permission" value={cg.permission} />
+                      <InfoItem icon={Briefcase} label="Role" value={cg.role_title} />
+                      <InfoItem icon={Hash} label="Sage Num" value={cg.sage_num} />
                     </div>
 
                     <SectionTitle title="DBS Information" />
@@ -294,15 +295,15 @@ const CareGiverProfile = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-6 flex flex-col">
             {/* Next of Kin */}
-            <Card className="border border-border overflow-hidden">
-              <div className="bg-gradient-to-r from-warning/10 to-transparent px-6 py-3">
-                <h3 className="text-sm font-bold uppercase tracking-widest text-warning flex items-center gap-2">
-                  <Users className="h-4 w-4" /> Emergency Contact
+            <Card className="border border-border overflow-hidden flex-1 flex flex-col">
+              <div className="bg-gradient-to-r from-primary/10 to-transparent px-6 py-3">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+                  <Heart className="h-4 w-4" /> Next of Kin
                 </h3>
               </div>
-              <CardContent className="p-5">
+              <CardContent className="p-5 flex-1 flex flex-col justify-center">
                 {editing ? (
                   <div className="space-y-3">
                     <EditField label="Name" value={form.next_of_kin_name} onChange={set("next_of_kin_name")} />
@@ -310,24 +311,24 @@ const CareGiverProfile = () => {
                     <EditField label="Phone" value={form.next_of_kin_phone} onChange={set("next_of_kin_phone")} type="tel" />
                   </div>
                 ) : (
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-3 py-2">
-                      <div className="h-10 w-10 rounded-full bg-warning/10 flex items-center justify-center shrink-0">
-                        <Users className="h-5 w-5 text-warning" />
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <Heart className="h-5 w-5 text-primary" />
                       </div>
                       <div>
                         <p className="text-sm font-semibold text-foreground">{cg.next_of_kin_name || "—"}</p>
                         <p className="text-xs text-muted-foreground">Next of Kin</p>
                       </div>
                     </div>
-                    <div className="ml-[52px] space-y-2 border-l-2 border-border pl-4">
+                    <div className="ml-[52px] space-y-3 border-l-2 border-border pl-4">
                       <div>
                         <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Phone</p>
-                        <p className="text-sm text-foreground">{cg.next_of_kin_phone || "—"}</p>
+                        <p className="text-sm text-foreground flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 text-muted-foreground" />{cg.next_of_kin_phone || "—"}</p>
                       </div>
                       <div>
                         <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Address</p>
-                        <p className="text-sm text-foreground">{cg.next_of_kin_address || "—"}</p>
+                        <p className="text-sm text-foreground flex items-center gap-1.5"><Home className="h-3.5 w-3.5 text-muted-foreground" />{cg.next_of_kin_address || "—"}</p>
                       </div>
                     </div>
                   </div>
