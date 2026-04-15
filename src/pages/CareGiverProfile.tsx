@@ -16,7 +16,7 @@ import {
   ArrowLeft, Pencil, Save, X, User, MapPin, Phone, Mail,
   Shield, Car, Calendar, AlertTriangle, Clock, Heart,
   Briefcase, Hash, KeyRound, UserCog, Stethoscope, Home,
-  PhoneCall, StickyNote, Link2,
+  PhoneCall, StickyNote, Link2, CalendarDays,
 } from "lucide-react";
 
 function SectionTitle({ title }: { title: string }) {
@@ -148,9 +148,14 @@ const CareGiverProfile = () => {
             <ArrowLeft className="h-4 w-4" /> Back to Care Givers
           </Button>
           {!editing ? (
-            <Button variant="outline" onClick={() => setEditing(true)} className="gap-2">
-              <Pencil className="h-4 w-4" /> Edit Profile
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => navigate(`/caregivers/${id}/schedule`)} className="gap-2">
+                <CalendarDays className="h-4 w-4" /> View Schedule
+              </Button>
+              <Button variant="outline" onClick={() => setEditing(true)} className="gap-2">
+                <Pencil className="h-4 w-4" /> Edit Profile
+              </Button>
+            </div>
           ) : (
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setEditing(false)}><X className="h-4 w-4 mr-1" /> Cancel</Button>
