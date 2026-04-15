@@ -4,17 +4,25 @@ import { AppLayout } from "@/components/AppLayout";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Phone, User, Clock, CalendarDays } from "lucide-react";
+import { Search, Plus, Phone, User, Clock, CalendarDays, Filter } from "lucide-react";
 import { useCareGivers } from "@/hooks/use-care-data";
+
+const STATUS_FILTERS = ["All", "Active", "Non-Active", "Onboarding"] as const;
+type StatusFilter = (typeof STATUS_FILTERS)[number];
 
 const CareGivers = () => {
   const { data: careGivers = [], isLoading } = useCareGivers();
   const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("All");
   const navigate = useNavigate();
 
-  const filtered = careGivers.filter((cg) =>
-    cg.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filtered = careGivers.filter((cg) => {
+    const matchesSearch = cg.name.toLowerCase().includes(searchQuery.toLowerCase());
+    if (!matchesSearch) return false;
+    if (statusFilter === "All") return true;
+    if (statusFilter === "Non-Active") return cg.status === "Non-Active" || cg.status === "Inactive";
+    return cg.status === statusFilter;
+  });
 
   return (
     <AppLayout>
