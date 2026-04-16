@@ -47,12 +47,6 @@ function diffMinutes(start: string | null, end: string | null) {
 export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
   const { data: notes = [] } = useShiftNotes(visit?.id);
   const { data: tasks = [] } = useShiftTasks(visit?.id);
-  const addNote = useAddShiftNote();
-  const addTask = useAddShiftTask();
-  const toggleTask = useToggleShiftTask();
-
-  const [newNote, setNewNote] = useState("");
-  const [newTaskTitle, setNewTaskTitle] = useState("");
 
   if (!visit) return null;
 
@@ -60,22 +54,6 @@ export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
   const scheduledEnd = fmt(visit.start_hour + visit.duration);
   const totalWorked = diffMinutes(visit.check_in_time, visit.check_out_time);
   const completedCount = tasks.filter((t) => t.is_completed).length;
-
-  const handleAddNote = async () => {
-    if (!newNote.trim()) return;
-    await addNote.mutateAsync({
-      daily_visit_id: visit.id,
-      note: newNote.trim(),
-      author: (visit.care_givers as any)?.name ?? "Unknown",
-    });
-    setNewNote("");
-  };
-
-  const handleAddTask = async () => {
-    if (!newTaskTitle.trim()) return;
-    await addTask.mutateAsync({ daily_visit_id: visit.id, title: newTaskTitle.trim() });
-    setNewTaskTitle("");
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
