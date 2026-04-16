@@ -75,14 +75,9 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
           </div>
         </TableCell>
         <TableCell className="text-sm">
-          {lateMins > 0 ? (
-            <div className="flex items-center gap-1.5">
-              <span className="text-destructive font-semibold">{fmtTime(v.check_in_time)}</span>
-              <span className="text-[10px] text-destructive font-semibold">({lateMins}m late)</span>
-            </div>
-          ) : (
-            <span className="text-foreground">{fmtTime(v.check_in_time)}</span>
-          )}
+          <span className={lateMins > 0 ? "text-destructive font-semibold" : "text-foreground"}>
+            {fmtTime(v.check_in_time)}
+          </span>
         </TableCell>
         <TableCell className="text-sm text-foreground">{fmtTime(v.check_out_time)}</TableCell>
         <TableCell>
