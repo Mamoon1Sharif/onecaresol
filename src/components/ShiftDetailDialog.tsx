@@ -1,15 +1,10 @@
-import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
-import { useShiftNotes, useAddShiftNote, useShiftTasks, useAddShiftTask, useToggleShiftTask } from "@/hooks/use-care-data";
+import { useShiftNotes, useShiftTasks } from "@/hooks/use-care-data";
 import {
-  Clock, MessageSquare, ListChecks, Plus, User, CheckCircle2,
+  Clock, MessageSquare, ListChecks, User, CheckCircle2, XCircle,
 } from "lucide-react";
 
 interface CompletedVisit {
@@ -52,12 +47,6 @@ function diffMinutes(start: string | null, end: string | null) {
 export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
   const { data: notes = [] } = useShiftNotes(visit?.id);
   const { data: tasks = [] } = useShiftTasks(visit?.id);
-  const addNote = useAddShiftNote();
-  const addTask = useAddShiftTask();
-  const toggleTask = useToggleShiftTask();
-
-  const [newNote, setNewNote] = useState("");
-  const [newTaskTitle, setNewTaskTitle] = useState("");
 
   if (!visit) return null;
 
@@ -65,22 +54,6 @@ export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
   const scheduledEnd = fmt(visit.start_hour + visit.duration);
   const totalWorked = diffMinutes(visit.check_in_time, visit.check_out_time);
   const completedCount = tasks.filter((t) => t.is_completed).length;
-
-  const handleAddNote = async () => {
-    if (!newNote.trim()) return;
-    await addNote.mutateAsync({
-      daily_visit_id: visit.id,
-      note: newNote.trim(),
-      author: (visit.care_givers as any)?.name ?? "Unknown",
-    });
-    setNewNote("");
-  };
-
-  const handleAddTask = async () => {
-    if (!newTaskTitle.trim()) return;
-    await addTask.mutateAsync({ daily_visit_id: visit.id, title: newTaskTitle.trim() });
-    setNewTaskTitle("");
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -162,20 +135,17 @@ export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
 
             <div className="space-y-2 py-2">
               {tasks.length === 0 && (
-                <p className="text-xs text-muted-foreground text-center py-3">No tasks added yet</p>
+                <p className="text-xs text-muted-foreground text-center py-3">No tasks recorded</p>
               )}
               {tasks.map((task) => (
                 <div key={task.id} className="flex items-center gap-3 py-1.5">
-                  <Checkbox
-                    checked={task.is_completed}
-                    onCheckedChange={(v) => toggleTask.mutate({
-                      id: task.id,
-                      is_completed: !!v,
-                      completed_by: (visit.care_givers as any)?.name ?? "",
-                    })}
-                  />
+                  {task.is_completed ? (
+                    <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
+                  ) : (
+                    <XCircle className="h-4 w-4 text-destructive shrink-0" />
+                  )}
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm ${task.is_completed ? "line-through text-muted-foreground" : "text-foreground"}`}>
+                    <p className="text-sm text-foreground">
                       {task.title}
                     </p>
                     {task.is_completed && task.completed_by && (
@@ -186,19 +156,6 @@ export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
                   </div>
                 </div>
               ))}
-
-              <div className="flex gap-2 mt-2">
-                <Input
-                  placeholder="Add a task..."
-                  value={newTaskTitle}
-                  onChange={(e) => setNewTaskTitle(e.target.value)}
-                  className="h-8 text-sm"
-                  onKeyDown={(e) => e.key === "Enter" && handleAddTask()}
-                />
-                <Button size="sm" variant="outline" onClick={handleAddTask} disabled={addTask.isPending} className="h-8 px-2">
-                  <Plus className="h-3.5 w-3.5" />
-                </Button>
-              </div>
             </div>
 
             {/* Notes */}
@@ -211,7 +168,7 @@ export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
 
             <div className="space-y-3 py-2">
               {notes.length === 0 && (
-                <p className="text-xs text-muted-foreground text-center py-3">No notes added yet</p>
+                <p className="text-xs text-muted-foreground text-center py-3">No notes recorded</p>
               )}
               {notes.map((n) => (
                 <div key={n.id} className="bg-muted/50 rounded-lg p-3">
@@ -222,18 +179,6 @@ export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
                   <p className="text-sm text-foreground">{n.note}</p>
                 </div>
               ))}
-
-              <div className="space-y-2 mt-2">
-                <Textarea
-                  placeholder="Write a shift note..."
-                  value={newNote}
-                  onChange={(e) => setNewNote(e.target.value)}
-                  className="min-h-[60px] text-sm"
-                />
-                <Button size="sm" onClick={handleAddNote} disabled={addNote.isPending || !newNote.trim()} className="gap-1.5">
-                  <Plus className="h-3.5 w-3.5" /> Add Note
-                </Button>
-              </div>
             </div>
           </div>
         </ScrollArea>
