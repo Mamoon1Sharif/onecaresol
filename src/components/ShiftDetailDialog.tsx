@@ -9,7 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { useShiftNotes, useAddShiftNote, useShiftTasks, useAddShiftTask, useToggleShiftTask } from "@/hooks/use-care-data";
 import {
-  Clock, MessageSquare, ListChecks, Plus, User, CheckCircle2,
+  Clock, MessageSquare, ListChecks, User, CheckCircle2, XCircle,
 } from "lucide-react";
 
 interface CompletedVisit {
