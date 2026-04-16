@@ -61,7 +61,7 @@ const Dashboard = () => {
   const [carouselPage, setCarouselPage] = useState(0);
   const CARDS_PER_PAGE = 4;
   const infographicCards = [
-    { label: "COMPLETE CALLS", value: String(completedVisits.length || 0), sub: `${stats?.visitsToday ? ((completedVisits.length / stats.visitsToday) * 100).toFixed(1) : 0}% of ${stats?.visitsToday ?? 0} shifts`, icon: CheckCircle2, bg: "bg-green-500", iconBg: "bg-green-600" },
+    { label: "COMPLETED CALLS", value: String(completedVisits.length || 0), sub: `${stats?.visitsToday ? ((completedVisits.length / stats.visitsToday) * 100).toFixed(1) : 0}% of ${stats?.visitsToday ?? 0} shifts`, icon: CheckCircle2, bg: "bg-green-500", iconBg: "bg-green-600" },
     { label: "LATE CALLS", value: "2", sub: "1.57% 30 minutes late", icon: Timer, bg: "bg-amber-600", iconBg: "bg-amber-700" },
     { label: "MISSED CALLS", value: "2", sub: "1.57% Not clocked into", icon: XCircle, bg: "bg-red-500", iconBg: "bg-red-600" },
     { label: "CALLS WITH MISSED MEDS", value: "5", sub: "13 Missed Meds", icon: Pill, bg: "bg-sky-500", iconBg: "bg-sky-600" },
@@ -104,9 +104,9 @@ const Dashboard = () => {
                   <p className="text-xl font-extrabold text-white leading-none">{card.value}</p>
                 </div>
                 <div className="flex-1 px-3 py-3 text-white min-w-0 flex flex-col justify-center">
-                  <p className="text-[10px] font-bold tracking-wider uppercase opacity-90 truncate">{card.label}</p>
+                  <p className="text-xs font-bold tracking-wider uppercase truncate">{card.label}</p>
                   <div className="border-t border-white/30 mt-1.5 pt-1.5">
-                    <p className="text-[10px] opacity-80 truncate">{card.sub}</p>
+                    <p className="text-xs font-medium opacity-90 truncate">{card.sub}</p>
                   </div>
                 </div>
               </div>
