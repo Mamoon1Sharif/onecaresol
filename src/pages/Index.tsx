@@ -99,12 +99,12 @@ const Dashboard = () => {
                 key={card.label}
                 className={`${card.bg} rounded-lg flex overflow-hidden shadow-lg hover:shadow-xl transition-shadow cursor-pointer`}
               >
-                <div className={`${card.iconBg} w-14 flex items-center justify-center`}>
+                <div className={`${card.iconBg} w-16 flex flex-col items-center justify-center gap-1 py-3`}>
                   <card.icon className="h-7 w-7 text-white/90" />
+                  <p className="text-xl font-extrabold text-white leading-none">{card.value}</p>
                 </div>
-                <div className="flex-1 px-3 py-3 text-white min-w-0">
+                <div className="flex-1 px-3 py-3 text-white min-w-0 flex flex-col justify-center">
                   <p className="text-[10px] font-bold tracking-wider uppercase opacity-90 truncate">{card.label}</p>
-                  <p className="text-2xl font-extrabold leading-tight">{card.value}</p>
                   <div className="border-t border-white/30 mt-1.5 pt-1.5">
                     <p className="text-[10px] opacity-80 truncate">{card.sub}</p>
                   </div>
