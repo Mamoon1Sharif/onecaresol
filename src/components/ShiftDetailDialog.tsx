@@ -195,7 +195,7 @@ export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
 
             <div className="space-y-3 py-2">
               {notes.length === 0 && (
-                <p className="text-xs text-muted-foreground text-center py-3">No notes added yet</p>
+                <p className="text-xs text-muted-foreground text-center py-3">No notes recorded</p>
               )}
               {notes.map((n) => (
                 <div key={n.id} className="bg-muted/50 rounded-lg p-3">
@@ -206,18 +206,6 @@ export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
                   <p className="text-sm text-foreground">{n.note}</p>
                 </div>
               ))}
-
-              <div className="space-y-2 mt-2">
-                <Textarea
-                  placeholder="Write a shift note..."
-                  value={newNote}
-                  onChange={(e) => setNewNote(e.target.value)}
-                  className="min-h-[60px] text-sm"
-                />
-                <Button size="sm" onClick={handleAddNote} disabled={addNote.isPending || !newNote.trim()} className="gap-1.5">
-                  <Plus className="h-3.5 w-3.5" /> Add Note
-                </Button>
-              </div>
             </div>
           </div>
         </ScrollArea>
