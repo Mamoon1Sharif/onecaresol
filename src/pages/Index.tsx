@@ -35,6 +35,115 @@ function diffMinutes(start: string | null, end: string | null) {
   return `${hrs}h ${String(mins).padStart(2, "0")}m`;
 }
 
+function getLateMins(visit: any): number {
+  if (!visit.check_in_time) return 0;
+  const scheduled = new Date(visit.visit_date + "T" + String(visit.start_hour).padStart(2, "0") + ":00:00");
+  const actual = new Date(visit.check_in_time);
+  const diff = Math.floor((actual.getTime() - scheduled.getTime()) / 60000);
+  return diff > 5 ? diff : 0; // >5 min counts as late
+}
+
+function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
+  const [showNotes, setShowNotes] = useState(false);
+  const [showTasks, setShowTasks] = useState(false);
+  const { data: notes = [] } = useShiftNotes(v.id);
+  const { data: tasks = [] } = useShiftTasks(v.id);
+  const lateMins = getLateMins(v);
+  const completedTasks = tasks.filter((t: any) => t.is_completed).length;
+
+  return (
+    <>
+      <TableRow className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={onClick}>
+        <TableCell className="font-medium text-foreground">
+          {(v.care_givers as any)?.name ?? "—"}
+        </TableCell>
+        <TableCell className="text-sm text-foreground">
+          <div className="flex items-center gap-1.5">
+            {(v.care_receivers as any)?.name ?? "—"}
+            {(v.care_receivers as any)?.dnacpr && (
+              <Badge variant="destructive" className="text-[9px] px-1 py-0">DNACPR</Badge>
+            )}
+          </div>
+        </TableCell>
+        <TableCell className="text-sm text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            {String(v.start_hour).padStart(2, "0")}:00 – {String(v.start_hour + v.duration).padStart(2, "0")}:00
+          </div>
+        </TableCell>
+        <TableCell className="text-sm">
+          <div className="flex items-center gap-1.5">
+            <span className="text-foreground">{fmtTime(v.check_in_time)}</span>
+            {lateMins > 0 && (
+              <Badge className="bg-warning/15 text-warning border-0 text-[10px] px-1.5">
+                {lateMins}m late
+              </Badge>
+            )}
+          </div>
+        </TableCell>
+        <TableCell className="text-sm text-foreground">{fmtTime(v.check_out_time)}</TableCell>
+        <TableCell>
+          <Badge className="bg-success/15 text-success border-0 text-xs">
+            {diffMinutes(v.check_in_time, v.check_out_time)}
+          </Badge>
+        </TableCell>
+        <TableCell>
+          <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setShowNotes(!showNotes)}
+              className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${showNotes ? "bg-primary/10 text-primary" : "hover:bg-muted text-muted-foreground"}`}
+            >
+              <StickyNote className="h-3 w-3" />
+              {notes.length}
+            </button>
+            <button
+              onClick={() => setShowTasks(!showTasks)}
+              className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${showTasks ? "bg-primary/10 text-primary" : "hover:bg-muted text-muted-foreground"}`}
+            >
+              <ClipboardCheck className="h-3 w-3" />
+              {completedTasks}/{tasks.length}
+            </button>
+          </div>
+        </TableCell>
+      </TableRow>
+      {showNotes && notes.length > 0 && (
+        <TableRow className="bg-muted/20">
+          <TableCell colSpan={7} className="py-2 px-6">
+            <div className="space-y-1.5">
+              <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><StickyNote className="h-3 w-3" /> Notes</p>
+              {notes.map((n: any) => (
+                <div key={n.id} className="text-sm text-foreground bg-background rounded px-3 py-1.5 border border-border">
+                  <span className="font-medium text-primary text-xs">{n.author}:</span> {n.note}
+                </div>
+              ))}
+            </div>
+          </TableCell>
+        </TableRow>
+      )}
+      {showTasks && tasks.length > 0 && (
+        <TableRow className="bg-muted/20">
+          <TableCell colSpan={7} className="py-2 px-6">
+            <div className="space-y-1.5">
+              <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><ClipboardCheck className="h-3 w-3" /> Tasks</p>
+              {tasks.map((t: any) => (
+                <div key={t.id} className="flex items-center gap-2 text-sm bg-background rounded px-3 py-1.5 border border-border">
+                  {t.is_completed ? (
+                    <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0" />
+                  ) : (
+                    <XCircle className="h-3.5 w-3.5 text-destructive shrink-0" />
+                  )}
+                  <span className={t.is_completed ? "text-foreground" : "text-muted-foreground"}>{t.title}</span>
+                  {t.completed_by && <span className="text-xs text-muted-foreground ml-auto">by {t.completed_by}</span>}
+                </div>
+              ))}
+            </div>
+          </TableCell>
+        </TableRow>
+      )}
+    </>
+  );
+}
+
 const Dashboard = () => {
   const { data: stats } = useDashboardStats();
   const { data: dbVisits, refetch } = useDashboardVisits();
