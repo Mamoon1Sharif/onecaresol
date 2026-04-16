@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { useCareGiver, useUpdateCareGiver } from "@/hooks/use-care-data";
 import { Button } from "@/components/ui/button";
+import { getCareGiverAvatar } from "@/lib/avatars";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -168,8 +169,8 @@ const CareGiverProfile = () => {
         <Card className="border border-border overflow-hidden">
           <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent px-8 py-6">
             <div className="flex items-start gap-6">
-              <div className="h-20 w-20 rounded-2xl bg-primary/15 border-2 border-primary/20 flex items-center justify-center shrink-0">
-                <User className="h-10 w-10 text-primary" />
+              <div className="h-24 w-24 rounded-2xl border-2 border-primary/20 overflow-hidden shrink-0">
+                <img src={getCareGiverAvatar(cg.id)} alt={cg.name} className="h-full w-full object-cover" loading="lazy" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-3 flex-wrap">
