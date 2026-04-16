@@ -118,8 +118,8 @@ const CareGivers = () => {
                     </Button>
                   </div>
                   <div className="flex flex-col items-center text-center mb-4">
-                    <div className="h-20 w-20 rounded-full bg-muted border-2 border-border flex items-center justify-center mb-2">
-                      <User className="h-9 w-9 text-muted-foreground" />
+                    <div className="h-20 w-20 rounded-full border-2 border-border overflow-hidden mb-2">
+                      <img src={getCareGiverAvatar(cg.id)} alt={cg.name} className="h-full w-full object-cover" loading="lazy" />
                     </div>
                     <h3 className="font-semibold text-foreground text-base">{cg.name}</h3>
                     <div className="mt-2 space-y-1.5 w-full">
