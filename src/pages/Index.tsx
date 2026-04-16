@@ -61,7 +61,7 @@ const Dashboard = () => {
   const [carouselPage, setCarouselPage] = useState(0);
   const CARDS_PER_PAGE = 4;
   const infographicCards = [
-    { label: "COMPLETE CALLS", value: String(completedVisits.length || 0), sub: `${stats?.visitsToday ? ((completedVisits.length / stats.visitsToday) * 100).toFixed(1) : 0}% of ${stats?.visitsToday ?? 0} shifts`, icon: CheckCircle2, bg: "bg-green-500", iconBg: "bg-green-600" },
+    { label: "COMPLETED CALLS", value: String(completedVisits.length || 0), sub: `${stats?.visitsToday ? ((completedVisits.length / stats.visitsToday) * 100).toFixed(1) : 0}% of ${stats?.visitsToday ?? 0} shifts`, icon: CheckCircle2, bg: "bg-green-500", iconBg: "bg-green-600" },
     { label: "LATE CALLS", value: "2", sub: "1.57% 30 minutes late", icon: Timer, bg: "bg-amber-600", iconBg: "bg-amber-700" },
     { label: "MISSED CALLS", value: "2", sub: "1.57% Not clocked into", icon: XCircle, bg: "bg-red-500", iconBg: "bg-red-600" },
     { label: "CALLS WITH MISSED MEDS", value: "5", sub: "13 Missed Meds", icon: Pill, bg: "bg-sky-500", iconBg: "bg-sky-600" },
