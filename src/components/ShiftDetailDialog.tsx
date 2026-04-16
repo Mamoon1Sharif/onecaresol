@@ -162,20 +162,17 @@ export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
 
             <div className="space-y-2 py-2">
               {tasks.length === 0 && (
-                <p className="text-xs text-muted-foreground text-center py-3">No tasks added yet</p>
+                <p className="text-xs text-muted-foreground text-center py-3">No tasks recorded</p>
               )}
               {tasks.map((task) => (
                 <div key={task.id} className="flex items-center gap-3 py-1.5">
-                  <Checkbox
-                    checked={task.is_completed}
-                    onCheckedChange={(v) => toggleTask.mutate({
-                      id: task.id,
-                      is_completed: !!v,
-                      completed_by: (visit.care_givers as any)?.name ?? "",
-                    })}
-                  />
+                  {task.is_completed ? (
+                    <CheckCircle2 className="h-4 w-4 text-success shrink-0" />
+                  ) : (
+                    <XCircle className="h-4 w-4 text-destructive shrink-0" />
+                  )}
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm ${task.is_completed ? "line-through text-muted-foreground" : "text-foreground"}`}>
+                    <p className="text-sm text-foreground">
                       {task.title}
                     </p>
                     {task.is_completed && task.completed_by && (
@@ -186,19 +183,6 @@ export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
                   </div>
                 </div>
               ))}
-
-              <div className="flex gap-2 mt-2">
-                <Input
-                  placeholder="Add a task..."
-                  value={newTaskTitle}
-                  onChange={(e) => setNewTaskTitle(e.target.value)}
-                  className="h-8 text-sm"
-                  onKeyDown={(e) => e.key === "Enter" && handleAddTask()}
-                />
-                <Button size="sm" variant="outline" onClick={handleAddTask} disabled={addTask.isPending} className="h-8 px-2">
-                  <Plus className="h-3.5 w-3.5" />
-                </Button>
-              </div>
             </div>
 
             {/* Notes */}
