@@ -168,7 +168,6 @@ const CareGiverProfile = () => {
         <Card className="border border-border overflow-hidden">
           <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent px-8 py-6">
             <div className="flex items-start gap-6">
-              {/* Avatar */}
               <div className="h-20 w-20 rounded-2xl bg-primary/15 border-2 border-primary/20 flex items-center justify-center shrink-0">
                 <User className="h-10 w-10 text-primary" />
               </div>
@@ -197,183 +196,108 @@ const CareGiverProfile = () => {
           </div>
         </Card>
 
-        {/* Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Details (2-col span) */}
-          <div className="lg:col-span-2 space-y-0">
-            <Card className="border border-border">
-              <CardContent className="p-6">
-                {editing ? (
-                  <div className="space-y-5">
-                    <h2 className="text-sm font-bold uppercase tracking-widest text-primary">Personal Details</h2>
-                    <Separator />
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <EditField label="Full Name" value={form.name} onChange={set("name")} />
-                      <EditField label="Email" value={form.email} onChange={set("email")} type="email" />
-                      <EditField label="Phone" value={form.phone} onChange={set("phone")} type="tel" />
-                      <EditField label="Address" value={form.address} onChange={set("address")} />
-                      <EditField label="Date of Birth" value={form.dob} onChange={set("dob")} type="date" />
-                      <EditField label="Ethnicity" value={form.ethnicity} onChange={set("ethnicity")} />
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Switch checked={form.is_driver} onCheckedChange={(v) => setForm({ ...form, is_driver: v })} />
-                      <Label className="text-sm">Is Driver</Label>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Allergies</Label>
-                      <Textarea value={form.allergies} onChange={(e) => setForm({ ...form, allergies: e.target.value })} className="min-h-[60px] text-sm" />
-                    </div>
+        {/* Main Details — full width */}
+        <Card className="border border-border">
+          <CardContent className="p-6">
+            {editing ? (
+              <div className="space-y-5">
+                <h2 className="text-sm font-bold uppercase tracking-widest text-primary">Personal Details</h2>
+                <Separator />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <EditField label="Full Name" value={form.name} onChange={set("name")} />
+                  <EditField label="Email" value={form.email} onChange={set("email")} type="email" />
+                  <EditField label="Phone" value={form.phone} onChange={set("phone")} type="tel" />
+                  <EditField label="Address" value={form.address} onChange={set("address")} />
+                  <EditField label="Date of Birth" value={form.dob} onChange={set("dob")} type="date" />
+                  <EditField label="Ethnicity" value={form.ethnicity} onChange={set("ethnicity")} />
+                </div>
+                <div className="flex items-center gap-3">
+                  <Switch checked={form.is_driver} onCheckedChange={(v) => setForm({ ...form, is_driver: v })} />
+                  <Label className="text-sm">Is Driver</Label>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Allergies</Label>
+                  <Textarea value={form.allergies} onChange={(e) => setForm({ ...form, allergies: e.target.value })} className="min-h-[60px] text-sm" />
+                </div>
 
-                    <h2 className="text-sm font-bold uppercase tracking-widest text-primary pt-4">Work Details</h2>
-                    <Separator />
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <EditField label="Login Code" value={form.login_code} onChange={set("login_code")} />
-                      <EditField label="Permission" value={form.permission} onChange={set("permission")} />
-                      <EditField label="Role Title" value={form.role_title} onChange={set("role_title")} />
-                      <EditField label="Sage Number" value={form.sage_num} onChange={set("sage_num")} />
-                    </div>
+                <h2 className="text-sm font-bold uppercase tracking-widest text-primary pt-4">Work Details</h2>
+                <Separator />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <EditField label="Login Code" value={form.login_code} onChange={set("login_code")} />
+                  <EditField label="Permission" value={form.permission} onChange={set("permission")} />
+                  <EditField label="Role Title" value={form.role_title} onChange={set("role_title")} />
+                  <EditField label="Sage Number" value={form.sage_num} onChange={set("sage_num")} />
+                </div>
 
-                    <h2 className="text-sm font-bold uppercase tracking-widest text-primary pt-4">DBS Information</h2>
-                    <Separator />
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <EditField label="DBS Reference" value={form.dbs_ref} onChange={set("dbs_ref")} />
-                      <EditField label="DBS Type" value={form.dbs_type} onChange={set("dbs_type")} />
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Switch checked={form.dbs_update_service} onCheckedChange={(v) => setForm({ ...form, dbs_update_service: v })} />
-                      <Label className="text-sm">Registered to DBS Update Service</Label>
+                <h2 className="text-sm font-bold uppercase tracking-widest text-primary pt-4">DBS Information</h2>
+                <Separator />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <EditField label="DBS Reference" value={form.dbs_ref} onChange={set("dbs_ref")} />
+                  <EditField label="DBS Type" value={form.dbs_type} onChange={set("dbs_type")} />
+                </div>
+                <div className="flex items-center gap-3">
+                  <Switch checked={form.dbs_update_service} onCheckedChange={(v) => setForm({ ...form, dbs_update_service: v })} />
+                  <Label className="text-sm">Registered to DBS Update Service</Label>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-1">
+                  <InfoItem icon={MapPin} label="Address" value={cg.address} />
+                  <InfoItem icon={Phone} label="Phone" value={cg.phone} />
+                  <InfoItem icon={Mail} label="Email" value={cg.email} />
+                </div>
+
+                <SectionTitle title="Personal Information" />
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-1">
+                  <InfoItem icon={Calendar} label="DOB (Age)" value={cg.dob ? `${new Date(cg.dob).toLocaleDateString("en-GB")} (${age})` : null} />
+                  <InfoItem icon={User} label="Ethnicity" value={cg.ethnicity} />
+                  <InfoItem icon={Car} label="Is Driver?" value={cg.is_driver ? "Yes" : "No"} />
+                  <InfoItem icon={Stethoscope} label="Allergies" value={cg.allergies || "None"} />
+                </div>
+
+                <SectionTitle title="Work Details" />
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-1">
+                  <InfoItem icon={KeyRound} label="Login Code" value={cg.login_code} />
+                  <InfoItem icon={UserCog} label="Permission" value={cg.permission} />
+                  <InfoItem icon={Briefcase} label="Role" value={cg.role_title} />
+                  <InfoItem icon={Hash} label="Sage Num" value={cg.sage_num} />
+                </div>
+
+                <SectionTitle title="DBS Information" />
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-1">
+                  <InfoItem icon={Shield} label="DBS Ref" value={cg.dbs_ref} />
+                  <InfoItem icon={Shield} label="DBS Type" value={cg.dbs_type} />
+                  <div className="flex items-center gap-3 py-2">
+                    <Shield className="h-4 w-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">DBS Update Service</p>
+                      <Badge variant={cg.dbs_update_service ? "default" : "secondary"} className="text-xs mt-0.5">
+                        {cg.dbs_update_service ? "Registered" : "Not Registered"}
+                      </Badge>
                     </div>
                   </div>
-                ) : (
+                </div>
+
+                {Array.isArray(refs) && refs.length > 0 && (
                   <>
-                    {/* Contact Row */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-1">
-                      <InfoItem icon={MapPin} label="Address" value={cg.address} />
-                      <InfoItem icon={Phone} label="Phone" value={cg.phone} />
-                      <InfoItem icon={Mail} label="Email" value={cg.email} />
-                    </div>
-
-                    <SectionTitle title="Personal Information" />
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-8 gap-y-1">
-                      <InfoItem icon={Calendar} label="DOB (Age)" value={cg.dob ? `${new Date(cg.dob).toLocaleDateString("en-GB")} (${age})` : null} />
-                      <InfoItem icon={User} label="Ethnicity" value={cg.ethnicity} />
-                      <InfoItem icon={Car} label="Is Driver?" value={cg.is_driver ? "Yes" : "No"} />
-                      <InfoItem icon={Stethoscope} label="Allergies" value={cg.allergies || "None"} />
-                    </div>
-
-                    <SectionTitle title="Work Details" />
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-8 gap-y-1">
-                      <InfoItem icon={KeyRound} label="Login Code" value={cg.login_code} />
-                      <InfoItem icon={UserCog} label="Permission" value={cg.permission} />
-                      <InfoItem icon={Briefcase} label="Role" value={cg.role_title} />
-                      <InfoItem icon={Hash} label="Sage Num" value={cg.sage_num} />
-                    </div>
-
-                    <SectionTitle title="DBS Information" />
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-8 gap-y-1">
-                      <InfoItem icon={Shield} label="DBS Ref" value={cg.dbs_ref} />
-                      <InfoItem icon={Shield} label="DBS Type" value={cg.dbs_type} />
-                      <div className="flex items-center gap-3 py-2">
-                        <Shield className="h-4 w-4 text-muted-foreground" />
-                        <div>
-                          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">DBS Update Service</p>
-                          <Badge variant={cg.dbs_update_service ? "default" : "secondary"} className="text-xs mt-0.5">
-                            {cg.dbs_update_service ? "Registered" : "Not Registered"}
-                          </Badge>
+                    <SectionTitle title="References" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                      {refs.map((r: any, i: number) => (
+                        <div key={i} className="bg-muted/50 rounded-lg p-3">
+                          <p className="text-sm font-medium text-foreground">{r.name}</p>
+                          <p className="text-xs text-muted-foreground">{r.type}</p>
                         </div>
-                      </div>
+                      ))}
                     </div>
-
-                    {/* References */}
-                    {Array.isArray(refs) && refs.length > 0 && (
-                      <>
-                        <SectionTitle title="References" />
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                          {refs.map((r: any, i: number) => (
-                            <div key={i} className="bg-muted/50 rounded-lg p-3">
-                              <p className="text-sm font-medium text-foreground">{r.name}</p>
-                              <p className="text-xs text-muted-foreground">{r.type}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </>
-                    )}
                   </>
                 )}
-              </CardContent>
-            </Card>
-          </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
 
-          {/* Sidebar */}
-          <div className="space-y-6 flex flex-col">
-            {/* Next of Kin */}
-            <Card className="border border-border overflow-hidden flex-1 flex flex-col">
-              <div className="bg-gradient-to-r from-primary/10 to-transparent px-6 py-3">
-                <h3 className="text-sm font-bold uppercase tracking-widest text-primary flex items-center gap-2">
-                  <Heart className="h-4 w-4" /> Next of Kin
-                </h3>
-              </div>
-              <CardContent className="p-5 flex-1 flex flex-col justify-center">
-                {editing ? (
-                  <div className="space-y-3">
-                    <EditField label="Name" value={form.next_of_kin_name} onChange={set("next_of_kin_name")} />
-                    <EditField label="Relationship" value={form.next_of_kin_relationship} onChange={set("next_of_kin_relationship")} />
-                    <EditField label="Phone" value={form.next_of_kin_phone} onChange={set("next_of_kin_phone")} type="tel" />
-                    <EditField label="Secondary Phone" value={form.next_of_kin_secondary_phone} onChange={set("next_of_kin_secondary_phone")} type="tel" />
-                    <EditField label="Email" value={form.next_of_kin_email} onChange={set("next_of_kin_email")} type="email" />
-                    <EditField label="Address" value={form.next_of_kin_address} onChange={set("next_of_kin_address")} />
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Notes</Label>
-                      <Textarea value={form.next_of_kin_notes} onChange={(e) => setForm({ ...form, next_of_kin_notes: e.target.value })} className="min-h-[60px] text-sm" placeholder="Any additional notes..." />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                        <Heart className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-foreground">{cg.next_of_kin_name || "—"}</p>
-                        <p className="text-xs text-muted-foreground">{(cg as any).next_of_kin_relationship || "Next of Kin"}</p>
-                      </div>
-                    </div>
-                    <div className="ml-[52px] space-y-3 border-l-2 border-border pl-4">
-                      <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Phone</p>
-                        <p className="text-sm text-foreground flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 text-muted-foreground" />{cg.next_of_kin_phone || "—"}</p>
-                      </div>
-                      {(cg as any).next_of_kin_secondary_phone && (
-                        <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Secondary Phone</p>
-                          <p className="text-sm text-foreground flex items-center gap-1.5"><PhoneCall className="h-3.5 w-3.5 text-muted-foreground" />{(cg as any).next_of_kin_secondary_phone}</p>
-                        </div>
-                      )}
-                      {(cg as any).next_of_kin_email && (
-                        <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Email</p>
-                          <p className="text-sm text-foreground flex items-center gap-1.5"><Mail className="h-3.5 w-3.5 text-muted-foreground" />{(cg as any).next_of_kin_email}</p>
-                        </div>
-                      )}
-                      <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Address</p>
-                        <p className="text-sm text-foreground flex items-center gap-1.5"><Home className="h-3.5 w-3.5 text-muted-foreground" />{cg.next_of_kin_address || "—"}</p>
-                      </div>
-                      {(cg as any).next_of_kin_notes && (
-                        <div>
-                          <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Notes</p>
-                          <p className="text-sm text-foreground flex items-center gap-1.5"><StickyNote className="h-3.5 w-3.5 text-muted-foreground" />{(cg as any).next_of_kin_notes}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-
-        {/* Hours Overview — full width at bottom */}
+        {/* Hours Overview */}
         <Card className="border border-border overflow-hidden">
           <div className="bg-gradient-to-r from-primary/10 to-transparent px-6 py-3">
             <h3 className="text-sm font-bold uppercase tracking-widest text-primary flex items-center gap-2">
@@ -391,6 +315,45 @@ const CareGiverProfile = () => {
                 <HoursRow hours={cg.templated_hours} />
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Next of Kin — full width at bottom */}
+        <Card className="border border-border overflow-hidden">
+          <div className="bg-gradient-to-r from-primary/10 to-transparent px-6 py-3">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-primary flex items-center gap-2">
+              <Heart className="h-4 w-4" /> Next of Kin
+            </h3>
+          </div>
+          <CardContent className="p-5">
+            {editing ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <EditField label="Name" value={form.next_of_kin_name} onChange={set("next_of_kin_name")} />
+                <EditField label="Relationship" value={form.next_of_kin_relationship} onChange={set("next_of_kin_relationship")} />
+                <EditField label="Phone" value={form.next_of_kin_phone} onChange={set("next_of_kin_phone")} type="tel" />
+                <EditField label="Secondary Phone" value={form.next_of_kin_secondary_phone} onChange={set("next_of_kin_secondary_phone")} type="tel" />
+                <EditField label="Email" value={form.next_of_kin_email} onChange={set("next_of_kin_email")} type="email" />
+                <EditField label="Address" value={form.next_of_kin_address} onChange={set("next_of_kin_address")} />
+                <div className="sm:col-span-2 lg:col-span-3 space-y-1.5">
+                  <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Notes</Label>
+                  <Textarea value={form.next_of_kin_notes} onChange={(e) => setForm({ ...form, next_of_kin_notes: e.target.value })} className="min-h-[60px] text-sm" placeholder="Any additional notes..." />
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-1">
+                <InfoItem icon={User} label="Name" value={cg.next_of_kin_name} />
+                <InfoItem icon={Heart} label="Relationship" value={(cg as any).next_of_kin_relationship} />
+                <InfoItem icon={Phone} label="Phone" value={cg.next_of_kin_phone} />
+                <InfoItem icon={PhoneCall} label="Secondary Phone" value={(cg as any).next_of_kin_secondary_phone} />
+                <InfoItem icon={Mail} label="Email" value={(cg as any).next_of_kin_email} />
+                <InfoItem icon={Home} label="Address" value={cg.next_of_kin_address} />
+                {(cg as any).next_of_kin_notes && (
+                  <div className="col-span-2">
+                    <InfoItem icon={StickyNote} label="Notes" value={(cg as any).next_of_kin_notes} />
+                  </div>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
