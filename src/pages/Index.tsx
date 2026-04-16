@@ -97,17 +97,19 @@ const Dashboard = () => {
             {visibleCards.map((card) => (
               <div
                 key={card.label}
-                className={`${card.bg} rounded-lg flex overflow-hidden shadow-lg hover:shadow-xl transition-shadow cursor-pointer`}
+                className={`${card.bg} rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow cursor-pointer`}
               >
-                <div className={`${card.iconBg} w-14 flex items-center justify-center`}>
-                  <card.icon className="h-7 w-7 text-white/90" />
+                <div className="px-4 pt-3 text-white">
+                  <p className="text-xs font-bold tracking-wider uppercase opacity-90 truncate">{card.label}</p>
                 </div>
-                <div className="flex-1 px-3 py-3 text-white min-w-0">
-                  <p className="text-[10px] font-bold tracking-wider uppercase opacity-90 truncate">{card.label}</p>
-                  <p className="text-2xl font-extrabold leading-tight">{card.value}</p>
-                  <div className="border-t border-white/30 mt-1.5 pt-1.5">
-                    <p className="text-[10px] opacity-80 truncate">{card.sub}</p>
+                <div className="flex items-end gap-3 px-4 py-2 text-white">
+                  <div className={`${card.iconBg} h-12 w-12 rounded-lg flex items-center justify-center flex-shrink-0`}>
+                    <card.icon className="h-7 w-7 text-white/90" />
                   </div>
+                  <p className="text-4xl font-extrabold leading-none">{card.value}</p>
+                </div>
+                <div className="border-t border-white/30 mx-4 mb-3 pt-2">
+                  <p className="text-xs opacity-80 truncate text-white">{card.sub}</p>
                 </div>
               </div>
             ))}
