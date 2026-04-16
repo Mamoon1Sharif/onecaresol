@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, Plus, User, MapPin, Phone, Heart } from "lucide-react";
 import { useCareReceivers } from "@/hooks/use-care-data";
+import { getCareReceiverAvatar } from "@/lib/avatars";
 
 const statusStyles: Record<string, string> = {
   Active: "bg-success/15 text-success border-0",
@@ -73,8 +74,8 @@ const CareReceivers = () => {
                   </Badge>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="h-16 w-16 rounded-full bg-muted border-2 border-border flex items-center justify-center shrink-0">
-                    <User className="h-7 w-7 text-muted-foreground" />
+                  <div className="h-16 w-16 rounded-full border-2 border-border overflow-hidden shrink-0">
+                    <img src={getCareReceiverAvatar(cr.id)} alt={cr.name} className="h-full w-full object-cover" loading="lazy" />
                   </div>
                   <div className="min-w-0 space-y-1.5 text-sm">
                     {cr.address && (
