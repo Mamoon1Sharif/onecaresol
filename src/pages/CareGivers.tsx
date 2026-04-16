@@ -149,7 +149,7 @@ const CareGivers = () => {
                       onClick={(e) => e.stopPropagation()}
                     >
                       {visibleTags.map((tag: string) => (
-                        <span key={tag} className="text-[10px] font-medium text-muted-foreground bg-muted rounded-md px-2 py-1 truncate max-w-[120px]">
+                        <span key={tag} className="text-xs font-semibold text-muted-foreground bg-muted rounded-md px-2.5 py-1 whitespace-nowrap">
                           {shortenTag(tag)}
                         </span>
                       ))}
