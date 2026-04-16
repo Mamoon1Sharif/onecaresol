@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, Plus, User, MapPin, Phone, Heart } from "lucide-react";
 import { useCareReceivers } from "@/hooks/use-care-data";
+import { getCareReceiverAvatar } from "@/lib/avatars";
 
 const statusStyles: Record<string, string> = {
   Active: "bg-success/15 text-success border-0",
