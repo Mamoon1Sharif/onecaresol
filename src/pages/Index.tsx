@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -58,8 +58,11 @@ const Dashboard = () => {
     { title: "Completed Shifts", value: String(completedVisits.length), icon: CheckCircle2, iconBg: "bg-success/10", color: "text-success", borderAccent: "border-l-4 border-l-success" },
   ];
 
-  const [carouselPage, setCarouselPage] = useState(0);
-  const CARDS_PER_PAGE = 4;
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const scroll = (dir: number) => {
+    scrollRef.current?.scrollBy({ left: dir * 300, behavior: "smooth" });
+  };
+
   const infographicCards = [
     { label: "COMPLETE CALLS", value: String(completedVisits.length || 0), sub: `${stats?.visitsToday ? ((completedVisits.length / stats.visitsToday) * 100).toFixed(1) : 0}% of ${stats?.visitsToday ?? 0} shifts`, icon: CheckCircle2, bg: "bg-green-500", iconBg: "bg-green-600" },
     { label: "LATE CALLS", value: "2", sub: "1.57% 30 minutes late", icon: Timer, bg: "bg-amber-600", iconBg: "bg-amber-700" },
@@ -74,8 +77,6 @@ const Dashboard = () => {
     { label: "CLOCK OUT EARLY", value: "1", sub: "0.79% of shifts", icon: Moon, bg: "bg-purple-500", iconBg: "bg-purple-600" },
     { label: "AUTO CLOCKOUTS", value: "2", sub: "1.57% of shifts", icon: ArrowRightFromLine, bg: "bg-pink-500", iconBg: "bg-pink-600" },
   ];
-  const totalPages = Math.ceil(infographicCards.length / CARDS_PER_PAGE);
-  const visibleCards = infographicCards.slice(carouselPage * CARDS_PER_PAGE, carouselPage * CARDS_PER_PAGE + CARDS_PER_PAGE);
 
   return (
     <AppLayout>
@@ -88,48 +89,40 @@ const Dashboard = () => {
         {/* Infographic Carousel */}
         <div className="relative">
           <button
-            onClick={() => setCarouselPage((p) => (p - 1 + totalPages) % totalPages)}
+            onClick={() => scroll(-1)}
             className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-background border border-border shadow-lg flex items-center justify-center hover:bg-muted transition-colors -ml-2"
           >
             <ChevronLeft className="h-5 w-5 text-green-600" />
           </button>
-          <div className="grid grid-cols-4 gap-3 px-6">
-            {visibleCards.map((card) => (
+          <div
+            ref={scrollRef}
+            className="flex gap-3 overflow-x-auto scrollbar-hide px-6 py-1 snap-x snap-mandatory"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            {infographicCards.map((card) => (
               <div
                 key={card.label}
-                className={`${card.bg} rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow cursor-pointer`}
+                className={`${card.bg} rounded-lg min-w-[240px] flex-shrink-0 snap-start flex overflow-hidden shadow-lg hover:shadow-xl transition-shadow cursor-pointer`}
               >
-                <div className="px-4 pt-3 text-white">
-                  <p className="text-xs font-bold tracking-wider uppercase opacity-90 truncate">{card.label}</p>
+                <div className={`${card.iconBg} w-16 flex items-center justify-center`}>
+                  <card.icon className="h-8 w-8 text-white/90" />
                 </div>
-                <div className="flex flex-col px-4 py-3 text-white">
-                  <div className={`${card.iconBg} h-12 w-12 rounded-lg flex items-center justify-center`}>
-                    <card.icon className="h-7 w-7 text-white/90" />
+                <div className="flex-1 px-4 py-3 text-white">
+                  <p className="text-[11px] font-bold tracking-wider uppercase opacity-90 truncate">{card.label}</p>
+                  <p className="text-3xl font-extrabold leading-tight">{card.value}</p>
+                  <div className="border-t border-white/30 mt-1.5 pt-1.5">
+                    <p className="text-[11px] opacity-80 truncate">{card.sub}</p>
                   </div>
-                  <p className="text-4xl font-extrabold leading-none mt-2">{card.value}</p>
-                </div>
-                <div className="border-t border-white/30 mx-4 mb-3 pt-2">
-                  <p className="text-sm opacity-80 truncate text-white">{card.sub}</p>
                 </div>
               </div>
             ))}
           </div>
           <button
-            onClick={() => setCarouselPage((p) => (p + 1) % totalPages)}
+            onClick={() => scroll(1)}
             className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-background border border-border shadow-lg flex items-center justify-center hover:bg-muted transition-colors -mr-2"
           >
             <ChevronRight className="h-5 w-5 text-green-600" />
           </button>
-          {/* Page dots */}
-          <div className="flex justify-center gap-1.5 mt-3">
-            {Array.from({ length: totalPages }).map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCarouselPage(i)}
-                className={`h-2 rounded-full transition-all ${i === carouselPage ? "w-6 bg-primary" : "w-2 bg-muted-foreground/30"}`}
-              />
-            ))}
-          </div>
         </div>
 
         {/* KPI Cards */}
