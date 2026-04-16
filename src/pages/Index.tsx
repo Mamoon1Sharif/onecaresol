@@ -104,9 +104,9 @@ const Dashboard = () => {
                   <p className="text-xl font-extrabold text-white leading-none">{card.value}</p>
                 </div>
                 <div className="flex-1 px-3 py-3 text-white min-w-0 flex flex-col justify-center">
-                  <p className="text-[10px] font-bold tracking-wider uppercase opacity-90 truncate">{card.label}</p>
+                  <p className="text-xs font-bold tracking-wider uppercase truncate">{card.label}</p>
                   <div className="border-t border-white/30 mt-1.5 pt-1.5">
-                    <p className="text-[10px] opacity-80 truncate">{card.sub}</p>
+                    <p className="text-xs font-medium opacity-90 truncate">{card.sub}</p>
                   </div>
                 </div>
               </div>
