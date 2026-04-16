@@ -186,11 +186,6 @@ const CareGiverProfile = () => {
                   {cg.phone && <span className="flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{cg.phone}</span>}
                   {cg.email && <span className="flex items-center gap-1"><Mail className="h-3.5 w-3.5" />{cg.email}</span>}
                 </div>
-                {cg.created_at && (
-                  <p className="text-xs text-muted-foreground mt-2">
-                    User Created: {new Date(cg.created_at).toLocaleDateString("en-GB")}
-                  </p>
-                )}
               </div>
             </div>
           </div>
