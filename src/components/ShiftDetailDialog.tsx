@@ -1,13 +1,8 @@
-import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
-import { useShiftNotes, useAddShiftNote, useShiftTasks, useAddShiftTask, useToggleShiftTask } from "@/hooks/use-care-data";
+import { useShiftNotes, useShiftTasks } from "@/hooks/use-care-data";
 import {
   Clock, MessageSquare, ListChecks, User, CheckCircle2, XCircle,
 } from "lucide-react";
