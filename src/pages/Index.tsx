@@ -36,11 +36,13 @@ function diffMinutes(start: string | null, end: string | null) {
 }
 
 function getLateMins(visit: any): number {
-  if (!visit.check_in_time) return 0;
-  const scheduled = new Date(visit.visit_date + "T" + String(visit.start_hour).padStart(2, "0") + ":00:00");
-  const actual = new Date(visit.check_in_time);
-  const diff = Math.floor((actual.getTime() - scheduled.getTime()) / 60000);
-  return diff > 5 ? diff : 0; // >5 min counts as late
+  if (!visit.check_in_time || !visit.start_hour) return 0;
+  const checkIn = new Date(visit.check_in_time);
+  const scheduledHour = visit.start_hour;
+  const actualMinuteOfDay = checkIn.getUTCHours() * 60 + checkIn.getUTCMinutes();
+  const scheduledMinuteOfDay = scheduledHour * 60;
+  const diff = actualMinuteOfDay - scheduledMinuteOfDay;
+  return diff > 5 ? diff : 0;
 }
 
 function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
@@ -72,17 +74,9 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
           </div>
         </TableCell>
         <TableCell className="text-sm">
-          {lateMins > 0 ? (
-            <div className="flex items-center gap-1.5">
-              <span className="text-warning font-medium">{fmtTime(v.check_in_time)}</span>
-              <span className="inline-flex items-center gap-1 text-[10px] text-warning bg-warning/10 rounded-full px-2 py-0.5 font-semibold">
-                <Timer className="h-3 w-3" />
-                +{lateMins}min
-              </span>
-            </div>
-          ) : (
-            <span className="text-foreground">{fmtTime(v.check_in_time)}</span>
-          )}
+          <span className={lateMins > 0 ? "text-warning font-medium" : "text-foreground"}>
+            {fmtTime(v.check_in_time)}
+          </span>
         </TableCell>
         <TableCell className="text-sm text-foreground">{fmtTime(v.check_out_time)}</TableCell>
         <TableCell>
@@ -91,19 +85,19 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
           </Badge>
         </TableCell>
         <TableCell>
-          <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => setShowNotes(!showNotes)}
-              className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${showNotes ? "bg-primary/10 text-primary" : "hover:bg-muted text-muted-foreground"}`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${showNotes ? "bg-primary/15 text-primary shadow-sm" : "hover:bg-muted/80 text-muted-foreground hover:text-foreground"}`}
             >
-              <StickyNote className="h-3 w-3" />
+              <StickyNote className="h-4 w-4" />
               {notes.length}
             </button>
             <button
               onClick={() => setShowTasks(!showTasks)}
-              className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${showTasks ? "bg-primary/10 text-primary" : "hover:bg-muted text-muted-foreground"}`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${showTasks ? "bg-primary/15 text-primary shadow-sm" : "hover:bg-muted/80 text-muted-foreground hover:text-foreground"}`}
             >
-              <ClipboardCheck className="h-3 w-3" />
+              <ClipboardCheck className="h-4 w-4" />
               {completedTasks}/{tasks.length}
             </button>
           </div>
