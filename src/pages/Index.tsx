@@ -36,11 +36,13 @@ function diffMinutes(start: string | null, end: string | null) {
 }
 
 function getLateMins(visit: any): number {
-  if (!visit.check_in_time) return 0;
-  const scheduled = new Date(visit.visit_date + "T" + String(visit.start_hour).padStart(2, "0") + ":00:00");
-  const actual = new Date(visit.check_in_time);
-  const diff = Math.floor((actual.getTime() - scheduled.getTime()) / 60000);
-  return diff > 5 ? diff : 0; // >5 min counts as late
+  if (!visit.check_in_time || !visit.start_hour) return 0;
+  const checkIn = new Date(visit.check_in_time);
+  const scheduledHour = visit.start_hour;
+  const actualMinuteOfDay = checkIn.getUTCHours() * 60 + checkIn.getUTCMinutes();
+  const scheduledMinuteOfDay = scheduledHour * 60;
+  const diff = actualMinuteOfDay - scheduledMinuteOfDay;
+  return diff > 5 ? diff : 0;
 }
 
 function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
