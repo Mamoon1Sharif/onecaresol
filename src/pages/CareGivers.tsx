@@ -31,6 +31,14 @@ const CareGivers = () => {
     return ids;
   }, [todayVisits]);
 
+  const tagColors: Record<string, string> = {
+    "COS Letter Received": "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
+    "DBS Adult & Children": "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
+    "DBS Disclaimer": "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+    "Has Full UK Driving Licence": "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+    "Registered to DBS Update Service": "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300",
+  };
+
   const shortenTag = (tag: string) => {
     const map: Record<string, string> = {
       "Has Full UK Driving Licence": "UK Licence",
