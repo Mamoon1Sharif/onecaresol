@@ -106,48 +106,53 @@ const CareGivers = () => {
             {filtered.map((cg) => (
               <div
                 key={cg.id}
-                className="group border border-border rounded-xl bg-card cursor-pointer hover:shadow-md hover:border-primary/30 transition-all duration-200 flex flex-col min-h-[220px]"
+                className="group border border-border rounded-xl bg-card cursor-pointer hover:shadow-md hover:border-primary/30 transition-all duration-200 flex flex-col min-h-[260px]"
               >
                 <div
-                  className="p-4 flex-1"
+                  className="p-5 flex-1"
                   onClick={() => navigate(`/caregivers/${cg.id}`)}
                 >
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-1.5 shrink-0">
                       <Badge
                         variant={cg.status === "Active" ? "default" : "secondary"}
-                        className={`text-[10px] px-2 py-0.5 ${cg.status === "Active" ? "bg-success/15 text-success border-0" : "bg-muted text-muted-foreground border-0"}`}
+                        className={`text-xs px-2.5 py-0.5 ${cg.status === "Active" ? "bg-success/15 text-success border-0" : "bg-muted text-muted-foreground border-0"}`}
                       >
                         {cg.status}
                       </Badge>
+                      {onShiftIds.has(cg.id) && (
+                        <Badge className="text-xs px-2.5 py-0.5 bg-info/15 text-info border-0 gap-1">
+                          <Briefcase className="h-3 w-3" /> On Shift
+                        </Badge>
+                      )}
                     </div>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 text-muted-foreground hover:text-primary"
+                      className="h-8 w-8 text-muted-foreground hover:text-primary"
                       onClick={(e) => { e.stopPropagation(); navigate(`/caregivers/${cg.id}/schedule`); }}
                     >
-                      <CalendarDays className="h-4 w-4" />
+                      <CalendarDays className="h-4.5 w-4.5" />
                     </Button>
                   </div>
                   <div className="flex flex-col items-center text-center mb-4">
-                    <div className="h-20 w-20 rounded-full border-2 border-border overflow-hidden mb-2">
+                    <div className="h-24 w-24 rounded-full border-2 border-border overflow-hidden mb-3">
                       <img src={getCareGiverAvatar(cg.id)} alt={cg.name} className="h-full w-full object-cover" loading="lazy" />
                     </div>
-                    <h3 className="font-semibold text-foreground text-base">{cg.name}</h3>
+                    <h3 className="font-bold text-foreground text-lg">{cg.name}</h3>
                     <div className="mt-2 space-y-1.5 w-full">
                       {cg.phone && (
                         <p className="flex items-center justify-center gap-1.5 text-muted-foreground">
-                          <Phone className="h-3.5 w-3.5 shrink-0" />
-                          <span className="text-sm">{cg.phone}</span>
+                          <Phone className="h-4 w-4 shrink-0" />
+                          <span className="text-base">{cg.phone}</span>
                         </p>
                       )}
                       <p className="flex items-center justify-center gap-1.5 text-muted-foreground">
-                        <Clock className="h-3.5 w-3.5 shrink-0" />
-                        <span className="text-sm">{cg.last_check_in || "Never"}</span>
+                        <Clock className="h-4 w-4 shrink-0" />
+                        <span className="text-base">{cg.last_check_in || "Never"}</span>
                       </p>
                       {cg.address && (
-                        <p className="text-muted-foreground text-sm leading-snug line-clamp-1 text-center">{cg.address}</p>
+                        <p className="text-muted-foreground text-base leading-snug line-clamp-1 text-center">{cg.address}</p>
                       )}
                     </div>
                   </div>
