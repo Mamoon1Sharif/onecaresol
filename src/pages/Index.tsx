@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Users, HeartHandshake, CalendarDays, AlertTriangle, Radio, CheckCircle2, Clock, ListChecks, Pill, Palmtree, UmbrellaOff, AlertOctagon, Eye } from "lucide-react";
+import { Users, HeartHandshake, CalendarDays, AlertTriangle, Radio, CheckCircle2, Clock, ListChecks, Pill, Palmtree, UmbrellaOff, AlertOctagon, Eye, ChevronLeft, ChevronRight, XCircle, Timer, Search, Ban, UserX, Moon, ArrowRightFromLine } from "lucide-react";
 import { useDashboardStats, useDashboardVisits, useCompletedVisitsToday } from "@/hooks/use-care-data";
 import { supabase } from "@/integrations/supabase/client";
 import { ShiftDetailDialog } from "@/components/ShiftDetailDialog";
@@ -58,6 +58,26 @@ const Dashboard = () => {
     { title: "Completed Shifts", value: String(completedVisits.length), icon: CheckCircle2, iconBg: "bg-success/10", color: "text-success", borderAccent: "border-l-4 border-l-success" },
   ];
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const scroll = (dir: number) => {
+    scrollRef.current?.scrollBy({ left: dir * 300, behavior: "smooth" });
+  };
+
+  const infographicCards = [
+    { label: "COMPLETE CALLS", value: String(completedVisits.length || 0), sub: `${stats?.visitsToday ? ((completedVisits.length / stats.visitsToday) * 100).toFixed(1) : 0}% of ${stats?.visitsToday ?? 0} shifts`, icon: CheckCircle2, bg: "bg-green-500", iconBg: "bg-green-600" },
+    { label: "LATE CALLS", value: "2", sub: "1.57% 30 minutes late", icon: Timer, bg: "bg-amber-600", iconBg: "bg-amber-700" },
+    { label: "MISSED CALLS", value: "2", sub: "1.57% Not clocked into", icon: XCircle, bg: "bg-red-500", iconBg: "bg-red-600" },
+    { label: "CALLS WITH MISSED MEDS", value: "5", sub: "13 Missed Meds", icon: Pill, bg: "bg-sky-500", iconBg: "bg-sky-600" },
+    { label: "MEDS NOT ADMINISTERED", value: "2", sub: "3 Meds Not Administered", icon: Pill, bg: "bg-pink-600", iconBg: "bg-pink-700" },
+    { label: "OVERDUE TASKS", value: "5", sub: "5 Overdue Tasks", icon: ListChecks, bg: "bg-amber-500", iconBg: "bg-amber-600" },
+    { label: "SHORT VISITS", value: "3", sub: "2.36% clocked in less than 75%", icon: Search, bg: "bg-orange-400", iconBg: "bg-orange-500" },
+    { label: "CANCELLED CALLS", value: "6", sub: "4.72% Calls Cancelled", icon: Ban, bg: "bg-gray-600", iconBg: "bg-gray-700" },
+    { label: "SHADOW SHIFTS", value: "1", sub: "0.79% of 127 shifts", icon: UserX, bg: "bg-blue-600", iconBg: "bg-blue-700" },
+    { label: "EARLY CALLS", value: "0", sub: "0.00% of shifts", icon: Clock, bg: "bg-purple-600", iconBg: "bg-purple-700" },
+    { label: "CLOCK OUT EARLY", value: "1", sub: "0.79% of shifts", icon: Moon, bg: "bg-purple-500", iconBg: "bg-purple-600" },
+    { label: "AUTO CLOCKOUTS", value: "2", sub: "1.57% of shifts", icon: ArrowRightFromLine, bg: "bg-pink-500", iconBg: "bg-pink-600" },
+  ];
+
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -66,34 +86,46 @@ const Dashboard = () => {
           <p className="text-sm text-muted-foreground mt-1">Welcome back, Admin. Here's your overview.</p>
         </div>
 
-        {/* Operational Overview */}
-        <div>
-          <h2 className="text-base font-semibold text-foreground mb-3">Operational Overview</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            {[
-              { label: "Overdue Tasks", value: 2, icon: ListChecks, color: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/30" },
-              { label: "Unverified Meds", value: 56, icon: Pill, color: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/30" },
-              { label: "Holiday Requests", value: 1, icon: UmbrellaOff, color: "text-purple-500", bg: "bg-purple-500/10", border: "border-purple-500/30" },
-              { label: "Team Holidays", value: 9, icon: Palmtree, color: "text-teal-500", bg: "bg-teal-500/10", border: "border-teal-500/30" },
-              { label: "Member Holidays", value: 0, icon: CalendarDays, color: "text-muted-foreground", bg: "bg-muted", border: "border-border" },
-              { label: "New Incidents", value: 8, icon: AlertOctagon, color: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/30" },
-            ].map((item) => (
-              <Card key={item.label} className={`border ${item.border} shadow-sm hover:shadow-md transition-shadow`}>
-                <CardContent className="p-5 flex flex-col items-center text-center gap-2.5">
-                  <div className={`h-12 w-12 rounded-xl ${item.bg} flex items-center justify-center`}>
-                    <item.icon className={`h-6 w-6 ${item.color}`} />
+        {/* Infographic Carousel */}
+        <div className="relative">
+          <button
+            onClick={() => scroll(-1)}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-background border border-border shadow-lg flex items-center justify-center hover:bg-muted transition-colors -ml-2"
+          >
+            <ChevronLeft className="h-5 w-5 text-green-600" />
+          </button>
+          <div
+            ref={scrollRef}
+            className="flex gap-3 overflow-x-auto scrollbar-hide px-6 py-1 snap-x snap-mandatory"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            {infographicCards.map((card) => (
+              <div
+                key={card.label}
+                className={`${card.bg} rounded-lg min-w-[240px] flex-shrink-0 snap-start flex overflow-hidden shadow-lg hover:shadow-xl transition-shadow cursor-pointer`}
+              >
+                <div className={`${card.iconBg} w-16 flex items-center justify-center`}>
+                  <card.icon className="h-8 w-8 text-white/90" />
+                </div>
+                <div className="flex-1 px-4 py-3 text-white">
+                  <p className="text-[11px] font-bold tracking-wider uppercase opacity-90 truncate">{card.label}</p>
+                  <p className="text-3xl font-extrabold leading-tight">{card.value}</p>
+                  <div className="border-t border-white/30 mt-1.5 pt-1.5">
+                    <p className="text-[11px] opacity-80 truncate">{card.sub}</p>
                   </div>
-                  <span className={`text-3xl font-bold ${item.color}`}>{item.value}</span>
-                  <span className="text-xs text-muted-foreground font-medium leading-tight">{item.label}</span>
-                  <Button variant="outline" size="sm" className={`h-7 px-3 text-[11px] font-semibold ${item.color} mt-1 gap-1`}>
-                    <Eye className="h-3.5 w-3.5" /> View Details
-                  </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
+          <button
+            onClick={() => scroll(1)}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-10 w-10 rounded-full bg-background border border-border shadow-lg flex items-center justify-center hover:bg-muted transition-colors -mr-2"
+          >
+            <ChevronRight className="h-5 w-5 text-green-600" />
+          </button>
         </div>
 
+        {/* KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {statCards.map((stat) => (
             <Card key={stat.title} className={`border border-border shadow-md hover:shadow-lg transition-shadow bg-card ${stat.borderAccent}`}>
