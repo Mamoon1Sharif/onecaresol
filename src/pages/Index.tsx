@@ -72,14 +72,17 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
           </div>
         </TableCell>
         <TableCell className="text-sm">
-          <div className="flex items-center gap-1.5">
+          {lateMins > 0 ? (
+            <div className="flex items-center gap-1.5">
+              <span className="text-warning font-medium">{fmtTime(v.check_in_time)}</span>
+              <span className="inline-flex items-center gap-1 text-[10px] text-warning bg-warning/10 rounded-full px-2 py-0.5 font-semibold">
+                <Timer className="h-3 w-3" />
+                +{lateMins}min
+              </span>
+            </div>
+          ) : (
             <span className="text-foreground">{fmtTime(v.check_in_time)}</span>
-            {lateMins > 0 && (
-              <Badge className="bg-warning/15 text-warning border-0 text-[10px] px-1.5">
-                {lateMins}m late
-              </Badge>
-            )}
-          </div>
+          )}
         </TableCell>
         <TableCell className="text-sm text-foreground">{fmtTime(v.check_out_time)}</TableCell>
         <TableCell>
