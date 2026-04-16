@@ -13,10 +13,23 @@ type StatusFilter = (typeof STATUS_FILTERS)[number];
 
 const CareGivers = () => {
   const { data: careGivers = [], isLoading } = useCareGivers();
+  const todayStr = new Date().toISOString().split("T")[0];
+  const { data: todayVisits = [] } = useDailyVisits(todayStr);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("All");
   const [expandedTags, setExpandedTags] = useState<Record<string, boolean>>({});
   const navigate = useNavigate();
+
+  // Set of caregiver IDs currently on shift (checked in but not checked out)
+  const onShiftIds = useMemo(() => {
+    const ids = new Set<string>();
+    todayVisits.forEach((v) => {
+      if (v.care_giver_id && v.check_in_time && !v.check_out_time) {
+        ids.add(v.care_giver_id);
+      }
+    });
+    return ids;
+  }, [todayVisits]);
 
   const shortenTag = (tag: string) => {
     const map: Record<string, string> = {
