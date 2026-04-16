@@ -102,14 +102,14 @@ const Dashboard = () => {
                 <div className="px-4 pt-3 text-white">
                   <p className="text-xs font-bold tracking-wider uppercase opacity-90 truncate">{card.label}</p>
                 </div>
-                <div className="flex items-end gap-3 px-4 py-2 text-white">
-                  <div className={`${card.iconBg} h-12 w-12 rounded-lg flex items-center justify-center flex-shrink-0`}>
+                <div className="flex flex-col items-center px-4 py-3 text-white">
+                  <div className={`${card.iconBg} h-12 w-12 rounded-lg flex items-center justify-center`}>
                     <card.icon className="h-7 w-7 text-white/90" />
                   </div>
-                  <p className="text-4xl font-extrabold leading-none">{card.value}</p>
+                  <p className="text-4xl font-extrabold leading-none mt-2">{card.value}</p>
                 </div>
                 <div className="border-t border-white/30 mx-4 mb-3 pt-2">
-                  <p className="text-xs opacity-80 truncate text-white">{card.sub}</p>
+                  <p className="text-xs opacity-80 truncate text-white text-center">{card.sub}</p>
                 </div>
               </div>
             ))}
