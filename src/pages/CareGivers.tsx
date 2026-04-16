@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, Phone, User, Clock, CalendarDays, Filter } from "lucide-react";
-import { useCareGivers } from "@/hooks/use-care-data";
+import { Search, Plus, Phone, User, Clock, CalendarDays, Filter, Briefcase } from "lucide-react";
+import { useCareGivers, useDailyVisits } from "@/hooks/use-care-data";
 import { getCareGiverAvatar } from "@/lib/avatars";
 
 const STATUS_FILTERS = ["All", "Active", "Non-Active", "Onboarding"] as const;
