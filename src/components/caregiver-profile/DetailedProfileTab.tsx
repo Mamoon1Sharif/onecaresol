@@ -196,23 +196,21 @@ export function DetailedProfileTab({ cg }: Props) {
         </CardContent>
       </Card>
 
+      {/* Login Details */}
+      <LoginDetailsSection cg={cg} save={save} />
+
       {/* References */}
-      {Array.isArray(refs) && refs.length > 0 && (
-        <Card className="border border-border">
-          <CardContent className="p-6">
-            <h3 className="text-sm font-bold uppercase tracking-widest text-primary mb-1">References</h3>
-            <Separator className="mb-4" />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-              {refs.map((r: any, i: number) => (
-                <div key={i} className="bg-muted/50 rounded-lg p-3">
-                  <p className="text-sm font-medium text-foreground">{r.name}</p>
-                  <p className="text-xs text-muted-foreground">{r.type}</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <ReferencesSection
+        references={Array.isArray(refs) ? refs : []}
+        onSave={(next) => save("care_giver_references", next)}
+      />
+
+      {/* User Preferences */}
+      <UserPreferencesSection />
+
+      {/* DNAR Settings */}
+      <DnarSection enabled={dnarEnabled} onChange={setDnarEnabled} />
+
 
       {/* Hours Overview */}
       <Card className="border border-border overflow-hidden">
