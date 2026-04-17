@@ -52,6 +52,7 @@ interface Props {
 export function DetailedProfileTab({ cg }: Props) {
   const updateMutation = useUpdateCareGiver();
   const { toast } = useToast();
+  const [dnarEnabled, setDnarEnabled] = useState(false);
 
   const save = async (field: string, value: any) => {
     try {
