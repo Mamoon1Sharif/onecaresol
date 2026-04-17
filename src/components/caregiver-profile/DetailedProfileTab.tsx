@@ -1,8 +1,13 @@
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { EditableField } from "./EditableField";
+import { LoginDetailsSection } from "./LoginDetailsSection";
+import { ReferencesSection } from "./ReferencesSection";
+import { UserPreferencesSection } from "./UserPreferencesSection";
+import { DnarSection } from "./DnarSection";
 import { useUpdateCareGiver } from "@/hooks/use-care-data";
 import { useToast } from "@/hooks/use-toast";
 import {
