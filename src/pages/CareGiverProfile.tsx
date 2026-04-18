@@ -12,6 +12,8 @@ import { PlaceholderTab } from "@/components/caregiver-profile/PlaceholderTab";
 import {
   LayoutDashboard, UserCog, CalendarDays, LayoutTemplate,
   Users, Bell, StickyNote,
+  CalendarCheck, Plane, MessageSquare, Pill,
+  GraduationCap, AlertTriangle, FileText, History,
 } from "lucide-react";
 
 const CareGiverProfile = () => {
