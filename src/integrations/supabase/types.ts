@@ -647,6 +647,56 @@ export type Database = {
           },
         ]
       }
+      caregiver_vaccinations: {
+        Row: {
+          administered_by: string | null
+          batch_number: string | null
+          care_giver_id: string
+          created_at: string
+          date_administered: string | null
+          dose: string | null
+          expiry_date: string | null
+          id: string
+          notes: string | null
+          updated_at: string
+          vaccine_name: string
+        }
+        Insert: {
+          administered_by?: string | null
+          batch_number?: string | null
+          care_giver_id: string
+          created_at?: string
+          date_administered?: string | null
+          dose?: string | null
+          expiry_date?: string | null
+          id?: string
+          notes?: string | null
+          updated_at?: string
+          vaccine_name: string
+        }
+        Update: {
+          administered_by?: string | null
+          batch_number?: string | null
+          care_giver_id?: string
+          created_at?: string
+          date_administered?: string | null
+          dose?: string | null
+          expiry_date?: string | null
+          id?: string
+          notes?: string | null
+          updated_at?: string
+          vaccine_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "caregiver_vaccinations_care_giver_id_fkey"
+            columns: ["care_giver_id"]
+            isOneToOne: false
+            referencedRelation: "care_givers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_visits: {
         Row: {
           care_giver_id: string | null
