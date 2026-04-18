@@ -12,6 +12,8 @@ import { PlaceholderTab } from "@/components/caregiver-profile/PlaceholderTab";
 import {
   LayoutDashboard, UserCog, CalendarDays, LayoutTemplate,
   Users, Bell, StickyNote,
+  CalendarCheck, Plane, MessageSquare, Pill,
+  GraduationCap, AlertTriangle, FileText, History,
 } from "lucide-react";
 
 const CareGiverProfile = () => {
@@ -69,6 +71,30 @@ const CareGiverProfile = () => {
             <TabsTrigger value="notes" className="gap-1.5 text-xs">
               <StickyNote className="h-3.5 w-3.5" /> Notes
             </TabsTrigger>
+            <TabsTrigger value="availability" className="gap-1.5 text-xs">
+              <CalendarCheck className="h-3.5 w-3.5" /> Availability
+            </TabsTrigger>
+            <TabsTrigger value="holidays" className="gap-1.5 text-xs">
+              <Plane className="h-3.5 w-3.5" /> Holidays
+            </TabsTrigger>
+            <TabsTrigger value="messaging" className="gap-1.5 text-xs">
+              <MessageSquare className="h-3.5 w-3.5" /> Messaging
+            </TabsTrigger>
+            <TabsTrigger value="medication" className="gap-1.5 text-xs">
+              <Pill className="h-3.5 w-3.5" /> Medication
+            </TabsTrigger>
+            <TabsTrigger value="qualifications" className="gap-1.5 text-xs">
+              <GraduationCap className="h-3.5 w-3.5" /> Qualifications
+            </TabsTrigger>
+            <TabsTrigger value="incidents" className="gap-1.5 text-xs">
+              <AlertTriangle className="h-3.5 w-3.5" /> Incidents
+            </TabsTrigger>
+            <TabsTrigger value="files" className="gap-1.5 text-xs">
+              <FileText className="h-3.5 w-3.5" /> Files
+            </TabsTrigger>
+            <TabsTrigger value="changelog" className="gap-1.5 text-xs">
+              <History className="h-3.5 w-3.5" /> Changelog
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-4">
@@ -97,6 +123,38 @@ const CareGiverProfile = () => {
 
           <TabsContent value="notes" className="mt-4">
             <PlaceholderTab title="Notes" description="Add and review notes about this caregiver's performance, preferences, and other observations." />
+          </TabsContent>
+
+          <TabsContent value="availability" className="mt-4">
+            <PlaceholderTab title="Availability" description="Manage this caregiver's working availability, preferred hours, and unavailable periods." />
+          </TabsContent>
+
+          <TabsContent value="holidays" className="mt-4">
+            <PlaceholderTab title="Holidays" description="Track holiday entitlement, booked time off, and remaining annual leave balance." />
+          </TabsContent>
+
+          <TabsContent value="messaging" className="mt-4">
+            <PlaceholderTab title="Messaging" description="Send and review messages exchanged with this caregiver." />
+          </TabsContent>
+
+          <TabsContent value="medication" className="mt-4">
+            <PlaceholderTab title="Medication" description="View medication administration records and competency certifications for this caregiver." />
+          </TabsContent>
+
+          <TabsContent value="qualifications" className="mt-4">
+            <PlaceholderTab title="Qualifications" description="Manage training records, certifications, and professional qualifications." />
+          </TabsContent>
+
+          <TabsContent value="incidents" className="mt-4">
+            <PlaceholderTab title="Incidents" description="Log and review incidents, accidents, and safeguarding reports involving this caregiver." />
+          </TabsContent>
+
+          <TabsContent value="files" className="mt-4">
+            <PlaceholderTab title="Files" description="Upload and manage documents, contracts, and supporting files for this caregiver." />
+          </TabsContent>
+
+          <TabsContent value="changelog" className="mt-4">
+            <PlaceholderTab title="Changelog" description="Audit trail of all changes made to this caregiver's profile and records." />
           </TabsContent>
         </Tabs>
       </div>
