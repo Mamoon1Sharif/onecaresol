@@ -11,6 +11,7 @@ import { DetailedProfileTab } from "@/components/caregiver-profile/DetailedProfi
 import { PlaceholderTab } from "@/components/caregiver-profile/PlaceholderTab";
 import { ScheduleView } from "@/components/caregiver-profile/ScheduleView";
 import { NotesTab } from "@/components/caregiver-profile/NotesTab";
+import { KeyContactsTab } from "@/components/caregiver-profile/KeyContactsTab";
 import {
   LayoutDashboard, UserCog, CalendarDays, LayoutTemplate,
   Users, Bell, StickyNote,
@@ -116,7 +117,7 @@ const CareGiverProfile = () => {
           </TabsContent>
 
           <TabsContent value="contacts" className="mt-4">
-            <PlaceholderTab title="Key Contacts" description="View and manage important contacts associated with this caregiver." />
+            <KeyContactsTab careGiverId={cg.id} />
           </TabsContent>
 
           <TabsContent value="reminders" className="mt-4">

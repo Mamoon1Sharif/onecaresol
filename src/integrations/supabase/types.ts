@@ -326,6 +326,80 @@ export type Database = {
         }
         Relationships: []
       }
+      caregiver_key_contacts: {
+        Row: {
+          address1: string | null
+          address2: string | null
+          area: string | null
+          care_giver_id: string
+          contact_type: string | null
+          created_at: string
+          email: string | null
+          id: string
+          is_ice: boolean
+          is_nok: boolean
+          lives_with: boolean
+          mobile: string | null
+          name: string
+          note: string | null
+          postcode: string | null
+          show_on_app: boolean
+          tel1: string | null
+          tel2: string | null
+          updated_at: string
+        }
+        Insert: {
+          address1?: string | null
+          address2?: string | null
+          area?: string | null
+          care_giver_id: string
+          contact_type?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_ice?: boolean
+          is_nok?: boolean
+          lives_with?: boolean
+          mobile?: string | null
+          name: string
+          note?: string | null
+          postcode?: string | null
+          show_on_app?: boolean
+          tel1?: string | null
+          tel2?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address1?: string | null
+          address2?: string | null
+          area?: string | null
+          care_giver_id?: string
+          contact_type?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_ice?: boolean
+          is_nok?: boolean
+          lives_with?: boolean
+          mobile?: string | null
+          name?: string
+          note?: string | null
+          postcode?: string | null
+          show_on_app?: boolean
+          tel1?: string | null
+          tel2?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "caregiver_key_contacts_care_giver_id_fkey"
+            columns: ["care_giver_id"]
+            isOneToOne: false
+            referencedRelation: "care_givers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       caregiver_private_notes: {
         Row: {
           care_giver_id: string
