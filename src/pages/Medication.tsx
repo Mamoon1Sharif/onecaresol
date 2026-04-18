@@ -140,7 +140,7 @@ export default function Medication() {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <MemberTopBar title="Team Member Medication" />
+      <MemberTopBar title="Team Member Medication" backTo={`/caregivers/${id}`} />
 
       <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-4 p-4">
         <MemberSidebar cg={cg} basePath="medication" showServiceUserSelect />

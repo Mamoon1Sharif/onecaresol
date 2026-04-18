@@ -97,10 +97,18 @@ export default function Messaging() {
           <div className="flex items-center gap-2">
             <Button
               size="sm"
-              className="h-8 bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5"
-              onClick={() => navigate("/caregivers")}
+              variant="outline"
+              className="h-8 gap-1.5"
+              onClick={() => navigate(`/caregivers/${id}`)}
             >
               <ArrowLeft className="h-3.5 w-3.5" />
+              Back to Profile
+            </Button>
+            <Button
+              size="sm"
+              className="h-8 bg-primary hover:bg-primary/90 text-primary-foreground"
+              onClick={() => navigate("/caregivers")}
+            >
               All Team Members
             </Button>
             <Button
