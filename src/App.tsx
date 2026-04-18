@@ -21,6 +21,7 @@ import Medication from "./pages/Medication.tsx";
 import Qualifications from "./pages/Qualifications.tsx";
 import Incidents from "./pages/Incidents.tsx";
 import Files from "./pages/Files.tsx";
+import Changelog from "./pages/Changelog.tsx";
 import Login from "./pages/Login.tsx";
 import Signup from "./pages/Signup.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="/caregivers/:id/qualifications" element={<ProtectedRoute><Qualifications /></ProtectedRoute>} />
             <Route path="/caregivers/:id/incidents" element={<ProtectedRoute><Incidents /></ProtectedRoute>} />
             <Route path="/caregivers/:id/files" element={<ProtectedRoute><Files /></ProtectedRoute>} />
+            <Route path="/caregivers/:id/changelog" element={<ProtectedRoute><Changelog /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

@@ -112,9 +112,12 @@ const CareGiverProfile = () => {
             >
               <FileText className="h-3.5 w-3.5" /> Files
             </button>
-            <TabsTrigger value="changelog" className="gap-1.5 text-xs">
+            <button
+              onClick={() => navigate(`/caregivers/${cg.id}/changelog`)}
+              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-sm font-medium text-muted-foreground hover:bg-background hover:text-foreground transition-colors"
+            >
               <History className="h-3.5 w-3.5" /> Changelog
-            </TabsTrigger>
+            </button>
           </TabsList>
 
           <TabsContent value="overview" className="mt-4">
@@ -155,9 +158,6 @@ const CareGiverProfile = () => {
 
 
 
-          <TabsContent value="changelog" className="mt-4">
-            <PlaceholderTab title="Changelog" description="Audit trail of all changes made to this caregiver's profile and records." />
-          </TabsContent>
         </Tabs>
       </div>
     </AppLayout>

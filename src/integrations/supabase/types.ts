@@ -362,6 +362,50 @@ export type Database = {
         }
         Relationships: []
       }
+      caregiver_changelog: {
+        Row: {
+          care_giver_id: string
+          created_at: string
+          description: string
+          for_name: string | null
+          id: string
+          log_time: string
+          made_by: string
+          record_id: string
+          title: string
+        }
+        Insert: {
+          care_giver_id: string
+          created_at?: string
+          description?: string
+          for_name?: string | null
+          id?: string
+          log_time?: string
+          made_by: string
+          record_id: string
+          title: string
+        }
+        Update: {
+          care_giver_id?: string
+          created_at?: string
+          description?: string
+          for_name?: string | null
+          id?: string
+          log_time?: string
+          made_by?: string
+          record_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "caregiver_changelog_care_giver_id_fkey"
+            columns: ["care_giver_id"]
+            isOneToOne: false
+            referencedRelation: "care_givers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       caregiver_document_categories: {
         Row: {
           care_giver_id: string
