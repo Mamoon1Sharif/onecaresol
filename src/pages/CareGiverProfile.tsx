@@ -13,6 +13,7 @@ import { ScheduleView } from "@/components/caregiver-profile/ScheduleView";
 import { NotesTab } from "@/components/caregiver-profile/NotesTab";
 import { KeyContactsTab } from "@/components/caregiver-profile/KeyContactsTab";
 import { RemindersTab } from "@/components/caregiver-profile/RemindersTab";
+import { AvailabilityTab } from "@/components/caregiver-profile/AvailabilityTab";
 import {
   LayoutDashboard, UserCog, CalendarDays, LayoutTemplate,
   Users, Bell, StickyNote,
@@ -130,7 +131,7 @@ const CareGiverProfile = () => {
           </TabsContent>
 
           <TabsContent value="availability" className="mt-4">
-            <PlaceholderTab title="Availability" description="Manage this caregiver's working availability, preferred hours, and unavailable periods." />
+            <AvailabilityTab cg={cg} />
           </TabsContent>
 
           <TabsContent value="holidays" className="mt-4">
