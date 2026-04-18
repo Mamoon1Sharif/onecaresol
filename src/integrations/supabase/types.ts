@@ -326,6 +326,42 @@ export type Database = {
         }
         Relationships: []
       }
+      caregiver_availability: {
+        Row: {
+          care_giver_id: string
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          note: string | null
+          start_time: string
+          updated_at: string
+          week_number: number
+        }
+        Insert: {
+          care_giver_id: string
+          created_at?: string
+          day_of_week: number
+          end_time?: string
+          id?: string
+          note?: string | null
+          start_time?: string
+          updated_at?: string
+          week_number: number
+        }
+        Update: {
+          care_giver_id?: string
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          note?: string | null
+          start_time?: string
+          updated_at?: string
+          week_number?: number
+        }
+        Relationships: []
+      }
       caregiver_key_contacts: {
         Row: {
           address1: string | null
