@@ -240,7 +240,7 @@ export const AvailabilityTab = ({ cg }: Props) => {
                           <button onClick={() => openEdit(s)} className="text-amber-600 hover:text-amber-700">
                             <Pencil className="h-3 w-3" />
                           </button>
-                          <button onClick={() => removeSlot.mutate(s.id)} className="text-destructive hover:text-destructive/80">
+                          <button onClick={() => setConfirmSlotId(s.id)} className="text-destructive hover:text-destructive/80">
                             <Trash2 className="h-3 w-3" />
                           </button>
                         </div>
@@ -285,6 +285,54 @@ export const AvailabilityTab = ({ cg }: Props) => {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Confirm remove week */}
+      <AlertDialog open={confirmWeek !== null} onOpenChange={(o) => !o && setConfirmWeek(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove all Week {confirmWeek} availability?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete every availability slot in Week {confirmWeek}. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (confirmWeek !== null) removeWeek.mutate(confirmWeek);
+                setConfirmWeek(null);
+              }}
+            >
+              Remove All
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirm remove single slot */}
+      <AlertDialog open={confirmSlotId !== null} onOpenChange={(o) => !o && setConfirmSlotId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove this availability slot?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This availability slot will be permanently deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (confirmSlotId) removeSlot.mutate(confirmSlotId);
+                setConfirmSlotId(null);
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
