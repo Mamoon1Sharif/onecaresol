@@ -326,6 +326,92 @@ export type Database = {
         }
         Relationships: []
       }
+      caregiver_private_notes: {
+        Row: {
+          care_giver_id: string
+          created_at: string
+          id: string
+          note: string
+          note_date: string
+          service_user_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          care_giver_id: string
+          created_at?: string
+          id?: string
+          note: string
+          note_date?: string
+          service_user_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          care_giver_id?: string
+          created_at?: string
+          id?: string
+          note?: string
+          note_date?: string
+          service_user_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "caregiver_private_notes_care_giver_id_fkey"
+            columns: ["care_giver_id"]
+            isOneToOne: false
+            referencedRelation: "care_givers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "caregiver_private_notes_service_user_id_fkey"
+            columns: ["service_user_id"]
+            isOneToOne: false
+            referencedRelation: "care_receivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      caregiver_rota_notes: {
+        Row: {
+          care_giver_id: string
+          created_at: string
+          id: string
+          note: string
+          note_date: string
+          note_ref: string | null
+          rota_ref: string | null
+          staff_name: string
+        }
+        Insert: {
+          care_giver_id: string
+          created_at?: string
+          id?: string
+          note: string
+          note_date?: string
+          note_ref?: string | null
+          rota_ref?: string | null
+          staff_name?: string
+        }
+        Update: {
+          care_giver_id?: string
+          created_at?: string
+          id?: string
+          note?: string
+          note_date?: string
+          note_ref?: string | null
+          rota_ref?: string | null
+          staff_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "caregiver_rota_notes_care_giver_id_fkey"
+            columns: ["care_giver_id"]
+            isOneToOne: false
+            referencedRelation: "care_givers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_visits: {
         Row: {
           care_giver_id: string | null
