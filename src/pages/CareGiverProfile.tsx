@@ -82,15 +82,24 @@ const CareGiverProfile = () => {
             <TabsTrigger value="holidays" className="gap-1.5 text-xs">
               <Plane className="h-3.5 w-3.5" /> Holidays
             </TabsTrigger>
-            <TabsTrigger value="messaging" className="gap-1.5 text-xs">
+            <button
+              onClick={() => navigate(`/caregivers/${cg.id}/messaging`)}
+              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-sm font-medium text-muted-foreground hover:bg-background hover:text-foreground transition-colors"
+            >
               <MessageSquare className="h-3.5 w-3.5" /> Messaging
-            </TabsTrigger>
-            <TabsTrigger value="medication" className="gap-1.5 text-xs">
+            </button>
+            <button
+              onClick={() => navigate(`/caregivers/${cg.id}/medication`)}
+              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-sm font-medium text-muted-foreground hover:bg-background hover:text-foreground transition-colors"
+            >
               <Pill className="h-3.5 w-3.5" /> Medication
-            </TabsTrigger>
-            <TabsTrigger value="qualifications" className="gap-1.5 text-xs">
+            </button>
+            <button
+              onClick={() => navigate(`/caregivers/${cg.id}/qualifications`)}
+              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-sm font-medium text-muted-foreground hover:bg-background hover:text-foreground transition-colors"
+            >
               <GraduationCap className="h-3.5 w-3.5" /> Qualifications
-            </TabsTrigger>
+            </button>
             <TabsTrigger value="incidents" className="gap-1.5 text-xs">
               <AlertTriangle className="h-3.5 w-3.5" /> Incidents
             </TabsTrigger>
