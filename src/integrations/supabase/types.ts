@@ -523,6 +523,38 @@ export type Database = {
           },
         ]
       }
+      caregiver_push_notifications: {
+        Row: {
+          care_giver_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string
+        }
+        Insert: {
+          care_giver_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note: string
+        }
+        Update: {
+          care_giver_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "caregiver_push_notifications_care_giver_id_fkey"
+            columns: ["care_giver_id"]
+            isOneToOne: false
+            referencedRelation: "care_givers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       caregiver_reminders: {
         Row: {
           account: string | null
