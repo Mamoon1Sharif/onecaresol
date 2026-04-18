@@ -124,7 +124,7 @@ const CareGiverProfile = () => {
           </TabsContent>
 
           <TabsContent value="notes" className="mt-4">
-            <PlaceholderTab title="Notes" description="Add and review notes about this caregiver's performance, preferences, and other observations." />
+            <NotesTab careGiverId={cg.id} />
           </TabsContent>
 
           <TabsContent value="availability" className="mt-4">
