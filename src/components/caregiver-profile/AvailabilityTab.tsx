@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import type { CareGiver } from "@/hooks/use-care-data";
+type CareGiver = { id: string; requested_hours?: any };
 
 interface Slot {
   id: string;
