@@ -20,6 +20,7 @@ import Messaging from "./pages/Messaging.tsx";
 import Medication from "./pages/Medication.tsx";
 import Qualifications from "./pages/Qualifications.tsx";
 import Incidents from "./pages/Incidents.tsx";
+import Files from "./pages/Files.tsx";
 import Login from "./pages/Login.tsx";
 import Signup from "./pages/Signup.tsx";
 import NotFound from "./pages/NotFound.tsx";
