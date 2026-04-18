@@ -362,6 +362,105 @@ export type Database = {
         }
         Relationships: []
       }
+      caregiver_document_categories: {
+        Row: {
+          care_giver_id: string
+          color: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          care_giver_id: string
+          color?: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          care_giver_id?: string
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "caregiver_document_categories_care_giver_id_fkey"
+            columns: ["care_giver_id"]
+            isOneToOne: false
+            referencedRelation: "care_givers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      caregiver_documents: {
+        Row: {
+          care_giver_id: string
+          category_id: string | null
+          created_at: string
+          file_name: string
+          id: string
+          mime_type: string | null
+          service_user_id: string | null
+          size_bytes: number | null
+          storage_path: string
+          tags: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          care_giver_id: string
+          category_id?: string | null
+          created_at?: string
+          file_name: string
+          id?: string
+          mime_type?: string | null
+          service_user_id?: string | null
+          size_bytes?: number | null
+          storage_path: string
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          care_giver_id?: string
+          category_id?: string | null
+          created_at?: string
+          file_name?: string
+          id?: string
+          mime_type?: string | null
+          service_user_id?: string | null
+          size_bytes?: number | null
+          storage_path?: string
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "caregiver_documents_care_giver_id_fkey"
+            columns: ["care_giver_id"]
+            isOneToOne: false
+            referencedRelation: "care_givers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "caregiver_documents_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "caregiver_document_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "caregiver_documents_service_user_id_fkey"
+            columns: ["service_user_id"]
+            isOneToOne: false
+            referencedRelation: "care_receivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       caregiver_holidays: {
         Row: {
           care_giver_id: string

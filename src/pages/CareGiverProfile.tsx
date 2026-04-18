@@ -106,9 +106,12 @@ const CareGiverProfile = () => {
             >
               <AlertTriangle className="h-3.5 w-3.5" /> Incidents
             </button>
-            <TabsTrigger value="files" className="gap-1.5 text-xs">
+            <button
+              onClick={() => navigate(`/caregivers/${cg.id}/files`)}
+              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-sm font-medium text-muted-foreground hover:bg-background hover:text-foreground transition-colors"
+            >
               <FileText className="h-3.5 w-3.5" /> Files
-            </TabsTrigger>
+            </button>
             <TabsTrigger value="changelog" className="gap-1.5 text-xs">
               <History className="h-3.5 w-3.5" /> Changelog
             </TabsTrigger>
@@ -151,9 +154,6 @@ const CareGiverProfile = () => {
           </TabsContent>
 
 
-          <TabsContent value="files" className="mt-4">
-            <PlaceholderTab title="Files" description="Upload and manage documents, contracts, and supporting files for this caregiver." />
-          </TabsContent>
 
           <TabsContent value="changelog" className="mt-4">
             <PlaceholderTab title="Changelog" description="Audit trail of all changes made to this caregiver's profile and records." />
