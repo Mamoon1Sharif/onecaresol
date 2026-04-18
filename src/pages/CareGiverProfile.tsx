@@ -150,9 +150,6 @@ const CareGiverProfile = () => {
             <HolidaysTab careGiverId={cg.id} careGiverName={cg.name} />
           </TabsContent>
 
-          <TabsContent value="incidents" className="mt-4">
-            <PlaceholderTab title="Incidents" description="Log and review incidents, accidents, and safeguarding reports involving this caregiver." />
-          </TabsContent>
 
           <TabsContent value="files" className="mt-4">
             <PlaceholderTab title="Files" description="Upload and manage documents, contracts, and supporting files for this caregiver." />
