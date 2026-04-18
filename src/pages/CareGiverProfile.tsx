@@ -11,6 +11,7 @@ import { DetailedProfileTab } from "@/components/caregiver-profile/DetailedProfi
 import { PlaceholderTab } from "@/components/caregiver-profile/PlaceholderTab";
 import { ScheduleView } from "@/components/caregiver-profile/ScheduleView";
 import { NotesTab } from "@/components/caregiver-profile/NotesTab";
+import { KeyContactsTab } from "@/components/caregiver-profile/KeyContactsTab";
 import {
   LayoutDashboard, UserCog, CalendarDays, LayoutTemplate,
   Users, Bell, StickyNote,
