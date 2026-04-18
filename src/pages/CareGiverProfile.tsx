@@ -12,6 +12,7 @@ import { PlaceholderTab } from "@/components/caregiver-profile/PlaceholderTab";
 import { ScheduleView } from "@/components/caregiver-profile/ScheduleView";
 import { NotesTab } from "@/components/caregiver-profile/NotesTab";
 import { KeyContactsTab } from "@/components/caregiver-profile/KeyContactsTab";
+import { RemindersTab } from "@/components/caregiver-profile/RemindersTab";
 import {
   LayoutDashboard, UserCog, CalendarDays, LayoutTemplate,
   Users, Bell, StickyNote,
@@ -121,7 +122,7 @@ const CareGiverProfile = () => {
           </TabsContent>
 
           <TabsContent value="reminders" className="mt-4">
-            <PlaceholderTab title="Reminders" description="Set up and manage reminders for training, DBS renewals, and other important dates." />
+            <RemindersTab careGiverId={cg.id} careGiverName={cg.name} />
           </TabsContent>
 
           <TabsContent value="notes" className="mt-4">

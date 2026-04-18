@@ -445,6 +445,57 @@ export type Database = {
           },
         ]
       }
+      caregiver_reminders: {
+        Row: {
+          account: string | null
+          care_giver_id: string
+          completed_at: string | null
+          completed_by: string | null
+          completion_notes: string | null
+          created_at: string
+          end_date: string | null
+          first_due: string | null
+          id: string
+          reminder_name: string
+          repeat_interval: string
+          status: string
+          updated_at: string
+          was_set_for: string | null
+        }
+        Insert: {
+          account?: string | null
+          care_giver_id: string
+          completed_at?: string | null
+          completed_by?: string | null
+          completion_notes?: string | null
+          created_at?: string
+          end_date?: string | null
+          first_due?: string | null
+          id?: string
+          reminder_name: string
+          repeat_interval?: string
+          status?: string
+          updated_at?: string
+          was_set_for?: string | null
+        }
+        Update: {
+          account?: string | null
+          care_giver_id?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          completion_notes?: string | null
+          created_at?: string
+          end_date?: string | null
+          first_due?: string | null
+          id?: string
+          reminder_name?: string
+          repeat_interval?: string
+          status?: string
+          updated_at?: string
+          was_set_for?: string | null
+        }
+        Relationships: []
+      }
       caregiver_rota_notes: {
         Row: {
           care_giver_id: string
