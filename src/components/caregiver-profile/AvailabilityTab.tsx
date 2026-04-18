@@ -9,6 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 type CareGiver = { id: string; requested_hours?: any };
@@ -47,6 +51,8 @@ export const AvailabilityTab = ({ cg }: Props) => {
   const [editorWeek, setEditorWeek] = useState<number>(1);
   const [editorSlot, setEditorSlot] = useState<Slot | null>(null);
   const [requestedOpen, setRequestedOpen] = useState(false);
+  const [confirmWeek, setConfirmWeek] = useState<number | null>(null);
+  const [confirmSlotId, setConfirmSlotId] = useState<string | null>(null);
 
   const { data: slots = [], isLoading } = useQuery({
     queryKey: ["caregiver_availability", cg.id],
@@ -212,8 +218,7 @@ export const AvailabilityTab = ({ cg }: Props) => {
                       size="sm"
                       variant="destructive"
                       className="h-7"
-                      disabled={weekSlots.length === 0}
-                      onClick={() => removeWeek.mutate(week)}
+                      onClick={() => setConfirmWeek(week)}
                     >
                       Remove All
                     </Button>
@@ -235,7 +240,7 @@ export const AvailabilityTab = ({ cg }: Props) => {
                           <button onClick={() => openEdit(s)} className="text-amber-600 hover:text-amber-700">
                             <Pencil className="h-3 w-3" />
                           </button>
-                          <button onClick={() => removeSlot.mutate(s.id)} className="text-destructive hover:text-destructive/80">
+                          <button onClick={() => setConfirmSlotId(s.id)} className="text-destructive hover:text-destructive/80">
                             <Trash2 className="h-3 w-3" />
                           </button>
                         </div>
@@ -280,6 +285,54 @@ export const AvailabilityTab = ({ cg }: Props) => {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Confirm remove week */}
+      <AlertDialog open={confirmWeek !== null} onOpenChange={(o) => !o && setConfirmWeek(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove all Week {confirmWeek} availability?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete every availability slot in Week {confirmWeek}. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (confirmWeek !== null) removeWeek.mutate(confirmWeek);
+                setConfirmWeek(null);
+              }}
+            >
+              Remove All
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirm remove single slot */}
+      <AlertDialog open={confirmSlotId !== null} onOpenChange={(o) => !o && setConfirmSlotId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove this availability slot?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This availability slot will be permanently deleted.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => {
+                if (confirmSlotId) removeSlot.mutate(confirmSlotId);
+                setConfirmSlotId(null);
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
