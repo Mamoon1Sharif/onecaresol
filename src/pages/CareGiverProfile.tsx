@@ -154,9 +154,6 @@ const CareGiverProfile = () => {
           </TabsContent>
 
 
-          <TabsContent value="files" className="mt-4">
-            <PlaceholderTab title="Files" description="Upload and manage documents, contracts, and supporting files for this caregiver." />
-          </TabsContent>
 
           <TabsContent value="changelog" className="mt-4">
             <PlaceholderTab title="Changelog" description="Audit trail of all changes made to this caregiver's profile and records." />
