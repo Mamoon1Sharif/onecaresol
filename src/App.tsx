@@ -19,6 +19,7 @@ import HolidaysAbsence from "./pages/HolidaysAbsence.tsx";
 import Messaging from "./pages/Messaging.tsx";
 import Medication from "./pages/Medication.tsx";
 import Qualifications from "./pages/Qualifications.tsx";
+import Incidents from "./pages/Incidents.tsx";
 import Login from "./pages/Login.tsx";
 import Signup from "./pages/Signup.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/caregivers/:id/messaging" element={<ProtectedRoute><Messaging /></ProtectedRoute>} />
             <Route path="/caregivers/:id/medication" element={<ProtectedRoute><Medication /></ProtectedRoute>} />
             <Route path="/caregivers/:id/qualifications" element={<ProtectedRoute><Qualifications /></ProtectedRoute>} />
+            <Route path="/caregivers/:id/incidents" element={<ProtectedRoute><Incidents /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

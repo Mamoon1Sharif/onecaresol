@@ -100,9 +100,12 @@ const CareGiverProfile = () => {
             >
               <GraduationCap className="h-3.5 w-3.5" /> Qualifications
             </button>
-            <TabsTrigger value="incidents" className="gap-1.5 text-xs">
+            <button
+              onClick={() => navigate(`/caregivers/${cg.id}/incidents`)}
+              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-sm font-medium text-muted-foreground hover:bg-background hover:text-foreground transition-colors"
+            >
               <AlertTriangle className="h-3.5 w-3.5" /> Incidents
-            </TabsTrigger>
+            </button>
             <TabsTrigger value="files" className="gap-1.5 text-xs">
               <FileText className="h-3.5 w-3.5" /> Files
             </TabsTrigger>
@@ -147,9 +150,6 @@ const CareGiverProfile = () => {
             <HolidaysTab careGiverId={cg.id} careGiverName={cg.name} />
           </TabsContent>
 
-          <TabsContent value="incidents" className="mt-4">
-            <PlaceholderTab title="Incidents" description="Log and review incidents, accidents, and safeguarding reports involving this caregiver." />
-          </TabsContent>
 
           <TabsContent value="files" className="mt-4">
             <PlaceholderTab title="Files" description="Upload and manage documents, contracts, and supporting files for this caregiver." />

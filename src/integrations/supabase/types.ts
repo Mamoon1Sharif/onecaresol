@@ -404,6 +404,59 @@ export type Database = {
         }
         Relationships: []
       }
+      caregiver_incidents: {
+        Row: {
+          care_giver_id: string
+          closed_at: string | null
+          created_at: string
+          created_by: string | null
+          created_for: string | null
+          description: string
+          id: string
+          incident_date: string
+          incident_ref: string
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          care_giver_id: string
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          created_for?: string | null
+          description?: string
+          id?: string
+          incident_date?: string
+          incident_ref: string
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          care_giver_id?: string
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          created_for?: string | null
+          description?: string
+          id?: string
+          incident_date?: string
+          incident_ref?: string
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "caregiver_incidents_care_giver_id_fkey"
+            columns: ["care_giver_id"]
+            isOneToOne: false
+            referencedRelation: "care_givers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       caregiver_key_contacts: {
         Row: {
           address1: string | null
