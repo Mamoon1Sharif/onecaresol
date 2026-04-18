@@ -16,6 +16,7 @@ import MemberProfile from "./pages/MemberProfile.tsx";
 import Roster from "./pages/Roster.tsx";
 import DailyRoster from "./pages/DailyRoster.tsx";
 import HolidaysAbsence from "./pages/HolidaysAbsence.tsx";
+import Messaging from "./pages/Messaging.tsx";
 import Login from "./pages/Login.tsx";
 import Signup from "./pages/Signup.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -42,6 +43,7 @@ const App = () => (
             <Route path="/roster" element={<ProtectedRoute><Roster /></ProtectedRoute>} />
             <Route path="/daily-roster" element={<ProtectedRoute><DailyRoster /></ProtectedRoute>} />
             <Route path="/holidays-absence" element={<ProtectedRoute><HolidaysAbsence /></ProtectedRoute>} />
+            <Route path="/caregivers/:id/messaging" element={<ProtectedRoute><Messaging /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
