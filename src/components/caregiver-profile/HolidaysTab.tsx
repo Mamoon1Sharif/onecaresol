@@ -240,7 +240,11 @@ export const HolidaysTab = ({ careGiverId, careGiverName }: Props) => {
           <CardTitle className="text-sm flex items-center gap-2">
             <Calendar className="h-4 w-4" /> Holidays & Absence
           </CardTitle>
-          <Button size="sm" className="bg-amber-500 hover:bg-amber-600 text-white gap-1">
+          <Button
+            size="sm"
+            className="bg-amber-500 hover:bg-amber-600 text-white gap-1"
+            onClick={() => window.location.assign(`/holidays-absence?caregiver=${careGiverId}`)}
+          >
             <ExternalLink className="h-3.5 w-3.5" /> Go To Holidays & Absence
           </Button>
         </CardHeader>
