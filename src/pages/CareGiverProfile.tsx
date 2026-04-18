@@ -9,6 +9,7 @@ import { ProfileHeader } from "@/components/caregiver-profile/ProfileHeader";
 import { OverviewTab } from "@/components/caregiver-profile/OverviewTab";
 import { DetailedProfileTab } from "@/components/caregiver-profile/DetailedProfileTab";
 import { PlaceholderTab } from "@/components/caregiver-profile/PlaceholderTab";
+import { ScheduleView } from "@/components/caregiver-profile/ScheduleView";
 import {
   LayoutDashboard, UserCog, CalendarDays, LayoutTemplate,
   Users, Bell, StickyNote,
@@ -106,7 +107,7 @@ const CareGiverProfile = () => {
           </TabsContent>
 
           <TabsContent value="rota" className="mt-4">
-            <PlaceholderTab title="Rota" description="View and manage this caregiver's weekly rota assignments and shift patterns." />
+            <ScheduleView cg={cg} showHeader={false} />
           </TabsContent>
 
           <TabsContent value="templates" className="mt-4">
