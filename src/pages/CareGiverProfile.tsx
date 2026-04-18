@@ -1,10 +1,9 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { useCareGiver } from "@/hooks/use-care-data";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useNavigate } from "react-router-dom";
 import { ProfileHeader } from "@/components/caregiver-profile/ProfileHeader";
 import { OverviewTab } from "@/components/caregiver-profile/OverviewTab";
 import { DetailedProfileTab } from "@/components/caregiver-profile/DetailedProfileTab";
@@ -83,15 +82,24 @@ const CareGiverProfile = () => {
             <TabsTrigger value="holidays" className="gap-1.5 text-xs">
               <Plane className="h-3.5 w-3.5" /> Holidays
             </TabsTrigger>
-            <TabsTrigger value="messaging" className="gap-1.5 text-xs">
+            <button
+              onClick={() => navigate(`/caregivers/${cg.id}/messaging`)}
+              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-sm font-medium text-muted-foreground hover:bg-background hover:text-foreground transition-colors"
+            >
               <MessageSquare className="h-3.5 w-3.5" /> Messaging
-            </TabsTrigger>
-            <TabsTrigger value="medication" className="gap-1.5 text-xs">
+            </button>
+            <button
+              onClick={() => navigate(`/caregivers/${cg.id}/medication`)}
+              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-sm font-medium text-muted-foreground hover:bg-background hover:text-foreground transition-colors"
+            >
               <Pill className="h-3.5 w-3.5" /> Medication
-            </TabsTrigger>
-            <TabsTrigger value="qualifications" className="gap-1.5 text-xs">
+            </button>
+            <button
+              onClick={() => navigate(`/caregivers/${cg.id}/qualifications`)}
+              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-sm font-medium text-muted-foreground hover:bg-background hover:text-foreground transition-colors"
+            >
               <GraduationCap className="h-3.5 w-3.5" /> Qualifications
-            </TabsTrigger>
+            </button>
             <TabsTrigger value="incidents" className="gap-1.5 text-xs">
               <AlertTriangle className="h-3.5 w-3.5" /> Incidents
             </TabsTrigger>
@@ -137,60 +145,6 @@ const CareGiverProfile = () => {
 
           <TabsContent value="holidays" className="mt-4">
             <HolidaysTab careGiverId={cg.id} careGiverName={cg.name} />
-          </TabsContent>
-
-          <TabsContent value="messaging" className="mt-4">
-            <div className="rounded-lg border border-border bg-card p-8 text-center">
-              <MessageSquare className="h-10 w-10 text-primary mx-auto mb-3" />
-              <h3 className="text-base font-semibold text-foreground mb-1">
-                Send Message
-              </h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Open the full messaging view to send push notifications to this team member's device.
-              </p>
-              <a
-                href={`/caregivers/${cg.id}/messaging`}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90"
-              >
-                Go To Messaging
-              </a>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="medication" className="mt-4">
-            <div className="rounded-lg border border-border bg-card p-8 text-center">
-              <Pill className="h-10 w-10 text-primary mx-auto mb-3" />
-              <h3 className="text-base font-semibold text-foreground mb-1">
-                Medication & Vaccinations
-              </h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Open the full medication view to manage vaccination records and competency certifications.
-              </p>
-              <a
-                href={`/caregivers/${cg.id}/medication`}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90"
-              >
-                Go To Medication
-              </a>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="qualifications" className="mt-4">
-            <div className="rounded-lg border border-border bg-card p-8 text-center">
-              <GraduationCap className="h-10 w-10 text-primary mx-auto mb-3" />
-              <h3 className="text-base font-semibold text-foreground mb-1">
-                All Qualifications
-              </h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Open the full view to manage training records, certifications, and qualifications.
-              </p>
-              <a
-                href={`/caregivers/${cg.id}/qualifications`}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90"
-              >
-                Go To Qualifications
-              </a>
-            </div>
           </TabsContent>
 
           <TabsContent value="incidents" className="mt-4">
