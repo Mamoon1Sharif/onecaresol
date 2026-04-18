@@ -172,12 +172,21 @@ function IconRow({
   );
 }
 
-export function MemberTopBar({ title }: { title: string }) {
+export function MemberTopBar({ title, backTo }: { title: string; backTo?: string }) {
   const navigate = useNavigate();
   return (
     <header className="bg-background border-b border-border">
       <div className="flex items-center justify-between px-4 py-2.5">
         <div className="flex items-center gap-2">
+          {backTo && (
+            <button
+              className="h-8 px-3 text-xs rounded border border-border bg-background hover:bg-muted text-foreground inline-flex items-center gap-1.5"
+              onClick={() => navigate(backTo)}
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Back to Profile
+            </button>
+          )}
           <button
             className="h-8 px-3 text-xs rounded bg-primary hover:bg-primary/90 text-primary-foreground"
             onClick={() => navigate("/caregivers")}
