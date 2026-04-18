@@ -147,60 +147,6 @@ const CareGiverProfile = () => {
             <HolidaysTab careGiverId={cg.id} careGiverName={cg.name} />
           </TabsContent>
 
-          <TabsContent value="messaging" className="mt-4">
-            <div className="rounded-lg border border-border bg-card p-8 text-center">
-              <MessageSquare className="h-10 w-10 text-primary mx-auto mb-3" />
-              <h3 className="text-base font-semibold text-foreground mb-1">
-                Send Message
-              </h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Open the full messaging view to send push notifications to this team member's device.
-              </p>
-              <a
-                href={`/caregivers/${cg.id}/messaging`}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90"
-              >
-                Go To Messaging
-              </a>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="medication" className="mt-4">
-            <div className="rounded-lg border border-border bg-card p-8 text-center">
-              <Pill className="h-10 w-10 text-primary mx-auto mb-3" />
-              <h3 className="text-base font-semibold text-foreground mb-1">
-                Medication & Vaccinations
-              </h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Open the full medication view to manage vaccination records and competency certifications.
-              </p>
-              <a
-                href={`/caregivers/${cg.id}/medication`}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90"
-              >
-                Go To Medication
-              </a>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="qualifications" className="mt-4">
-            <div className="rounded-lg border border-border bg-card p-8 text-center">
-              <GraduationCap className="h-10 w-10 text-primary mx-auto mb-3" />
-              <h3 className="text-base font-semibold text-foreground mb-1">
-                All Qualifications
-              </h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Open the full view to manage training records, certifications, and qualifications.
-              </p>
-              <a
-                href={`/caregivers/${cg.id}/qualifications`}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90"
-              >
-                Go To Qualifications
-              </a>
-            </div>
-          </TabsContent>
-
           <TabsContent value="incidents" className="mt-4">
             <PlaceholderTab title="Incidents" description="Log and review incidents, accidents, and safeguarding reports involving this caregiver." />
           </TabsContent>
