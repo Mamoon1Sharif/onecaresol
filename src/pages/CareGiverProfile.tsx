@@ -1,10 +1,9 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { useCareGiver } from "@/hooks/use-care-data";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useNavigate } from "react-router-dom";
 import { ProfileHeader } from "@/components/caregiver-profile/ProfileHeader";
 import { OverviewTab } from "@/components/caregiver-profile/OverviewTab";
 import { DetailedProfileTab } from "@/components/caregiver-profile/DetailedProfileTab";
