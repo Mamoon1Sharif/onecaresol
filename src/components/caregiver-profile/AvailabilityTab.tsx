@@ -9,6 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 type CareGiver = { id: string; requested_hours?: any };
@@ -47,6 +51,8 @@ export const AvailabilityTab = ({ cg }: Props) => {
   const [editorWeek, setEditorWeek] = useState<number>(1);
   const [editorSlot, setEditorSlot] = useState<Slot | null>(null);
   const [requestedOpen, setRequestedOpen] = useState(false);
+  const [confirmWeek, setConfirmWeek] = useState<number | null>(null);
+  const [confirmSlotId, setConfirmSlotId] = useState<string | null>(null);
 
   const { data: slots = [], isLoading } = useQuery({
     queryKey: ["caregiver_availability", cg.id],
@@ -212,8 +218,7 @@ export const AvailabilityTab = ({ cg }: Props) => {
                       size="sm"
                       variant="destructive"
                       className="h-7"
-                      disabled={weekSlots.length === 0}
-                      onClick={() => removeWeek.mutate(week)}
+                      onClick={() => setConfirmWeek(week)}
                     >
                       Remove All
                     </Button>
