@@ -14,6 +14,7 @@ import { NotesTab } from "@/components/caregiver-profile/NotesTab";
 import { KeyContactsTab } from "@/components/caregiver-profile/KeyContactsTab";
 import { RemindersTab } from "@/components/caregiver-profile/RemindersTab";
 import { AvailabilityTab } from "@/components/caregiver-profile/AvailabilityTab";
+import { HolidaysTab } from "@/components/caregiver-profile/HolidaysTab";
 import {
   LayoutDashboard, UserCog, CalendarDays, LayoutTemplate,
   Users, Bell, StickyNote,
@@ -135,7 +136,7 @@ const CareGiverProfile = () => {
           </TabsContent>
 
           <TabsContent value="holidays" className="mt-4">
-            <PlaceholderTab title="Holidays" description="Track holiday entitlement, booked time off, and remaining annual leave balance." />
+            <HolidaysTab careGiverId={cg.id} careGiverName={cg.name} />
           </TabsContent>
 
           <TabsContent value="messaging" className="mt-4">
