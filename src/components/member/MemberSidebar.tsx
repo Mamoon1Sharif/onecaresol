@@ -9,7 +9,7 @@ import { useCareGivers, useCareReceivers } from "@/hooks/use-care-data";
 import { getCareGiverAvatar } from "@/lib/avatars";
 import { format, parseISO } from "date-fns";
 import {
-  IdCard, FileBadge, Hash, MapPin, Phone,
+  IdCard, FileBadge, Hash, MapPin, Phone, ArrowLeft,
 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
