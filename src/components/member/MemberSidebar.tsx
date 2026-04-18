@@ -18,7 +18,7 @@ type CareGiver = Tables<"care_givers">;
 interface Props {
   cg: CareGiver | undefined;
   /** Path used when switching team members from the dropdown, e.g. "messaging" or "medication". */
-  basePath: "messaging" | "medication";
+  basePath: "messaging" | "medication" | "qualifications";
   /** Whether to show the "Select Service User..." secondary dropdown. */
   showServiceUserSelect?: boolean;
 }
