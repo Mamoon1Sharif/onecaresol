@@ -362,6 +362,48 @@ export type Database = {
         }
         Relationships: []
       }
+      caregiver_holidays: {
+        Row: {
+          care_giver_id: string
+          created_at: string
+          end_date: string | null
+          entry_type: string
+          hours: number | null
+          id: string
+          notes: string | null
+          reason: string | null
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          care_giver_id: string
+          created_at?: string
+          end_date?: string | null
+          entry_type?: string
+          hours?: number | null
+          id?: string
+          notes?: string | null
+          reason?: string | null
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          care_giver_id?: string
+          created_at?: string
+          end_date?: string | null
+          entry_type?: string
+          hours?: number | null
+          id?: string
+          notes?: string | null
+          reason?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       caregiver_key_contacts: {
         Row: {
           address1: string | null
