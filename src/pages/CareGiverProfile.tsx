@@ -71,6 +71,30 @@ const CareGiverProfile = () => {
             <TabsTrigger value="notes" className="gap-1.5 text-xs">
               <StickyNote className="h-3.5 w-3.5" /> Notes
             </TabsTrigger>
+            <TabsTrigger value="availability" className="gap-1.5 text-xs">
+              <CalendarCheck className="h-3.5 w-3.5" /> Availability
+            </TabsTrigger>
+            <TabsTrigger value="holidays" className="gap-1.5 text-xs">
+              <Plane className="h-3.5 w-3.5" /> Holidays
+            </TabsTrigger>
+            <TabsTrigger value="messaging" className="gap-1.5 text-xs">
+              <MessageSquare className="h-3.5 w-3.5" /> Messaging
+            </TabsTrigger>
+            <TabsTrigger value="medication" className="gap-1.5 text-xs">
+              <Pill className="h-3.5 w-3.5" /> Medication
+            </TabsTrigger>
+            <TabsTrigger value="qualifications" className="gap-1.5 text-xs">
+              <GraduationCap className="h-3.5 w-3.5" /> Qualifications
+            </TabsTrigger>
+            <TabsTrigger value="incidents" className="gap-1.5 text-xs">
+              <AlertTriangle className="h-3.5 w-3.5" /> Incidents
+            </TabsTrigger>
+            <TabsTrigger value="files" className="gap-1.5 text-xs">
+              <FileText className="h-3.5 w-3.5" /> Files
+            </TabsTrigger>
+            <TabsTrigger value="changelog" className="gap-1.5 text-xs">
+              <History className="h-3.5 w-3.5" /> Changelog
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-4">
