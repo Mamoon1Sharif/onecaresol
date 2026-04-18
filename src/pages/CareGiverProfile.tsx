@@ -107,7 +107,7 @@ const CareGiverProfile = () => {
           </TabsContent>
 
           <TabsContent value="rota" className="mt-4">
-            <PlaceholderTab title="Rota" description="View and manage this caregiver's weekly rota assignments and shift patterns." />
+            <ScheduleView cg={cg} showHeader={false} />
           </TabsContent>
 
           <TabsContent value="templates" className="mt-4">
