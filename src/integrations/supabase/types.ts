@@ -555,6 +555,56 @@ export type Database = {
           },
         ]
       }
+      caregiver_qualifications: {
+        Row: {
+          care_giver_id: string
+          created_at: string
+          expiry_date: string | null
+          id: string
+          never_expires: boolean
+          notes: string | null
+          qualification: string
+          start_date: string | null
+          status: string
+          sub_status: string
+          updated_at: string
+        }
+        Insert: {
+          care_giver_id: string
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          never_expires?: boolean
+          notes?: string | null
+          qualification: string
+          start_date?: string | null
+          status?: string
+          sub_status?: string
+          updated_at?: string
+        }
+        Update: {
+          care_giver_id?: string
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          never_expires?: boolean
+          notes?: string | null
+          qualification?: string
+          start_date?: string | null
+          status?: string
+          sub_status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "caregiver_qualifications_care_giver_id_fkey"
+            columns: ["care_giver_id"]
+            isOneToOne: false
+            referencedRelation: "care_givers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       caregiver_reminders: {
         Row: {
           account: string | null
