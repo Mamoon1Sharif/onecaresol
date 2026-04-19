@@ -1,0 +1,58 @@
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { ArrowLeft, Heart, MapPin } from "lucide-react";
+import type { Tables } from "@/integrations/supabase/types";
+
+type CareReceiver = Tables<"care_receivers">;
+
+interface Props {
+  cr: CareReceiver;
+}
+
+export function ReceiverProfileHeader({ cr }: Props) {
+  const navigate = useNavigate();
+
+  return (
+    <>
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" onClick={() => navigate("/carereceivers")} className="gap-2 text-muted-foreground">
+          <ArrowLeft className="h-4 w-4" /> Back to Service Members
+        </Button>
+      </div>
+
+      <Card className="border border-border overflow-hidden">
+        <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent px-8 py-6">
+          <div className="flex items-start gap-6">
+            <div className="h-24 w-24 rounded-2xl border-2 border-primary/20 bg-primary/15 flex items-center justify-center shrink-0">
+              <Heart className="h-12 w-12 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-2xl font-bold text-foreground">{cr.name}</h1>
+                {cr.dnacpr && <Badge variant="destructive" className="text-xs">DNACPR</Badge>}
+                <Badge
+                  variant="default"
+                  className={
+                    cr.care_status === "Active" ? "bg-success/15 text-success border-0" :
+                    cr.care_status === "On Hold" ? "bg-warning/15 text-warning border-0" :
+                    "bg-muted text-muted-foreground border-0"
+                  }
+                >
+                  {cr.care_status}
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground mt-1">
+                {cr.care_type} · Age {cr.age ?? "—"}
+              </p>
+              <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground flex-wrap">
+                {cr.address && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{cr.address}</span>}
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
+    </>
+  );
+}
