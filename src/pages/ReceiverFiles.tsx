@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCareReceiver } from "@/hooks/use-care-data";
@@ -30,7 +30,6 @@ const BUCKET = "service-user-documents";
 
 export default function ReceiverFiles() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const qc = useQueryClient();
   const { data: cr } = useCareReceiver(id);
 
