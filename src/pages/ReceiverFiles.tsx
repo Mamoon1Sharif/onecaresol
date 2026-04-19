@@ -1,8 +1,9 @@
 import { useState, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useCareReceiver, useCareReceivers } from "@/hooks/use-care-data";
+import { useCareReceiver } from "@/hooks/use-care-data";
+import { ServiceUserSidebar, ServiceUserTopBar } from "@/components/member/ServiceUserSidebar";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +15,7 @@ import {
   AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
   AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import { ArrowLeft, Upload, FolderCog, FileImage, File as FileIcon, Plus, Pencil, Trash2 } from "lucide-react";
+import { Upload, FolderCog, FileImage, File as FileIcon, Plus, Pencil, Trash2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { toast } from "sonner";
 
@@ -29,10 +30,8 @@ const BUCKET = "service-user-documents";
 
 export default function ReceiverFiles() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const qc = useQueryClient();
   const { data: cr } = useCareReceiver(id);
-  const { data: receivers = [] } = useCareReceivers();
 
   const { data: categories = [] } = useQuery({
     queryKey: ["receiver_document_categories", id],
@@ -114,22 +113,10 @@ export default function ReceiverFiles() {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <header className="bg-background border-b border-border">
-        <div className="flex items-center px-4 py-2.5 relative">
-          <Button size="sm" className="h-8 bg-primary hover:bg-primary/90 text-primary-foreground gap-1.5" onClick={() => navigate(`/carereceivers/${id}`)}>
-            <ArrowLeft className="h-3.5 w-3.5" /> Back
-          </Button>
-          <h1 className="absolute left-1/2 -translate-x-1/2 text-lg font-medium text-foreground">Documents &amp; Assessments</h1>
-        </div>
-      </header>
+      <ServiceUserTopBar title="Documents & Assessments" backTo={`/carereceivers/${id}`} />
 
-      <div className="p-4 space-y-4">
-        <Card className="p-3 border-l-4 border-l-primary">
-          <Select value={id} onValueChange={(val) => navigate(`/carereceivers/${val}/files`)}>
-            <SelectTrigger className="h-9 bg-muted/50 max-w-md"><SelectValue placeholder="Select Service User" /></SelectTrigger>
-            <SelectContent>{receivers.map((r) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}</SelectContent>
-          </Select>
-        </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-4 p-4">
+        <ServiceUserSidebar cr={cr} basePath="files" />
 
         <Card className="overflow-hidden border-l-4 border-l-primary">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
