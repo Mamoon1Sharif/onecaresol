@@ -214,25 +214,45 @@ export type Database = {
       }
       care_receivers: {
         Row: {
+          account_status: string | null
           address: string | null
           age: number | null
+          alias: string | null
           allergies: string | null
+          area_name: string | null
+          authority_ref: string | null
           care_plan: string | null
           care_status: string
           care_type: string
+          carer_pref: string | null
+          cm2000_link: string | null
           community_health_index: string | null
           consent_flags: Json | null
+          contract_type: string | null
           created_at: string
           diagnoses: string | null
           dnacpr: boolean
+          dob: string | null
           doctor_address: string | null
           doctor_contact: string | null
           doctor_name: string | null
           doctor_phone: string | null
+          email_1: string | null
+          email_2: string | null
           ethnicity: string | null
+          forename: string | null
+          gender: string | null
           health_care_number: string | null
           id: string
+          keysafe: string | null
           language: string | null
+          marital_status: string | null
+          medical_company_number: string | null
+          medical_password: string | null
+          medical_service_user_number: string | null
+          mediverify: string | null
+          mobile_num_1: string | null
+          mobile_num_2: string | null
           name: string
           next_of_kin: string | null
           next_of_kin_address: string | null
@@ -240,36 +260,76 @@ export type Database = {
           next_of_kin_phone: string | null
           nfc_code: string | null
           nhs_number: string | null
+          ni_number: string | null
+          npc_number: string | null
+          onboarding_status: string | null
           patient_number: string | null
           pharmacy_address: string | null
           pharmacy_name: string | null
           pharmacy_phone: string | null
+          phone_appears_on_app: boolean | null
+          phone_number: string | null
+          pref: string | null
           preference: string | null
           preferred_hours: string | null
+          preferred_language: string | null
+          reference_no: string | null
+          religion: string | null
           requested_hours: Json | null
           risk_rating: string | null
+          risk_rating_description: string | null
+          service_start_date: string | null
+          sex_assigned_at_birth: string | null
+          sexual_orientation: string | null
+          social_services_id: string | null
+          sub_status: string | null
+          suffix: string | null
+          surname: string | null
+          tags: string[] | null
+          title: string | null
+          under_regulated_activity: boolean | null
           updated_at: string
         }
         Insert: {
+          account_status?: string | null
           address?: string | null
           age?: number | null
+          alias?: string | null
           allergies?: string | null
+          area_name?: string | null
+          authority_ref?: string | null
           care_plan?: string | null
           care_status?: string
           care_type?: string
+          carer_pref?: string | null
+          cm2000_link?: string | null
           community_health_index?: string | null
           consent_flags?: Json | null
+          contract_type?: string | null
           created_at?: string
           diagnoses?: string | null
           dnacpr?: boolean
+          dob?: string | null
           doctor_address?: string | null
           doctor_contact?: string | null
           doctor_name?: string | null
           doctor_phone?: string | null
+          email_1?: string | null
+          email_2?: string | null
           ethnicity?: string | null
+          forename?: string | null
+          gender?: string | null
           health_care_number?: string | null
           id?: string
+          keysafe?: string | null
           language?: string | null
+          marital_status?: string | null
+          medical_company_number?: string | null
+          medical_password?: string | null
+          medical_service_user_number?: string | null
+          mediverify?: string | null
+          mobile_num_1?: string | null
+          mobile_num_2?: string | null
           name: string
           next_of_kin?: string | null
           next_of_kin_address?: string | null
@@ -277,36 +337,76 @@ export type Database = {
           next_of_kin_phone?: string | null
           nfc_code?: string | null
           nhs_number?: string | null
+          ni_number?: string | null
+          npc_number?: string | null
+          onboarding_status?: string | null
           patient_number?: string | null
           pharmacy_address?: string | null
           pharmacy_name?: string | null
           pharmacy_phone?: string | null
+          phone_appears_on_app?: boolean | null
+          phone_number?: string | null
+          pref?: string | null
           preference?: string | null
           preferred_hours?: string | null
+          preferred_language?: string | null
+          reference_no?: string | null
+          religion?: string | null
           requested_hours?: Json | null
           risk_rating?: string | null
+          risk_rating_description?: string | null
+          service_start_date?: string | null
+          sex_assigned_at_birth?: string | null
+          sexual_orientation?: string | null
+          social_services_id?: string | null
+          sub_status?: string | null
+          suffix?: string | null
+          surname?: string | null
+          tags?: string[] | null
+          title?: string | null
+          under_regulated_activity?: boolean | null
           updated_at?: string
         }
         Update: {
+          account_status?: string | null
           address?: string | null
           age?: number | null
+          alias?: string | null
           allergies?: string | null
+          area_name?: string | null
+          authority_ref?: string | null
           care_plan?: string | null
           care_status?: string
           care_type?: string
+          carer_pref?: string | null
+          cm2000_link?: string | null
           community_health_index?: string | null
           consent_flags?: Json | null
+          contract_type?: string | null
           created_at?: string
           diagnoses?: string | null
           dnacpr?: boolean
+          dob?: string | null
           doctor_address?: string | null
           doctor_contact?: string | null
           doctor_name?: string | null
           doctor_phone?: string | null
+          email_1?: string | null
+          email_2?: string | null
           ethnicity?: string | null
+          forename?: string | null
+          gender?: string | null
           health_care_number?: string | null
           id?: string
+          keysafe?: string | null
           language?: string | null
+          marital_status?: string | null
+          medical_company_number?: string | null
+          medical_password?: string | null
+          medical_service_user_number?: string | null
+          mediverify?: string | null
+          mobile_num_1?: string | null
+          mobile_num_2?: string | null
           name?: string
           next_of_kin?: string | null
           next_of_kin_address?: string | null
@@ -314,14 +414,34 @@ export type Database = {
           next_of_kin_phone?: string | null
           nfc_code?: string | null
           nhs_number?: string | null
+          ni_number?: string | null
+          npc_number?: string | null
+          onboarding_status?: string | null
           patient_number?: string | null
           pharmacy_address?: string | null
           pharmacy_name?: string | null
           pharmacy_phone?: string | null
+          phone_appears_on_app?: boolean | null
+          phone_number?: string | null
+          pref?: string | null
           preference?: string | null
           preferred_hours?: string | null
+          preferred_language?: string | null
+          reference_no?: string | null
+          religion?: string | null
           requested_hours?: Json | null
           risk_rating?: string | null
+          risk_rating_description?: string | null
+          service_start_date?: string | null
+          sex_assigned_at_birth?: string | null
+          sexual_orientation?: string | null
+          social_services_id?: string | null
+          sub_status?: string | null
+          suffix?: string | null
+          surname?: string | null
+          tags?: string[] | null
+          title?: string | null
+          under_regulated_activity?: boolean | null
           updated_at?: string
         }
         Relationships: []
@@ -1208,6 +1328,42 @@ export type Database = {
         }
         Relationships: []
       }
+      receiver_dnar_settings: {
+        Row: {
+          applies_from: string | null
+          applies_until: string | null
+          care_receiver_id: string
+          created_at: string
+          document_ref: string | null
+          id: string
+          notes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          applies_from?: string | null
+          applies_until?: string | null
+          care_receiver_id: string
+          created_at?: string
+          document_ref?: string | null
+          id?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          applies_from?: string | null
+          applies_until?: string | null
+          care_receiver_id?: string
+          created_at?: string
+          document_ref?: string | null
+          id?: string
+          notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       receiver_document_categories: {
         Row: {
           care_receiver_id: string
@@ -1489,6 +1645,36 @@ export type Database = {
         }
         Relationships: []
       }
+      receiver_qualification_requirements: {
+        Row: {
+          care_receiver_id: string
+          created_at: string
+          id: string
+          mandatory: boolean
+          notes: string | null
+          qualification: string
+          updated_at: string
+        }
+        Insert: {
+          care_receiver_id: string
+          created_at?: string
+          id?: string
+          mandatory?: boolean
+          notes?: string | null
+          qualification: string
+          updated_at?: string
+        }
+        Update: {
+          care_receiver_id?: string
+          created_at?: string
+          id?: string
+          mandatory?: boolean
+          notes?: string | null
+          qualification?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       receiver_qualifications: {
         Row: {
           care_receiver_id: string
@@ -1579,6 +1765,36 @@ export type Database = {
           status?: string
           updated_at?: string
           was_set_for?: string | null
+        }
+        Relationships: []
+      }
+      receiver_user_preferences: {
+        Row: {
+          care_giver_id: string
+          care_receiver_id: string
+          created_at: string
+          description: string | null
+          id: string
+          rating: number
+          updated_at: string
+        }
+        Insert: {
+          care_giver_id: string
+          care_receiver_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          rating?: number
+          updated_at?: string
+        }
+        Update: {
+          care_giver_id?: string
+          care_receiver_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          rating?: number
+          updated_at?: string
         }
         Relationships: []
       }
