@@ -1136,6 +1136,452 @@ export type Database = {
         }
         Relationships: []
       }
+      receiver_availability: {
+        Row: {
+          care_receiver_id: string
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          note: string | null
+          start_time: string
+          updated_at: string
+          week_number: number
+        }
+        Insert: {
+          care_receiver_id: string
+          created_at?: string
+          day_of_week: number
+          end_time?: string
+          id?: string
+          note?: string | null
+          start_time?: string
+          updated_at?: string
+          week_number: number
+        }
+        Update: {
+          care_receiver_id?: string
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          note?: string | null
+          start_time?: string
+          updated_at?: string
+          week_number?: number
+        }
+        Relationships: []
+      }
+      receiver_changelog: {
+        Row: {
+          care_receiver_id: string
+          created_at: string
+          description: string
+          for_name: string | null
+          id: string
+          log_time: string
+          made_by: string
+          record_id: string
+          title: string
+        }
+        Insert: {
+          care_receiver_id: string
+          created_at?: string
+          description?: string
+          for_name?: string | null
+          id?: string
+          log_time?: string
+          made_by: string
+          record_id: string
+          title: string
+        }
+        Update: {
+          care_receiver_id?: string
+          created_at?: string
+          description?: string
+          for_name?: string | null
+          id?: string
+          log_time?: string
+          made_by?: string
+          record_id?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      receiver_document_categories: {
+        Row: {
+          care_receiver_id: string
+          color: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          care_receiver_id: string
+          color?: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          care_receiver_id?: string
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      receiver_documents: {
+        Row: {
+          care_receiver_id: string
+          category_id: string | null
+          created_at: string
+          file_name: string
+          id: string
+          mime_type: string | null
+          size_bytes: number | null
+          storage_path: string
+          tags: string[] | null
+          updated_at: string
+        }
+        Insert: {
+          care_receiver_id: string
+          category_id?: string | null
+          created_at?: string
+          file_name: string
+          id?: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          storage_path: string
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Update: {
+          care_receiver_id?: string
+          category_id?: string | null
+          created_at?: string
+          file_name?: string
+          id?: string
+          mime_type?: string | null
+          size_bytes?: number | null
+          storage_path?: string
+          tags?: string[] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "receiver_documents_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "receiver_document_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      receiver_holidays: {
+        Row: {
+          care_receiver_id: string
+          created_at: string
+          end_date: string | null
+          entry_type: string
+          hours: number | null
+          id: string
+          notes: string | null
+          reason: string | null
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          care_receiver_id: string
+          created_at?: string
+          end_date?: string | null
+          entry_type?: string
+          hours?: number | null
+          id?: string
+          notes?: string | null
+          reason?: string | null
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          care_receiver_id?: string
+          created_at?: string
+          end_date?: string | null
+          entry_type?: string
+          hours?: number | null
+          id?: string
+          notes?: string | null
+          reason?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      receiver_incidents: {
+        Row: {
+          care_receiver_id: string
+          closed_at: string | null
+          created_at: string
+          created_by: string | null
+          created_for: string | null
+          description: string
+          id: string
+          incident_date: string
+          incident_ref: string
+          severity: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          care_receiver_id: string
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          created_for?: string | null
+          description?: string
+          id?: string
+          incident_date?: string
+          incident_ref: string
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          care_receiver_id?: string
+          closed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          created_for?: string | null
+          description?: string
+          id?: string
+          incident_date?: string
+          incident_ref?: string
+          severity?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      receiver_key_contacts: {
+        Row: {
+          address1: string | null
+          address2: string | null
+          area: string | null
+          care_receiver_id: string
+          contact_type: string | null
+          created_at: string
+          email: string | null
+          id: string
+          is_ice: boolean
+          is_nok: boolean
+          lives_with: boolean
+          mobile: string | null
+          name: string
+          note: string | null
+          postcode: string | null
+          show_on_app: boolean
+          tel1: string | null
+          tel2: string | null
+          updated_at: string
+        }
+        Insert: {
+          address1?: string | null
+          address2?: string | null
+          area?: string | null
+          care_receiver_id: string
+          contact_type?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_ice?: boolean
+          is_nok?: boolean
+          lives_with?: boolean
+          mobile?: string | null
+          name: string
+          note?: string | null
+          postcode?: string | null
+          show_on_app?: boolean
+          tel1?: string | null
+          tel2?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address1?: string | null
+          address2?: string | null
+          area?: string | null
+          care_receiver_id?: string
+          contact_type?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_ice?: boolean
+          is_nok?: boolean
+          lives_with?: boolean
+          mobile?: string | null
+          name?: string
+          note?: string | null
+          postcode?: string | null
+          show_on_app?: boolean
+          tel1?: string | null
+          tel2?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      receiver_private_notes: {
+        Row: {
+          care_giver_id: string | null
+          care_receiver_id: string
+          created_at: string
+          id: string
+          note: string
+          note_date: string
+          updated_at: string
+        }
+        Insert: {
+          care_giver_id?: string | null
+          care_receiver_id: string
+          created_at?: string
+          id?: string
+          note: string
+          note_date?: string
+          updated_at?: string
+        }
+        Update: {
+          care_giver_id?: string | null
+          care_receiver_id?: string
+          created_at?: string
+          id?: string
+          note?: string
+          note_date?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      receiver_push_notifications: {
+        Row: {
+          care_receiver_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string
+        }
+        Insert: {
+          care_receiver_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note: string
+        }
+        Update: {
+          care_receiver_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string
+        }
+        Relationships: []
+      }
+      receiver_qualifications: {
+        Row: {
+          care_receiver_id: string
+          created_at: string
+          expiry_date: string | null
+          id: string
+          never_expires: boolean
+          notes: string | null
+          qualification: string
+          start_date: string | null
+          status: string
+          sub_status: string
+          updated_at: string
+        }
+        Insert: {
+          care_receiver_id: string
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          never_expires?: boolean
+          notes?: string | null
+          qualification: string
+          start_date?: string | null
+          status?: string
+          sub_status?: string
+          updated_at?: string
+        }
+        Update: {
+          care_receiver_id?: string
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          never_expires?: boolean
+          notes?: string | null
+          qualification?: string
+          start_date?: string | null
+          status?: string
+          sub_status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      receiver_reminders: {
+        Row: {
+          account: string | null
+          care_receiver_id: string
+          completed_at: string | null
+          completed_by: string | null
+          completion_notes: string | null
+          created_at: string
+          end_date: string | null
+          first_due: string | null
+          id: string
+          reminder_name: string
+          repeat_interval: string
+          status: string
+          updated_at: string
+          was_set_for: string | null
+        }
+        Insert: {
+          account?: string | null
+          care_receiver_id: string
+          completed_at?: string | null
+          completed_by?: string | null
+          completion_notes?: string | null
+          created_at?: string
+          end_date?: string | null
+          first_due?: string | null
+          id?: string
+          reminder_name: string
+          repeat_interval?: string
+          status?: string
+          updated_at?: string
+          was_set_for?: string | null
+        }
+        Update: {
+          account?: string | null
+          care_receiver_id?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          completion_notes?: string | null
+          created_at?: string
+          end_date?: string | null
+          first_due?: string | null
+          id?: string
+          reminder_name?: string
+          repeat_interval?: string
+          status?: string
+          updated_at?: string
+          was_set_for?: string | null
+        }
+        Relationships: []
+      }
       risk_assessments: {
         Row: {
           care_receiver_id: string
