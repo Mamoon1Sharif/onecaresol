@@ -11,7 +11,9 @@ import {
 } from "lucide-react";
 import { addMonths, endOfMonth, format, isSameDay, isToday, startOfMonth } from "date-fns";
 import { toast } from "sonner";
-import type { CareReceiver } from "@/hooks/use-care-data";
+import type { Tables } from "@/integrations/supabase/types";
+
+type CareReceiver = Tables<"care_receivers">;
 
 interface Props {
   cr: CareReceiver;
