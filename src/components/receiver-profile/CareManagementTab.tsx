@@ -754,8 +754,19 @@ export function CareManagementTab({ careReceiverName }: Props) {
               <Input value={visitDraft.type} onChange={(e) => setVisitDraft({ ...visitDraft, type: e.target.value })} placeholder="e.g. Morning Visit" />
             </div>
             <div className="grid grid-cols-2 gap-3">
+              <div><Label className="text-xs">Start Date</Label>
+                <Input type="date" value={visitDraft.startDate} onChange={(e) => setVisitDraft({ ...visitDraft, startDate: e.target.value })} />
+              </div>
+              <div><Label className="text-xs">Visit Kind</Label>
+                <Select value={visitDraft.visitKind} onValueChange={(v) => setVisitDraft({ ...visitDraft, visitKind: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {["Care visit", "Medication", "Welfare call", "Domestic visit"].map((k) => <SelectItem key={k} value={k}>{k}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
               <div><Label className="text-xs">Days</Label>
-                <Input value={visitDraft.dayOfWeek} onChange={(e) => setVisitDraft({ ...visitDraft, dayOfWeek: e.target.value })} placeholder="Mon-Sun" />
+                <Input value={visitDraft.dayOfWeek} onChange={(e) => setVisitDraft({ ...visitDraft, dayOfWeek: e.target.value })} placeholder="Daily / Mon Tue Wed" />
               </div>
               <div><Label className="text-xs">Start Time</Label>
                 <Input type="time" value={visitDraft.startTime} onChange={(e) => setVisitDraft({ ...visitDraft, startTime: e.target.value })} />
@@ -766,6 +777,12 @@ export function CareManagementTab({ careReceiverName }: Props) {
               <div><Label className="text-xs">Caregivers</Label>
                 <Input type="number" min={1} max={4} value={visitDraft.caregivers} onChange={(e) => setVisitDraft({ ...visitDraft, caregivers: Number(e.target.value) })} />
               </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <label className="flex items-center gap-2 text-xs cursor-pointer">
+                <Checkbox checked={visitDraft.isOngoing} onCheckedChange={(c) => setVisitDraft({ ...visitDraft, isOngoing: !!c })} />
+                Ongoing
+              </label>
             </div>
             <div><Label className="text-xs">Status</Label>
               <Select value={visitDraft.status} onValueChange={(v) => setVisitDraft({ ...visitDraft, status: v as Visit["status"] })}>
