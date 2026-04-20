@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, HeartHandshake, CalendarDays, CalendarClock, ChevronDown, LogOut, MapPin, MessageSquare, FileBarChart } from "lucide-react";
+import { LayoutDashboard, Users, HeartHandshake, CalendarDays, CalendarClock, ChevronDown, LogOut, MapPin, MessageSquare, FileBarChart, Receipt } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
@@ -38,6 +38,16 @@ const rosterSubItems = [
   { title: "Daily Roster", url: "/daily-roster" },
 ];
 
+const invoicingSubItems = [
+  { title: "Invoice Groups", url: "/invoicing/invoice-groups" },
+  { title: "Wages", url: "/invoicing/wages" },
+  { title: "Tariffs", url: "/invoicing/tariffs" },
+  { title: "Funders", url: "/invoicing/funders" },
+  { title: "Settings", url: "/invoicing/settings" },
+  { title: "Bank Holidays", url: "/invoicing/bank-holidays" },
+  { title: "Holiday Report", url: "/invoicing/holiday-report" },
+];
+
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
@@ -49,6 +59,7 @@ export function AppSidebar() {
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
 
   const rosterOpen = location.pathname === "/roster" || location.pathname === "/daily-roster";
+  const invoicingOpen = location.pathname.startsWith("/invoicing");
 
   return (
     <Sidebar collapsible="icon">
@@ -118,6 +129,44 @@ export function AppSidebar() {
                   <CollapsibleContent>
                     <SidebarMenuSub>
                       {rosterSubItems.map((sub) => (
+                        <SidebarMenuSubItem key={sub.title}>
+                          <SidebarMenuSubButton asChild isActive={isActive(sub.url)}>
+                            <NavLink
+                              to={sub.url}
+                              className="hover:bg-sidebar-accent"
+                              activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                            >
+                              {sub.title}
+                            </NavLink>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+
+              {/* Invoicing / Wages with sub-items */}
+              <Collapsible defaultOpen={invoicingOpen} className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                      isActive={invoicingOpen}
+                      tooltip="Invoicing / Wages"
+                      className="hover:bg-sidebar-accent"
+                    >
+                      <Receipt className="h-4 w-4" />
+                      {!collapsed && (
+                        <>
+                          <span className="flex-1">Invoicing / Wages</span>
+                          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                        </>
+                      )}
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {invoicingSubItems.map((sub) => (
                         <SidebarMenuSubItem key={sub.title}>
                           <SidebarMenuSubButton asChild isActive={isActive(sub.url)}>
                             <NavLink
