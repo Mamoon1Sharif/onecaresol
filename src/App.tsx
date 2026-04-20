@@ -44,6 +44,7 @@ import Tariffs from "./pages/Tariffs.tsx";
 import ChargeTariffDetail from "./pages/ChargeTariffDetail.tsx";
 import Funders from "./pages/Funders.tsx";
 import FunderProfile from "./pages/FunderProfile.tsx";
+import InvoiceWagesSettings from "./pages/InvoiceWagesSettings.tsx";
 import Login from "./pages/Login.tsx";
 import Signup from "./pages/Signup.tsx";
 import NotFound from "./pages/NotFound.tsx";
