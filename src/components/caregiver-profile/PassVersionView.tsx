@@ -130,35 +130,6 @@ export function PassVersionView({ careGiverName = "Mr Edward Allenby", receiverN
 
   return (
     <Card className="border border-border shadow-sm overflow-hidden p-0">
-      {/* Patient/Header strip */}
-      <div className="bg-[hsl(280,55%,28%)] text-white px-4 py-3 flex items-center gap-4">
-        <div className="h-12 w-12 rounded-full bg-white/20 flex items-center justify-center text-sm font-semibold">
-          EA
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold">{careGiverName}</span>
-            <span className="text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded uppercase tracking-wide">Active</span>
-          </div>
-          <div className="text-xs text-white/80">DOB: 29/04/1944</div>
-          <div className="text-xs text-white/80">14, Raven Drive, Rotherham, S81 2UD</div>
-        </div>
-        <nav className="hidden lg:flex items-center gap-4 text-xs">
-          {[
-            "Dashboard","Care Management","Care Notes","MAR Chart","Timeline",
-            "Documents","About Me","Details","Checklists","Rostering",
-            "Communications","Medical History","Customer File","openPASS",
-          ].map((n) => (
-            <button
-              key={n}
-              className={`hover:text-white/100 ${n === "Care Notes" ? "text-white border-b-2 border-white pb-0.5 font-semibold" : "text-white/85"}`}
-            >
-              {n}
-            </button>
-          ))}
-        </nav>
-      </div>
-
       {/* Toolbar */}
       <div className="bg-background border-b px-4 py-2 flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
