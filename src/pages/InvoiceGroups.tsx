@@ -30,8 +30,6 @@ import {
 } from "@/components/ui/pagination";
 import { ArrowLeft, CalendarIcon, FileText, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 
 type InvoiceGroup = {
   groupName: string;
