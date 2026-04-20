@@ -46,6 +46,7 @@ import Funders from "./pages/Funders.tsx";
 import FunderProfile from "./pages/FunderProfile.tsx";
 import InvoiceWagesSettings from "./pages/InvoiceWagesSettings.tsx";
 import BankHolidays from "./pages/BankHolidays.tsx";
+import HolidayReport from "./pages/HolidayReport.tsx";
 import Login from "./pages/Login.tsx";
 import Signup from "./pages/Signup.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -95,7 +96,7 @@ const App = () => (
             <Route path="/invoicing/funders/:funderName" element={<ProtectedRoute><FunderProfile /></ProtectedRoute>} />
             <Route path="/invoicing/settings" element={<ProtectedRoute><InvoiceWagesSettings /></ProtectedRoute>} />
             <Route path="/invoicing/bank-holidays" element={<ProtectedRoute><BankHolidays /></ProtectedRoute>} />
-            <Route path="/invoicing/holiday-report" element={<ProtectedRoute><InvoicingPlaceholder title="Holiday Report" description="Annual leave accruals, taken hours and outstanding balances." /></ProtectedRoute>} />
+            <Route path="/invoicing/holiday-report" element={<ProtectedRoute><HolidayReport /></ProtectedRoute>} />
             <Route path="/caregivers/:id/messaging" element={<ProtectedRoute><Messaging /></ProtectedRoute>} />
             <Route path="/caregivers/:id/medication" element={<ProtectedRoute><Medication /></ProtectedRoute>} />
             <Route path="/caregivers/:id/qualifications" element={<ProtectedRoute><Qualifications /></ProtectedRoute>} />
