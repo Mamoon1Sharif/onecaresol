@@ -76,6 +76,7 @@ function GroupTable({
   search: string;
   pageSize: number;
 }) {
+  const navigate = useNavigate();
   const filtered = useMemo(
     () =>
       rows.filter((r) =>
@@ -118,7 +119,10 @@ function GroupTable({
                 return (
                   <TableRow key={i} className={fullyPaid ? "bg-emerald-50/40" : "bg-rose-50/40"}>
                     <TableCell>
-                      <button className="text-primary hover:underline text-left">
+                      <button
+                        className="text-primary hover:underline text-left"
+                        onClick={() => navigate(`/invoicing/invoice-groups/${encodeURIComponent(r.groupName)}`)}
+                      >
                         {r.groupName}
                       </button>
                     </TableCell>
