@@ -14,10 +14,12 @@ import { ReceiverNotesTab } from "@/components/receiver-profile/NotesTab";
 import { ReceiverAvailabilityTab } from "@/components/receiver-profile/AvailabilityTab";
 import { ReceiverHolidaysTab } from "@/components/receiver-profile/HolidaysTab";
 import { ReceiverPlaceholderTab } from "@/components/receiver-profile/PlaceholderTab";
+import { CareManagementTab } from "@/components/receiver-profile/CareManagementTab";
 import {
   LayoutDashboard, UserCog, CalendarDays, LayoutTemplate,
   Users, Bell, StickyNote, CalendarCheck, Plane,
   MessageSquare, Pill, GraduationCap, AlertTriangle, FileText, History,
+  HeartPulse,
 } from "lucide-react";
 
 const CareReceiverProfile = () => {
@@ -56,6 +58,9 @@ const CareReceiverProfile = () => {
           <TabsList className="w-full justify-start flex-wrap h-auto gap-1 bg-muted/50 p-1">
             <TabsTrigger value="overview" className="gap-1.5 text-xs">
               <LayoutDashboard className="h-3.5 w-3.5" /> Overview
+            </TabsTrigger>
+            <TabsTrigger value="care-management" className="gap-1.5 text-xs">
+              <HeartPulse className="h-3.5 w-3.5" /> Care Management
             </TabsTrigger>
             <TabsTrigger value="detailed" className="gap-1.5 text-xs">
               <UserCog className="h-3.5 w-3.5" /> Detailed Profile
@@ -121,6 +126,9 @@ const CareReceiverProfile = () => {
 
           <TabsContent value="overview" className="mt-4">
             <ReceiverOverviewTab cr={cr} />
+          </TabsContent>
+          <TabsContent value="care-management" className="mt-4">
+            <CareManagementTab careReceiverId={cr.id} careReceiverName={cr.name} />
           </TabsContent>
           <TabsContent value="detailed" className="mt-4">
             <ReceiverDetailedProfileTab cr={cr} />
