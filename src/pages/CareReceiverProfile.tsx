@@ -15,11 +15,12 @@ import { ReceiverAvailabilityTab } from "@/components/receiver-profile/Availabil
 import { ReceiverHolidaysTab } from "@/components/receiver-profile/HolidaysTab";
 import { ReceiverPlaceholderTab } from "@/components/receiver-profile/PlaceholderTab";
 import { CareManagementTab } from "@/components/receiver-profile/CareManagementTab";
+import { MarChartTab } from "@/components/receiver-profile/MarChartTab";
 import {
   LayoutDashboard, UserCog, CalendarDays, LayoutTemplate,
   Users, Bell, StickyNote, CalendarCheck, Plane,
   MessageSquare, Pill, GraduationCap, AlertTriangle, FileText, History,
-  HeartPulse,
+  HeartPulse, ClipboardList,
 } from "lucide-react";
 
 const CareReceiverProfile = () => {
@@ -61,6 +62,9 @@ const CareReceiverProfile = () => {
             </TabsTrigger>
             <TabsTrigger value="care-management" className="gap-1.5 text-xs">
               <HeartPulse className="h-3.5 w-3.5" /> Care Management
+            </TabsTrigger>
+            <TabsTrigger value="mar-chart" className="gap-1.5 text-xs">
+              <ClipboardList className="h-3.5 w-3.5" /> MAR Chart
             </TabsTrigger>
             <TabsTrigger value="detailed" className="gap-1.5 text-xs">
               <UserCog className="h-3.5 w-3.5" /> Detailed Profile
@@ -129,6 +133,9 @@ const CareReceiverProfile = () => {
           </TabsContent>
           <TabsContent value="care-management" className="mt-4">
             <CareManagementTab careReceiverId={cr.id} careReceiverName={cr.name} />
+          </TabsContent>
+          <TabsContent value="mar-chart" className="mt-4">
+            <MarChartTab cr={cr} />
           </TabsContent>
           <TabsContent value="detailed" className="mt-4">
             <ReceiverDetailedProfileTab cr={cr} />
