@@ -1,0 +1,7 @@
+
+ALTER TABLE public.communication_logs
+  ADD COLUMN IF NOT EXISTS title TEXT,
+  ADD COLUMN IF NOT EXISTS user_type TEXT,
+  ADD COLUMN IF NOT EXISTS waiting_on TEXT DEFAULT 'Call Back',
+  ADD COLUMN IF NOT EXISTS assigned_to TEXT,
+  ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}'::text[];

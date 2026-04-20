@@ -488,136 +488,232 @@ function AddLogDialog({
   reasons: CommReason[];
 }) {
   const qc = useQueryClient();
-  const [direction, setDirection] = useState<"outgoing" | "incoming">("outgoing");
-  const [commType, setCommType] = useState<"call" | "email">("call");
-  const [contactName, setContactName] = useState("");
-  const [contactPhone, setContactPhone] = useState("");
-  const [contactEmail, setContactEmail] = useState("");
-  const [subject, setSubject] = useState("");
-  const [notes, setNotes] = useState("");
+  const [title, setTitle] = useState("");
+  const [userType, setUserType] = useState<string>("");
+  const [logType, setLogType] = useState<"outgoing" | "incoming">("outgoing");
+  const [commType, setCommType] = useState<"Phone" | "Email" | "SMS" | "In Person" | "Letter">("Phone");
+  const [phoneEmail, setPhoneEmail] = useState("");
+  const [waitingOn, setWaitingOn] = useState<string>("Call Back");
+  const [assignTo, setAssignTo] = useState("");
+  const [commDate, setCommDate] = useState<Date>(new Date());
+  const [note, setNote] = useState("");
   const [reasonId, setReasonId] = useState<string>("none");
-  const [loggedBy, setLoggedBy] = useState("");
-  const [occurredAt, setOccurredAt] = useState<Date>(new Date());
-  const [duration, setDuration] = useState("");
+  const [tagsInput, setTagsInput] = useState("");
+
+  // Load assignable users (caregivers) for "Assign To"
+  const { data: assignees = [] } = useQuery({
+    queryKey: ["caregivers_for_assign"],
+    enabled: open,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("care_givers")
+        .select("id, name")
+        .eq("status", "Active")
+        .order("name");
+      if (error) throw error;
+      return data as { id: string; name: string }[];
+    },
+  });
 
   const reset = () => {
-    setDirection("outgoing"); setCommType("call"); setContactName(""); setContactPhone("");
-    setContactEmail(""); setSubject(""); setNotes(""); setReasonId("none"); setLoggedBy("");
-    setOccurredAt(new Date()); setDuration("");
+    setTitle(""); setUserType(""); setLogType("outgoing"); setCommType("Phone");
+    setPhoneEmail(""); setWaitingOn("Call Back"); setAssignTo(""); setCommDate(new Date());
+    setNote(""); setReasonId("none"); setTagsInput("");
   };
 
   const save = useMutation({
     mutationFn: async () => {
-      if (!contactName.trim()) throw new Error("Contact name required");
+      if (!title.trim()) throw new Error("Title is required");
+      if (!userType) throw new Error("User Type is required");
+      if (!logType) throw new Error("Log Type is required");
+      if (!commType) throw new Error("Communication Type is required");
+      if (!waitingOn) throw new Error("Waiting On is required");
+
       const reason = reasons.find((r) => r.id === reasonId);
+      const isEmail = commType === "Email";
+      const tags = tagsInput.split(",").map((t) => t.trim()).filter(Boolean);
+
       const { error } = await supabase.from("communication_logs" as any).insert({
-        direction, comm_type: commType,
-        contact_name: contactName.trim(),
-        contact_phone: contactPhone || null,
-        contact_email: contactEmail || null,
-        subject: subject || null,
-        notes: notes || null,
+        title: title.trim(),
+        user_type: userType,
+        direction: logType,
+        comm_type: isEmail ? "email" : "call",
+        contact_name: title.trim(),
+        contact_phone: !isEmail ? phoneEmail || null : null,
+        contact_email: isEmail ? phoneEmail || null : null,
+        subject: title.trim(),
+        notes: note || null,
         reason_id: reasonId === "none" ? null : reasonId,
         reason_label: reason?.name ?? null,
-        logged_by: loggedBy || null,
-        occurred_at: occurredAt.toISOString(),
-        duration_minutes: duration ? Number(duration) : null,
+        waiting_on: waitingOn,
+        assigned_to: assignTo || null,
+        occurred_at: commDate.toISOString(),
+        tags,
       });
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["comm_logs"] });
-      toast.success("Log added");
-      reset(); onOpenChange(false);
+      toast.success("Communication log added");
+      reset();
+      onOpenChange(false);
     },
     onError: (e: any) => toast.error(e.message),
   });
 
+  const labelCls = "text-xs font-semibold text-white text-right pt-2";
+  const requiredStar = <span className="text-rose-200 mr-0.5">*</span>;
+
   return (
     <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) reset(); }}>
-      <DialogContent className="max-w-lg">
-        <DialogHeader><DialogTitle>Log a Call/Email</DialogTitle></DialogHeader>
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <Label className="text-xs">Direction</Label>
-            <Select value={direction} onValueChange={(v: any) => setDirection(v)}>
-              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+      <DialogContent className="max-w-md p-0 gap-0 border-0 overflow-hidden bg-emerald-600">
+        {/* Header */}
+        <div className="px-4 py-3 bg-emerald-700 border-b border-emerald-800">
+          <DialogHeader>
+            <DialogTitle className="text-white text-base font-medium">Add Communication Log</DialogTitle>
+          </DialogHeader>
+        </div>
+
+        {/* Body */}
+        <div className="px-5 py-4 bg-emerald-600 max-h-[70vh] overflow-y-auto">
+          <div className="grid grid-cols-[120px_1fr] gap-x-3 gap-y-3 items-start">
+            <div className={labelCls}>{requiredStar}Title</div>
+            <Input
+              className="h-9 text-xs bg-white text-foreground border-0"
+              value={title}
+              maxLength={200}
+              onChange={(e) => setTitle(e.target.value)}
+            />
+
+            <div className={labelCls}>{requiredStar}User Type</div>
+            <Select value={userType} onValueChange={setUserType}>
+              <SelectTrigger className="h-9 text-xs bg-white text-foreground border-0"><SelectValue placeholder="Please Select" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Service User">Service User</SelectItem>
+                <SelectItem value="Team Member">Team Member</SelectItem>
+                <SelectItem value="Family / NOK">Family / NOK</SelectItem>
+                <SelectItem value="Healthcare Pro">Healthcare Pro</SelectItem>
+                <SelectItem value="Other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <div className={labelCls}>{requiredStar}Log Type</div>
+            <Select value={logType} onValueChange={(v: any) => setLogType(v)}>
+              <SelectTrigger className="h-9 text-xs bg-white text-foreground border-0"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="outgoing">Outgoing</SelectItem>
                 <SelectItem value="incoming">Incoming</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-          <div>
-            <Label className="text-xs">Type</Label>
+
+            <div className={labelCls}>{requiredStar}Communication Type</div>
             <Select value={commType} onValueChange={(v: any) => setCommType(v)}>
-              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-9 text-xs bg-white text-foreground border-0"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="call">Call</SelectItem>
-                <SelectItem value="email">Email</SelectItem>
+                <SelectItem value="Phone">Phone</SelectItem>
+                <SelectItem value="Email">Email</SelectItem>
+                <SelectItem value="SMS">SMS</SelectItem>
+                <SelectItem value="In Person">In Person</SelectItem>
+                <SelectItem value="Letter">Letter</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-          <div className="col-span-2">
-            <Label className="text-xs">Contact name *</Label>
-            <Input className="h-8 text-xs" value={contactName} onChange={(e) => setContactName(e.target.value)} />
-          </div>
-          <div>
-            <Label className="text-xs">Phone</Label>
-            <Input className="h-8 text-xs" value={contactPhone} onChange={(e) => setContactPhone(e.target.value)} />
-          </div>
-          <div>
-            <Label className="text-xs">Email</Label>
-            <Input className="h-8 text-xs" value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} />
-          </div>
-          <div className="col-span-2">
-            <Label className="text-xs">Subject</Label>
-            <Input className="h-8 text-xs" value={subject} onChange={(e) => setSubject(e.target.value)} />
-          </div>
-          <div className="col-span-2">
-            <Label className="text-xs">Notes</Label>
-            <Textarea className="text-xs min-h-[70px]" value={notes} onChange={(e) => setNotes(e.target.value)} />
-          </div>
-          <div>
-            <Label className="text-xs">Reason</Label>
-            <Select value={reasonId} onValueChange={setReasonId}>
-              <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="None" /></SelectTrigger>
+
+            <div className={labelCls}>Phone/Email</div>
+            <Input
+              className="h-9 text-xs bg-white text-foreground border-0 placeholder:text-muted-foreground"
+              placeholder="Phone or Email"
+              value={phoneEmail}
+              maxLength={255}
+              onChange={(e) => setPhoneEmail(e.target.value)}
+            />
+
+            <div className={labelCls}>{requiredStar}Waiting On</div>
+            <Select value={waitingOn} onValueChange={setWaitingOn}>
+              <SelectTrigger className="h-9 text-xs bg-white text-foreground border-0"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">None</SelectItem>
-                {reasons.map((r) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}
+                <SelectItem value="Call Back">Call Back</SelectItem>
+                <SelectItem value="Email Reply">Email Reply</SelectItem>
+                <SelectItem value="Action">Action</SelectItem>
+                <SelectItem value="Nothing">Nothing</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-          <div>
-            <Label className="text-xs">Logged by</Label>
-            <Input className="h-8 text-xs" value={loggedBy} onChange={(e) => setLoggedBy(e.target.value)} />
-          </div>
-          <div>
-            <Label className="text-xs">Occurred at</Label>
+
+            <div className={labelCls}>Assign To</div>
+            <Select value={assignTo} onValueChange={setAssignTo}>
+              <SelectTrigger className="h-9 text-xs bg-muted text-foreground border-0"><SelectValue placeholder="Please Select" /></SelectTrigger>
+              <SelectContent>
+                {assignees.length === 0 ? (
+                  <SelectItem value="__none" disabled>No active team members</SelectItem>
+                ) : (
+                  assignees.map((u) => <SelectItem key={u.id} value={u.name}>{u.name}</SelectItem>)
+                )}
+              </SelectContent>
+            </Select>
+
+            <div className={labelCls}>Communication Date</div>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="h-8 text-xs w-full justify-start font-normal">
-                  <CalendarIcon className="h-3 w-3 mr-1" />{format(occurredAt, "dd MMM yyyy HH:mm")}
+                <Button variant="outline" className="h-9 text-xs w-full justify-start font-normal bg-muted text-foreground border-0">
+                  <CalendarIcon className="h-3 w-3 mr-1" />{format(commDate, "dd/MM/yyyy")}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar mode="single" selected={occurredAt} onSelect={(d) => d && setOccurredAt(d)} className="pointer-events-auto" />
+                <Calendar mode="single" selected={commDate} onSelect={(d) => d && setCommDate(d)} className="pointer-events-auto" />
               </PopoverContent>
             </Popover>
-          </div>
-          <div>
-            <Label className="text-xs">Duration (min)</Label>
-            <Input className="h-8 text-xs" type="number" value={duration} onChange={(e) => setDuration(e.target.value)} />
+
+            <div className={labelCls}>Note</div>
+            <Textarea
+              className="text-xs bg-white text-foreground border-0 min-h-[100px] resize-y"
+              value={note}
+              maxLength={2000}
+              onChange={(e) => setNote(e.target.value)}
+            />
+
+            <div className={labelCls}>{requiredStar}Reason</div>
+            <Select value={reasonId} onValueChange={setReasonId}>
+              <SelectTrigger className="h-9 text-xs bg-white text-foreground border-0"><SelectValue placeholder="choose one..." /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">choose one...</SelectItem>
+                {reasons.map((r) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+
+            <div className={labelCls}>Tags</div>
+            <Input
+              className="h-9 text-xs bg-muted text-foreground border-0 placeholder:text-muted-foreground"
+              placeholder="Nothing selected"
+              value={tagsInput}
+              maxLength={300}
+              onChange={(e) => setTagsInput(e.target.value)}
+            />
           </div>
         </div>
-        <DialogFooter>
-          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>Cancel</Button>
-          <Button size="sm" onClick={() => save.mutate()} disabled={save.isPending}>Save Log</Button>
-        </DialogFooter>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between px-4 py-3 bg-emerald-700 border-t border-emerald-800">
+          <Button
+            size="sm"
+            onClick={() => save.mutate()}
+            disabled={save.isPending}
+            className="h-8 bg-white hover:bg-white/90 text-emerald-700 border border-emerald-800"
+          >
+            <span className="mr-1">💾</span> Save
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            className="h-8 bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-800"
+          >
+            Close
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
 }
+
 
 function ReasonsDialog({
   open,
