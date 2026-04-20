@@ -146,7 +146,28 @@ export default function InvoiceFull() {
     setChargeOpen(false);
   };
 
-  return (
+  const resetPaymentForm = () => {
+    setPayAmount("");
+    setPayDate(todayDdMmYyyy());
+    setPayPaidTo("");
+    setPayMethod("");
+    setPayRef("");
+  };
+
+  const handleCreatePayment = () => {
+    const amount = Number(payAmount);
+    if (!payAmount || isNaN(amount) || amount <= 0 || !payPaidTo) {
+      toast({ title: "Missing details", description: "Amount and Paid To are required.", variant: "destructive" });
+      return;
+    }
+    setPayments((prev) => [
+      ...prev,
+      { date: payDate, paidTo: payPaidTo, referenceNum: payRef.trim(), method: payMethod || "—", amount },
+    ]);
+    toast({ title: "Payment recorded", description: `${fmt(amount)} added to invoice.` });
+    resetPaymentForm();
+    setPaymentOpen(false);
+  };
     <AppLayout>
       <div className="max-w-7xl mx-auto space-y-5 print:space-y-3">
         {/* Top toolbar */}
