@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -88,12 +89,17 @@ const colorMap = {
 
 function ReportSectionCard({ section }: { section: ReportSection }) {
   const [search, setSearch] = useState("");
+  const nav = useNavigate();
   const c = colorMap[section.color];
 
   const filtered = useMemo(
     () => section.items.filter((i) => i.name.toLowerCase().includes(search.toLowerCase())),
     [section.items, search],
   );
+
+  const openReport = (name: string) => {
+    nav(`/reports/${encodeURIComponent(name)}?category=${encodeURIComponent(section.title)}`);
+  };
 
   return (
     <Card className={`border-t-4 ${c.border} flex flex-col`}>
@@ -116,20 +122,21 @@ function ReportSectionCard({ section }: { section: ReportSection }) {
               return (
                 <tr
                   key={item.name + idx}
-                  className={`border-b last:border-b-0 ${idx % 2 === 0 ? "bg-muted/30" : "bg-background"} hover:bg-muted/60 transition-colors`}
+                  className={`border-b last:border-b-0 ${idx % 2 === 0 ? "bg-muted/30" : "bg-background"} hover:bg-muted/60 transition-colors cursor-pointer`}
+                  onClick={() => openReport(item.name)}
                 >
                   <td className="w-10 px-3 py-2">
                     <Icon className={`h-4 w-4 ${c.text}`} />
                   </td>
                   <td className="px-2 py-2">
-                    <button className={`${c.text} hover:underline text-left`}>
+                    <span className={`${c.text} hover:underline text-left`}>
                       {item.name}
-                    </button>
+                    </span>
                   </td>
                   <td className="w-10 px-3 py-2 text-right">
-                    <button className={`${c.text} hover:opacity-70`} title="View">
+                    <span className={`${c.text} hover:opacity-70`} title="View">
                       <Eye className="h-4 w-4 inline" />
-                    </button>
+                    </span>
                   </td>
                 </tr>
               );
