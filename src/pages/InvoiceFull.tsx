@@ -244,67 +244,60 @@ export default function InvoiceFull() {
             if (!o) resetChargeForm();
           }}
         >
-          <DialogContent className="p-0 overflow-hidden max-w-md gap-0 border-0">
-            <DialogHeader className="bg-emerald-600 text-white px-5 py-3 flex flex-row items-center justify-between space-y-0">
-              <DialogTitle className="text-white text-base font-semibold">Add New Charge</DialogTitle>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add New Charge</DialogTitle>
             </DialogHeader>
-            <div className="bg-emerald-500 text-white px-5 py-3 text-xs leading-relaxed">
-              You can add a custom charge to this invoice below. We will take your quantity entered and * it by the cost to get the total for this payment.
-            </div>
-            <div className="bg-emerald-500 px-5 pb-5 space-y-3">
-              <div className="grid grid-cols-[120px_1fr] items-center gap-3">
-                <Label className="text-white text-right text-sm">
-                  <span className="text-red-200 mr-0.5">*</span>Service
+            <p className="text-sm text-muted-foreground -mt-1">
+              Add a custom charge to this invoice. The total is calculated as quantity × cost per quantity.
+            </p>
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="charge-service">
+                  Service <span className="text-destructive">*</span>
                 </Label>
                 <Input
+                  id="charge-service"
                   value={chargeService}
                   onChange={(e) => setChargeService(e.target.value)}
-                  placeholder="Service Description"
-                  className="h-9 bg-white text-foreground"
+                  placeholder="Service description"
                 />
               </div>
-              <div className="grid grid-cols-[120px_1fr] items-center gap-3">
-                <Label className="text-white text-right text-sm">
-                  <span className="text-red-200 mr-0.5">*</span>Quantitiy
-                </Label>
-                <Input
-                  type="number"
-                  value={chargeQty}
-                  onChange={(e) => setChargeQty(e.target.value)}
-                  placeholder="Number Only"
-                  className="h-9 bg-white text-foreground"
-                />
-              </div>
-              <div className="grid grid-cols-[120px_1fr] items-center gap-3">
-                <Label className="text-white text-right text-sm">
-                  <span className="text-red-200 mr-0.5">*</span>Cost Per Quantity
-                </Label>
-                <Input
-                  type="number"
-                  value={chargeCost}
-                  onChange={(e) => setChargeCost(e.target.value)}
-                  placeholder="Number Only"
-                  className="h-9 bg-white text-foreground"
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="charge-qty">
+                    Quantity <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="charge-qty"
+                    type="number"
+                    value={chargeQty}
+                    onChange={(e) => setChargeQty(e.target.value)}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="charge-cost">
+                    Cost per Quantity <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="charge-cost"
+                    type="number"
+                    value={chargeCost}
+                    onChange={(e) => setChargeCost(e.target.value)}
+                    placeholder="0.00"
+                  />
+                </div>
               </div>
             </div>
-            <div className="bg-emerald-700 px-5 py-3 flex items-center justify-between">
-              <Button
-                size="sm"
-                onClick={handleAddCharge}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-400"
-              >
-                <Check className="h-4 w-4 mr-1.5" /> Add &amp; Save
+            <DialogFooter className="gap-2 sm:gap-2">
+              <Button variant="outline" onClick={() => setChargeOpen(false)}>
+                Cancel
               </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setChargeOpen(false)}
-                className="text-white hover:bg-emerald-600 hover:text-white"
-              >
-                <X className="h-4 w-4 mr-1.5" /> Close
+              <Button onClick={handleAddCharge}>
+                <Check className="h-4 w-4 mr-1.5" /> Add Charge
               </Button>
-            </div>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 
