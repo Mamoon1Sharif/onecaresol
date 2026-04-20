@@ -106,11 +106,9 @@ const SEED_TASKS: Task[] = [
 ];
 
 const SEED_VISITS: Visit[] = [
-  { id: "v1", type: "Morning Visit", dayOfWeek: "Mon-Sun", startTime: "06:30", duration: 25, caregivers: 1, status: "Active" },
-  { id: "v2", type: "Lunch Visit", dayOfWeek: "Mon-Sun", startTime: "12:30", duration: 30, caregivers: 1, status: "Active" },
-  { id: "v3", type: "Tea Visit", dayOfWeek: "Mon-Sun", startTime: "17:00", duration: 30, caregivers: 1, status: "Active" },
-  { id: "v4", type: "Bed Time Visit", dayOfWeek: "Mon-Sun", startTime: "21:30", duration: 25, caregivers: 1, status: "Active" },
-  { id: "v5", type: "Welfare Call", dayOfWeek: "Wed, Sat", startTime: "15:00", duration: 15, caregivers: 1, status: "Inactive" },
+  { id: "v1", type: "Bed Time Visit", startDate: "2025-06-30", isOngoing: true, visitKind: "Care visit", dayOfWeek: "Daily", startTime: "18:45", duration: 30, caregivers: 1, status: "Active" },
+  { id: "v2", type: "Medication Stock Check Visit", startDate: "2025-06-30", isOngoing: true, visitKind: "Care visit", dayOfWeek: "Mon", startTime: "08:45", duration: 30, caregivers: 1, status: "Active" },
+  { id: "v3", type: "Morning Visit", startDate: "2025-06-30", isOngoing: true, visitKind: "Care visit", dayOfWeek: "Tue Wed Thu Fri Sat Sun", startTime: "08:45", duration: 30, caregivers: 1, status: "Active" },
 ];
 
 const SEED_GROUPS: CareGroup[] = [
