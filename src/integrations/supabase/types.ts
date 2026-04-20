@@ -1063,6 +1063,145 @@ export type Database = {
           },
         ]
       }
+      communication_actions: {
+        Row: {
+          assigned_to: string | null
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          is_completed: boolean
+          log_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          is_completed?: boolean
+          log_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          is_completed?: boolean
+          log_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communication_actions_log_id_fkey"
+            columns: ["log_id"]
+            isOneToOne: false
+            referencedRelation: "communication_logs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      communication_logs: {
+        Row: {
+          comm_type: string
+          contact_email: string | null
+          contact_name: string
+          contact_phone: string | null
+          created_at: string
+          direction: string
+          duration_minutes: number | null
+          id: string
+          logged_by: string | null
+          logged_for: string | null
+          notes: string | null
+          occurred_at: string
+          reason_id: string | null
+          reason_label: string | null
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          comm_type?: string
+          contact_email?: string | null
+          contact_name: string
+          contact_phone?: string | null
+          created_at?: string
+          direction?: string
+          duration_minutes?: number | null
+          id?: string
+          logged_by?: string | null
+          logged_for?: string | null
+          notes?: string | null
+          occurred_at?: string
+          reason_id?: string | null
+          reason_label?: string | null
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          comm_type?: string
+          contact_email?: string | null
+          contact_name?: string
+          contact_phone?: string | null
+          created_at?: string
+          direction?: string
+          duration_minutes?: number | null
+          id?: string
+          logged_by?: string | null
+          logged_for?: string | null
+          notes?: string | null
+          occurred_at?: string
+          reason_id?: string | null
+          reason_label?: string | null
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communication_logs_reason_id_fkey"
+            columns: ["reason_id"]
+            isOneToOne: false
+            referencedRelation: "communication_reasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      communication_reasons: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       daily_visits: {
         Row: {
           care_giver_id: string | null
