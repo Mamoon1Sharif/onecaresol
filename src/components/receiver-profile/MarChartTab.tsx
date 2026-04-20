@@ -227,23 +227,25 @@ export function MarChartTab({ cr }: Props) {
           <div className="flex items-center gap-1">
             <Button
               size="icon"
-              className="h-8 w-8 bg-[hsl(280,55%,28%)] hover:bg-[hsl(280,55%,22%)] text-white"
+              variant="outline"
+              className="h-8 w-8"
               onClick={() => setMonthStart((d) => startOfMonth(addMonths(d, -1)))}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <div className="px-3 py-1.5 text-xs font-semibold rounded bg-[hsl(280,55%,28%)] text-white min-w-[260px] text-center">
+            <div className="px-3 py-1.5 text-xs font-semibold rounded bg-muted border min-w-[260px] text-center">
               {periodLabel}
             </div>
             <Button
               size="icon"
-              className="h-8 w-8 bg-[hsl(280,55%,28%)] hover:bg-[hsl(280,55%,22%)] text-white"
+              variant="outline"
+              className="h-8 w-8"
               onClick={() => setMonthStart((d) => startOfMonth(addMonths(d, 1)))}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
-          <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+          <label className="flex items-center gap-1.5 text-xs cursor-pointer text-muted-foreground">
             <Checkbox checked={hideSelf} onCheckedChange={(v) => setHideSelf(!!v)} />
             Hide self-administer medications
           </label>
