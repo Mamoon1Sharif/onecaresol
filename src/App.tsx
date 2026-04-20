@@ -41,6 +41,7 @@ import InvoicingPlaceholder from "./pages/InvoicingPlaceholder.tsx";
 import Wages from "./pages/Wages.tsx";
 import WageGroupDetail from "./pages/WageGroupDetail.tsx";
 import Tariffs from "./pages/Tariffs.tsx";
+import ChargeTariffDetail from "./pages/ChargeTariffDetail.tsx";
 import Login from "./pages/Login.tsx";
 import Signup from "./pages/Signup.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -85,6 +86,7 @@ const App = () => (
             <Route path="/invoicing/wages" element={<ProtectedRoute><Wages /></ProtectedRoute>} />
             <Route path="/invoicing/wages/:groupName" element={<ProtectedRoute><WageGroupDetail /></ProtectedRoute>} />
             <Route path="/invoicing/tariffs" element={<ProtectedRoute><Tariffs /></ProtectedRoute>} />
+            <Route path="/invoicing/tariffs/:tariffName" element={<ProtectedRoute><ChargeTariffDetail /></ProtectedRoute>} />
             <Route path="/invoicing/funders" element={<ProtectedRoute><InvoicingPlaceholder title="Funders" description="Manage funding bodies, contracts and billing references." /></ProtectedRoute>} />
             <Route path="/invoicing/settings" element={<ProtectedRoute><InvoicingPlaceholder title="Invoicing Settings" description="Invoice numbering, VAT, PDF templates and payment terms." /></ProtectedRoute>} />
             <Route path="/invoicing/bank-holidays" element={<ProtectedRoute><InvoicingPlaceholder title="Bank Holidays" description="Define UK bank holidays that affect pay and charge calculations." /></ProtectedRoute>} />
