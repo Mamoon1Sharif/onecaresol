@@ -457,20 +457,75 @@ export default function InvoiceFull() {
           <Card className="p-5 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="font-semibold">Invoice Settings</h2>
-              <Button size="sm" className="h-8 bg-amber-500 hover:bg-amber-600 text-white">
+              <Button
+                size="sm"
+                className="h-8 bg-amber-500 hover:bg-amber-600 text-white"
+                onClick={openSettings}
+              >
                 <Pencil className="h-4 w-4 mr-1" /> Edit
               </Button>
             </div>
             <dl className="space-y-1.5 text-xs">
-              {settings.map((s) => (
-                <div key={s.label} className="flex gap-2">
-                  <dt className="font-medium min-w-[210px]">{s.label}:</dt>
-                  <dd className={s.valueClass ?? "text-muted-foreground"}>{s.value || "—"}</dd>
+              {settingFields.map((f) => (
+                <div key={f.key} className="flex gap-2">
+                  <dt className="font-medium min-w-[210px]">{f.label}:</dt>
+                  <dd className={f.key === "invoiceLayout" ? "text-primary" : "text-muted-foreground"}>
+                    {settings[f.key] || "—"}
+                  </dd>
                 </div>
               ))}
             </dl>
           </Card>
         </div>
+
+        {/* Edit Invoice Settings Dialog */}
+        <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+          <DialogContent className="p-0 overflow-hidden max-w-lg gap-0 border-0">
+            <DialogHeader className="bg-amber-600 text-white px-5 py-3 flex flex-row items-center justify-between space-y-0">
+              <DialogTitle className="text-white text-base font-semibold">Invoice Settings</DialogTitle>
+            </DialogHeader>
+            <div className="bg-amber-500 px-5 py-5 space-y-3 max-h-[70vh] overflow-y-auto">
+              {settingFields.map((f) => (
+                <div key={f.key} className="grid grid-cols-[180px_1fr] items-center gap-3">
+                  <Label className="text-white text-right text-sm leading-tight">
+                    {f.required && <span className="text-red-200 mr-0.5">*</span>}
+                    {f.label}
+                  </Label>
+                  <Select
+                    value={draftSettings[f.key]}
+                    onValueChange={(v) => setDraftSettings((p) => ({ ...p, [f.key]: v }))}
+                  >
+                    <SelectTrigger className="h-9 bg-white text-foreground">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {f.options.map((o) => (
+                        <SelectItem key={o} value={o}>{o}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              ))}
+            </div>
+            <div className="bg-amber-700 px-5 py-3 flex items-center justify-between">
+              <Button
+                size="sm"
+                onClick={handleUpdateSettings}
+                className="bg-amber-600 hover:bg-amber-500 text-white border border-amber-400"
+              >
+                <Save className="h-4 w-4 mr-1.5" /> Update Invoice Settings
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setSettingsOpen(false)}
+                className="text-white hover:bg-amber-600 hover:text-white"
+              >
+                <X className="h-4 w-4 mr-1.5" /> Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Status banner */}
         <div
