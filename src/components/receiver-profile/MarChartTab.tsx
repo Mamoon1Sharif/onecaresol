@@ -191,64 +191,37 @@ export function MarChartTab({ cr }: Props) {
 
   return (
     <Card className="border border-border shadow-sm overflow-hidden p-0">
-      {/* Patient strip */}
-      <div className="bg-card border-b px-4 py-3 flex items-center gap-4 flex-wrap">
-        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center text-sm font-semibold uppercase text-muted-foreground">
-          {cr.name.split(" ").map((s) => s[0]).slice(0, 2).join("")}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold">{cr.name}</span>
-            <span className="text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded uppercase tracking-wide">{cr.care_status || "Active"}</span>
-          </div>
-          <div className="text-xs text-muted-foreground">Tel: {cr.phone_number || "—"} · DOB: {cr.dob ? format(new Date(cr.dob), "dd/MM/yyyy") : "—"}</div>
-          <div className="text-xs text-muted-foreground">{cr.address || "—"}</div>
-        </div>
-        <Button
-          size="sm"
-          variant="outline"
-          className="gap-1.5"
-          onClick={handlePrint}
-        >
-          <Printer className="h-3.5 w-3.5" /> Print
-        </Button>
-      </div>
-
       {/* Toolbar */}
-      <div className="bg-background border-b px-4 py-3 grid grid-cols-1 md:grid-cols-[1fr_auto] gap-3 items-end">
-        <div className="grid grid-cols-1 sm:grid-cols-[140px_1fr] gap-x-3 gap-y-1 text-xs">
-          <div className="text-muted-foreground font-semibold">DOB</div>
-          <div className="font-medium">{cr.dob ? format(new Date(cr.dob), "dd/MM/yyyy") : "—"}</div>
-          <div className="text-muted-foreground font-semibold">Address</div>
-          <div className="font-medium">{cr.address || "—"}</div>
-        </div>
-
-        <div className="flex flex-col items-end gap-2">
-          <div className="flex items-center gap-1">
-            <Button
-              size="icon"
-              variant="outline"
-              className="h-8 w-8"
-              onClick={() => setMonthStart((d) => startOfMonth(addMonths(d, -1)))}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <div className="px-3 py-1.5 text-xs font-semibold rounded bg-muted border min-w-[260px] text-center">
-              {periodLabel}
-            </div>
-            <Button
-              size="icon"
-              variant="outline"
-              className="h-8 w-8"
-              onClick={() => setMonthStart((d) => startOfMonth(addMonths(d, 1)))}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+      <div className="bg-background border-b px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-1">
+          <Button
+            size="icon"
+            variant="outline"
+            className="h-8 w-8"
+            onClick={() => setMonthStart((d) => startOfMonth(addMonths(d, -1)))}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <div className="px-3 py-1.5 text-xs font-semibold rounded bg-muted border min-w-[260px] text-center">
+            {periodLabel}
           </div>
+          <Button
+            size="icon"
+            variant="outline"
+            className="h-8 w-8"
+            onClick={() => setMonthStart((d) => startOfMonth(addMonths(d, 1)))}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className="flex items-center gap-3">
           <label className="flex items-center gap-1.5 text-xs cursor-pointer text-muted-foreground">
             <Checkbox checked={hideSelf} onCheckedChange={(v) => setHideSelf(!!v)} />
             Hide self-administer medications
           </label>
+          <Button size="sm" variant="outline" className="gap-1.5" onClick={handlePrint}>
+            <Printer className="h-3.5 w-3.5" /> Print
+          </Button>
         </div>
       </div>
 
