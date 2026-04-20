@@ -466,7 +466,7 @@ export default function Funders() {
                   <TableRow key={f.id} className="group">
                     <TableCell className="text-sm">
                       <button
-                        onClick={() => openEditAuthority(f)}
+                        onClick={() => navigate(`/invoicing/funders/${encodeURIComponent(f.name)}`)}
                         className="text-primary hover:underline text-left"
                       >
                         {f.name}
@@ -610,7 +610,7 @@ export default function Funders() {
                   <TableRow key={f.id} className="group">
                     <TableCell className="text-sm">
                       <button
-                        onClick={() => openEditDirect(f)}
+                        onClick={() => navigate(`/invoicing/funders/${encodeURIComponent(f.funderName)}`)}
                         className="text-primary hover:underline text-left"
                       >
                         {f.funderName}
