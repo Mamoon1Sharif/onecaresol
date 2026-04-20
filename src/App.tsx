@@ -32,6 +32,7 @@ import LocationTracking from "./pages/LocationTracking.tsx";
 import CommunicationLog from "./pages/CommunicationLog.tsx";
 import CommunicationReasons from "./pages/CommunicationReasons.tsx";
 import Reports from "./pages/Reports.tsx";
+import Timeline from "./pages/Timeline.tsx";
 import ReportDetail from "./pages/ReportDetail.tsx";
 import Invoicing from "./pages/Invoicing.tsx";
 import InvoiceGroups from "./pages/InvoiceGroups.tsx";
