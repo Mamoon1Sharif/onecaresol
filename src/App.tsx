@@ -36,6 +36,7 @@ import ReportDetail from "./pages/ReportDetail.tsx";
 import Invoicing from "./pages/Invoicing.tsx";
 import InvoiceGroups from "./pages/InvoiceGroups.tsx";
 import InvoiceDetail from "./pages/InvoiceDetail.tsx";
+import InvoiceFull from "./pages/InvoiceFull.tsx";
 import InvoicingPlaceholder from "./pages/InvoicingPlaceholder.tsx";
 import Login from "./pages/Login.tsx";
 import Signup from "./pages/Signup.tsx";
@@ -77,6 +78,7 @@ const App = () => (
             <Route path="/invoicing" element={<ProtectedRoute><Invoicing /></ProtectedRoute>} />
             <Route path="/invoicing/invoice-groups" element={<ProtectedRoute><InvoiceGroups /></ProtectedRoute>} />
             <Route path="/invoicing/invoice-groups/:groupName" element={<ProtectedRoute><InvoiceDetail /></ProtectedRoute>} />
+            <Route path="/invoicing/invoice-groups/:groupName/invoice/:invoiceRef" element={<ProtectedRoute><InvoiceFull /></ProtectedRoute>} />
             <Route path="/invoicing/wages" element={<ProtectedRoute><InvoicingPlaceholder title="Wages" description="Process and review team member wages, payslips and exports." /></ProtectedRoute>} />
             <Route path="/invoicing/tariffs" element={<ProtectedRoute><InvoicingPlaceholder title="Tariffs" description="Configure pay rates and charge bands per service and time of day." /></ProtectedRoute>} />
             <Route path="/invoicing/funders" element={<ProtectedRoute><InvoicingPlaceholder title="Funders" description="Manage funding bodies, contracts and billing references." /></ProtectedRoute>} />
