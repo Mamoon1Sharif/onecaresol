@@ -192,8 +192,8 @@ export function MarChartTab({ cr }: Props) {
   return (
     <Card className="border border-border shadow-sm overflow-hidden p-0">
       {/* Patient strip */}
-      <div className="bg-[hsl(280,55%,28%)] text-white px-4 py-3 flex items-center gap-4 flex-wrap">
-        <div className="h-12 w-12 rounded-full bg-white/20 flex items-center justify-center text-sm font-semibold uppercase">
+      <div className="bg-card border-b px-4 py-3 flex items-center gap-4 flex-wrap">
+        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center text-sm font-semibold uppercase text-muted-foreground">
           {cr.name.split(" ").map((s) => s[0]).slice(0, 2).join("")}
         </div>
         <div className="flex-1 min-w-0">
@@ -201,13 +201,13 @@ export function MarChartTab({ cr }: Props) {
             <span className="font-semibold">{cr.name}</span>
             <span className="text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded uppercase tracking-wide">{cr.care_status || "Active"}</span>
           </div>
-          <div className="text-xs text-white/80">Tel: {cr.phone_number || "—"} · DOB: {cr.dob ? format(new Date(cr.dob), "dd/MM/yyyy") : "—"}</div>
-          <div className="text-xs text-white/80">{cr.address || "—"}</div>
+          <div className="text-xs text-muted-foreground">Tel: {cr.phone_number || "—"} · DOB: {cr.dob ? format(new Date(cr.dob), "dd/MM/yyyy") : "—"}</div>
+          <div className="text-xs text-muted-foreground">{cr.address || "—"}</div>
         </div>
         <Button
           size="sm"
           variant="outline"
-          className="gap-1.5 bg-white text-foreground hover:bg-white/90"
+          className="gap-1.5"
           onClick={handlePrint}
         >
           <Printer className="h-3.5 w-3.5" /> Print
@@ -227,23 +227,25 @@ export function MarChartTab({ cr }: Props) {
           <div className="flex items-center gap-1">
             <Button
               size="icon"
-              className="h-8 w-8 bg-[hsl(280,55%,28%)] hover:bg-[hsl(280,55%,22%)] text-white"
+              variant="outline"
+              className="h-8 w-8"
               onClick={() => setMonthStart((d) => startOfMonth(addMonths(d, -1)))}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <div className="px-3 py-1.5 text-xs font-semibold rounded bg-[hsl(280,55%,28%)] text-white min-w-[260px] text-center">
+            <div className="px-3 py-1.5 text-xs font-semibold rounded bg-muted border min-w-[260px] text-center">
               {periodLabel}
             </div>
             <Button
               size="icon"
-              className="h-8 w-8 bg-[hsl(280,55%,28%)] hover:bg-[hsl(280,55%,22%)] text-white"
+              variant="outline"
+              className="h-8 w-8"
               onClick={() => setMonthStart((d) => startOfMonth(addMonths(d, 1)))}
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
-          <label className="flex items-center gap-1.5 text-xs cursor-pointer">
+          <label className="flex items-center gap-1.5 text-xs cursor-pointer text-muted-foreground">
             <Checkbox checked={hideSelf} onCheckedChange={(v) => setHideSelf(!!v)} />
             Hide self-administer medications
           </label>
@@ -367,11 +369,11 @@ export function MarChartTab({ cr }: Props) {
             <span className="text-foreground">This medication is self-administered. Any schedule shown indicates the prescribed time for when the medication should be taken.</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="h-5 w-8 bg-amber-50 border border-amber-200" />
+            <div className="h-5 w-8 bg-accent border border-accent/50" />
             <span>Current date</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="h-5 w-8 bg-rose-100 border border-rose-200" />
+            <div className="h-5 w-8 bg-muted border border-border" />
             <span>Care Plan change on day</span>
           </div>
         </div>
