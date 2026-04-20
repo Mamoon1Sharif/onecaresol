@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Check, Pencil, Plus, Printer, X } from "lucide-react";
+import { ArrowLeft, Check, Pencil, Plus, Printer, Save, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
 import {
@@ -20,6 +20,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 
 type ExtraCharge = {
@@ -47,9 +54,19 @@ type Visit = {
   total: number;
 };
 
-const payments: Payment[] = [
+const initialPayments: Payment[] = [
   { date: "15/04/2026", paidTo: "Current Account", referenceNum: "", method: "Bank Transfer", amount: 400 },
 ];
+
+const paidToOptions = ["Current Account", "Savings Account", "Cash Float", "Petty Cash"];
+const paymentMethodOptions = ["Bank Transfer", "Cash", "Cheque", "Card Payment", "Direct Debit"];
+
+const todayDdMmYyyy = () => {
+  const d = new Date();
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  return `${dd}/${mm}/${d.getFullYear()}`;
+};
 
 const visits: Visit[] = [
   { date: "01/04/2026", call: "CHC - Sitting", start: "07:30", end: "09:00", duration: "01:30", cost: 37.5, total: 37.5 },
@@ -87,6 +104,14 @@ export default function InvoiceFull() {
   const [chargeQty, setChargeQty] = useState("");
   const [chargeCost, setChargeCost] = useState("");
 
+  const [payments, setPayments] = useState<Payment[]>(initialPayments);
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [payAmount, setPayAmount] = useState("");
+  const [payDate, setPayDate] = useState(todayDdMmYyyy());
+  const [payPaidTo, setPayPaidTo] = useState("");
+  const [payMethod, setPayMethod] = useState("");
+  const [payRef, setPayRef] = useState("");
+
   const extraTotal = extraCharges.reduce((a, c) => a + c.quantity * c.cost, 0);
   const baseRequired = 400;
   const totalRequired = baseRequired + extraTotal;
@@ -119,6 +144,29 @@ export default function InvoiceFull() {
     toast({ title: "Charge added", description: `${chargeService} added to invoice.` });
     resetChargeForm();
     setChargeOpen(false);
+  };
+
+  const resetPaymentForm = () => {
+    setPayAmount("");
+    setPayDate(todayDdMmYyyy());
+    setPayPaidTo("");
+    setPayMethod("");
+    setPayRef("");
+  };
+
+  const handleCreatePayment = () => {
+    const amount = Number(payAmount);
+    if (!payAmount || isNaN(amount) || amount <= 0 || !payPaidTo) {
+      toast({ title: "Missing details", description: "Amount and Paid To are required.", variant: "destructive" });
+      return;
+    }
+    setPayments((prev) => [
+      ...prev,
+      { date: payDate, paidTo: payPaidTo, referenceNum: payRef.trim(), method: payMethod || "—", amount },
+    ]);
+    toast({ title: "Payment recorded", description: `${fmt(amount)} added to invoice.` });
+    resetPaymentForm();
+    setPaymentOpen(false);
   };
 
   return (
@@ -213,13 +261,108 @@ export default function InvoiceFull() {
           </DialogContent>
         </Dialog>
 
+        {/* Make A Payment Dialog */}
+        <Dialog
+          open={paymentOpen}
+          onOpenChange={(o) => {
+            setPaymentOpen(o);
+            if (!o) resetPaymentForm();
+          }}
+        >
+          <DialogContent className="p-0 overflow-hidden max-w-md gap-0 border-0">
+            <DialogHeader className="bg-emerald-600 text-white px-5 py-3 flex flex-row items-center justify-between space-y-0">
+              <DialogTitle className="text-white text-base font-semibold">Make A Payment</DialogTitle>
+            </DialogHeader>
+            <div className="bg-emerald-500 px-5 py-5 space-y-3">
+              <div className="grid grid-cols-[130px_1fr] items-center gap-3">
+                <Label className="text-white text-right text-sm">
+                  <span className="text-red-200 mr-0.5">*</span>Amount
+                </Label>
+                <Input
+                  type="number"
+                  value={payAmount}
+                  onChange={(e) => setPayAmount(e.target.value)}
+                  placeholder="Number Only"
+                  className="h-9 bg-white text-foreground"
+                />
+              </div>
+              <div className="grid grid-cols-[130px_1fr] items-center gap-3">
+                <Label className="text-white text-right text-sm">Payment Date</Label>
+                <Input
+                  value={payDate}
+                  onChange={(e) => setPayDate(e.target.value)}
+                  placeholder="DD/MM/YYYY"
+                  className="h-9 bg-white text-foreground"
+                />
+              </div>
+              <div className="grid grid-cols-[130px_1fr] items-center gap-3">
+                <Label className="text-white text-right text-sm">
+                  <span className="text-red-200 mr-0.5">*</span>Paid To
+                </Label>
+                <Select value={payPaidTo} onValueChange={setPayPaidTo}>
+                  <SelectTrigger className="h-9 bg-white text-foreground">
+                    <SelectValue placeholder="choose one..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {paidToOptions.map((o) => (
+                      <SelectItem key={o} value={o}>{o}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-[130px_1fr] items-center gap-3">
+                <Label className="text-white text-right text-sm">Payment Method</Label>
+                <Select value={payMethod} onValueChange={setPayMethod}>
+                  <SelectTrigger className="h-9 bg-white text-foreground">
+                    <SelectValue placeholder="choose one..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {paymentMethodOptions.map((o) => (
+                      <SelectItem key={o} value={o}>{o}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-[130px_1fr] items-center gap-3">
+                <Label className="text-white text-right text-sm">Reference Number</Label>
+                <Input
+                  value={payRef}
+                  onChange={(e) => setPayRef(e.target.value)}
+                  className="h-9 bg-white text-foreground"
+                />
+              </div>
+            </div>
+            <div className="bg-emerald-700 px-5 py-3 flex items-center justify-between">
+              <Button
+                size="sm"
+                onClick={handleCreatePayment}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-400"
+              >
+                <Save className="h-4 w-4 mr-1.5" /> Create Payment
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setPaymentOpen(false)}
+                className="text-white hover:bg-emerald-600 hover:text-white"
+              >
+                <X className="h-4 w-4 mr-1.5" /> Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* Top two-column: Payments Made + Invoice Settings */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 print:hidden">
           {/* Payments Made */}
           <Card className="p-5 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="font-semibold">Payments Made</h2>
-              <Button size="sm" className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white">
+              <Button
+                size="sm"
+                className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white"
+                onClick={() => setPaymentOpen(true)}
+              >
                 <Plus className="h-4 w-4 mr-1" /> Add
               </Button>
             </div>
