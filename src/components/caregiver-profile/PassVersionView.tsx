@@ -123,9 +123,9 @@ export function PassVersionView({ careGiverName = "Mr Edward Allenby", receiverN
   const handlePrint = () => window.print();
 
   const taskColor = (s: TaskStatus) => {
-    if (s === "done") return "bg-emerald-600 text-white border-emerald-700";
-    if (s === "missed") return "bg-orange-500 text-white border-orange-600";
-    return "bg-slate-200 text-slate-800 border-slate-300";
+    if (s === "done") return "bg-success text-success-foreground border-success";
+    if (s === "missed") return "bg-warning text-warning-foreground border-warning";
+    return "bg-muted text-foreground border-border";
   };
 
   return (
@@ -136,18 +136,18 @@ export function PassVersionView({ careGiverName = "Mr Edward Allenby", receiverN
           <Button
             size="icon"
             variant="outline"
-            className="h-7 w-7 border-emerald-600 text-emerald-700 hover:bg-emerald-50"
+            className="h-7 w-7"
             onClick={() => setWeekStart((d) => addDays(d, -7))}
           >
             <ChevronLeft className="h-3.5 w-3.5" />
           </Button>
-          <div className="px-3 py-1 text-xs font-semibold rounded border border-[hsl(280,55%,28%)] text-[hsl(280,55%,28%)] bg-[hsl(280,55%,96%)]">
+          <div className="px-3 py-1 text-xs font-semibold rounded border border-border text-foreground bg-muted">
             {rangeLabel}
           </div>
           <Button
             size="icon"
             variant="outline"
-            className="h-7 w-7 border-emerald-600 text-emerald-700 hover:bg-emerald-50"
+            className="h-7 w-7"
             onClick={() => setWeekStart((d) => addDays(d, 7))}
           >
             <ChevronRight className="h-3.5 w-3.5" />
@@ -180,7 +180,7 @@ export function PassVersionView({ careGiverName = "Mr Edward Allenby", receiverN
 
         <Button
           size="sm"
-          className="h-7 gap-1.5 bg-[hsl(280,55%,28%)] hover:bg-[hsl(280,55%,22%)] text-white text-xs"
+          className="h-7 gap-1.5 text-xs"
           onClick={handlePrint}
         >
           <Printer className="h-3.5 w-3.5" /> Print
@@ -190,11 +190,11 @@ export function PassVersionView({ careGiverName = "Mr Edward Allenby", receiverN
       {/* Table header */}
       <div className="overflow-x-auto">
         <div className="min-w-[1200px]">
-          <div className="grid grid-cols-[140px_140px_110px_1fr] bg-[hsl(280,55%,28%)] text-white text-xs font-semibold">
+          <div className="grid grid-cols-[140px_140px_110px_1fr] bg-muted text-foreground text-xs font-semibold border-b border-border">
             <div className="px-3 py-2">When</div>
             <div className="px-3 py-2">Who</div>
             <div className="px-3 py-2">Status</div>
-            <div className="px-3 py-2 text-center border-l border-white/10">Visit</div>
+            <div className="px-3 py-2 text-center border-l border-border">Visit</div>
           </div>
 
           {filtered.length === 0 ? (
@@ -215,11 +215,11 @@ export function PassVersionView({ careGiverName = "Mr Edward Allenby", receiverN
                     <CalendarIcon className="h-3 w-3 text-muted-foreground" />
                     <span className="font-medium">{format(v.date, "dd MMM yyyy")}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-emerald-700">
+                  <div className="flex items-center gap-1.5 text-success">
                     <Clock className="h-3 w-3" />
                     <span>{v.scheduledStart}</span>
                     <span className="text-muted-foreground">/</span>
-                    <span className="text-orange-600">{v.actualStart}</span>
+                    <span className="text-warning">{v.actualStart}</span>
                   </div>
                 </div>
 
@@ -228,7 +228,7 @@ export function PassVersionView({ careGiverName = "Mr Edward Allenby", receiverN
 
                 {/* Status */}
                 <div className="px-3 py-3">
-                  <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-amber-300 text-amber-900 border border-amber-400">
+                  <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-warning/15 text-warning border border-warning/30">
                     {v.status}
                   </span>
                 </div>
