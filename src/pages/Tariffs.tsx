@@ -360,10 +360,10 @@ export default function Tariffs() {
                           <TableCell className="text-center">
                             <button
                               onClick={() => setViewTariff(t)}
-                              className="inline-flex items-center justify-center h-7 w-7 rounded hover:bg-emerald-50"
+                              className="inline-flex items-center justify-center h-7 w-7 rounded hover:bg-accent"
                               aria-label="View"
                             >
-                              <Eye className="h-4 w-4 text-emerald-600" />
+                              <Eye className="h-4 w-4 text-primary" />
                             </button>
                           </TableCell>
                           <TableCell className="text-center">
