@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   Star, CheckSquare, Hand, Users, Plus, Printer, Save, History, Pencil, Trash2,
-  ChevronDown, ChevronRight,
+  ChevronDown, ChevronRight, Calendar as CalendarIcon, Clock, FileText, Check, FileCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -361,38 +361,84 @@ export function CareManagementTab({ careReceiverName }: Props) {
           )
         )}
 
-        {/* TASKS */}
+        {/* TASKS — alphabetical task strips with description, date and visit pills */}
         {sub === "tasks" && (
           visibleTasks.length === 0 ? (
             <div className="border border-border rounded-md bg-background px-4 py-3 text-sm text-muted-foreground">
               No tasks yet. Click 'Add task' to create the first task.
             </div>
           ) : (
-            <div className="border border-border rounded-md overflow-hidden">
-              <div className="grid grid-cols-[1fr_180px_120px_140px_110px_80px] text-xs font-semibold bg-muted/40 px-3 py-2 border-b">
-                <div>Task</div>
-                <div>Linked Outcome</div>
-                <div>Frequency</div>
-                <div>Assigned To</div>
-                <div>Status</div>
-                <div className="text-right">Actions</div>
-              </div>
-              {visibleTasks.map((t) => (
-                <div key={t.id} className="grid grid-cols-[1fr_180px_120px_140px_110px_80px] text-xs px-3 py-2.5 border-b last:border-b-0 items-center hover:bg-muted/20">
-                  <div>
-                    <div className="font-medium text-foreground">{t.title}</div>
-                    {t.lastCompleted && <div className="text-[10px] text-muted-foreground mt-0.5">Last: {format(new Date(t.lastCompleted), "dd MMM yyyy")}</div>}
+            <div className="space-y-2">
+              {[...visibleTasks].sort((a, b) => a.title.localeCompare(b.title)).map((t) => {
+                const isMed = t.isMedication;
+                // Header strip color: yellow for normal tasks, blue for medication
+                const headerCls = isMed
+                  ? "bg-sky-100/80 border-sky-200"
+                  : "bg-amber-100/70 border-amber-200";
+                const headerTitleCls = isMed ? "text-sky-700" : "text-amber-700";
+                const HeaderIcon = isMed ? FileText : Check;
+                return (
+                  <div key={t.id} className="border border-border rounded-md overflow-hidden bg-background group">
+                    {/* Title strip */}
+                    <div className={`flex items-center justify-between px-3 py-2 border-b ${headerCls}`}>
+                      <div className={`flex items-center gap-2 text-sm font-semibold ${headerTitleCls}`}>
+                        <HeaderIcon className="h-4 w-4" />
+                        <span>{t.title}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge
+                          variant="outline"
+                          className={`text-[10px] uppercase tracking-wide ${
+                            t.status === "Active"
+                              ? "bg-emerald-500 text-white border-emerald-600"
+                              : "bg-muted text-muted-foreground border-border"
+                          }`}
+                        >
+                          {t.status}
+                        </Badge>
+                        <Button size="icon" variant="ghost" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition" onClick={() => openEditTask(t)}>
+                          <Pencil className="h-3 w-3" />
+                        </Button>
+                        <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive opacity-0 group-hover:opacity-100 transition" onClick={() => setDeleting({ kind: "tasks", id: t.id })}>
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Body row */}
+                    <div className="grid grid-cols-1 md:grid-cols-[1fr_180px_auto] gap-3 items-start px-3 py-2.5">
+                      <div className="text-xs text-muted-foreground leading-relaxed">{t.description}</div>
+                      <div className="text-[11px] space-y-1">
+                        <div className="flex items-center gap-1.5">
+                          <CalendarIcon className="h-3 w-3 text-destructive" />
+                          <span>{format(new Date(t.startDate), "dd/MM/yyyy")}</span>
+                        </div>
+                        {t.isOngoing && (
+                          <div className="flex items-center gap-1.5">
+                            <Clock className="h-3 w-3 text-destructive" />
+                            <span className="text-muted-foreground">Ongoing</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex flex-wrap gap-1.5 justify-end">
+                        {t.visits.map((v, i) => {
+                          const isMedVisit = v.toLowerCase().includes("medication");
+                          return (
+                            <button
+                              key={i}
+                              onClick={() => toast.info(`Linked visit: ${v}`)}
+                              className="inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium border bg-sky-50 border-sky-200 text-sky-700 hover:bg-sky-100 transition"
+                            >
+                              {isMedVisit ? <FileCheck className="h-3 w-3" /> : <Hand className="h-3 w-3" />}
+                              {v}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
-                  <div className="text-muted-foreground truncate">{t.outcome || "—"}</div>
-                  <div>{t.frequency}</div>
-                  <div>{t.assignedTo || "—"}</div>
-                  <div><Badge variant="outline" className={`text-[10px] ${statusClasses(t.status)}`}>{t.status}</Badge></div>
-                  <div className="flex items-center justify-end gap-0.5">
-                    <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => openEditTask(t)}><Pencil className="h-3 w-3" /></Button>
-                    <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive" onClick={() => setDeleting({ kind: "tasks", id: t.id })}><Trash2 className="h-3 w-3" /></Button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )
         )}
@@ -537,38 +583,88 @@ export function CareManagementTab({ careReceiverName }: Props) {
 
       {/* ============= Task Dialog ============= */}
       <Dialog open={taskDlg} onOpenChange={setTaskDlg}>
-        <DialogContent>
+        <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>{editingTask ? "Edit Task" : "Add Task"}</DialogTitle></DialogHeader>
           <div className="space-y-3">
-            <div><Label className="text-xs">Title</Label>
-              <Input value={taskDraft.title} onChange={(e) => setTaskDraft({ ...taskDraft, title: e.target.value })} /></div>
-            <div><Label className="text-xs">Linked Outcome</Label>
-              <Select value={taskDraft.outcome} onValueChange={(v) => setTaskDraft({ ...taskDraft, outcome: v })}>
-                <SelectTrigger><SelectValue placeholder="Select an outcome..." /></SelectTrigger>
-                <SelectContent>
-                  {outcomes.map((o) => <SelectItem key={o.id} value={o.title}>{o.title}</SelectItem>)}
-                </SelectContent>
-              </Select>
+            <div>
+              <Label className="text-xs">Title</Label>
+              <Input value={taskDraft.title} onChange={(e) => setTaskDraft({ ...taskDraft, title: e.target.value })} placeholder="e.g. Personal Care" />
+            </div>
+            <div>
+              <Label className="text-xs">Description</Label>
+              <Textarea rows={3} value={taskDraft.description} onChange={(e) => setTaskDraft({ ...taskDraft, description: e.target.value })} placeholder="What should staff do for this task?" />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label className="text-xs">Frequency</Label>
-                <Select value={taskDraft.frequency} onValueChange={(v) => setTaskDraft({ ...taskDraft, frequency: v })}>
+              <div>
+                <Label className="text-xs">Start Date</Label>
+                <Input type="date" value={taskDraft.startDate} onChange={(e) => setTaskDraft({ ...taskDraft, startDate: e.target.value })} />
+              </div>
+              <div>
+                <Label className="text-xs">Status</Label>
+                <Select value={taskDraft.status} onValueChange={(v) => setTaskDraft({ ...taskDraft, status: v as Task["status"] })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {["Every visit", "Daily", "Weekly", "Fortnightly", "Monthly", "As needed"].map((f) => <SelectItem key={f} value={f}>{f}</SelectItem>)}
+                    <SelectItem value="Active">Active</SelectItem>
+                    <SelectItem value="Inactive">Inactive</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-              <div><Label className="text-xs">Assigned To</Label>
-                <Input value={taskDraft.assignedTo} onChange={(e) => setTaskDraft({ ...taskDraft, assignedTo: e.target.value })} placeholder="Caregiver name or All staff" />
+            </div>
+            <div className="flex items-center gap-4">
+              <label className="flex items-center gap-2 text-xs cursor-pointer">
+                <Checkbox checked={taskDraft.isOngoing} onCheckedChange={(v) => setTaskDraft({ ...taskDraft, isOngoing: !!v })} />
+                Ongoing
+              </label>
+              <label className="flex items-center gap-2 text-xs cursor-pointer">
+                <Checkbox checked={taskDraft.isMedication} onCheckedChange={(v) => setTaskDraft({ ...taskDraft, isMedication: !!v })} />
+                Medication task
+              </label>
+            </div>
+            <div>
+              <Label className="text-xs">Applies To Visits</Label>
+              <div className="grid grid-cols-2 gap-2 mt-1.5 border border-border rounded-md p-2 bg-muted/20">
+                {visits.map((v) => {
+                  const checked = taskDraft.visits.includes(v.type);
+                  return (
+                    <label key={v.id} className="flex items-center gap-2 text-xs cursor-pointer">
+                      <Checkbox
+                        checked={checked}
+                        onCheckedChange={(c) => {
+                          setTaskDraft({
+                            ...taskDraft,
+                            visits: c
+                              ? [...taskDraft.visits, v.type]
+                              : taskDraft.visits.filter((x) => x !== v.type),
+                          });
+                        }}
+                      />
+                      {v.type}
+                    </label>
+                  );
+                })}
+                {!visits.some((v) => v.type === "Medication Stock Check Visit") && (
+                  <label className="flex items-center gap-2 text-xs cursor-pointer">
+                    <Checkbox
+                      checked={taskDraft.visits.includes("Medication Stock Check Visit")}
+                      onCheckedChange={(c) => setTaskDraft({
+                        ...taskDraft,
+                        visits: c
+                          ? [...taskDraft.visits, "Medication Stock Check Visit"]
+                          : taskDraft.visits.filter((x) => x !== "Medication Stock Check Visit"),
+                      })}
+                    />
+                    Medication Stock Check Visit
+                  </label>
+                )}
               </div>
             </div>
-            <div><Label className="text-xs">Status</Label>
-              <Select value={taskDraft.status} onValueChange={(v) => setTaskDraft({ ...taskDraft, status: v as Task["status"] })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+            <div>
+              <Label className="text-xs">Linked Outcome (optional)</Label>
+              <Select value={taskDraft.outcome || "none"} onValueChange={(v) => setTaskDraft({ ...taskDraft, outcome: v === "none" ? "" : v })}>
+                <SelectTrigger><SelectValue placeholder="Select an outcome..." /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Active">Active</SelectItem>
-                  <SelectItem value="Inactive">Inactive</SelectItem>
+                  <SelectItem value="none">— None —</SelectItem>
+                  {outcomes.map((o) => <SelectItem key={o.id} value={o.title}>{o.title}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
