@@ -125,15 +125,6 @@ const initialSettings: SettingsState = {
   includeNotes: "No",
   showServiceUserAddress: "No",
 };
-  { label: "Include Notes", value: "No" },
-  { label: "Service User Name Config", value: "Show Only Service User Ref Number" },
-  { label: "Show Service User Email", value: "No" },
-  { label: "Show Invoice Breakdown", value: "Yes" },
-  { label: "Show Breakdown Table on Invoice", value: "Yes" },
-  { label: "Show Team Member in Breakdown", value: "Don't Show Team Member Name" },
-  { label: "Show Service User Address", value: "No" },
-  { label: "Show Amount/Rate Breakdown", value: "No" },
-];
 
 export default function InvoiceFull() {
   const navigate = useNavigate();
