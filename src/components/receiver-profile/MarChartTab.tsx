@@ -369,11 +369,11 @@ export function MarChartTab({ cr }: Props) {
             <span className="text-foreground">This medication is self-administered. Any schedule shown indicates the prescribed time for when the medication should be taken.</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="h-5 w-8 bg-amber-50 border border-amber-200" />
+            <div className="h-5 w-8 bg-accent border border-accent/50" />
             <span>Current date</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="h-5 w-8 bg-rose-100 border border-rose-200" />
+            <div className="h-5 w-8 bg-muted border border-border" />
             <span>Care Plan change on day</span>
           </div>
         </div>
