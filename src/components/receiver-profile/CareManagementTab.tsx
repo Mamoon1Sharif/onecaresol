@@ -39,11 +39,13 @@ interface Outcome {
 interface Task {
   id: string;
   title: string;
-  outcome: string;
-  frequency: string;
-  assignedTo: string;
+  description: string;
+  startDate: string;          // e.g. 2025-07-04
+  isOngoing: boolean;
+  visits: string[];           // visit-type pill labels
+  isMedication: boolean;      // renders as blue document row (e.g. "Medication Stock Check")
   status: "Active" | "Inactive";
-  lastCompleted?: string;
+  outcome?: string;           // optional linked outcome (kept for compatibility)
 }
 
 interface Visit {
@@ -80,11 +82,24 @@ const SEED_OUTCOMES: Outcome[] = [
 ];
 
 const SEED_TASKS: Task[] = [
-  { id: "t1", title: "Morning medication administration", outcome: "Manage diabetes through routine checks", frequency: "Daily", assignedTo: "David Goliby", status: "Active", lastCompleted: "2026-04-19" },
-  { id: "t2", title: "10 min assisted walk", outcome: "Maintain mobility and balance", frequency: "Daily", assignedTo: "Karren Lupton", status: "Active", lastCompleted: "2026-04-18" },
-  { id: "t3", title: "Hydration check", outcome: "Improve nutrition and hydration", frequency: "Every visit", assignedTo: "All staff", status: "Active", lastCompleted: "2026-04-19" },
-  { id: "t4", title: "Weekly weight check", outcome: "Improve nutrition and hydration", frequency: "Weekly", assignedTo: "Christina Hyde", status: "Active", lastCompleted: "2026-04-15" },
-  { id: "t5", title: "Smoking diary review", outcome: "Continue smoking cessation program", frequency: "Weekly", assignedTo: "—", status: "Inactive" },
+  { id: "t1", title: "Attach Night Bag", description: "Staff Member should empty my catheter and connect my Night Bag.", startDate: "2025-07-04", isOngoing: true, visits: ["Bed Time Visit"], isMedication: false, status: "Active" },
+  { id: "t2", title: "Check and Changed Pad", description: "staff member should check my pad and change when required", startDate: "2025-07-11", isOngoing: true, visits: ["Bed Time Visit", "Medication Stock Check Visit"], isMedication: false, status: "Active" },
+  { id: "t3", title: "Clean & Tidy", description: "Staff to ensure they empty bins, wash dishes, clean bathroom after use, wipe down kitchen sides and …", startDate: "2025-06-30", isOngoing: true, visits: ["Bed Time Visit", "Medication Stock Check Visit", "Morning Visit"], isMedication: false, status: "Active" },
+  { id: "t4", title: "Dry & Dress", description: "Staff to support me with getting dry and dressing into clean appropriate clothing for the day.", startDate: "2025-06-30", isOngoing: true, visits: ["Medication Stock Check Visit", "Morning Visit"], isMedication: false, status: "Active" },
+  { id: "t5", title: "Empty leg bag", description: "staff member to assist me to empty my catheter bag at all calls.", startDate: "2025-07-04", isOngoing: true, visits: ["Bed Time Visit", "Medication Stock Check Visit", "Morning Visit"], isMedication: false, status: "Active" },
+  { id: "t6", title: "Ensure I have my hearing Aids on", description: "please assist me to put my hearing Aids on in the Morning and ensure it is working.", startDate: "2025-07-04", isOngoing: true, visits: ["Medication Stock Check Visit", "Morning Visit"], isMedication: false, status: "Active" },
+  { id: "t7", title: "Enter Via keysafe", description: "Keysafe – 1953", startDate: "2025-06-25", isOngoing: true, visits: ["Bed Time Visit", "Medication Stock Check Visit", "Morning Visit"], isMedication: false, status: "Active" },
+  { id: "t8", title: "General Information", description: "I live with my wife and I have underlined condition which I require the help of carers my wife helps…", startDate: "2025-06-24", isOngoing: true, visits: ["Bed Time Visit", "Medication Stock Check Visit", "Morning Visit"], isMedication: false, status: "Active" },
+  { id: "t9", title: "Greet & Gain consent", description: "Staff to ask how I am feeling and report any concerns or deterioration.", startDate: "2025-06-25", isOngoing: true, visits: ["Bed Time Visit", "Medication Stock Check Visit", "Morning Visit"], isMedication: false, status: "Active" },
+  { id: "t10", title: "Medication Stock Check", description: "Staff to monitor and report concerns.", startDate: "2025-06-30", isOngoing: true, visits: ["Medication Stock Check Visit"], isMedication: true, status: "Active" },
+  { id: "t11", title: "Offer Breakfast meal & Drink", description: "My wife will prepare my breakfast and drink, Staff to ensure I have a meal and drink of my choice.", startDate: "2025-06-30", isOngoing: true, visits: ["Medication Stock Check Visit", "Morning Visit"], isMedication: false, status: "Active" },
+  { id: "t12", title: "Oral Hygiene", description: "Staff to ensure I am encouraged with my oral hygiene.", startDate: "2025-06-30", isOngoing: true, visits: ["Bed Time Visit", "Medication Stock Check Visit", "Morning Visit"], isMedication: false, status: "Active" },
+  { id: "t13", title: "Personal Care", description: "Staff to support with personal care.", startDate: "2025-06-30", isOngoing: true, visits: ["Bed Time Visit", "Medication Stock Check Visit", "Morning Visit"], isMedication: false, status: "Active" },
+  { id: "t14", title: "PPE", description: "Staff to ensure they are wearing required PPE – Gloves, Aprons, Masks.", startDate: "2025-06-25", isOngoing: true, visits: ["Bed Time Visit", "Medication Stock Check Visit", "Morning Visit"], isMedication: false, status: "Active" },
+  { id: "t15", title: "Remove Night Bag and disposed appropriately", description: "staff member to assist me to remove my night bag in the morning and dispose.", startDate: "2025-07-04", isOngoing: true, visits: ["Medication Stock Check Visit", "Morning Visit"], isMedication: false, status: "Active" },
+  { id: "t16", title: "Skin Integrity", description: "Staff to monitor my skin during personal care and report any redness or breakdown.", startDate: "2025-07-01", isOngoing: true, visits: ["Bed Time Visit", "Morning Visit"], isMedication: false, status: "Active" },
+  { id: "t17", title: "Safe Exit", description: "Ensure all doors are locked and the keysafe is reset before leaving.", startDate: "2025-06-25", isOngoing: true, visits: ["Bed Time Visit", "Medication Stock Check Visit", "Morning Visit"], isMedication: false, status: "Active" },
+  { id: "t18", title: "Snack & Drink", description: "Offer a small snack and drink at the bed time visit.", startDate: "2025-07-08", isOngoing: false, visits: ["Bed Time Visit"], isMedication: false, status: "Inactive" },
 ];
 
 const SEED_VISITS: Visit[] = [
@@ -136,7 +151,7 @@ export function CareManagementTab({ careReceiverName }: Props) {
   // Task dialog
   const [taskDlg, setTaskDlg] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const blankTask: Task = { id: "", title: "", outcome: "", frequency: "Daily", assignedTo: "", status: "Active" };
+  const blankTask: Task = { id: "", title: "", description: "", startDate: new Date().toISOString().split("T")[0], isOngoing: true, visits: [], isMedication: false, status: "Active", outcome: "" };
   const [taskDraft, setTaskDraft] = useState<Task>(blankTask);
 
   // Visit dialog
