@@ -51,7 +51,10 @@ interface Task {
 interface Visit {
   id: string;
   type: string;
-  dayOfWeek: string;
+  startDate: string;        // e.g. 2025-06-30
+  isOngoing: boolean;
+  visitKind: string;        // "Care visit" | "Medication" | etc
+  dayOfWeek: string;        // "Daily" / "Mon" / "Tue Wed Thu Fri Sat Sun"
   startTime: string;
   duration: number;
   caregivers: number;
@@ -103,11 +106,9 @@ const SEED_TASKS: Task[] = [
 ];
 
 const SEED_VISITS: Visit[] = [
-  { id: "v1", type: "Morning Visit", dayOfWeek: "Mon-Sun", startTime: "06:30", duration: 25, caregivers: 1, status: "Active" },
-  { id: "v2", type: "Lunch Visit", dayOfWeek: "Mon-Sun", startTime: "12:30", duration: 30, caregivers: 1, status: "Active" },
-  { id: "v3", type: "Tea Visit", dayOfWeek: "Mon-Sun", startTime: "17:00", duration: 30, caregivers: 1, status: "Active" },
-  { id: "v4", type: "Bed Time Visit", dayOfWeek: "Mon-Sun", startTime: "21:30", duration: 25, caregivers: 1, status: "Active" },
-  { id: "v5", type: "Welfare Call", dayOfWeek: "Wed, Sat", startTime: "15:00", duration: 15, caregivers: 1, status: "Inactive" },
+  { id: "v1", type: "Bed Time Visit", startDate: "2025-06-30", isOngoing: true, visitKind: "Care visit", dayOfWeek: "Daily", startTime: "18:45", duration: 30, caregivers: 1, status: "Active" },
+  { id: "v2", type: "Medication Stock Check Visit", startDate: "2025-06-30", isOngoing: true, visitKind: "Care visit", dayOfWeek: "Mon", startTime: "08:45", duration: 30, caregivers: 1, status: "Active" },
+  { id: "v3", type: "Morning Visit", startDate: "2025-06-30", isOngoing: true, visitKind: "Care visit", dayOfWeek: "Tue Wed Thu Fri Sat Sun", startTime: "08:45", duration: 30, caregivers: 1, status: "Active" },
 ];
 
 const SEED_GROUPS: CareGroup[] = [
@@ -157,7 +158,7 @@ export function CareManagementTab({ careReceiverName }: Props) {
   // Visit dialog
   const [visitDlg, setVisitDlg] = useState(false);
   const [editingVisit, setEditingVisit] = useState<Visit | null>(null);
-  const blankVisit: Visit = { id: "", type: "", dayOfWeek: "Mon-Sun", startTime: "08:00", duration: 30, caregivers: 1, status: "Active" };
+  const blankVisit: Visit = { id: "", type: "", startDate: new Date().toISOString().split("T")[0], isOngoing: true, visitKind: "Care visit", dayOfWeek: "Daily", startTime: "08:00", duration: 30, caregivers: 1, status: "Active" };
   const [visitDraft, setVisitDraft] = useState<Visit>(blankVisit);
 
   // Group dialog
@@ -443,37 +444,105 @@ export function CareManagementTab({ careReceiverName }: Props) {
           )
         )}
 
-        {/* VISITS */}
+        {/* VISITS — sky-blue header strips with linked task pills */}
         {sub === "visits" && (
           visibleVisits.length === 0 ? (
             <div className="border border-border rounded-md bg-background px-4 py-3 text-sm text-muted-foreground">
               No visits planned. Click 'Add visit' to schedule a recurring visit.
             </div>
           ) : (
-            <div className="grid gap-2 md:grid-cols-2">
-              {visibleVisits.map((v) => (
-                <div key={v.id} className="border border-border rounded-md bg-background p-4 hover:shadow-sm transition-shadow">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <Hand className="h-4 w-4 text-primary" />
-                        <span className="font-semibold text-sm">{v.type}</span>
-                        <Badge variant="outline" className={`text-[10px] ${statusClasses(v.status)}`}>{v.status}</Badge>
+            <div className="space-y-3">
+              {visibleVisits.map((v) => {
+                const linkedTasks = tasks.filter((t) => t.visits.includes(v.type));
+                return (
+                  <div key={v.id} className="border border-border rounded-md overflow-hidden bg-background group">
+                    {/* Sky-blue title strip */}
+                    <div className="flex items-center justify-between px-3 py-2 border-b bg-sky-100/70 border-sky-200">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-sky-700">
+                        <Hand className="h-4 w-4" />
+                        <span>{v.type}</span>
                       </div>
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-3 ml-6 text-xs">
-                        <div><span className="text-muted-foreground">Days:</span> <span className="font-medium">{v.dayOfWeek}</span></div>
-                        <div><span className="text-muted-foreground">Start:</span> <span className="font-medium">{v.startTime}</span></div>
-                        <div><span className="text-muted-foreground">Duration:</span> <span className="font-medium">{v.duration} min</span></div>
-                        <div><span className="text-muted-foreground">Caregivers:</span> <span className="font-medium">{v.caregivers}</span></div>
+                      <div className="flex items-center gap-2">
+                        <Badge
+                          variant="outline"
+                          className={`text-[10px] uppercase tracking-wide ${
+                            v.status === "Active"
+                              ? "bg-emerald-500 text-white border-emerald-600"
+                              : "bg-muted text-muted-foreground border-border"
+                          }`}
+                        >
+                          {v.status}
+                        </Badge>
+                        <Button size="icon" variant="ghost" className="h-6 w-6 opacity-0 group-hover:opacity-100 transition" onClick={() => openEditVisit(v)}>
+                          <Pencil className="h-3 w-3" />
+                        </Button>
+                        <Button size="icon" variant="ghost" className="h-6 w-6 text-destructive opacity-0 group-hover:opacity-100 transition" onClick={() => setDeleting({ kind: "visits", id: v.id })}>
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-0.5">
-                      <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => openEditVisit(v)}><Pencil className="h-3.5 w-3.5" /></Button>
-                      <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={() => setDeleting({ kind: "visits", id: v.id })}><Trash2 className="h-3.5 w-3.5" /></Button>
+
+                    {/* Body row: meta column + linked tasks pills */}
+                    <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-3 px-3 py-2.5">
+                      {/* Meta column */}
+                      <div className="text-[11px] space-y-1">
+                        <div className="flex items-center gap-1.5">
+                          <CalendarIcon className="h-3 w-3 text-emerald-600" />
+                          <span>{format(new Date(v.startDate), "dd/MM/yyyy")}</span>
+                        </div>
+                        {v.isOngoing && (
+                          <div className="flex items-center gap-1.5">
+                            <Clock className="h-3 w-3 text-destructive" />
+                            <span className="text-muted-foreground">Ongoing</span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-1.5">
+                          <CalendarIcon className="h-3 w-3 text-sky-600" />
+                          <span className="text-muted-foreground">{v.visitKind}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <CalendarIcon className="h-3 w-3 text-sky-600" />
+                          <span>{v.dayOfWeek}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center gap-1">
+                            <Clock className="h-3 w-3 text-muted-foreground" /> {v.startTime}
+                          </span>
+                          <span className="inline-flex items-center gap-1 text-muted-foreground">
+                            <Clock className="h-3 w-3" /> {v.duration} minutes
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Linked task pills */}
+                      <div className="flex flex-wrap gap-1.5 content-start justify-end">
+                        {linkedTasks.length === 0 ? (
+                          <span className="text-[11px] text-muted-foreground italic self-center">No linked tasks</span>
+                        ) : (
+                          linkedTasks.map((t) => {
+                            const isMed = t.isMedication;
+                            const pillCls = isMed
+                              ? "bg-sky-100 border-sky-300 text-sky-800 hover:bg-sky-200"
+                              : "bg-amber-100 border-amber-300 text-amber-900 hover:bg-amber-200";
+                            const Icon = isMed ? FileText : Check;
+                            return (
+                              <button
+                                key={t.id}
+                                onClick={() => toast.info(`Task: ${t.title}`)}
+                                className={`inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium border transition ${pillCls}`}
+                                title={t.description}
+                              >
+                                <Icon className="h-3 w-3" />
+                                {t.title}
+                              </button>
+                            );
+                          })
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )
         )}
@@ -685,8 +754,19 @@ export function CareManagementTab({ careReceiverName }: Props) {
               <Input value={visitDraft.type} onChange={(e) => setVisitDraft({ ...visitDraft, type: e.target.value })} placeholder="e.g. Morning Visit" />
             </div>
             <div className="grid grid-cols-2 gap-3">
+              <div><Label className="text-xs">Start Date</Label>
+                <Input type="date" value={visitDraft.startDate} onChange={(e) => setVisitDraft({ ...visitDraft, startDate: e.target.value })} />
+              </div>
+              <div><Label className="text-xs">Visit Kind</Label>
+                <Select value={visitDraft.visitKind} onValueChange={(v) => setVisitDraft({ ...visitDraft, visitKind: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {["Care visit", "Medication", "Welfare call", "Domestic visit"].map((k) => <SelectItem key={k} value={k}>{k}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
               <div><Label className="text-xs">Days</Label>
-                <Input value={visitDraft.dayOfWeek} onChange={(e) => setVisitDraft({ ...visitDraft, dayOfWeek: e.target.value })} placeholder="Mon-Sun" />
+                <Input value={visitDraft.dayOfWeek} onChange={(e) => setVisitDraft({ ...visitDraft, dayOfWeek: e.target.value })} placeholder="Daily / Mon Tue Wed" />
               </div>
               <div><Label className="text-xs">Start Time</Label>
                 <Input type="time" value={visitDraft.startTime} onChange={(e) => setVisitDraft({ ...visitDraft, startTime: e.target.value })} />
@@ -697,6 +777,12 @@ export function CareManagementTab({ careReceiverName }: Props) {
               <div><Label className="text-xs">Caregivers</Label>
                 <Input type="number" min={1} max={4} value={visitDraft.caregivers} onChange={(e) => setVisitDraft({ ...visitDraft, caregivers: Number(e.target.value) })} />
               </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <label className="flex items-center gap-2 text-xs cursor-pointer">
+                <Checkbox checked={visitDraft.isOngoing} onCheckedChange={(c) => setVisitDraft({ ...visitDraft, isOngoing: !!c })} />
+                Ongoing
+              </label>
             </div>
             <div><Label className="text-xs">Status</Label>
               <Select value={visitDraft.status} onValueChange={(v) => setVisitDraft({ ...visitDraft, status: v as Visit["status"] })}>
