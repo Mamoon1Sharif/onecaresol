@@ -15,11 +15,12 @@ import { ReceiverAvailabilityTab } from "@/components/receiver-profile/Availabil
 import { ReceiverHolidaysTab } from "@/components/receiver-profile/HolidaysTab";
 import { ReceiverPlaceholderTab } from "@/components/receiver-profile/PlaceholderTab";
 import { CareManagementTab } from "@/components/receiver-profile/CareManagementTab";
+import { MarChartTab } from "@/components/receiver-profile/MarChartTab";
 import {
   LayoutDashboard, UserCog, CalendarDays, LayoutTemplate,
   Users, Bell, StickyNote, CalendarCheck, Plane,
   MessageSquare, Pill, GraduationCap, AlertTriangle, FileText, History,
-  HeartPulse,
+  HeartPulse, ClipboardList,
 } from "lucide-react";
 
 const CareReceiverProfile = () => {
