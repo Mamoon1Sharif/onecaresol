@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, HeartHandshake, CalendarDays, CalendarClock, ChevronDown, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, HeartHandshake, CalendarDays, CalendarClock, ChevronDown, LogOut, MapPin } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
@@ -28,6 +28,7 @@ const topItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Care Givers", url: "/caregivers", icon: Users },
   { title: "Service Members", url: "/carereceivers", icon: HeartHandshake },
+  { title: "Location Tracking", url: "/location-tracking", icon: MapPin },
 ];
 
 const rosterSubItems = [
