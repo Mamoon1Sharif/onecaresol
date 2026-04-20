@@ -520,6 +520,8 @@ export function NotesTab({ careGiverId }: Props) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+        </>
+      )}
     </div>
   );
 }
