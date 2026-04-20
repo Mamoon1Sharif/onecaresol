@@ -561,128 +561,150 @@ function AddLogDialog({
     onError: (e: any) => toast.error(e.message),
   });
 
-  const labelCls = "text-xs font-semibold text-white text-right pt-2";
-  const requiredStar = <span className="text-rose-200 mr-0.5">*</span>;
+  const labelCls = "text-xs font-medium text-muted-foreground";
+  const requiredStar = <span className="text-destructive ml-0.5">*</span>;
 
   return (
     <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) reset(); }}>
-      <DialogContent className="max-w-md p-0 gap-0 border-0 overflow-hidden bg-emerald-600">
+      <DialogContent className="max-w-lg p-0 gap-0 overflow-hidden">
         {/* Header */}
-        <div className="px-4 py-3 bg-emerald-700 border-b border-emerald-800">
-          <DialogHeader>
-            <DialogTitle className="text-white text-base font-medium">Add Communication Log</DialogTitle>
-          </DialogHeader>
-        </div>
+        <DialogHeader className="px-6 py-4 border-b bg-muted/30">
+          <DialogTitle className="text-base font-semibold">Add Communication Log</DialogTitle>
+        </DialogHeader>
 
         {/* Body */}
-        <div className="px-5 py-4 bg-emerald-600 max-h-[70vh] overflow-y-auto">
-          <div className="grid grid-cols-[120px_1fr] gap-x-3 gap-y-3 items-start">
-            <div className={labelCls}>{requiredStar}Title</div>
+        <div className="px-6 py-5 max-h-[70vh] overflow-y-auto space-y-4">
+          <div className="space-y-1.5">
+            <label className={labelCls}>Title{requiredStar}</label>
             <Input
-              className="h-9 text-xs bg-white text-foreground border-0"
+              className="h-9 text-sm"
               value={title}
               maxLength={200}
               onChange={(e) => setTitle(e.target.value)}
+              placeholder="Brief summary of the communication"
             />
+          </div>
 
-            <div className={labelCls}>{requiredStar}User Type</div>
-            <Select value={userType} onValueChange={setUserType}>
-              <SelectTrigger className="h-9 text-xs bg-white text-foreground border-0"><SelectValue placeholder="Please Select" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Service User">Service User</SelectItem>
-                <SelectItem value="Team Member">Team Member</SelectItem>
-                <SelectItem value="Family / NOK">Family / NOK</SelectItem>
-                <SelectItem value="Healthcare Pro">Healthcare Pro</SelectItem>
-                <SelectItem value="Other">Other</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label className={labelCls}>User Type{requiredStar}</label>
+              <Select value={userType} onValueChange={setUserType}>
+                <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Please select" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Service User">Service User</SelectItem>
+                  <SelectItem value="Team Member">Team Member</SelectItem>
+                  <SelectItem value="Family / NOK">Family / NOK</SelectItem>
+                  <SelectItem value="Healthcare Pro">Healthcare Pro</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            <div className={labelCls}>{requiredStar}Log Type</div>
-            <Select value={logType} onValueChange={(v: any) => setLogType(v)}>
-              <SelectTrigger className="h-9 text-xs bg-white text-foreground border-0"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="outgoing">Outgoing</SelectItem>
-                <SelectItem value="incoming">Incoming</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="space-y-1.5">
+              <label className={labelCls}>Log Type{requiredStar}</label>
+              <Select value={logType} onValueChange={(v: any) => setLogType(v)}>
+                <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="outgoing">Outgoing</SelectItem>
+                  <SelectItem value="incoming">Incoming</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            <div className={labelCls}>{requiredStar}Communication Type</div>
-            <Select value={commType} onValueChange={(v: any) => setCommType(v)}>
-              <SelectTrigger className="h-9 text-xs bg-white text-foreground border-0"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Phone">Phone</SelectItem>
-                <SelectItem value="Email">Email</SelectItem>
-                <SelectItem value="SMS">SMS</SelectItem>
-                <SelectItem value="In Person">In Person</SelectItem>
-                <SelectItem value="Letter">Letter</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="space-y-1.5">
+              <label className={labelCls}>Communication Type{requiredStar}</label>
+              <Select value={commType} onValueChange={(v: any) => setCommType(v)}>
+                <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Phone">Phone</SelectItem>
+                  <SelectItem value="Email">Email</SelectItem>
+                  <SelectItem value="SMS">SMS</SelectItem>
+                  <SelectItem value="In Person">In Person</SelectItem>
+                  <SelectItem value="Letter">Letter</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            <div className={labelCls}>Phone/Email</div>
-            <Input
-              className="h-9 text-xs bg-white text-foreground border-0 placeholder:text-muted-foreground"
-              placeholder="Phone or Email"
-              value={phoneEmail}
-              maxLength={255}
-              onChange={(e) => setPhoneEmail(e.target.value)}
-            />
+            <div className="space-y-1.5">
+              <label className={labelCls}>Phone / Email</label>
+              <Input
+                className="h-9 text-sm"
+                placeholder={commType === "Email" ? "name@example.com" : "Phone number"}
+                value={phoneEmail}
+                maxLength={255}
+                onChange={(e) => setPhoneEmail(e.target.value)}
+              />
+            </div>
 
-            <div className={labelCls}>{requiredStar}Waiting On</div>
-            <Select value={waitingOn} onValueChange={setWaitingOn}>
-              <SelectTrigger className="h-9 text-xs bg-white text-foreground border-0"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Call Back">Call Back</SelectItem>
-                <SelectItem value="Email Reply">Email Reply</SelectItem>
-                <SelectItem value="Action">Action</SelectItem>
-                <SelectItem value="Nothing">Nothing</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="space-y-1.5">
+              <label className={labelCls}>Waiting On{requiredStar}</label>
+              <Select value={waitingOn} onValueChange={setWaitingOn}>
+                <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Call Back">Call Back</SelectItem>
+                  <SelectItem value="Email Reply">Email Reply</SelectItem>
+                  <SelectItem value="Action">Action</SelectItem>
+                  <SelectItem value="Nothing">Nothing</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            <div className={labelCls}>Assign To</div>
-            <Select value={assignTo} onValueChange={setAssignTo}>
-              <SelectTrigger className="h-9 text-xs bg-muted text-foreground border-0"><SelectValue placeholder="Please Select" /></SelectTrigger>
-              <SelectContent>
-                {assignees.length === 0 ? (
-                  <SelectItem value="__none" disabled>No active team members</SelectItem>
-                ) : (
-                  assignees.map((u) => <SelectItem key={u.id} value={u.name}>{u.name}</SelectItem>)
-                )}
-              </SelectContent>
-            </Select>
+            <div className="space-y-1.5">
+              <label className={labelCls}>Assign To</label>
+              <Select value={assignTo} onValueChange={setAssignTo}>
+                <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Please select" /></SelectTrigger>
+                <SelectContent>
+                  {assignees.length === 0 ? (
+                    <SelectItem value="__none" disabled>No active team members</SelectItem>
+                  ) : (
+                    assignees.map((u) => <SelectItem key={u.id} value={u.name}>{u.name}</SelectItem>)
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
 
-            <div className={labelCls}>Communication Date</div>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="h-9 text-xs w-full justify-start font-normal bg-muted text-foreground border-0">
-                  <CalendarIcon className="h-3 w-3 mr-1" />{format(commDate, "dd/MM/yyyy")}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar mode="single" selected={commDate} onSelect={(d) => d && setCommDate(d)} className="pointer-events-auto" />
-              </PopoverContent>
-            </Popover>
+            <div className="space-y-1.5">
+              <label className={labelCls}>Communication Date</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="h-9 text-sm w-full justify-start font-normal">
+                    <CalendarIcon className="h-3.5 w-3.5 mr-2" />{format(commDate, "dd/MM/yyyy")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={commDate} onSelect={(d) => d && setCommDate(d)} className="pointer-events-auto" />
+                </PopoverContent>
+              </Popover>
+            </div>
 
-            <div className={labelCls}>Note</div>
+            <div className="space-y-1.5">
+              <label className={labelCls}>Reason{requiredStar}</label>
+              <Select value={reasonId} onValueChange={setReasonId}>
+                <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Choose one..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Choose one...</SelectItem>
+                  {reasons.map((r) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className={labelCls}>Note</label>
             <Textarea
-              className="text-xs bg-white text-foreground border-0 min-h-[100px] resize-y"
+              className="text-sm min-h-[100px] resize-y"
               value={note}
               maxLength={2000}
               onChange={(e) => setNote(e.target.value)}
+              placeholder="Add details about this communication..."
             />
+          </div>
 
-            <div className={labelCls}>{requiredStar}Reason</div>
-            <Select value={reasonId} onValueChange={setReasonId}>
-              <SelectTrigger className="h-9 text-xs bg-white text-foreground border-0"><SelectValue placeholder="choose one..." /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">choose one...</SelectItem>
-                {reasons.map((r) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-
-            <div className={labelCls}>Tags</div>
+          <div className="space-y-1.5">
+            <label className={labelCls}>Tags</label>
             <Input
-              className="h-9 text-xs bg-muted text-foreground border-0 placeholder:text-muted-foreground"
-              placeholder="Nothing selected"
+              className="h-9 text-sm"
+              placeholder="Comma-separated tags"
               value={tagsInput}
               maxLength={300}
               onChange={(e) => setTagsInput(e.target.value)}
@@ -691,24 +713,22 @@ function AddLogDialog({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-4 py-3 bg-emerald-700 border-t border-emerald-800">
-          <Button
-            size="sm"
-            onClick={() => save.mutate()}
-            disabled={save.isPending}
-            className="h-8 bg-white hover:bg-white/90 text-emerald-700 border border-emerald-800"
-          >
-            <span className="mr-1">💾</span> Save
-          </Button>
+        <DialogFooter className="px-6 py-3 border-t bg-muted/30">
           <Button
             size="sm"
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="h-8 bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-800"
           >
-            Close
+            Cancel
           </Button>
-        </div>
+          <Button
+            size="sm"
+            onClick={() => save.mutate()}
+            disabled={save.isPending}
+          >
+            {save.isPending ? "Saving..." : "Save Log"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
