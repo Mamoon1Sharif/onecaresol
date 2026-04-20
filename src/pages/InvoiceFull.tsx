@@ -54,9 +54,19 @@ type Visit = {
   total: number;
 };
 
-const payments: Payment[] = [
+const initialPayments: Payment[] = [
   { date: "15/04/2026", paidTo: "Current Account", referenceNum: "", method: "Bank Transfer", amount: 400 },
 ];
+
+const paidToOptions = ["Current Account", "Savings Account", "Cash Float", "Petty Cash"];
+const paymentMethodOptions = ["Bank Transfer", "Cash", "Cheque", "Card Payment", "Direct Debit"];
+
+const todayDdMmYyyy = () => {
+  const d = new Date();
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  return `${dd}/${mm}/${d.getFullYear()}`;
+};
 
 const visits: Visit[] = [
   { date: "01/04/2026", call: "CHC - Sitting", start: "07:30", end: "09:00", duration: "01:30", cost: 37.5, total: 37.5 },
