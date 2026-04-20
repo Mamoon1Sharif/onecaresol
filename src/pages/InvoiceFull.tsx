@@ -310,39 +310,44 @@ export default function InvoiceFull() {
             if (!o) resetPaymentForm();
           }}
         >
-          <DialogContent className="p-0 overflow-hidden max-w-md gap-0 border-0">
-            <DialogHeader className="bg-emerald-600 text-white px-5 py-3 flex flex-row items-center justify-between space-y-0">
-              <DialogTitle className="text-white text-base font-semibold">Make A Payment</DialogTitle>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Make a Payment</DialogTitle>
             </DialogHeader>
-            <div className="bg-emerald-500 px-5 py-5 space-y-3">
-              <div className="grid grid-cols-[130px_1fr] items-center gap-3">
-                <Label className="text-white text-right text-sm">
-                  <span className="text-red-200 mr-0.5">*</span>Amount
-                </Label>
-                <Input
-                  type="number"
-                  value={payAmount}
-                  onChange={(e) => setPayAmount(e.target.value)}
-                  placeholder="Number Only"
-                  className="h-9 bg-white text-foreground"
-                />
+            <p className="text-sm text-muted-foreground -mt-1">
+              Record a new payment against this invoice.
+            </p>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="pay-amount">
+                    Amount <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="pay-amount"
+                    type="number"
+                    value={payAmount}
+                    onChange={(e) => setPayAmount(e.target.value)}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="pay-date">Payment Date</Label>
+                  <Input
+                    id="pay-date"
+                    value={payDate}
+                    onChange={(e) => setPayDate(e.target.value)}
+                    placeholder="DD/MM/YYYY"
+                  />
+                </div>
               </div>
-              <div className="grid grid-cols-[130px_1fr] items-center gap-3">
-                <Label className="text-white text-right text-sm">Payment Date</Label>
-                <Input
-                  value={payDate}
-                  onChange={(e) => setPayDate(e.target.value)}
-                  placeholder="DD/MM/YYYY"
-                  className="h-9 bg-white text-foreground"
-                />
-              </div>
-              <div className="grid grid-cols-[130px_1fr] items-center gap-3">
-                <Label className="text-white text-right text-sm">
-                  <span className="text-red-200 mr-0.5">*</span>Paid To
+              <div className="space-y-1.5">
+                <Label>
+                  Paid To <span className="text-destructive">*</span>
                 </Label>
                 <Select value={payPaidTo} onValueChange={setPayPaidTo}>
-                  <SelectTrigger className="h-9 bg-white text-foreground">
-                    <SelectValue placeholder="choose one..." />
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose one..." />
                   </SelectTrigger>
                   <SelectContent>
                     {paidToOptions.map((o) => (
@@ -351,11 +356,11 @@ export default function InvoiceFull() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-[130px_1fr] items-center gap-3">
-                <Label className="text-white text-right text-sm">Payment Method</Label>
+              <div className="space-y-1.5">
+                <Label>Payment Method</Label>
                 <Select value={payMethod} onValueChange={setPayMethod}>
-                  <SelectTrigger className="h-9 bg-white text-foreground">
-                    <SelectValue placeholder="choose one..." />
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose one..." />
                   </SelectTrigger>
                   <SelectContent>
                     {paymentMethodOptions.map((o) => (
@@ -364,32 +369,24 @@ export default function InvoiceFull() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-[130px_1fr] items-center gap-3">
-                <Label className="text-white text-right text-sm">Reference Number</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="pay-ref">Reference Number</Label>
                 <Input
+                  id="pay-ref"
                   value={payRef}
                   onChange={(e) => setPayRef(e.target.value)}
-                  className="h-9 bg-white text-foreground"
+                  placeholder="Optional"
                 />
               </div>
             </div>
-            <div className="bg-emerald-700 px-5 py-3 flex items-center justify-between">
-              <Button
-                size="sm"
-                onClick={handleCreatePayment}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-400"
-              >
+            <DialogFooter className="gap-2 sm:gap-2">
+              <Button variant="outline" onClick={() => setPaymentOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreatePayment}>
                 <Save className="h-4 w-4 mr-1.5" /> Create Payment
               </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setPaymentOpen(false)}
-                className="text-white hover:bg-emerald-600 hover:text-white"
-              >
-                <X className="h-4 w-4 mr-1.5" /> Close
-              </Button>
-            </div>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 
