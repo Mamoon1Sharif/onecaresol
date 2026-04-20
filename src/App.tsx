@@ -33,6 +33,9 @@ import CommunicationLog from "./pages/CommunicationLog.tsx";
 import CommunicationReasons from "./pages/CommunicationReasons.tsx";
 import Reports from "./pages/Reports.tsx";
 import ReportDetail from "./pages/ReportDetail.tsx";
+import Invoicing from "./pages/Invoicing.tsx";
+import InvoiceGroups from "./pages/InvoiceGroups.tsx";
+import InvoicingPlaceholder from "./pages/InvoicingPlaceholder.tsx";
 import Login from "./pages/Login.tsx";
 import Signup from "./pages/Signup.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -70,6 +73,14 @@ const App = () => (
             <Route path="/communication-log/reasons" element={<ProtectedRoute><CommunicationReasons /></ProtectedRoute>} />
             <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
             <Route path="/reports/:name" element={<ProtectedRoute><ReportDetail /></ProtectedRoute>} />
+            <Route path="/invoicing" element={<ProtectedRoute><Invoicing /></ProtectedRoute>} />
+            <Route path="/invoicing/invoice-groups" element={<ProtectedRoute><InvoiceGroups /></ProtectedRoute>} />
+            <Route path="/invoicing/wages" element={<ProtectedRoute><InvoicingPlaceholder title="Wages" description="Process and review team member wages, payslips and exports." /></ProtectedRoute>} />
+            <Route path="/invoicing/tariffs" element={<ProtectedRoute><InvoicingPlaceholder title="Tariffs" description="Configure pay rates and charge bands per service and time of day." /></ProtectedRoute>} />
+            <Route path="/invoicing/funders" element={<ProtectedRoute><InvoicingPlaceholder title="Funders" description="Manage funding bodies, contracts and billing references." /></ProtectedRoute>} />
+            <Route path="/invoicing/settings" element={<ProtectedRoute><InvoicingPlaceholder title="Invoicing Settings" description="Invoice numbering, VAT, PDF templates and payment terms." /></ProtectedRoute>} />
+            <Route path="/invoicing/bank-holidays" element={<ProtectedRoute><InvoicingPlaceholder title="Bank Holidays" description="Define UK bank holidays that affect pay and charge calculations." /></ProtectedRoute>} />
+            <Route path="/invoicing/holiday-report" element={<ProtectedRoute><InvoicingPlaceholder title="Holiday Report" description="Annual leave accruals, taken hours and outstanding balances." /></ProtectedRoute>} />
             <Route path="/caregivers/:id/messaging" element={<ProtectedRoute><Messaging /></ProtectedRoute>} />
             <Route path="/caregivers/:id/medication" element={<ProtectedRoute><Medication /></ProtectedRoute>} />
             <Route path="/caregivers/:id/qualifications" element={<ProtectedRoute><Qualifications /></ProtectedRoute>} />

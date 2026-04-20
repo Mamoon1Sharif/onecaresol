@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, HeartHandshake, CalendarDays, CalendarClock, ChevronDown, LogOut, MapPin, MessageSquare, FileBarChart } from "lucide-react";
+import { LayoutDashboard, Users, HeartHandshake, CalendarDays, CalendarClock, ChevronDown, LogOut, MapPin, MessageSquare, FileBarChart, Receipt } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
@@ -36,6 +36,16 @@ const topItems = [
 const rosterSubItems = [
   { title: "Weekly Roster", url: "/roster" },
   { title: "Daily Roster", url: "/daily-roster" },
+];
+
+const invoicingSubItems = [
+  { title: "Invoice Groups", url: "/invoicing/invoice-groups" },
+  { title: "Wages", url: "/invoicing/wages" },
+  { title: "Tariffs", url: "/invoicing/tariffs" },
+  { title: "Funders", url: "/invoicing/funders" },
+  { title: "Settings", url: "/invoicing/settings" },
+  { title: "Bank Holidays", url: "/invoicing/bank-holidays" },
+  { title: "Holiday Report", url: "/invoicing/holiday-report" },
 ];
 
 export function AppSidebar() {
