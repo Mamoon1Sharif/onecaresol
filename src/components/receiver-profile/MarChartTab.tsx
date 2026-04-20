@@ -192,8 +192,8 @@ export function MarChartTab({ cr }: Props) {
   return (
     <Card className="border border-border shadow-sm overflow-hidden p-0">
       {/* Patient strip */}
-      <div className="bg-[hsl(280,55%,28%)] text-white px-4 py-3 flex items-center gap-4 flex-wrap">
-        <div className="h-12 w-12 rounded-full bg-white/20 flex items-center justify-center text-sm font-semibold uppercase">
+      <div className="bg-card border-b px-4 py-3 flex items-center gap-4 flex-wrap">
+        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center text-sm font-semibold uppercase text-muted-foreground">
           {cr.name.split(" ").map((s) => s[0]).slice(0, 2).join("")}
         </div>
         <div className="flex-1 min-w-0">
@@ -201,13 +201,13 @@ export function MarChartTab({ cr }: Props) {
             <span className="font-semibold">{cr.name}</span>
             <span className="text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded uppercase tracking-wide">{cr.care_status || "Active"}</span>
           </div>
-          <div className="text-xs text-white/80">Tel: {cr.phone_number || "—"} · DOB: {cr.dob ? format(new Date(cr.dob), "dd/MM/yyyy") : "—"}</div>
-          <div className="text-xs text-white/80">{cr.address || "—"}</div>
+          <div className="text-xs text-muted-foreground">Tel: {cr.phone_number || "—"} · DOB: {cr.dob ? format(new Date(cr.dob), "dd/MM/yyyy") : "—"}</div>
+          <div className="text-xs text-muted-foreground">{cr.address || "—"}</div>
         </div>
         <Button
           size="sm"
           variant="outline"
-          className="gap-1.5 bg-white text-foreground hover:bg-white/90"
+          className="gap-1.5"
           onClick={handlePrint}
         >
           <Printer className="h-3.5 w-3.5" /> Print
