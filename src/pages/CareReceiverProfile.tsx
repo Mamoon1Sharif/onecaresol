@@ -134,6 +134,9 @@ const CareReceiverProfile = () => {
           <TabsContent value="care-management" className="mt-4">
             <CareManagementTab careReceiverId={cr.id} careReceiverName={cr.name} />
           </TabsContent>
+          <TabsContent value="mar-chart" className="mt-4">
+            <MarChartTab cr={cr} />
+          </TabsContent>
           <TabsContent value="detailed" className="mt-4">
             <ReceiverDetailedProfileTab cr={cr} />
           </TabsContent>
