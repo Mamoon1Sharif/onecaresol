@@ -78,12 +78,53 @@ const visits: Visit[] = [
 
 const fmt = (n: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(n);
 
-const settings: Array<{ label: string; value: string; valueClass?: string }> = [
-  { label: "Invoice Layout", value: "Mayfair Care (CHC)", valueClass: "text-primary" },
-  { label: "Invoice Prefix", value: "" },
-  { label: "Invoice Number", value: "29333" },
-  { label: "Include Terms", value: "Yes" },
-  { label: "Include Banking Info", value: "Yes" },
+type SettingKey =
+  | "invoiceLayout"
+  | "serviceUserNameConfig"
+  | "showServiceUserEmail"
+  | "includeTerms"
+  | "includeBanking"
+  | "includeInvoiceBreakdown"
+  | "showBreakdownTableOnInvoice"
+  | "showTeamMemberInBreakdown"
+  | "includeAmountRateBreakdown"
+  | "includeNotes"
+  | "showServiceUserAddress";
+
+type SettingsState = Record<SettingKey, string>;
+
+const settingFields: Array<{
+  key: SettingKey;
+  label: string;
+  required?: boolean;
+  options: string[];
+}> = [
+  { key: "invoiceLayout", label: "Invoice Layout", required: true, options: ["Mayfair Care (CHC)", "Mayfair Care (Private)", "Default"] },
+  { key: "serviceUserNameConfig", label: "Service User Name Config", options: ["Show Only Service User Ref Number", "Show Full Name", "Show Initials Only"] },
+  { key: "showServiceUserEmail", label: "Show Service User Email", options: ["No", "Yes"] },
+  { key: "includeTerms", label: "Include Terms", options: ["Yes", "No"] },
+  { key: "includeBanking", label: "Include Banking", options: ["Yes", "No"] },
+  { key: "includeInvoiceBreakdown", label: "Include Invoice Breakdown", options: ["Yes", "No"] },
+  { key: "showBreakdownTableOnInvoice", label: "Show Breakdown Table on Invoice", options: ["Yes", "No"] },
+  { key: "showTeamMemberInBreakdown", label: "Show Team Member In Breakdown", options: ["Don't Show Team Member Name", "Show Team Member Name"] },
+  { key: "includeAmountRateBreakdown", label: "Include Amount/Rate Breakdown", options: ["No", "Yes"] },
+  { key: "includeNotes", label: "Include Notes", options: ["No", "Yes"] },
+  { key: "showServiceUserAddress", label: "Show Service User Address", options: ["No", "Yes"] },
+];
+
+const initialSettings: SettingsState = {
+  invoiceLayout: "Mayfair Care (CHC)",
+  serviceUserNameConfig: "Show Only Service User Ref Number",
+  showServiceUserEmail: "No",
+  includeTerms: "Yes",
+  includeBanking: "Yes",
+  includeInvoiceBreakdown: "Yes",
+  showBreakdownTableOnInvoice: "Yes",
+  showTeamMemberInBreakdown: "Don't Show Team Member Name",
+  includeAmountRateBreakdown: "No",
+  includeNotes: "No",
+  showServiceUserAddress: "No",
+};
   { label: "Include Notes", value: "No" },
   { label: "Service User Name Config", value: "Show Only Service User Ref Number" },
   { label: "Show Service User Email", value: "No" },
