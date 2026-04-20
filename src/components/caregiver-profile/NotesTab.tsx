@@ -61,6 +61,8 @@ const PAGE_SIZE = 10;
 export function NotesTab({ careGiverId }: Props) {
   const qc = useQueryClient();
   const { data: receivers = [] } = useCareReceivers();
+  const { data: caregiver } = useCareGiver(careGiverId);
+  const [passVersion, setPassVersion] = useState(false);
 
   // ============== Private User Notes ==============
   const today = new Date().toISOString().split("T")[0];
@@ -228,6 +230,22 @@ export function NotesTab({ careGiverId }: Props) {
 
   return (
     <div className="space-y-6">
+      {/* ======================= PASS VERSION TOGGLE ======================= */}
+      <div className="flex items-center justify-end gap-3 px-1">
+        <Label htmlFor="pass-version-toggle" className="text-sm font-medium cursor-pointer">
+          Pass version
+        </Label>
+        <Switch
+          id="pass-version-toggle"
+          checked={passVersion}
+          onCheckedChange={setPassVersion}
+        />
+      </div>
+
+      {passVersion ? (
+        <PassVersionView careGiverName={caregiver?.name} />
+      ) : (
+        <>
       {/* ======================= PRIVATE USER NOTES ======================= */}
       <Card className="border border-border shadow-sm overflow-hidden">
         <div className="flex items-center justify-between gap-3 px-4 py-3 bg-muted/30 border-b flex-wrap">
