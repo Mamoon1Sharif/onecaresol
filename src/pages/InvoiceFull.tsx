@@ -144,6 +144,21 @@ export default function InvoiceFull() {
   const [payMethod, setPayMethod] = useState("");
   const [payRef, setPayRef] = useState("");
 
+  const [settings, setSettings] = useState<SettingsState>(initialSettings);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [draftSettings, setDraftSettings] = useState<SettingsState>(initialSettings);
+
+  const openSettings = () => {
+    setDraftSettings(settings);
+    setSettingsOpen(true);
+  };
+
+  const handleUpdateSettings = () => {
+    setSettings(draftSettings);
+    setSettingsOpen(false);
+    toast({ title: "Settings updated", description: "Invoice settings have been saved." });
+  };
+
   const extraTotal = extraCharges.reduce((a, c) => a + c.quantity * c.cost, 0);
   const baseRequired = 400;
   const totalRequired = baseRequired + extraTotal;
