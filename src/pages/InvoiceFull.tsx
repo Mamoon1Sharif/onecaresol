@@ -168,6 +168,8 @@ export default function InvoiceFull() {
     resetPaymentForm();
     setPaymentOpen(false);
   };
+
+  return (
     <AppLayout>
       <div className="max-w-7xl mx-auto space-y-5 print:space-y-3">
         {/* Top toolbar */}
