@@ -2,6 +2,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
@@ -19,7 +20,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Download, Settings, Play } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Download, Settings, Play, Check, Save, Printer, FileText } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -39,9 +50,19 @@ type WageRow = {
   waitingTimePay: number;
 };
 
+type TeamRow = {
+  surname: string;
+  forename: string;
+  payroll: string;
+  scheduled: number;
+  clocked: number;
+  included: number;
+  excluded: number;
+};
+
 const dateRange = "24/02/2026 - 23/03/2026";
 
-const wageRows: WageRow[] = [
+const initialWageRows: WageRow[] = [
   { ref: "1348060", published: false, dateRange, surname: "Archer", forename: "Lisa", totalHours: 121.55, pay: 1627.78, mileageMiles: 309.90, mileagePay: 139.48, travelTimeMins: 728.30, travelTimePay: 158.09, waitingTimePay: 157.71 },
   { ref: "1348063", published: false, dateRange, surname: "Biggart", forename: "Emily", totalHours: 67.73, pay: 850.79, mileageMiles: 436.16, mileagePay: 196.30, travelTimeMins: 994.60, travelTimePay: 208.83, waitingTimePay: 230.62 },
   { ref: "1348066", published: false, dateRange, surname: "Cannaway", forename: "Anne", totalHours: 65.28, pay: 842.35, mileageMiles: 276.41, mileagePay: 124.28, travelTimeMins: 904.08, travelTimePay: 195.69, waitingTimePay: 238.29 },
@@ -65,6 +86,16 @@ const wageRows: WageRow[] = [
   { ref: "1348120", published: false, dateRange, surname: "Young", forename: "Hayley", totalHours: 0, pay: 0, mileageMiles: 0, mileagePay: 0, travelTimeMins: 0, travelTimePay: 0, waitingTimePay: 0 },
 ];
 
+const initialTeamRows: TeamRow[] = [
+  { surname: "Archer", forename: "Lisa", payroll: "PR-1001", scheduled: 122.00, clocked: 121.55, included: 121.55, excluded: 0.45 },
+  { surname: "Biggart", forename: "Emily", payroll: "PR-1002", scheduled: 68.00, clocked: 67.73, included: 67.73, excluded: 0.27 },
+  { surname: "Cannaway", forename: "Anne", payroll: "PR-1003", scheduled: 66.00, clocked: 65.28, included: 65.28, excluded: 0.72 },
+  { surname: "Davis", forename: "Kirsty", payroll: "PR-1004", scheduled: 67.00, clocked: 66.68, included: 66.68, excluded: 0.32 },
+  { surname: "Hill", forename: "Aimee", payroll: "PR-1005", scheduled: 54.00, clocked: 53.43, included: 53.43, excluded: 0.57 },
+  { surname: "McBride", forename: "Alison", payroll: "PR-1006", scheduled: 80.00, clocked: 79.50, included: 79.50, excluded: 0.50 },
+  { surname: "Wood", forename: "Nicola", payroll: "PR-1007", scheduled: 54.00, clocked: 53.76, included: 53.76, excluded: 0.24 },
+];
+
 const fmtGBP = (n: number) =>
   new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", minimumFractionDigits: 2 }).format(n);
 const fmtNum = (n: number, d = 2) =>
@@ -79,15 +110,42 @@ export default function WageGroupDetail() {
   const [teamSearch, setTeamSearch] = useState("");
   const [bulkAction, setBulkAction] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [teamSelected, setTeamSelected] = useState<Set<string>>(new Set());
+  const [rows, setRows] = useState<WageRow[]>(initialWageRows);
+  const [teamRows] = useState<TeamRow[]>(initialTeamRows);
+
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [payslip, setPayslip] = useState<WageRow | null>(null);
+  const [runOpen, setRunOpen] = useState(false);
+  const [running, setRunning] = useState(false);
+
+  const [settings, setSettings] = useState({
+    payDate: "31/03/2026",
+    includeMileage: true,
+    includeTravelTime: true,
+    includeWaitingTime: true,
+    autoPublish: false,
+    notifyStaff: true,
+  });
 
   const filtered = useMemo(
     () =>
-      wageRows.filter((r) =>
+      rows.filter((r) =>
         [r.ref, r.surname, r.forename].some((v) =>
           v.toLowerCase().includes(search.toLowerCase()),
         ),
       ),
-    [search],
+    [rows, search],
+  );
+
+  const filteredTeam = useMemo(
+    () =>
+      teamRows.filter((r) =>
+        [r.surname, r.forename, r.payroll].some((v) =>
+          v.toLowerCase().includes(teamSearch.toLowerCase()),
+        ),
+      ),
+    [teamRows, teamSearch],
   );
 
   const totals = useMemo(
@@ -101,6 +159,16 @@ export default function WageGroupDetail() {
       waitingPay: filtered.reduce((s, r) => s + r.waitingTimePay, 0),
     }),
     [filtered],
+  );
+
+  const teamTotals = useMemo(
+    () => ({
+      scheduled: filteredTeam.reduce((s, r) => s + r.scheduled, 0),
+      clocked: filteredTeam.reduce((s, r) => s + r.clocked, 0),
+      included: filteredTeam.reduce((s, r) => s + r.included, 0),
+      excluded: filteredTeam.reduce((s, r) => s + r.excluded, 0),
+    }),
+    [filteredTeam],
   );
 
   const grandTotal = (r: WageRow) =>
@@ -121,6 +189,19 @@ export default function WageGroupDetail() {
     setSelected(next);
   };
 
+  const allTeamSelected =
+    filteredTeam.length > 0 && filteredTeam.every((r) => teamSelected.has(r.payroll));
+  const toggleAllTeam = () => {
+    if (allTeamSelected) setTeamSelected(new Set());
+    else setTeamSelected(new Set(filteredTeam.map((r) => r.payroll)));
+  };
+  const toggleOneTeam = (payroll: string) => {
+    const next = new Set(teamSelected);
+    if (next.has(payroll)) next.delete(payroll);
+    else next.add(payroll);
+    setTeamSelected(next);
+  };
+
   const runBulk = () => {
     if (!bulkAction) {
       toast.error("Choose a bulk action");
@@ -130,9 +211,44 @@ export default function WageGroupDetail() {
       toast.error("Select at least one wage");
       return;
     }
-    toast.success(`${bulkAction} applied to ${selected.size} wage(s)`);
+    if (bulkAction === "publish") {
+      setRows((prev) => prev.map((r) => (selected.has(r.ref) ? { ...r, published: true } : r)));
+      toast.success(`Published ${selected.size} wage(s)`);
+    } else if (bulkAction === "unpublish") {
+      setRows((prev) => prev.map((r) => (selected.has(r.ref) ? { ...r, published: false } : r)));
+      toast.success(`Unpublished ${selected.size} wage(s)`);
+    } else if (bulkAction === "delete") {
+      setRows((prev) => prev.filter((r) => !selected.has(r.ref)));
+      toast.success(`Deleted ${selected.size} wage(s)`);
+    } else if (bulkAction === "export") {
+      toast.success(`Exported ${selected.size} wage(s) to CSV`);
+    }
     setSelected(new Set());
     setBulkAction("");
+  };
+
+  const togglePublishOne = (ref: string) => {
+    setRows((prev) => prev.map((r) => (r.ref === ref ? { ...r, published: !r.published } : r)));
+    const row = rows.find((r) => r.ref === ref);
+    toast.success(`Wage ${ref} ${row?.published ? "unpublished" : "published"}`);
+  };
+
+  const handleRun = () => {
+    if (teamSelected.size === 0) {
+      toast.error("Select at least one team member");
+      return;
+    }
+    setRunOpen(true);
+  };
+
+  const confirmRun = () => {
+    setRunning(true);
+    setTimeout(() => {
+      setRunning(false);
+      setRunOpen(false);
+      toast.success(`Wages run completed for ${teamSelected.size} member(s)`);
+      setTeamSelected(new Set());
+    }, 900);
   };
 
   return (
@@ -151,6 +267,16 @@ export default function WageGroupDetail() {
             >
               <Download className="h-4 w-4 mr-1.5" /> Export CSV
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                window.print();
+                toast.info("Opening print preview");
+              }}
+            >
+              <Printer className="h-4 w-4 mr-1.5" /> Print
+            </Button>
             <div className="flex-1 text-center">
               <h1 className="text-lg font-semibold">Wages</h1>
               <p className="text-xs text-muted-foreground mt-0.5">
@@ -160,7 +286,7 @@ export default function WageGroupDetail() {
             <Button
               size="sm"
               className="bg-amber-500 hover:bg-amber-600 text-white"
-              onClick={() => toast.info("Settings panel")}
+              onClick={() => setSettingsOpen(true)}
             >
               <Settings className="h-4 w-4 mr-1.5" /> Settings
             </Button>
@@ -189,6 +315,11 @@ export default function WageGroupDetail() {
               >
                 Go
               </Button>
+              {selected.size > 0 && (
+                <Badge variant="secondary" className="h-7">
+                  {selected.size} selected
+                </Badge>
+              )}
             </div>
             <div className="flex items-center gap-2 text-sm">
               <span>Search:</span>
@@ -223,36 +354,56 @@ export default function WageGroupDetail() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map((r) => (
-                  <TableRow key={r.ref} className="bg-emerald-50/40">
-                    <TableCell>
-                      <Checkbox
-                        checked={selected.has(r.ref)}
-                        onCheckedChange={() => toggleOne(r.ref)}
-                      />
+                {filtered.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={14} className="text-center text-sm text-muted-foreground py-8">
+                      No wages found.
                     </TableCell>
-                    <TableCell>
-                      <button
-                        className="text-emerald-700 hover:underline"
-                        onClick={() => toast.info(`Opening wage ${r.ref}`)}
-                      >
-                        {r.ref}
-                      </button>
-                    </TableCell>
-                    <TableCell>{r.published ? "Yes" : "No"}</TableCell>
-                    <TableCell className="whitespace-nowrap">{r.dateRange}</TableCell>
-                    <TableCell>{r.surname}</TableCell>
-                    <TableCell>{r.forename}</TableCell>
-                    <TableCell className="text-right">{fmtNum(r.totalHours)}</TableCell>
-                    <TableCell className="text-right">{fmtGBP(r.pay)}</TableCell>
-                    <TableCell className="text-right">{fmtNum(r.mileageMiles)}</TableCell>
-                    <TableCell className="text-right">{fmtGBP(r.mileagePay)}</TableCell>
-                    <TableCell className="text-right">{fmtNum(r.travelTimeMins)}</TableCell>
-                    <TableCell className="text-right">{fmtGBP(r.travelTimePay)}</TableCell>
-                    <TableCell className="text-right">{fmtGBP(r.waitingTimePay)}</TableCell>
-                    <TableCell className="text-right font-medium">{fmtGBP(grandTotal(r))}</TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  filtered.map((r) => (
+                    <TableRow key={r.ref} className="bg-emerald-50/40">
+                      <TableCell>
+                        <Checkbox
+                          checked={selected.has(r.ref)}
+                          onCheckedChange={() => toggleOne(r.ref)}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <button
+                          className="text-emerald-700 hover:underline font-medium"
+                          onClick={() => setPayslip(r)}
+                        >
+                          {r.ref}
+                        </button>
+                      </TableCell>
+                      <TableCell>
+                        <button
+                          onClick={() => togglePublishOne(r.ref)}
+                          className="cursor-pointer"
+                        >
+                          <Badge
+                            variant={r.published ? "default" : "outline"}
+                            className={r.published ? "bg-emerald-600 hover:bg-emerald-700" : ""}
+                          >
+                            {r.published ? "Yes" : "No"}
+                          </Badge>
+                        </button>
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">{r.dateRange}</TableCell>
+                      <TableCell>{r.surname}</TableCell>
+                      <TableCell>{r.forename}</TableCell>
+                      <TableCell className="text-right">{fmtNum(r.totalHours)}</TableCell>
+                      <TableCell className="text-right">{fmtGBP(r.pay)}</TableCell>
+                      <TableCell className="text-right">{fmtNum(r.mileageMiles)}</TableCell>
+                      <TableCell className="text-right">{fmtGBP(r.mileagePay)}</TableCell>
+                      <TableCell className="text-right">{fmtNum(r.travelTimeMins)}</TableCell>
+                      <TableCell className="text-right">{fmtGBP(r.travelTimePay)}</TableCell>
+                      <TableCell className="text-right">{fmtGBP(r.waitingTimePay)}</TableCell>
+                      <TableCell className="text-right font-medium">{fmtGBP(grandTotal(r))}</TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
               <TableFooter>
                 <TableRow>
@@ -282,7 +433,7 @@ export default function WageGroupDetail() {
             <Button
               size="sm"
               className="bg-sky-600 hover:bg-sky-700 text-white"
-              onClick={() => toast.success("CSV export started")}
+              onClick={() => toast.success("Team CSV export started")}
             >
               <Download className="h-4 w-4 mr-1.5" /> Export CSV
             </Button>
@@ -304,13 +455,20 @@ export default function WageGroupDetail() {
           </div>
 
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <Button
-              size="sm"
-              className="bg-emerald-600 hover:bg-emerald-700 text-white"
-              onClick={() => toast.success("Wages run started")}
-            >
-              <Play className="h-4 w-4 mr-1.5" /> Run Wages
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                onClick={handleRun}
+              >
+                <Play className="h-4 w-4 mr-1.5" /> Run Wages
+              </Button>
+              {teamSelected.size > 0 && (
+                <Badge variant="secondary" className="h-7">
+                  {teamSelected.size} selected
+                </Badge>
+              )}
+            </div>
             <div className="flex items-center gap-2 text-sm">
               <span>Search:</span>
               <Input
@@ -326,7 +484,7 @@ export default function WageGroupDetail() {
               <TableHeader>
                 <TableRow className="bg-muted/40">
                   <TableHead className="w-10">
-                    <Checkbox />
+                    <Checkbox checked={allTeamSelected} onCheckedChange={toggleAllTeam} />
                   </TableHead>
                   <TableHead className="font-medium">Surname</TableHead>
                   <TableHead className="font-medium">Forename</TableHead>
@@ -339,28 +497,185 @@ export default function WageGroupDetail() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
-                  <TableCell colSpan={9} className="text-center text-sm text-muted-foreground py-10">
-                    Loading…
-                  </TableCell>
-                </TableRow>
+                {filteredTeam.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={9} className="text-center text-sm text-muted-foreground py-8">
+                      No team members found.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredTeam.map((r) => {
+                    const diff = r.scheduled - r.clocked;
+                    return (
+                      <TableRow key={r.payroll}>
+                        <TableCell>
+                          <Checkbox
+                            checked={teamSelected.has(r.payroll)}
+                            onCheckedChange={() => toggleOneTeam(r.payroll)}
+                          />
+                        </TableCell>
+                        <TableCell>{r.surname}</TableCell>
+                        <TableCell>{r.forename}</TableCell>
+                        <TableCell className="font-mono text-xs">{r.payroll}</TableCell>
+                        <TableCell className="text-right">{fmtNum(r.scheduled)}</TableCell>
+                        <TableCell className="text-right">{fmtNum(r.clocked)}</TableCell>
+                        <TableCell className={`text-right ${diff > 0 ? "text-rose-600" : "text-emerald-700"}`}>
+                          {fmtNum(diff)}
+                        </TableCell>
+                        <TableCell className="text-right">{fmtNum(r.included)}</TableCell>
+                        <TableCell className="text-right">{fmtNum(r.excluded)}</TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
               </TableBody>
               <TableFooter>
                 <TableRow>
                   <TableCell colSpan={4} className="font-semibold">Totals</TableCell>
-                  <TableCell className="text-right font-semibold">0</TableCell>
-                  <TableCell className="text-right font-semibold">0</TableCell>
-                  <TableCell className="text-right font-semibold">0</TableCell>
-                  <TableCell className="text-right font-semibold">0</TableCell>
-                  <TableCell className="text-right font-semibold">0</TableCell>
+                  <TableCell className="text-right font-semibold">{fmtNum(teamTotals.scheduled)}</TableCell>
+                  <TableCell className="text-right font-semibold">{fmtNum(teamTotals.clocked)}</TableCell>
+                  <TableCell className="text-right font-semibold">{fmtNum(teamTotals.scheduled - teamTotals.clocked)}</TableCell>
+                  <TableCell className="text-right font-semibold">{fmtNum(teamTotals.included)}</TableCell>
+                  <TableCell className="text-right font-semibold">{fmtNum(teamTotals.excluded)}</TableCell>
                 </TableRow>
               </TableFooter>
             </Table>
           </div>
 
-          <div className="text-xs text-muted-foreground">Showing 0 to 0 of 0 entries</div>
+          <div className="text-xs text-muted-foreground">
+            Showing 1 to {filteredTeam.length} of {filteredTeam.length} entries
+          </div>
         </Card>
       </div>
+
+      {/* Settings dialog */}
+      <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Wage Group Settings</DialogTitle>
+            <DialogDescription>
+              Configure how wages in this group are calculated and published.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-1">
+            <div className="grid grid-cols-[160px_1fr] items-center gap-3">
+              <Label htmlFor="payDate">Pay date</Label>
+              <Input
+                id="payDate"
+                value={settings.payDate}
+                onChange={(e) => setSettings({ ...settings, payDate: e.target.value })}
+              />
+            </div>
+            {[
+              { key: "includeMileage", label: "Include mileage" },
+              { key: "includeTravelTime", label: "Include travel time" },
+              { key: "includeWaitingTime", label: "Include waiting time" },
+              { key: "autoPublish", label: "Auto-publish on run" },
+              { key: "notifyStaff", label: "Notify staff via app" },
+            ].map((opt) => (
+              <div key={opt.key} className="flex items-center justify-between border-t pt-3">
+                <Label htmlFor={opt.key}>{opt.label}</Label>
+                <Switch
+                  id={opt.key}
+                  checked={settings[opt.key as keyof typeof settings] as boolean}
+                  onCheckedChange={(v) =>
+                    setSettings({ ...settings, [opt.key]: v })
+                  }
+                />
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSettingsOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                setSettingsOpen(false);
+                toast.success("Settings saved");
+              }}
+            >
+              <Save className="h-4 w-4 mr-1.5" /> Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payslip dialog */}
+      <Dialog open={!!payslip} onOpenChange={(o) => !o && setPayslip(null)}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5 text-emerald-700" />
+              Payslip {payslip?.ref}
+            </DialogTitle>
+            <DialogDescription>
+              {payslip?.forename} {payslip?.surname} · {payslip?.dateRange}
+            </DialogDescription>
+          </DialogHeader>
+          {payslip && (
+            <div className="space-y-2 text-sm">
+              {[
+                ["Total hours", `${fmtNum(payslip.totalHours)} hrs`],
+                ["Base pay", fmtGBP(payslip.pay)],
+                ["Mileage", `${fmtNum(payslip.mileageMiles)} mi · ${fmtGBP(payslip.mileagePay)}`],
+                ["Travel time", `${fmtNum(payslip.travelTimeMins)} min · ${fmtGBP(payslip.travelTimePay)}`],
+                ["Waiting time", fmtGBP(payslip.waitingTimePay)],
+              ].map(([k, v]) => (
+                <div key={k} className="flex justify-between border-b pb-2">
+                  <span className="text-muted-foreground">{k}</span>
+                  <span className="font-medium">{v}</span>
+                </div>
+              ))}
+              <div className="flex justify-between pt-2">
+                <span className="font-semibold">Grand total</span>
+                <span className="font-semibold text-emerald-700">
+                  {fmtGBP(grandTotal(payslip))}
+                </span>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPayslip(null)}>
+              Close
+            </Button>
+            <Button
+              onClick={() => {
+                toast.success(`Payslip ${payslip?.ref} downloaded`);
+                setPayslip(null);
+              }}
+            >
+              <Download className="h-4 w-4 mr-1.5" /> Download PDF
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Run Wages confirm dialog */}
+      <Dialog open={runOpen} onOpenChange={setRunOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Run wages now?</DialogTitle>
+            <DialogDescription>
+              This will generate wages for {teamSelected.size} selected team member(s) in
+              this group.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRunOpen(false)} disabled={running}>
+              Cancel
+            </Button>
+            <Button
+              onClick={confirmRun}
+              disabled={running}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+            >
+              <Check className="h-4 w-4 mr-1.5" />
+              {running ? "Running…" : "Confirm"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }
