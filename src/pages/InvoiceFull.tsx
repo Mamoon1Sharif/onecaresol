@@ -471,22 +471,25 @@ export default function InvoiceFull() {
 
         {/* Edit Invoice Settings Dialog */}
         <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-          <DialogContent className="p-0 overflow-hidden max-w-lg gap-0 border-0">
-            <DialogHeader className="bg-amber-600 text-white px-5 py-3 flex flex-row items-center justify-between space-y-0">
-              <DialogTitle className="text-white text-base font-semibold">Invoice Settings</DialogTitle>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Invoice Settings</DialogTitle>
             </DialogHeader>
-            <div className="bg-amber-500 px-5 py-5 space-y-3 max-h-[70vh] overflow-y-auto">
+            <p className="text-sm text-muted-foreground -mt-1">
+              Configure how this invoice is displayed and printed.
+            </p>
+            <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1 -mr-1">
               {settingFields.map((f) => (
-                <div key={f.key} className="grid grid-cols-[180px_1fr] items-center gap-3">
-                  <Label className="text-white text-right text-sm leading-tight">
-                    {f.required && <span className="text-red-200 mr-0.5">*</span>}
+                <div key={f.key} className="grid grid-cols-1 sm:grid-cols-[200px_1fr] sm:items-center gap-2 sm:gap-3">
+                  <Label className="text-sm">
                     {f.label}
+                    {f.required && <span className="text-destructive ml-0.5">*</span>}
                   </Label>
                   <Select
                     value={draftSettings[f.key]}
                     onValueChange={(v) => setDraftSettings((p) => ({ ...p, [f.key]: v }))}
                   >
-                    <SelectTrigger className="h-9 bg-white text-foreground">
+                    <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -498,23 +501,14 @@ export default function InvoiceFull() {
                 </div>
               ))}
             </div>
-            <div className="bg-amber-700 px-5 py-3 flex items-center justify-between">
-              <Button
-                size="sm"
-                onClick={handleUpdateSettings}
-                className="bg-amber-600 hover:bg-amber-500 text-white border border-amber-400"
-              >
-                <Save className="h-4 w-4 mr-1.5" /> Update Invoice Settings
+            <DialogFooter className="gap-2 sm:gap-2">
+              <Button variant="outline" onClick={() => setSettingsOpen(false)}>
+                Cancel
               </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setSettingsOpen(false)}
-                className="text-white hover:bg-amber-600 hover:text-white"
-              >
-                <X className="h-4 w-4 mr-1.5" /> Close
+              <Button onClick={handleUpdateSettings}>
+                <Save className="h-4 w-4 mr-1.5" /> Update Settings
               </Button>
-            </div>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 
