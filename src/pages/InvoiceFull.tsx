@@ -9,8 +9,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Pencil, Plus, Printer } from "lucide-react";
+import { ArrowLeft, Check, Pencil, Plus, Printer, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "@/hooks/use-toast";
+
+type ExtraCharge = {
+  id: string;
+  service: string;
+  quantity: number;
+  cost: number;
+};
 
 type Payment = {
   date: string;
