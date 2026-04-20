@@ -25,8 +25,11 @@ import {
   StickyNote, CalendarDays, Plus, Download, RefreshCw,
   ChevronLeft, ChevronRight, FileText, Trash2, Pencil,
 } from "lucide-react";
-import { useCareReceivers } from "@/hooks/use-care-data";
+import { useCareReceivers, useCareGiver } from "@/hooks/use-care-data";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { PassVersionView } from "./PassVersionView";
 
 interface Props {
   careGiverId: string;
