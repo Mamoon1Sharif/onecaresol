@@ -81,7 +81,15 @@ export default function InvoiceFull() {
   const navigate = useNavigate();
   const { groupName = "", invoiceRef = "29333" } = useParams();
 
-  const totalRequired = 400;
+  const [extraCharges, setExtraCharges] = useState<ExtraCharge[]>([]);
+  const [chargeOpen, setChargeOpen] = useState(false);
+  const [chargeService, setChargeService] = useState("");
+  const [chargeQty, setChargeQty] = useState("");
+  const [chargeCost, setChargeCost] = useState("");
+
+  const extraTotal = extraCharges.reduce((a, c) => a + c.quantity * c.cost, 0);
+  const baseRequired = 400;
+  const totalRequired = baseRequired + extraTotal;
   const totalPaid = payments.reduce((a, p) => a + p.amount, 0);
   const outstanding = Math.max(0, totalRequired - totalPaid);
   const visitTotal = visits.reduce((a, v) => a + v.cost, 0);
@@ -90,6 +98,28 @@ export default function InvoiceFull() {
     return acc + h * 60 + m;
   }, 0);
   const totalDurationFmt = `${String(Math.floor(totalDuration / 60)).padStart(2, "0")}:${String(totalDuration % 60).padStart(2, "0")}`;
+
+  const resetChargeForm = () => {
+    setChargeService("");
+    setChargeQty("");
+    setChargeCost("");
+  };
+
+  const handleAddCharge = () => {
+    const qty = Number(chargeQty);
+    const cost = Number(chargeCost);
+    if (!chargeService.trim() || !chargeQty || !chargeCost || isNaN(qty) || isNaN(cost)) {
+      toast({ title: "Missing details", description: "Please fill in service, quantity and cost.", variant: "destructive" });
+      return;
+    }
+    setExtraCharges((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), service: chargeService.trim(), quantity: qty, cost },
+    ]);
+    toast({ title: "Charge added", description: `${chargeService} added to invoice.` });
+    resetChargeForm();
+    setChargeOpen(false);
+  };
 
   return (
     <AppLayout>
@@ -102,10 +132,86 @@ export default function InvoiceFull() {
           <Button size="sm" variant="secondary" onClick={() => window.print()}>
             <Printer className="h-4 w-4 mr-1.5" /> Print
           </Button>
-          <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+          <Button
+            size="sm"
+            className="bg-emerald-600 hover:bg-emerald-700 text-white"
+            onClick={() => setChargeOpen(true)}
+          >
             <Plus className="h-4 w-4 mr-1.5" /> Extra Charge
           </Button>
         </div>
+
+        {/* Add New Charge Dialog */}
+        <Dialog
+          open={chargeOpen}
+          onOpenChange={(o) => {
+            setChargeOpen(o);
+            if (!o) resetChargeForm();
+          }}
+        >
+          <DialogContent className="p-0 overflow-hidden max-w-md gap-0 border-0">
+            <DialogHeader className="bg-emerald-600 text-white px-5 py-3 flex flex-row items-center justify-between space-y-0">
+              <DialogTitle className="text-white text-base font-semibold">Add New Charge</DialogTitle>
+            </DialogHeader>
+            <div className="bg-emerald-500 text-white px-5 py-3 text-xs leading-relaxed">
+              You can add a custom charge to this invoice below. We will take your quantity entered and * it by the cost to get the total for this payment.
+            </div>
+            <div className="bg-emerald-500 px-5 pb-5 space-y-3">
+              <div className="grid grid-cols-[120px_1fr] items-center gap-3">
+                <Label className="text-white text-right text-sm">
+                  <span className="text-red-200 mr-0.5">*</span>Service
+                </Label>
+                <Input
+                  value={chargeService}
+                  onChange={(e) => setChargeService(e.target.value)}
+                  placeholder="Service Description"
+                  className="h-9 bg-white text-foreground"
+                />
+              </div>
+              <div className="grid grid-cols-[120px_1fr] items-center gap-3">
+                <Label className="text-white text-right text-sm">
+                  <span className="text-red-200 mr-0.5">*</span>Quantitiy
+                </Label>
+                <Input
+                  type="number"
+                  value={chargeQty}
+                  onChange={(e) => setChargeQty(e.target.value)}
+                  placeholder="Number Only"
+                  className="h-9 bg-white text-foreground"
+                />
+              </div>
+              <div className="grid grid-cols-[120px_1fr] items-center gap-3">
+                <Label className="text-white text-right text-sm">
+                  <span className="text-red-200 mr-0.5">*</span>Cost Per Quantity
+                </Label>
+                <Input
+                  type="number"
+                  value={chargeCost}
+                  onChange={(e) => setChargeCost(e.target.value)}
+                  placeholder="Number Only"
+                  className="h-9 bg-white text-foreground"
+                />
+              </div>
+            </div>
+            <div className="bg-emerald-700 px-5 py-3 flex items-center justify-between">
+              <Button
+                size="sm"
+                onClick={handleAddCharge}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-400"
+              >
+                <Check className="h-4 w-4 mr-1.5" /> Add &amp; Save
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setChargeOpen(false)}
+                className="text-white hover:bg-emerald-600 hover:text-white"
+              >
+                <X className="h-4 w-4 mr-1.5" /> Close
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Top two-column: Payments Made + Invoice Settings */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 print:hidden">
