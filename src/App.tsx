@@ -35,6 +35,7 @@ import Reports from "./pages/Reports.tsx";
 import ReportDetail from "./pages/ReportDetail.tsx";
 import Invoicing from "./pages/Invoicing.tsx";
 import InvoiceGroups from "./pages/InvoiceGroups.tsx";
+import InvoiceDetail from "./pages/InvoiceDetail.tsx";
 import InvoicingPlaceholder from "./pages/InvoicingPlaceholder.tsx";
 import Login from "./pages/Login.tsx";
 import Signup from "./pages/Signup.tsx";
