@@ -15,6 +15,7 @@ import { useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -244,67 +245,60 @@ export default function InvoiceFull() {
             if (!o) resetChargeForm();
           }}
         >
-          <DialogContent className="p-0 overflow-hidden max-w-md gap-0 border-0">
-            <DialogHeader className="bg-emerald-600 text-white px-5 py-3 flex flex-row items-center justify-between space-y-0">
-              <DialogTitle className="text-white text-base font-semibold">Add New Charge</DialogTitle>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Add New Charge</DialogTitle>
             </DialogHeader>
-            <div className="bg-emerald-500 text-white px-5 py-3 text-xs leading-relaxed">
-              You can add a custom charge to this invoice below. We will take your quantity entered and * it by the cost to get the total for this payment.
-            </div>
-            <div className="bg-emerald-500 px-5 pb-5 space-y-3">
-              <div className="grid grid-cols-[120px_1fr] items-center gap-3">
-                <Label className="text-white text-right text-sm">
-                  <span className="text-red-200 mr-0.5">*</span>Service
+            <p className="text-sm text-muted-foreground -mt-1">
+              Add a custom charge to this invoice. The total is calculated as quantity × cost per quantity.
+            </p>
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="charge-service">
+                  Service <span className="text-destructive">*</span>
                 </Label>
                 <Input
+                  id="charge-service"
                   value={chargeService}
                   onChange={(e) => setChargeService(e.target.value)}
-                  placeholder="Service Description"
-                  className="h-9 bg-white text-foreground"
+                  placeholder="Service description"
                 />
               </div>
-              <div className="grid grid-cols-[120px_1fr] items-center gap-3">
-                <Label className="text-white text-right text-sm">
-                  <span className="text-red-200 mr-0.5">*</span>Quantitiy
-                </Label>
-                <Input
-                  type="number"
-                  value={chargeQty}
-                  onChange={(e) => setChargeQty(e.target.value)}
-                  placeholder="Number Only"
-                  className="h-9 bg-white text-foreground"
-                />
-              </div>
-              <div className="grid grid-cols-[120px_1fr] items-center gap-3">
-                <Label className="text-white text-right text-sm">
-                  <span className="text-red-200 mr-0.5">*</span>Cost Per Quantity
-                </Label>
-                <Input
-                  type="number"
-                  value={chargeCost}
-                  onChange={(e) => setChargeCost(e.target.value)}
-                  placeholder="Number Only"
-                  className="h-9 bg-white text-foreground"
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="charge-qty">
+                    Quantity <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="charge-qty"
+                    type="number"
+                    value={chargeQty}
+                    onChange={(e) => setChargeQty(e.target.value)}
+                    placeholder="0"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="charge-cost">
+                    Cost per Quantity <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="charge-cost"
+                    type="number"
+                    value={chargeCost}
+                    onChange={(e) => setChargeCost(e.target.value)}
+                    placeholder="0.00"
+                  />
+                </div>
               </div>
             </div>
-            <div className="bg-emerald-700 px-5 py-3 flex items-center justify-between">
-              <Button
-                size="sm"
-                onClick={handleAddCharge}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-400"
-              >
-                <Check className="h-4 w-4 mr-1.5" /> Add &amp; Save
+            <DialogFooter className="gap-2 sm:gap-2">
+              <Button variant="outline" onClick={() => setChargeOpen(false)}>
+                Cancel
               </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setChargeOpen(false)}
-                className="text-white hover:bg-emerald-600 hover:text-white"
-              >
-                <X className="h-4 w-4 mr-1.5" /> Close
+              <Button onClick={handleAddCharge}>
+                <Check className="h-4 w-4 mr-1.5" /> Add Charge
               </Button>
-            </div>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -316,39 +310,44 @@ export default function InvoiceFull() {
             if (!o) resetPaymentForm();
           }}
         >
-          <DialogContent className="p-0 overflow-hidden max-w-md gap-0 border-0">
-            <DialogHeader className="bg-emerald-600 text-white px-5 py-3 flex flex-row items-center justify-between space-y-0">
-              <DialogTitle className="text-white text-base font-semibold">Make A Payment</DialogTitle>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Make a Payment</DialogTitle>
             </DialogHeader>
-            <div className="bg-emerald-500 px-5 py-5 space-y-3">
-              <div className="grid grid-cols-[130px_1fr] items-center gap-3">
-                <Label className="text-white text-right text-sm">
-                  <span className="text-red-200 mr-0.5">*</span>Amount
-                </Label>
-                <Input
-                  type="number"
-                  value={payAmount}
-                  onChange={(e) => setPayAmount(e.target.value)}
-                  placeholder="Number Only"
-                  className="h-9 bg-white text-foreground"
-                />
+            <p className="text-sm text-muted-foreground -mt-1">
+              Record a new payment against this invoice.
+            </p>
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="pay-amount">
+                    Amount <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    id="pay-amount"
+                    type="number"
+                    value={payAmount}
+                    onChange={(e) => setPayAmount(e.target.value)}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="pay-date">Payment Date</Label>
+                  <Input
+                    id="pay-date"
+                    value={payDate}
+                    onChange={(e) => setPayDate(e.target.value)}
+                    placeholder="DD/MM/YYYY"
+                  />
+                </div>
               </div>
-              <div className="grid grid-cols-[130px_1fr] items-center gap-3">
-                <Label className="text-white text-right text-sm">Payment Date</Label>
-                <Input
-                  value={payDate}
-                  onChange={(e) => setPayDate(e.target.value)}
-                  placeholder="DD/MM/YYYY"
-                  className="h-9 bg-white text-foreground"
-                />
-              </div>
-              <div className="grid grid-cols-[130px_1fr] items-center gap-3">
-                <Label className="text-white text-right text-sm">
-                  <span className="text-red-200 mr-0.5">*</span>Paid To
+              <div className="space-y-1.5">
+                <Label>
+                  Paid To <span className="text-destructive">*</span>
                 </Label>
                 <Select value={payPaidTo} onValueChange={setPayPaidTo}>
-                  <SelectTrigger className="h-9 bg-white text-foreground">
-                    <SelectValue placeholder="choose one..." />
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose one..." />
                   </SelectTrigger>
                   <SelectContent>
                     {paidToOptions.map((o) => (
@@ -357,11 +356,11 @@ export default function InvoiceFull() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-[130px_1fr] items-center gap-3">
-                <Label className="text-white text-right text-sm">Payment Method</Label>
+              <div className="space-y-1.5">
+                <Label>Payment Method</Label>
                 <Select value={payMethod} onValueChange={setPayMethod}>
-                  <SelectTrigger className="h-9 bg-white text-foreground">
-                    <SelectValue placeholder="choose one..." />
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose one..." />
                   </SelectTrigger>
                   <SelectContent>
                     {paymentMethodOptions.map((o) => (
@@ -370,32 +369,24 @@ export default function InvoiceFull() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-[130px_1fr] items-center gap-3">
-                <Label className="text-white text-right text-sm">Reference Number</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="pay-ref">Reference Number</Label>
                 <Input
+                  id="pay-ref"
                   value={payRef}
                   onChange={(e) => setPayRef(e.target.value)}
-                  className="h-9 bg-white text-foreground"
+                  placeholder="Optional"
                 />
               </div>
             </div>
-            <div className="bg-emerald-700 px-5 py-3 flex items-center justify-between">
-              <Button
-                size="sm"
-                onClick={handleCreatePayment}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white border border-emerald-400"
-              >
+            <DialogFooter className="gap-2 sm:gap-2">
+              <Button variant="outline" onClick={() => setPaymentOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreatePayment}>
                 <Save className="h-4 w-4 mr-1.5" /> Create Payment
               </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setPaymentOpen(false)}
-                className="text-white hover:bg-emerald-600 hover:text-white"
-              >
-                <X className="h-4 w-4 mr-1.5" /> Close
-              </Button>
-            </div>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 
@@ -480,22 +471,25 @@ export default function InvoiceFull() {
 
         {/* Edit Invoice Settings Dialog */}
         <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
-          <DialogContent className="p-0 overflow-hidden max-w-lg gap-0 border-0">
-            <DialogHeader className="bg-amber-600 text-white px-5 py-3 flex flex-row items-center justify-between space-y-0">
-              <DialogTitle className="text-white text-base font-semibold">Invoice Settings</DialogTitle>
+          <DialogContent className="sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Invoice Settings</DialogTitle>
             </DialogHeader>
-            <div className="bg-amber-500 px-5 py-5 space-y-3 max-h-[70vh] overflow-y-auto">
+            <p className="text-sm text-muted-foreground -mt-1">
+              Configure how this invoice is displayed and printed.
+            </p>
+            <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1 -mr-1">
               {settingFields.map((f) => (
-                <div key={f.key} className="grid grid-cols-[180px_1fr] items-center gap-3">
-                  <Label className="text-white text-right text-sm leading-tight">
-                    {f.required && <span className="text-red-200 mr-0.5">*</span>}
+                <div key={f.key} className="grid grid-cols-1 sm:grid-cols-[200px_1fr] sm:items-center gap-2 sm:gap-3">
+                  <Label className="text-sm">
                     {f.label}
+                    {f.required && <span className="text-destructive ml-0.5">*</span>}
                   </Label>
                   <Select
                     value={draftSettings[f.key]}
                     onValueChange={(v) => setDraftSettings((p) => ({ ...p, [f.key]: v }))}
                   >
-                    <SelectTrigger className="h-9 bg-white text-foreground">
+                    <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -507,23 +501,14 @@ export default function InvoiceFull() {
                 </div>
               ))}
             </div>
-            <div className="bg-amber-700 px-5 py-3 flex items-center justify-between">
-              <Button
-                size="sm"
-                onClick={handleUpdateSettings}
-                className="bg-amber-600 hover:bg-amber-500 text-white border border-amber-400"
-              >
-                <Save className="h-4 w-4 mr-1.5" /> Update Invoice Settings
+            <DialogFooter className="gap-2 sm:gap-2">
+              <Button variant="outline" onClick={() => setSettingsOpen(false)}>
+                Cancel
               </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => setSettingsOpen(false)}
-                className="text-white hover:bg-amber-600 hover:text-white"
-              >
-                <X className="h-4 w-4 mr-1.5" /> Close
+              <Button onClick={handleUpdateSettings}>
+                <Save className="h-4 w-4 mr-1.5" /> Update Settings
               </Button>
-            </div>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 
