@@ -104,6 +104,14 @@ export default function InvoiceFull() {
   const [chargeQty, setChargeQty] = useState("");
   const [chargeCost, setChargeCost] = useState("");
 
+  const [payments, setPayments] = useState<Payment[]>(initialPayments);
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [payAmount, setPayAmount] = useState("");
+  const [payDate, setPayDate] = useState(todayDdMmYyyy());
+  const [payPaidTo, setPayPaidTo] = useState("");
+  const [payMethod, setPayMethod] = useState("");
+  const [payRef, setPayRef] = useState("");
+
   const extraTotal = extraCharges.reduce((a, c) => a + c.quantity * c.cost, 0);
   const baseRequired = 400;
   const totalRequired = baseRequired + extraTotal;
