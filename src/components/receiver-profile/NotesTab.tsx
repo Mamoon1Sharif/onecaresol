@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
@@ -19,9 +20,13 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Download, RefreshCw, Trash2, Pencil, FileText } from "lucide-react";
-import { useCareGivers } from "@/hooks/use-care-data";
+import {
+  Plus, Download, RefreshCw, Trash2, Pencil, FileText,
+  StickyNote, CalendarDays, ChevronLeft, ChevronRight,
+} from "lucide-react";
+import { useCareGivers, useCareReceiver } from "@/hooks/use-care-data";
 import { toast } from "sonner";
+import { PassVersionView } from "@/components/caregiver-profile/PassVersionView";
 
 interface PrivateNote {
   id: string;
@@ -31,9 +36,25 @@ interface PrivateNote {
   note_date: string;
 }
 
+interface RotaNote {
+  id: string;
+  care_giver_id: string;
+  rota_ref: string | null;
+  note_ref: string | null;
+  staff_name: string;
+  note: string;
+  note_date: string;
+}
+
+const PAGE_SIZE = 10;
+
 export function ReceiverNotesTab({ careReceiverId }: { careReceiverId: string }) {
   const qc = useQueryClient();
   const { data: caregivers = [] } = useCareGivers();
+  const { data: receiver } = useCareReceiver(careReceiverId);
+  const [passVersion, setPassVersion] = useState(false);
+
+  // ============== Private Notes ==============
   const today = new Date().toISOString().split("T")[0];
   const [fromDate, setFromDate] = useState(today);
   const [toDate, setToDate] = useState(today);
@@ -147,8 +168,65 @@ export function ReceiverNotesTab({ careReceiverId }: { careReceiverId: string })
   };
   const allSelected = notes.length > 0 && notes.every((n) => selected.has(n.id));
 
+  // ============== Team Member Notes (Rota) ==============
+  // Sourced from caregivers who have visited this receiver
+  const [page, setPage] = useState(1);
+
+  const { data: rotaNotes = [], isLoading: loadingRota } = useQuery({
+    queryKey: ["receiver-rota-notes", careReceiverId],
+    queryFn: async () => {
+      // Find caregivers linked to this receiver via daily_visits
+      const { data: visits, error: vErr } = await supabase
+        .from("daily_visits")
+        .select("care_giver_id")
+        .eq("care_receiver_id", careReceiverId);
+      if (vErr) throw vErr;
+
+      const cgIds = Array.from(new Set((visits ?? []).map((v) => v.care_giver_id).filter(Boolean) as string[]));
+      if (cgIds.length === 0) return [] as RotaNote[];
+
+      const { data, error } = await supabase
+        .from("caregiver_rota_notes")
+        .select("*")
+        .in("care_giver_id", cgIds)
+        .order("note_date", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as RotaNote[];
+    },
+  });
+
+  const totalPages = Math.max(1, Math.ceil(rotaNotes.length / PAGE_SIZE));
+  const pagedRota = useMemo(
+    () => rotaNotes.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [rotaNotes, page]
+  );
+
+  const fmtRotaDate = (iso: string) => {
+    const d = new Date(iso);
+    const date = d.toLocaleDateString("en-GB");
+    const time = d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    return { date, time };
+  };
+
   return (
     <div className="space-y-6">
+      {/* ======================= PASS VERSION TOGGLE ======================= */}
+      <div className="flex items-center justify-end gap-3 px-1">
+        <Label htmlFor="pass-version-toggle" className="text-sm font-medium cursor-pointer">
+          Pass version
+        </Label>
+        <Switch
+          id="pass-version-toggle"
+          checked={passVersion}
+          onCheckedChange={setPassVersion}
+        />
+      </div>
+
+      {passVersion ? (
+        <PassVersionView receiverName={receiver?.name} />
+      ) : (
+        <>
+      {/* ======================= PRIVATE NOTES ======================= */}
       <Card className="border border-border shadow-sm overflow-hidden">
         <div className="flex items-center justify-between gap-3 px-4 py-3 bg-muted/30 border-b flex-wrap">
           <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -181,7 +259,7 @@ export function ReceiverNotesTab({ careReceiverId }: { careReceiverId: string })
             </Select>
             <div className="flex items-center gap-2">
               <Select value={bulkAction} onValueChange={setBulkAction}>
-                <SelectTrigger className="h-9 flex-1"><SelectValue placeholder="Bulk Actions..." /></SelectTrigger>
+                <SelectTrigger className="h-9 flex-1"><SelectValue placeholder="Note Bulk Actions..." /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="delete">Delete Selected</SelectItem>
                 </SelectContent>
@@ -243,32 +321,122 @@ export function ReceiverNotesTab({ careReceiverId }: { careReceiverId: string })
         </CardContent>
       </Card>
 
+      {/* ======================= TEAM MEMBER NOTES (ROTA) ======================= */}
+      <Card className="border border-border shadow-sm overflow-hidden">
+        <div className="flex items-center gap-2 px-4 py-3 bg-muted/30 border-b">
+          <CalendarDays className="h-4 w-4 text-primary" />
+          <span className="text-sm font-semibold text-foreground">Team Member Notes (Rota)</span>
+        </div>
+        <CardContent className="p-4 space-y-3">
+          <p className="text-sm text-info">
+            Live rota notes from team members involved in this service user's care
+          </p>
+
+          <div className="border rounded-md overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/20">
+                  <TableHead className="w-[110px] font-semibold">Rota Ref</TableHead>
+                  <TableHead className="w-[110px] font-semibold">Note Ref</TableHead>
+                  <TableHead className="w-[140px] font-semibold">Staff</TableHead>
+                  <TableHead className="w-[140px] font-semibold">Created</TableHead>
+                  <TableHead className="font-semibold">Note</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {loadingRota && (
+                  <TableRow>
+                    <TableCell colSpan={5}><Skeleton className="h-12 w-full" /></TableCell>
+                  </TableRow>
+                )}
+                {!loadingRota && rotaNotes.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-10">
+                      <StickyNote className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+                      No rota notes yet
+                    </TableCell>
+                  </TableRow>
+                )}
+                {pagedRota.map((n) => {
+                  const { date, time } = fmtRotaDate(n.note_date);
+                  return (
+                    <TableRow key={n.id} className="align-top">
+                      <TableCell className="text-info font-mono text-xs pt-3">{n.rota_ref ?? "—"}</TableCell>
+                      <TableCell className="font-mono text-xs pt-3">{n.note_ref ?? "—"}</TableCell>
+                      <TableCell className="text-sm pt-3">{n.staff_name}</TableCell>
+                      <TableCell className="text-xs pt-3">
+                        <div>{date}</div>
+                        <div className="text-muted-foreground">{time}</div>
+                      </TableCell>
+                      <TableCell className="text-sm pt-3 leading-relaxed">{n.note}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Pagination */}
+          <div className="flex items-center justify-end gap-1">
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8 bg-success/10 text-success hover:bg-success/20"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+              <Button
+                key={p}
+                size="sm"
+                variant={p === page ? "default" : "ghost"}
+                className={p === page ? "h-8 w-8 p-0 bg-success text-success-foreground hover:bg-success/90" : "h-8 w-8 p-0"}
+                onClick={() => setPage(p)}
+              >
+                {p}
+              </Button>
+            ))}
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-8 w-8 bg-success/10 text-success hover:bg-success/20"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       <Dialog open={addOpen} onOpenChange={setAddOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>{editing ? "Edit Note" : "Add Note"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editing ? "Edit Note" : "Add Private Note"}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div>
-              <Label className="text-xs">Date</Label>
+              <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Date</Label>
               <Input type="date" value={draft.note_date} onChange={(e) => setDraft({ ...draft, note_date: e.target.value })} />
             </div>
             <div>
-              <Label className="text-xs">Caregiver (optional)</Label>
+              <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Caregiver (optional)</Label>
               <Select value={draft.care_giver_id} onValueChange={(v) => setDraft({ ...draft, care_giver_id: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Select Caregiver..." /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">None</SelectItem>
+                  <SelectItem value="none">— None —</SelectItem>
                   {caregivers.map((c) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label className="text-xs">Note</Label>
-              <Textarea rows={4} value={draft.note} onChange={(e) => setDraft({ ...draft, note: e.target.value })} />
+              <Label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Note</Label>
+              <Textarea rows={5} value={draft.note} onChange={(e) => setDraft({ ...draft, note: e.target.value })} placeholder="Write your note..." />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAddOpen(false)}>Cancel</Button>
-            <Button onClick={handleSave}>{editing ? "Update" : "Add Note"}</Button>
+            <Button onClick={handleSave} disabled={upsert.isPending}>{editing ? "Update" : "Add Note"}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -288,6 +456,8 @@ export function ReceiverNotesTab({ careReceiverId }: { careReceiverId: string })
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+        </>
+      )}
     </div>
   );
 }
