@@ -30,6 +30,7 @@ import Files from "./pages/Files.tsx";
 import Changelog from "./pages/Changelog.tsx";
 import LocationTracking from "./pages/LocationTracking.tsx";
 import CommunicationLog from "./pages/CommunicationLog.tsx";
+import CommunicationReasons from "./pages/CommunicationReasons.tsx";
 import Login from "./pages/Login.tsx";
 import Signup from "./pages/Signup.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -64,6 +65,7 @@ const App = () => (
             <Route path="/holidays-absence" element={<ProtectedRoute><HolidaysAbsence /></ProtectedRoute>} />
             <Route path="/location-tracking" element={<ProtectedRoute><LocationTracking /></ProtectedRoute>} />
             <Route path="/communication-log" element={<ProtectedRoute><CommunicationLog /></ProtectedRoute>} />
+            <Route path="/communication-log/reasons" element={<ProtectedRoute><CommunicationReasons /></ProtectedRoute>} />
             <Route path="/caregivers/:id/messaging" element={<ProtectedRoute><Messaging /></ProtectedRoute>} />
             <Route path="/caregivers/:id/medication" element={<ProtectedRoute><Medication /></ProtectedRoute>} />
             <Route path="/caregivers/:id/qualifications" element={<ProtectedRoute><Qualifications /></ProtectedRoute>} />
