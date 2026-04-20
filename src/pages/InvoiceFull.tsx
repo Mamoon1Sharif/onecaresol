@@ -364,9 +364,17 @@ export default function InvoiceFull() {
                   <TableCell className="text-right">N/A</TableCell>
                   <TableCell className="text-right">{fmt(400)}</TableCell>
                 </TableRow>
+                {extraCharges.map((c) => (
+                  <TableRow key={c.id}>
+                    <TableCell>{c.service}</TableCell>
+                    <TableCell className="text-right">{c.quantity}</TableCell>
+                    <TableCell className="text-right">{fmt(c.cost)}</TableCell>
+                    <TableCell className="text-right">{fmt(c.quantity * c.cost)}</TableCell>
+                  </TableRow>
+                ))}
                 <TableRow className="font-medium">
                   <TableCell colSpan={3} className="text-right">Total</TableCell>
-                  <TableCell className="text-right">{fmt(400)}</TableCell>
+                  <TableCell className="text-right">{fmt(totalRequired)}</TableCell>
                 </TableRow>
               </TableBody>
             </Table>
