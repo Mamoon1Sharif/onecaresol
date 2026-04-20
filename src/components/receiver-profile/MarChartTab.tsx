@@ -9,7 +9,7 @@ import {
 import {
   ChevronLeft, ChevronRight, Printer, Calendar as CalendarIcon, Pill,
 } from "lucide-react";
-import { addMonths, endOfMonth, format, isSameDay, isToday, startOfMonth } from "date-fns";
+import { addMonths, endOfMonth, format, isToday, startOfMonth } from "date-fns";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 
