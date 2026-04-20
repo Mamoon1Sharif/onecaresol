@@ -123,60 +123,31 @@ export function PassVersionView({ careGiverName = "Mr Edward Allenby", receiverN
   const handlePrint = () => window.print();
 
   const taskColor = (s: TaskStatus) => {
-    if (s === "done") return "bg-emerald-600 text-white border-emerald-700";
-    if (s === "missed") return "bg-orange-500 text-white border-orange-600";
-    return "bg-slate-200 text-slate-800 border-slate-300";
+    if (s === "done") return "bg-success text-success-foreground border-success";
+    if (s === "missed") return "bg-warning text-warning-foreground border-warning";
+    return "bg-muted text-foreground border-border";
   };
 
   return (
     <Card className="border border-border shadow-sm overflow-hidden p-0">
-      {/* Patient/Header strip */}
-      <div className="bg-[hsl(280,55%,28%)] text-white px-4 py-3 flex items-center gap-4">
-        <div className="h-12 w-12 rounded-full bg-white/20 flex items-center justify-center text-sm font-semibold">
-          EA
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold">{careGiverName}</span>
-            <span className="text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded uppercase tracking-wide">Active</span>
-          </div>
-          <div className="text-xs text-white/80">DOB: 29/04/1944</div>
-          <div className="text-xs text-white/80">14, Raven Drive, Rotherham, S81 2UD</div>
-        </div>
-        <nav className="hidden lg:flex items-center gap-4 text-xs">
-          {[
-            "Dashboard","Care Management","Care Notes","MAR Chart","Timeline",
-            "Documents","About Me","Details","Checklists","Rostering",
-            "Communications","Medical History","Customer File","openPASS",
-          ].map((n) => (
-            <button
-              key={n}
-              className={`hover:text-white/100 ${n === "Care Notes" ? "text-white border-b-2 border-white pb-0.5 font-semibold" : "text-white/85"}`}
-            >
-              {n}
-            </button>
-          ))}
-        </nav>
-      </div>
-
       {/* Toolbar */}
       <div className="bg-background border-b px-4 py-2 flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <Button
             size="icon"
             variant="outline"
-            className="h-7 w-7 border-emerald-600 text-emerald-700 hover:bg-emerald-50"
+            className="h-7 w-7"
             onClick={() => setWeekStart((d) => addDays(d, -7))}
           >
             <ChevronLeft className="h-3.5 w-3.5" />
           </Button>
-          <div className="px-3 py-1 text-xs font-semibold rounded border border-[hsl(280,55%,28%)] text-[hsl(280,55%,28%)] bg-[hsl(280,55%,96%)]">
+          <div className="px-3 py-1 text-xs font-semibold rounded border border-border text-foreground bg-muted">
             {rangeLabel}
           </div>
           <Button
             size="icon"
             variant="outline"
-            className="h-7 w-7 border-emerald-600 text-emerald-700 hover:bg-emerald-50"
+            className="h-7 w-7"
             onClick={() => setWeekStart((d) => addDays(d, 7))}
           >
             <ChevronRight className="h-3.5 w-3.5" />
@@ -209,7 +180,7 @@ export function PassVersionView({ careGiverName = "Mr Edward Allenby", receiverN
 
         <Button
           size="sm"
-          className="h-7 gap-1.5 bg-[hsl(280,55%,28%)] hover:bg-[hsl(280,55%,22%)] text-white text-xs"
+          className="h-7 gap-1.5 text-xs"
           onClick={handlePrint}
         >
           <Printer className="h-3.5 w-3.5" /> Print
@@ -219,11 +190,11 @@ export function PassVersionView({ careGiverName = "Mr Edward Allenby", receiverN
       {/* Table header */}
       <div className="overflow-x-auto">
         <div className="min-w-[1200px]">
-          <div className="grid grid-cols-[140px_140px_110px_1fr] bg-[hsl(280,55%,28%)] text-white text-xs font-semibold">
+          <div className="grid grid-cols-[140px_140px_110px_1fr] bg-muted text-foreground text-xs font-semibold border-b border-border">
             <div className="px-3 py-2">When</div>
             <div className="px-3 py-2">Who</div>
             <div className="px-3 py-2">Status</div>
-            <div className="px-3 py-2 text-center border-l border-white/10">Visit</div>
+            <div className="px-3 py-2 text-center border-l border-border">Visit</div>
           </div>
 
           {filtered.length === 0 ? (
@@ -244,11 +215,11 @@ export function PassVersionView({ careGiverName = "Mr Edward Allenby", receiverN
                     <CalendarIcon className="h-3 w-3 text-muted-foreground" />
                     <span className="font-medium">{format(v.date, "dd MMM yyyy")}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-emerald-700">
+                  <div className="flex items-center gap-1.5 text-success">
                     <Clock className="h-3 w-3" />
                     <span>{v.scheduledStart}</span>
                     <span className="text-muted-foreground">/</span>
-                    <span className="text-orange-600">{v.actualStart}</span>
+                    <span className="text-warning">{v.actualStart}</span>
                   </div>
                 </div>
 
@@ -257,7 +228,7 @@ export function PassVersionView({ careGiverName = "Mr Edward Allenby", receiverN
 
                 {/* Status */}
                 <div className="px-3 py-3">
-                  <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-amber-300 text-amber-900 border border-amber-400">
+                  <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-warning/15 text-warning border border-warning/30">
                     {v.status}
                   </span>
                 </div>
