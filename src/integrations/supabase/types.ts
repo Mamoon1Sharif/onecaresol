@@ -1115,6 +1115,7 @@ export type Database = {
       }
       communication_logs: {
         Row: {
+          assigned_to: string | null
           comm_type: string
           contact_email: string | null
           contact_name: string
@@ -1130,9 +1131,14 @@ export type Database = {
           reason_id: string | null
           reason_label: string | null
           subject: string | null
+          tags: string[] | null
+          title: string | null
           updated_at: string
+          user_type: string | null
+          waiting_on: string | null
         }
         Insert: {
+          assigned_to?: string | null
           comm_type?: string
           contact_email?: string | null
           contact_name: string
@@ -1148,9 +1154,14 @@ export type Database = {
           reason_id?: string | null
           reason_label?: string | null
           subject?: string | null
+          tags?: string[] | null
+          title?: string | null
           updated_at?: string
+          user_type?: string | null
+          waiting_on?: string | null
         }
         Update: {
+          assigned_to?: string | null
           comm_type?: string
           contact_email?: string | null
           contact_name?: string
@@ -1166,7 +1177,11 @@ export type Database = {
           reason_id?: string | null
           reason_label?: string | null
           subject?: string | null
+          tags?: string[] | null
+          title?: string | null
           updated_at?: string
+          user_type?: string | null
+          waiting_on?: string | null
         }
         Relationships: [
           {
