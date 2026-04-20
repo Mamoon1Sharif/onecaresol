@@ -63,6 +63,9 @@ const CareReceiverProfile = () => {
             <TabsTrigger value="care-management" className="gap-1.5 text-xs">
               <HeartPulse className="h-3.5 w-3.5" /> Care Management
             </TabsTrigger>
+            <TabsTrigger value="mar-chart" className="gap-1.5 text-xs">
+              <ClipboardList className="h-3.5 w-3.5" /> MAR Chart
+            </TabsTrigger>
             <TabsTrigger value="detailed" className="gap-1.5 text-xs">
               <UserCog className="h-3.5 w-3.5" /> Detailed Profile
             </TabsTrigger>
