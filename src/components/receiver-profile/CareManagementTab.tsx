@@ -51,7 +51,10 @@ interface Task {
 interface Visit {
   id: string;
   type: string;
-  dayOfWeek: string;
+  startDate: string;        // e.g. 2025-06-30
+  isOngoing: boolean;
+  visitKind: string;        // "Care visit" | "Medication" | etc
+  dayOfWeek: string;        // "Daily" / "Mon" / "Tue Wed Thu Fri Sat Sun"
   startTime: string;
   duration: number;
   caregivers: number;
