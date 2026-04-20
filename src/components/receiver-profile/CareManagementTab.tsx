@@ -158,7 +158,7 @@ export function CareManagementTab({ careReceiverName }: Props) {
   // Visit dialog
   const [visitDlg, setVisitDlg] = useState(false);
   const [editingVisit, setEditingVisit] = useState<Visit | null>(null);
-  const blankVisit: Visit = { id: "", type: "", dayOfWeek: "Mon-Sun", startTime: "08:00", duration: 30, caregivers: 1, status: "Active" };
+  const blankVisit: Visit = { id: "", type: "", startDate: new Date().toISOString().split("T")[0], isOngoing: true, visitKind: "Care visit", dayOfWeek: "Daily", startTime: "08:00", duration: 30, caregivers: 1, status: "Active" };
   const [visitDraft, setVisitDraft] = useState<Visit>(blankVisit);
 
   // Group dialog
