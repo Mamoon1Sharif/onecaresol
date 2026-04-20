@@ -44,6 +44,7 @@ import Tariffs from "./pages/Tariffs.tsx";
 import ChargeTariffDetail from "./pages/ChargeTariffDetail.tsx";
 import Funders from "./pages/Funders.tsx";
 import FunderProfile from "./pages/FunderProfile.tsx";
+import InvoiceWagesSettings from "./pages/InvoiceWagesSettings.tsx";
 import Login from "./pages/Login.tsx";
 import Signup from "./pages/Signup.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -91,7 +92,7 @@ const App = () => (
             <Route path="/invoicing/tariffs/:tariffName" element={<ProtectedRoute><ChargeTariffDetail /></ProtectedRoute>} />
             <Route path="/invoicing/funders" element={<ProtectedRoute><Funders /></ProtectedRoute>} />
             <Route path="/invoicing/funders/:funderName" element={<ProtectedRoute><FunderProfile /></ProtectedRoute>} />
-            <Route path="/invoicing/settings" element={<ProtectedRoute><InvoicingPlaceholder title="Invoicing Settings" description="Invoice numbering, VAT, PDF templates and payment terms." /></ProtectedRoute>} />
+            <Route path="/invoicing/settings" element={<ProtectedRoute><InvoiceWagesSettings /></ProtectedRoute>} />
             <Route path="/invoicing/bank-holidays" element={<ProtectedRoute><InvoicingPlaceholder title="Bank Holidays" description="Define UK bank holidays that affect pay and charge calculations." /></ProtectedRoute>} />
             <Route path="/invoicing/holiday-report" element={<ProtectedRoute><InvoicingPlaceholder title="Holiday Report" description="Annual leave accruals, taken hours and outstanding balances." /></ProtectedRoute>} />
             <Route path="/caregivers/:id/messaging" element={<ProtectedRoute><Messaging /></ProtectedRoute>} />
