@@ -232,7 +232,16 @@ export default function InvoiceDetail() {
                       </Button>
                     </TableCell>
                     <TableCell>
-                      <button className="text-primary hover:underline">{r.ref}</button>
+                      <button
+                        className="text-primary hover:underline"
+                        onClick={() =>
+                          navigate(
+                            `/invoicing/invoice-groups/${encodeURIComponent(decodedGroup)}/invoice/${r.ref}`,
+                          )
+                        }
+                      >
+                        {r.ref}
+                      </button>
                     </TableCell>
                     <TableCell className="whitespace-nowrap">{r.issueDate}</TableCell>
                     <TableCell className="whitespace-nowrap">{r.dateRange}</TableCell>
