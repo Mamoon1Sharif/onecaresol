@@ -359,7 +359,7 @@ export default function Tariffs() {
                         <TableRow key={t.id} className="group">
                           <TableCell className="text-center">
                             <button
-                              onClick={() => setViewTariff(t)}
+                              onClick={() => navigate(`/invoicing/tariffs/${encodeURIComponent(t.name)}`)}
                               className="inline-flex items-center justify-center h-7 w-7 rounded hover:bg-accent"
                               aria-label="View"
                             >
@@ -377,7 +377,7 @@ export default function Tariffs() {
                           </TableCell>
                           <TableCell>
                             <button
-                              onClick={() => setViewTariff(t)}
+                              onClick={() => navigate(`/invoicing/tariffs/${encodeURIComponent(t.name)}`)}
                               className="text-primary hover:underline text-sm font-medium"
                             >
                               {t.name}
@@ -386,7 +386,7 @@ export default function Tariffs() {
                           <TableCell className="text-right">
                             <div className="opacity-0 group-hover:opacity-100 transition-opacity inline-flex gap-1">
                               <button
-                                onClick={() => setViewTariff(t)}
+                                onClick={() => navigate(`/invoicing/tariffs/${encodeURIComponent(t.name)}`)}
                                 className="h-7 w-7 inline-flex items-center justify-center rounded hover:bg-muted"
                                 aria-label="Edit"
                               >
@@ -488,11 +488,7 @@ export default function Tariffs() {
                           </TableCell>
                           <TableCell>
                             <button
-                              onClick={() => {
-                                const t = tariffs.find((x) => x.name === l.chargeTariff);
-                                if (t) setViewTariff(t);
-                                else toast.info(l.chargeTariff);
-                              }}
+                              onClick={() => navigate(`/invoicing/tariffs/${encodeURIComponent(l.chargeTariff)}`)}
                               className="text-primary hover:underline text-sm"
                             >
                               {l.chargeTariff}
