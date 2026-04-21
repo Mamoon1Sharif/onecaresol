@@ -47,6 +47,13 @@ function getLateMins(visit: any): number {
   return diff > 5 ? diff : 0;
 }
 
+function visitTypeStyle(duration: number): string {
+  if (duration >= 12) return "bg-purple-500/15 text-purple-600 border-0";
+  if (duration >= 8) return "bg-info/15 text-info border-0";
+  if (duration >= 2) return "bg-warning/15 text-warning border-0";
+  return "bg-primary/15 text-primary border-0";
+}
+
 function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
   const [showNotes, setShowNotes] = useState(false);
   const [showTasks, setShowTasks] = useState(false);
@@ -74,6 +81,11 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
             <Clock className="h-3 w-3" />
             {String(v.start_hour).padStart(2, "0")}:00 – {String(v.start_hour + v.duration).padStart(2, "0")}:00
           </div>
+        </TableCell>
+        <TableCell>
+          <Badge className={visitTypeStyle(v.duration) + " text-xs font-semibold"}>
+            {v.duration}h
+          </Badge>
         </TableCell>
         <TableCell className="text-sm">
           <span className={lateMins > 0 ? "text-destructive font-semibold" : "text-foreground"}>
@@ -107,7 +119,7 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
       </TableRow>
       {showNotes && notes.length > 0 && (
         <TableRow className="bg-muted/20">
-          <TableCell colSpan={7} className="py-2 px-6">
+          <TableCell colSpan={8} className="py-2 px-6">
             <div className="space-y-1.5">
               <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><StickyNote className="h-3 w-3" /> Notes</p>
               {notes.map((n: any) => (
@@ -121,7 +133,7 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
       )}
       {showTasks && tasks.length > 0 && (
         <TableRow className="bg-muted/20">
-          <TableCell colSpan={7} className="py-2 px-6">
+          <TableCell colSpan={8} className="py-2 px-6">
             <div className="space-y-1.5">
               <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><ClipboardCheck className="h-3 w-3" /> Tasks</p>
               {tasks.map((t: any) => (
@@ -275,6 +287,7 @@ const Dashboard = () => {
                   <TableHead className="font-semibold text-foreground">Care Giver</TableHead>
                   <TableHead className="font-semibold text-foreground">Service Member</TableHead>
                   <TableHead className="font-semibold text-foreground">Scheduled</TableHead>
+                  <TableHead className="font-semibold text-foreground">Type</TableHead>
                   <TableHead className="font-semibold text-foreground">Checked In</TableHead>
                   <TableHead className="font-semibold text-foreground">Clocked Out</TableHead>
                   <TableHead className="font-semibold text-foreground">Total Worked</TableHead>
@@ -284,7 +297,7 @@ const Dashboard = () => {
               <TableBody>
                 {completedVisits.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No completed shifts yet today</TableCell>
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">No completed shifts yet today</TableCell>
                   </TableRow>
                 ) : completedVisits.map((v) => (
                   <CompletedVisitRow key={v.id} v={v} onClick={() => setSelectedVisit(v)} />
