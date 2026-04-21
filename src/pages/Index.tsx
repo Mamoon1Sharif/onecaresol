@@ -47,6 +47,13 @@ function getLateMins(visit: any): number {
   return diff > 5 ? diff : 0;
 }
 
+function visitTypeStyle(duration: number): string {
+  if (duration >= 12) return "bg-purple-500/15 text-purple-600 border-0";
+  if (duration >= 8) return "bg-info/15 text-info border-0";
+  if (duration >= 2) return "bg-warning/15 text-warning border-0";
+  return "bg-primary/15 text-primary border-0";
+}
+
 function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
   const [showNotes, setShowNotes] = useState(false);
   const [showTasks, setShowTasks] = useState(false);
@@ -74,6 +81,11 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
             <Clock className="h-3 w-3" />
             {String(v.start_hour).padStart(2, "0")}:00 – {String(v.start_hour + v.duration).padStart(2, "0")}:00
           </div>
+        </TableCell>
+        <TableCell>
+          <Badge className={visitTypeStyle(v.duration) + " text-xs font-semibold"}>
+            {v.duration}h
+          </Badge>
         </TableCell>
         <TableCell className="text-sm">
           <span className={lateMins > 0 ? "text-destructive font-semibold" : "text-foreground"}>
