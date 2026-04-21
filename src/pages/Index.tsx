@@ -355,13 +355,14 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: "Add Care Giver", icon: Users, to: "/add-care-giver" },
-              { label: "Add Service Member", icon: HeartHandshake, to: "/care-receivers" },
-              { label: "Create Roster", icon: CalendarDays, to: "/roster" },
+              { label: "Add Care Giver", icon: Users, to: "/caregivers/new" },
+              { label: "Add Service Member", icon: HeartHandshake, to: "/carereceivers" },
+              { label: "Create Roster", icon: CalendarDays, to: "/daily-roster" },
               { label: "View Reports", icon: AlertTriangle, to: "/reports" },
             ].map((action) => (
               <button
                 key={action.label}
+                type="button"
                 onClick={() => navigate(action.to)}
                 className="flex flex-col items-center gap-2 p-4 rounded-lg border border-border hover:bg-accent hover:border-primary/20 transition-colors active:scale-[0.98]"
               >
