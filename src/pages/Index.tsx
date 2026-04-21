@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -143,6 +144,7 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
 }
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const { data: stats } = useDashboardStats();
   const { data: dbVisits, refetch } = useDashboardVisits();
   const { data: completedVisits = [], refetch: refetchCompleted } = useCompletedVisitsToday();
@@ -340,14 +342,15 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: "Add Care Giver", icon: Users },
-              { label: "Add Service Member", icon: HeartHandshake },
-              { label: "Create Roster", icon: CalendarDays },
-              { label: "View Reports", icon: AlertTriangle },
+              { label: "Add Care Giver", icon: Users, to: "/add-care-giver" },
+              { label: "Add Service Member", icon: HeartHandshake, to: "/care-receivers" },
+              { label: "Create Roster", icon: CalendarDays, to: "/roster" },
+              { label: "View Reports", icon: AlertTriangle, to: "/reports" },
             ].map((action) => (
               <button
                 key={action.label}
-                className="flex flex-col items-center gap-2 p-4 rounded-lg border border-border hover:bg-accent hover:border-primary/20 transition-colors"
+                onClick={() => navigate(action.to)}
+                className="flex flex-col items-center gap-2 p-4 rounded-lg border border-border hover:bg-accent hover:border-primary/20 transition-colors active:scale-[0.98]"
               >
                 <action.icon className="h-5 w-5 text-primary" />
                 <span className="text-xs font-medium text-foreground">{action.label}</span>
