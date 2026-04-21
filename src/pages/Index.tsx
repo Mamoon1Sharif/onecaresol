@@ -119,7 +119,7 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
       </TableRow>
       {showNotes && notes.length > 0 && (
         <TableRow className="bg-muted/20">
-          <TableCell colSpan={7} className="py-2 px-6">
+          <TableCell colSpan={8} className="py-2 px-6">
             <div className="space-y-1.5">
               <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><StickyNote className="h-3 w-3" /> Notes</p>
               {notes.map((n: any) => (
@@ -133,7 +133,7 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
       )}
       {showTasks && tasks.length > 0 && (
         <TableRow className="bg-muted/20">
-          <TableCell colSpan={7} className="py-2 px-6">
+          <TableCell colSpan={8} className="py-2 px-6">
             <div className="space-y-1.5">
               <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><ClipboardCheck className="h-3 w-3" /> Tasks</p>
               {tasks.map((t: any) => (
