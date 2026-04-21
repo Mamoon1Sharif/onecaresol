@@ -287,6 +287,7 @@ const Dashboard = () => {
                   <TableHead className="font-semibold text-foreground">Care Giver</TableHead>
                   <TableHead className="font-semibold text-foreground">Service Member</TableHead>
                   <TableHead className="font-semibold text-foreground">Scheduled</TableHead>
+                  <TableHead className="font-semibold text-foreground">Type</TableHead>
                   <TableHead className="font-semibold text-foreground">Checked In</TableHead>
                   <TableHead className="font-semibold text-foreground">Clocked Out</TableHead>
                   <TableHead className="font-semibold text-foreground">Total Worked</TableHead>
@@ -296,7 +297,7 @@ const Dashboard = () => {
               <TableBody>
                 {completedVisits.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">No completed shifts yet today</TableCell>
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">No completed shifts yet today</TableCell>
                   </TableRow>
                 ) : completedVisits.map((v) => (
                   <CompletedVisitRow key={v.id} v={v} onClick={() => setSelectedVisit(v)} />
