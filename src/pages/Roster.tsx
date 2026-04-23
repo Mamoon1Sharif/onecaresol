@@ -118,7 +118,10 @@ const Roster = () => {
             <h1 className="text-2xl font-bold text-foreground">Roster</h1>
             <p className="text-sm text-muted-foreground mt-1">Manage weekly caregiver shift assignments</p>
           </div>
-          <Button onClick={openCreate} className="gap-2"><Plus className="h-4 w-4" /> Create Shift</Button>
+          <div className="flex items-center gap-3 flex-wrap">
+            <RosterViewSwitcher />
+            <Button onClick={openCreate} className="gap-2"><Plus className="h-4 w-4" /> Create Shift</Button>
+          </div>
         </div>
 
         <div className="flex items-center justify-between">
