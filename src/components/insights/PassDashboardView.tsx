@@ -33,10 +33,10 @@ const statusTone: Record<string, string> = {
 };
 
 const highlights = [
-  { icon: AlertTriangle, tone: "destructive", title: "15 missed visits", body: "Across 6 service members. Review allocation and travel routes." },
-  { icon: Clock, tone: "warning", title: "Punctuality 75.1%", body: "Above the 50% threshold. Most affected: late starts after 11:00." },
-  { icon: CheckCircle2, tone: "success", title: "738 bookings logged", body: "Operations on schedule for the week." },
-  { icon: Users, tone: "info", title: "16 cancelled hours", body: "Mostly Tuesday afternoons — confirm with funders." },
+  { icon: AlertTriangle, toneClass: "bg-destructive/15 text-destructive", title: "15 missed visits", body: "Across 6 service members. Review allocation and travel routes." },
+  { icon: Clock, toneClass: "bg-warning/15 text-warning", title: "Punctuality 75.1%", body: "Above the 50% threshold. Most affected: late starts after 11:00." },
+  { icon: CheckCircle2, toneClass: "bg-success/15 text-success", title: "738 bookings logged", body: "Operations on schedule for the week." },
+  { icon: Users, toneClass: "bg-info/15 text-info", title: "16 cancelled hours", body: "Mostly Tuesday afternoons — confirm with funders." },
 ];
 
 export function PassDashboardView({ onBack }: { onBack: () => void }) {
@@ -115,7 +115,7 @@ export function PassDashboardView({ onBack }: { onBack: () => void }) {
               onClick={() => toast.info(h.title)}
               className={`flex items-start gap-3 rounded-md border p-3 text-left hover:bg-muted/40 transition-colors`}
             >
-              <div className={`h-8 w-8 rounded-md flex items-center justify-center shrink-0 bg-${h.tone}/15 text-${h.tone}`}>
+              <div className={`h-8 w-8 rounded-md flex items-center justify-center shrink-0 ${h.toneClass}`}>
                 <h.icon className="h-4 w-4" />
               </div>
               <div className="min-w-0">
