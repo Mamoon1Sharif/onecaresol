@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useDailyVisits, useUpdateDailyVisit, useCareGivers } from "@/hooks/use-care-data";
 import { supabase } from "@/integrations/supabase/client";
+import { RosterViewSwitcher } from "@/components/RosterViewSwitcher";
 
 type CareType = "24h" | "12h-live-in" | "8h-morning" | "8h-night";
 
@@ -239,14 +240,17 @@ const DailyRoster = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Daily Roster</h1>
+            <h1 className="text-2xl font-bold text-foreground">Roster</h1>
             <p className="text-sm text-muted-foreground mt-1">24-hour timeline · Drag visits to assign caregivers</p>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={() => setDayOffset((d) => d - 1)}><ChevronLeft className="h-4 w-4" /></Button>
-            <span className="text-sm font-medium text-foreground min-w-[200px] text-center">{getDateLabel(dayOffset)}</span>
-            {dayOffset !== 0 && <Button variant="ghost" size="sm" onClick={() => setDayOffset(0)}>Today</Button>}
-            <Button variant="outline" size="icon" onClick={() => setDayOffset((d) => d + 1)}><ChevronRight className="h-4 w-4" /></Button>
+          <div className="flex items-center gap-3 flex-wrap">
+            <RosterViewSwitcher />
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="icon" onClick={() => setDayOffset((d) => d - 1)}><ChevronLeft className="h-4 w-4" /></Button>
+              <span className="text-sm font-medium text-foreground min-w-[200px] text-center">{getDateLabel(dayOffset)}</span>
+              {dayOffset !== 0 && <Button variant="ghost" size="sm" onClick={() => setDayOffset(0)}>Today</Button>}
+              <Button variant="outline" size="icon" onClick={() => setDayOffset((d) => d + 1)}><ChevronRight className="h-4 w-4" /></Button>
+            </div>
           </div>
         </div>
 
