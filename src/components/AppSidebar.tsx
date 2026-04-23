@@ -29,16 +29,12 @@ const topItems = [
   { title: "Insights", url: "/insights", icon: Sparkles },
   { title: "Care Givers", url: "/caregivers", icon: Users },
   { title: "Service Members", url: "/carereceivers", icon: HeartHandshake },
+  { title: "Roster", url: "/roster", icon: CalendarDays },
+  { title: "Bookings", url: "/bookings", icon: BookMarked },
   { title: "Location Tracking", url: "/location-tracking", icon: MapPin },
   { title: "Communication Log", url: "/communication-log", icon: MessageSquare },
   { title: "Timeline", url: "/timeline", icon: Activity },
   { title: "Reports", url: "/reports", icon: FileBarChart },
-];
-
-const rosterSubItems = [
-  { title: "Weekly Roster", url: "/roster" },
-  { title: "Daily Roster", url: "/daily-roster" },
-  { title: "Bookings", url: "/bookings" },
 ];
 
 const invoicingSubItems = [
