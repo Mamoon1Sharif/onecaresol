@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, HeartHandshake, CalendarDays, ChevronDown, LogOut, MapPin, MessageSquare, FileBarChart, Receipt, Activity, Sparkles } from "lucide-react";
+import { LayoutDashboard, Users, HeartHandshake, CalendarDays, ChevronDown, LogOut, MapPin, MessageSquare, FileBarChart, Receipt, Activity, Sparkles, BookMarked } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
@@ -38,6 +38,7 @@ const topItems = [
 const rosterSubItems = [
   { title: "Weekly Roster", url: "/roster" },
   { title: "Daily Roster", url: "/daily-roster" },
+  { title: "Bookings", url: "/bookings" },
 ];
 
 const invoicingSubItems = [
@@ -60,7 +61,7 @@ export function AppSidebar() {
   const isActive = (path: string) =>
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
 
-  const rosterOpen = location.pathname === "/roster" || location.pathname === "/daily-roster";
+  const rosterOpen = location.pathname === "/roster" || location.pathname === "/daily-roster" || location.pathname === "/bookings";
   const invoicingOpen = location.pathname.startsWith("/invoicing");
 
   return (
