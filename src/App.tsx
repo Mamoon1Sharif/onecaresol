@@ -7,6 +7,7 @@ import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index.tsx";
 import InsightsDashboard from "./pages/InsightsDashboard.tsx";
+import Bookings from "./pages/Bookings.tsx";
 import CareGivers from "./pages/CareGivers.tsx";
 import CareGiverProfile from "./pages/CareGiverProfile.tsx";
 import AddCareGiver from "./pages/AddCareGiver.tsx";
@@ -67,6 +68,7 @@ const App = () => (
             <Route path="/signup" element={<Signup />} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/insights" element={<ProtectedRoute><InsightsDashboard /></ProtectedRoute>} />
+            <Route path="/bookings" element={<ProtectedRoute><Bookings /></ProtectedRoute>} />
             <Route path="/caregivers" element={<ProtectedRoute><CareGivers /></ProtectedRoute>} />
             <Route path="/caregivers/new" element={<ProtectedRoute><AddCareGiver /></ProtectedRoute>} />
             <Route path="/caregivers/:id" element={<ProtectedRoute><CareGiverProfile /></ProtectedRoute>} />
