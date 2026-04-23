@@ -16,6 +16,7 @@ import {
 import { CalendarDays, ChevronLeft, ChevronRight, Plus, Edit2, Trash2, Clock, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useShifts, useUpsertShift, useDeleteShift, useCareGivers, useCareReceivers } from "@/hooks/use-care-data";
+import { RosterViewSwitcher } from "@/components/RosterViewSwitcher";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
