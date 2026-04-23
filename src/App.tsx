@@ -23,6 +23,7 @@ import ReceiverChangelog from "./pages/ReceiverChangelog.tsx";
 import MemberProfile from "./pages/MemberProfile.tsx";
 import Roster from "./pages/Roster.tsx";
 import DailyRoster from "./pages/DailyRoster.tsx";
+import MonthlyRoster from "./pages/MonthlyRoster.tsx";
 import HolidaysAbsence from "./pages/HolidaysAbsence.tsx";
 import Messaging from "./pages/Messaging.tsx";
 import Medication from "./pages/Medication.tsx";
@@ -82,6 +83,8 @@ const App = () => (
             <Route path="/carereceivers/:id/files" element={<ProtectedRoute><ReceiverFiles /></ProtectedRoute>} />
             <Route path="/carereceivers/:id/changelog" element={<ProtectedRoute><ReceiverChangelog /></ProtectedRoute>} />
             <Route path="/roster" element={<ProtectedRoute><Roster /></ProtectedRoute>} />
+            <Route path="/roster/daily" element={<ProtectedRoute><DailyRoster /></ProtectedRoute>} />
+            <Route path="/roster/monthly" element={<ProtectedRoute><MonthlyRoster /></ProtectedRoute>} />
             <Route path="/daily-roster" element={<ProtectedRoute><DailyRoster /></ProtectedRoute>} />
             <Route path="/holidays-absence" element={<ProtectedRoute><HolidaysAbsence /></ProtectedRoute>} />
             <Route path="/location-tracking" element={<ProtectedRoute><LocationTracking /></ProtectedRoute>} />

@@ -29,16 +29,12 @@ const topItems = [
   { title: "Insights", url: "/insights", icon: Sparkles },
   { title: "Care Givers", url: "/caregivers", icon: Users },
   { title: "Service Members", url: "/carereceivers", icon: HeartHandshake },
+  { title: "Roster", url: "/roster", icon: CalendarDays },
+  { title: "Bookings", url: "/bookings", icon: BookMarked },
   { title: "Location Tracking", url: "/location-tracking", icon: MapPin },
   { title: "Communication Log", url: "/communication-log", icon: MessageSquare },
   { title: "Timeline", url: "/timeline", icon: Activity },
   { title: "Reports", url: "/reports", icon: FileBarChart },
-];
-
-const rosterSubItems = [
-  { title: "Weekly Roster", url: "/roster" },
-  { title: "Daily Roster", url: "/daily-roster" },
-  { title: "Bookings", url: "/bookings" },
 ];
 
 const invoicingSubItems = [
@@ -61,7 +57,6 @@ export function AppSidebar() {
   const isActive = (path: string) =>
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
 
-  const rosterOpen = location.pathname === "/roster" || location.pathname === "/daily-roster" || location.pathname === "/bookings";
   const invoicingOpen = location.pathname.startsWith("/invoicing");
 
   return (
@@ -108,43 +103,6 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               ))}
 
-              {/* Roster with sub-items */}
-              <Collapsible defaultOpen={rosterOpen} className="group/collapsible">
-                <SidebarMenuItem>
-                  <CollapsibleTrigger asChild>
-                    <SidebarMenuButton
-                      isActive={rosterOpen}
-                      tooltip="Roster"
-                      className="hover:bg-sidebar-accent"
-                    >
-                      <CalendarDays className="h-4 w-4" />
-                      {!collapsed && (
-                        <>
-                          <span className="flex-1">Roster</span>
-                          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                        </>
-                      )}
-                    </SidebarMenuButton>
-                  </CollapsibleTrigger>
-                  <CollapsibleContent>
-                    <SidebarMenuSub>
-                      {rosterSubItems.map((sub) => (
-                        <SidebarMenuSubItem key={sub.title}>
-                          <SidebarMenuSubButton asChild isActive={isActive(sub.url)}>
-                            <NavLink
-                              to={sub.url}
-                              className="hover:bg-sidebar-accent"
-                              activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                            >
-                              {sub.title}
-                            </NavLink>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  </CollapsibleContent>
-                </SidebarMenuItem>
-              </Collapsible>
 
               {/* Invoicing / Wages with sub-items */}
               <Collapsible defaultOpen={invoicingOpen} className="group/collapsible">

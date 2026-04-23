@@ -86,10 +86,11 @@ function buildDummyBookings(
   weekDates: Date[],
 ): BookingChip[] {
   const out: BookingChip[] = [];
-  receivers.forEach((r) => {
+  receivers.forEach((r, ri) => {
     weekDates.forEach((d, di) => {
-      const seed = hashStr(`${r.id}-${isoDay(d)}`);
-      const visitsToday = (seed % 5); // 0..4 visits
+      const seed = hashStr(`${r.id}-${isoDay(d)}-${ri}-${di}`);
+      // Guarantee 1-3 visits/day so the grid is never empty
+      const visitsToday = 1 + (seed % 3);
       const today = new Date();
       const isPast = d < new Date(today.toDateString());
       const isToday = isoDay(d) === isoDay(today);
@@ -206,7 +207,7 @@ export default function Bookings() {
   const [view, setView] = useState<"week" | "today">("week");
   const [weekOffset, setWeekOffset] = useState(0);
   const [page, setPage] = useState(1);
-  const [bookedOnly, setBookedOnly] = useState(true);
+  const [bookedOnly, setBookedOnly] = useState(false);
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState<BookingChip | null>(null);
   const [newOpen, setNewOpen] = useState(false);
