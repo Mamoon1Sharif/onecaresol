@@ -655,15 +655,15 @@ export default function InsightsDashboard() {
             </div>
             <div className="px-4 pt-1 pb-2 flex flex-wrap gap-3 text-[10px] text-muted-foreground">
               {[
-                ["Manual", "muted-foreground"],
-                ["Late", "warning"],
-                ["Overstay", "destructive"],
-                ["Deficit", "info"],
-                ["Early", "success"],
-                ["Undertime", "primary"],
-              ].map(([l, c]) => (
+                { l: "Manual", c: "bg-muted-foreground" },
+                { l: "Late", c: "bg-warning" },
+                { l: "Overstay", c: "bg-destructive" },
+                { l: "Deficit", c: "bg-info" },
+                { l: "Early", c: "bg-success" },
+                { l: "Undertime", c: "bg-primary" },
+              ].map(({ l, c }) => (
                 <span key={l} className="inline-flex items-center gap-1">
-                  <span className={`h-2 w-2 rounded-sm bg-${c}`} /> {l}
+                  <span className={`h-2 w-2 rounded-sm ${c}`} /> {l}
                 </span>
               ))}
             </div>
