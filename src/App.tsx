@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index.tsx";
+import InsightsDashboard from "./pages/InsightsDashboard.tsx";
 import CareGivers from "./pages/CareGivers.tsx";
 import CareGiverProfile from "./pages/CareGiverProfile.tsx";
 import AddCareGiver from "./pages/AddCareGiver.tsx";
@@ -65,6 +66,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/insights" element={<ProtectedRoute><InsightsDashboard /></ProtectedRoute>} />
             <Route path="/caregivers" element={<ProtectedRoute><CareGivers /></ProtectedRoute>} />
             <Route path="/caregivers/new" element={<ProtectedRoute><AddCareGiver /></ProtectedRoute>} />
             <Route path="/caregivers/:id" element={<ProtectedRoute><CareGiverProfile /></ProtectedRoute>} />
