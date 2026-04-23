@@ -61,7 +61,7 @@ export function AppSidebar() {
   const isActive = (path: string) =>
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
 
-  const rosterOpen = location.pathname === "/roster" || location.pathname === "/daily-roster";
+  const rosterOpen = location.pathname === "/roster" || location.pathname === "/daily-roster" || location.pathname === "/bookings";
   const invoicingOpen = location.pathname.startsWith("/invoicing");
 
   return (
