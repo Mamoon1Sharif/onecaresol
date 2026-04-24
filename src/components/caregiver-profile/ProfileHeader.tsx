@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { getCareGiverAvatar } from "@/lib/avatars";
+import { AvatarUpload } from "@/components/AvatarUpload";
 import { ArrowLeft, CalendarDays, Phone, Mail } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
