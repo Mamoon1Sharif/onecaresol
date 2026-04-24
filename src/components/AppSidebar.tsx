@@ -1,8 +1,9 @@
-import { LayoutDashboard, Users, HeartHandshake, CalendarDays, ChevronDown, LogOut, MapPin, MessageSquare, FileBarChart, Receipt, Activity, Sparkles, BookMarked } from "lucide-react";
+import { LayoutDashboard, Users, HeartHandshake, CalendarDays, ChevronDown, LogOut, MapPin, MessageSquare, FileBarChart, Receipt, Activity, Sparkles, BookMarked, Building2, UserCog } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
+import { useCurrentCompany, useHasAppRole } from "@/hooks/use-company";
 import {
   Sidebar,
   SidebarContent,
@@ -53,6 +54,9 @@ export function AppSidebar() {
   const { signOut } = useAuth();
   const nav = useNavigate();
   const location = useLocation();
+  const { data: cu } = useCurrentCompany();
+  const { data: isSuper } = useHasAppRole("super_admin");
+  const isCompanyAdmin = cu && (cu.role === "owner" || cu.role === "admin");
 
   const isActive = (path: string) =>
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
@@ -141,6 +145,30 @@ export function AppSidebar() {
                   </CollapsibleContent>
                 </SidebarMenuItem>
               </Collapsible>
+
+              {isCompanyAdmin && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/company-users")} tooltip="Users">
+                    <NavLink to="/company-users" className="hover:bg-sidebar-accent"
+                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium">
+                      <UserCog className="h-4 w-4" />
+                      {!collapsed && <span>Users</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
+
+              {isSuper && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/super-admin")} tooltip="Companies">
+                    <NavLink to="/super-admin" className="hover:bg-sidebar-accent"
+                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium">
+                      <Building2 className="h-4 w-4" />
+                      {!collapsed && <span>Companies</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
