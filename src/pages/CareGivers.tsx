@@ -145,7 +145,7 @@ const CareGivers = () => {
                   </div>
                   <div className="flex flex-col items-center text-center mb-4">
                     <div className="h-24 w-24 rounded-full border-2 border-border overflow-hidden mb-3">
-                      <img src={getCareGiverAvatar(cg.id)} alt={cg.name} className="h-full w-full object-cover" loading="lazy" />
+                      <img src={getCareGiverAvatar(cg.id, cg.avatar_url)} alt={cg.name} className="h-full w-full object-cover" loading="lazy" />
                     </div>
                     <h3 className="font-bold text-foreground text-lg">{cg.name}</h3>
                     <div className="mt-2 space-y-1.5 w-full">

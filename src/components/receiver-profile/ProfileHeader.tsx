@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, Heart, MapPin } from "lucide-react";
+import { AvatarUpload } from "@/components/AvatarUpload";
+import { getCareReceiverAvatar } from "@/lib/avatars";
 import type { Tables } from "@/integrations/supabase/types";
 
 type CareReceiver = Tables<"care_receivers">;
@@ -25,9 +27,14 @@ export function ReceiverProfileHeader({ cr }: Props) {
       <Card className="border border-border overflow-hidden">
         <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent px-8 py-6">
           <div className="flex items-start gap-6">
-            <div className="h-24 w-24 rounded-2xl border-2 border-primary/20 bg-primary/15 flex items-center justify-center shrink-0">
-              <Heart className="h-12 w-12 text-primary" />
-            </div>
+            <AvatarUpload
+              table="care_receivers"
+              recordId={cr.id}
+              currentSrc={cr.avatar_url || getCareReceiverAvatar(cr.id)}
+              hasUploadedAvatar={!!cr.avatar_url}
+              fallback={<Heart className="h-12 w-12 text-primary" />}
+              invalidateKeys={[["care_receivers"], ["care_receivers", cr.id]]}
+            />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-2xl font-bold text-foreground">{cr.name}</h1>
