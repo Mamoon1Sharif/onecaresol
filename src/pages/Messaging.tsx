@@ -158,7 +158,7 @@ export default function Messaging() {
               <>
                 <div className="flex flex-col items-center pt-6 pb-4 px-4">
                   <img
-                    src={getCareGiverAvatar(cg.id)}
+                    src={getCareGiverAvatar(cg.id, cg.avatar_url)}
                     alt={cg.name}
                     className="h-20 w-20 rounded-full object-cover ring-1 ring-border"
                   />
