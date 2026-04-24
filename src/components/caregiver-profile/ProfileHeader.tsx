@@ -30,9 +30,12 @@ export function ProfileHeader({ cg }: Props) {
       <Card className="border border-border overflow-hidden">
         <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent px-8 py-6">
           <div className="flex items-start gap-6">
-            <div className="h-24 w-24 rounded-2xl border-2 border-primary/20 overflow-hidden shrink-0">
-              <img src={getCareGiverAvatar(cg.id)} alt={cg.name} className="h-full w-full object-cover" loading="lazy" />
-            </div>
+            <AvatarUpload
+              table="care_givers"
+              recordId={cg.id}
+              currentSrc={getCareGiverAvatar(cg.id, cg.avatar_url)}
+              invalidateKeys={[["care_givers"], ["care_givers", cg.id]]}
+            />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-2xl font-bold text-foreground">{cg.name}</h1>
