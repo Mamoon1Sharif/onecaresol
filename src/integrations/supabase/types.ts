@@ -21,6 +21,7 @@ export type Database = {
           address_3: string | null
           alias: string | null
           allergies: string | null
+          avatar_url: string | null
           care_giver_references: Json | null
           country: string | null
           county: string | null
@@ -86,6 +87,7 @@ export type Database = {
           address_3?: string | null
           alias?: string | null
           allergies?: string | null
+          avatar_url?: string | null
           care_giver_references?: Json | null
           country?: string | null
           county?: string | null
@@ -151,6 +153,7 @@ export type Database = {
           address_3?: string | null
           alias?: string | null
           allergies?: string | null
+          avatar_url?: string | null
           care_giver_references?: Json | null
           country?: string | null
           county?: string | null
@@ -221,6 +224,7 @@ export type Database = {
           allergies: string | null
           area_name: string | null
           authority_ref: string | null
+          avatar_url: string | null
           care_plan: string | null
           care_status: string
           care_type: string
@@ -298,6 +302,7 @@ export type Database = {
           allergies?: string | null
           area_name?: string | null
           authority_ref?: string | null
+          avatar_url?: string | null
           care_plan?: string | null
           care_status?: string
           care_type?: string
@@ -375,6 +380,7 @@ export type Database = {
           allergies?: string | null
           area_name?: string | null
           authority_ref?: string | null
+          avatar_url?: string | null
           care_plan?: string | null
           care_status?: string
           care_type?: string
