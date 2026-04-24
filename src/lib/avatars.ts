@@ -18,10 +18,12 @@ function hashStr(s: string): number {
   return h;
 }
 
-export function getCareGiverAvatar(id: string): string {
+export function getCareGiverAvatar(id: string, override?: string | null): string {
+  if (override) return override;
   return cgAvatars[hashStr(id) % cgAvatars.length];
 }
 
-export function getCareReceiverAvatar(id: string): string {
+export function getCareReceiverAvatar(id: string, override?: string | null): string {
+  if (override) return override;
   return crAvatars[hashStr(id) % crAvatars.length];
 }
