@@ -53,6 +53,8 @@ import BankHolidays from "./pages/BankHolidays.tsx";
 import HolidayReport from "./pages/HolidayReport.tsx";
 import Login from "./pages/Login.tsx";
 import Signup from "./pages/Signup.tsx";
+import SuperAdmin from "./pages/SuperAdmin.tsx";
+import CompanyUsers from "./pages/CompanyUsers.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -67,6 +69,8 @@ const App = () => (
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/super-admin" element={<ProtectedRoute><SuperAdmin /></ProtectedRoute>} />
+            <Route path="/company-users" element={<ProtectedRoute><CompanyUsers /></ProtectedRoute>} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/insights" element={<ProtectedRoute><InsightsDashboard /></ProtectedRoute>} />
             <Route path="/bookings" element={<ProtectedRoute><Bookings /></ProtectedRoute>} />
