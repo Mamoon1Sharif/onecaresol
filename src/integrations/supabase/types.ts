@@ -23,6 +23,7 @@ export type Database = {
           allergies: string | null
           avatar_url: string | null
           care_giver_references: Json | null
+          company_id: string
           country: string | null
           county: string | null
           created_at: string
@@ -89,6 +90,7 @@ export type Database = {
           allergies?: string | null
           avatar_url?: string | null
           care_giver_references?: Json | null
+          company_id?: string
           country?: string | null
           county?: string | null
           created_at?: string
@@ -155,6 +157,7 @@ export type Database = {
           allergies?: string | null
           avatar_url?: string | null
           care_giver_references?: Json | null
+          company_id?: string
           country?: string | null
           county?: string | null
           created_at?: string
@@ -231,6 +234,7 @@ export type Database = {
           carer_pref: string | null
           cm2000_link: string | null
           community_health_index: string | null
+          company_id: string
           consent_flags: Json | null
           contract_type: string | null
           created_at: string
@@ -309,6 +313,7 @@ export type Database = {
           carer_pref?: string | null
           cm2000_link?: string | null
           community_health_index?: string | null
+          company_id?: string
           consent_flags?: Json | null
           contract_type?: string | null
           created_at?: string
@@ -387,6 +392,7 @@ export type Database = {
           carer_pref?: string | null
           cm2000_link?: string | null
           community_health_index?: string | null
+          company_id?: string
           consent_flags?: Json | null
           contract_type?: string | null
           created_at?: string
@@ -455,6 +461,7 @@ export type Database = {
       caregiver_availability: {
         Row: {
           care_giver_id: string
+          company_id: string
           created_at: string
           day_of_week: number
           end_time: string
@@ -466,6 +473,7 @@ export type Database = {
         }
         Insert: {
           care_giver_id: string
+          company_id?: string
           created_at?: string
           day_of_week: number
           end_time?: string
@@ -477,6 +485,7 @@ export type Database = {
         }
         Update: {
           care_giver_id?: string
+          company_id?: string
           created_at?: string
           day_of_week?: number
           end_time?: string
@@ -491,6 +500,7 @@ export type Database = {
       caregiver_changelog: {
         Row: {
           care_giver_id: string
+          company_id: string
           created_at: string
           description: string
           for_name: string | null
@@ -502,6 +512,7 @@ export type Database = {
         }
         Insert: {
           care_giver_id: string
+          company_id?: string
           created_at?: string
           description?: string
           for_name?: string | null
@@ -513,6 +524,7 @@ export type Database = {
         }
         Update: {
           care_giver_id?: string
+          company_id?: string
           created_at?: string
           description?: string
           for_name?: string | null
@@ -536,6 +548,7 @@ export type Database = {
         Row: {
           care_giver_id: string
           color: string
+          company_id: string
           created_at: string
           id: string
           name: string
@@ -544,6 +557,7 @@ export type Database = {
         Insert: {
           care_giver_id: string
           color?: string
+          company_id?: string
           created_at?: string
           id?: string
           name: string
@@ -552,6 +566,7 @@ export type Database = {
         Update: {
           care_giver_id?: string
           color?: string
+          company_id?: string
           created_at?: string
           id?: string
           name?: string
@@ -571,6 +586,7 @@ export type Database = {
         Row: {
           care_giver_id: string
           category_id: string | null
+          company_id: string
           created_at: string
           file_name: string
           id: string
@@ -584,6 +600,7 @@ export type Database = {
         Insert: {
           care_giver_id: string
           category_id?: string | null
+          company_id?: string
           created_at?: string
           file_name: string
           id?: string
@@ -597,6 +614,7 @@ export type Database = {
         Update: {
           care_giver_id?: string
           category_id?: string | null
+          company_id?: string
           created_at?: string
           file_name?: string
           id?: string
@@ -634,6 +652,7 @@ export type Database = {
       caregiver_holidays: {
         Row: {
           care_giver_id: string
+          company_id: string
           created_at: string
           end_date: string | null
           entry_type: string
@@ -647,6 +666,7 @@ export type Database = {
         }
         Insert: {
           care_giver_id: string
+          company_id?: string
           created_at?: string
           end_date?: string | null
           entry_type?: string
@@ -660,6 +680,7 @@ export type Database = {
         }
         Update: {
           care_giver_id?: string
+          company_id?: string
           created_at?: string
           end_date?: string | null
           entry_type?: string
@@ -677,6 +698,7 @@ export type Database = {
         Row: {
           care_giver_id: string
           closed_at: string | null
+          company_id: string
           created_at: string
           created_by: string | null
           created_for: string | null
@@ -691,6 +713,7 @@ export type Database = {
         Insert: {
           care_giver_id: string
           closed_at?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           created_for?: string | null
@@ -705,6 +728,7 @@ export type Database = {
         Update: {
           care_giver_id?: string
           closed_at?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           created_for?: string | null
@@ -732,6 +756,7 @@ export type Database = {
           address2: string | null
           area: string | null
           care_giver_id: string
+          company_id: string
           contact_type: string | null
           created_at: string
           email: string | null
@@ -753,6 +778,7 @@ export type Database = {
           address2?: string | null
           area?: string | null
           care_giver_id: string
+          company_id?: string
           contact_type?: string | null
           created_at?: string
           email?: string | null
@@ -774,6 +800,7 @@ export type Database = {
           address2?: string | null
           area?: string | null
           care_giver_id?: string
+          company_id?: string
           contact_type?: string | null
           created_at?: string
           email?: string | null
@@ -803,6 +830,7 @@ export type Database = {
       caregiver_private_notes: {
         Row: {
           care_giver_id: string
+          company_id: string
           created_at: string
           id: string
           note: string
@@ -812,6 +840,7 @@ export type Database = {
         }
         Insert: {
           care_giver_id: string
+          company_id?: string
           created_at?: string
           id?: string
           note: string
@@ -821,6 +850,7 @@ export type Database = {
         }
         Update: {
           care_giver_id?: string
+          company_id?: string
           created_at?: string
           id?: string
           note?: string
@@ -848,6 +878,7 @@ export type Database = {
       caregiver_push_notifications: {
         Row: {
           care_giver_id: string
+          company_id: string
           created_at: string
           created_by: string | null
           id: string
@@ -855,6 +886,7 @@ export type Database = {
         }
         Insert: {
           care_giver_id: string
+          company_id?: string
           created_at?: string
           created_by?: string | null
           id?: string
@@ -862,6 +894,7 @@ export type Database = {
         }
         Update: {
           care_giver_id?: string
+          company_id?: string
           created_at?: string
           created_by?: string | null
           id?: string
@@ -880,6 +913,7 @@ export type Database = {
       caregiver_qualifications: {
         Row: {
           care_giver_id: string
+          company_id: string
           created_at: string
           expiry_date: string | null
           id: string
@@ -893,6 +927,7 @@ export type Database = {
         }
         Insert: {
           care_giver_id: string
+          company_id?: string
           created_at?: string
           expiry_date?: string | null
           id?: string
@@ -906,6 +941,7 @@ export type Database = {
         }
         Update: {
           care_giver_id?: string
+          company_id?: string
           created_at?: string
           expiry_date?: string | null
           id?: string
@@ -931,6 +967,7 @@ export type Database = {
         Row: {
           account: string | null
           care_giver_id: string
+          company_id: string
           completed_at: string | null
           completed_by: string | null
           completion_notes: string | null
@@ -947,6 +984,7 @@ export type Database = {
         Insert: {
           account?: string | null
           care_giver_id: string
+          company_id?: string
           completed_at?: string | null
           completed_by?: string | null
           completion_notes?: string | null
@@ -963,6 +1001,7 @@ export type Database = {
         Update: {
           account?: string | null
           care_giver_id?: string
+          company_id?: string
           completed_at?: string | null
           completed_by?: string | null
           completion_notes?: string | null
@@ -981,6 +1020,7 @@ export type Database = {
       caregiver_rota_notes: {
         Row: {
           care_giver_id: string
+          company_id: string
           created_at: string
           id: string
           note: string
@@ -991,6 +1031,7 @@ export type Database = {
         }
         Insert: {
           care_giver_id: string
+          company_id?: string
           created_at?: string
           id?: string
           note: string
@@ -1001,6 +1042,7 @@ export type Database = {
         }
         Update: {
           care_giver_id?: string
+          company_id?: string
           created_at?: string
           id?: string
           note?: string
@@ -1024,6 +1066,7 @@ export type Database = {
           administered_by: string | null
           batch_number: string | null
           care_giver_id: string
+          company_id: string
           created_at: string
           date_administered: string | null
           dose: string | null
@@ -1037,6 +1080,7 @@ export type Database = {
           administered_by?: string | null
           batch_number?: string | null
           care_giver_id: string
+          company_id?: string
           created_at?: string
           date_administered?: string | null
           dose?: string | null
@@ -1050,6 +1094,7 @@ export type Database = {
           administered_by?: string | null
           batch_number?: string | null
           care_giver_id?: string
+          company_id?: string
           created_at?: string
           date_administered?: string | null
           dose?: string | null
@@ -1072,6 +1117,7 @@ export type Database = {
       communication_actions: {
         Row: {
           assigned_to: string | null
+          company_id: string
           completed_at: string | null
           completed_by: string | null
           created_at: string
@@ -1085,6 +1131,7 @@ export type Database = {
         }
         Insert: {
           assigned_to?: string | null
+          company_id?: string
           completed_at?: string | null
           completed_by?: string | null
           created_at?: string
@@ -1098,6 +1145,7 @@ export type Database = {
         }
         Update: {
           assigned_to?: string | null
+          company_id?: string
           completed_at?: string | null
           completed_by?: string | null
           created_at?: string
@@ -1123,6 +1171,7 @@ export type Database = {
         Row: {
           assigned_to: string | null
           comm_type: string
+          company_id: string
           contact_email: string | null
           contact_name: string
           contact_phone: string | null
@@ -1146,6 +1195,7 @@ export type Database = {
         Insert: {
           assigned_to?: string | null
           comm_type?: string
+          company_id?: string
           contact_email?: string | null
           contact_name: string
           contact_phone?: string | null
@@ -1169,6 +1219,7 @@ export type Database = {
         Update: {
           assigned_to?: string | null
           comm_type?: string
+          company_id?: string
           contact_email?: string | null
           contact_name?: string
           contact_phone?: string | null
@@ -1202,6 +1253,7 @@ export type Database = {
       communication_reasons: {
         Row: {
           color: string
+          company_id: string
           created_at: string
           id: string
           name: string
@@ -1209,6 +1261,7 @@ export type Database = {
         }
         Insert: {
           color?: string
+          company_id?: string
           created_at?: string
           id?: string
           name: string
@@ -1216,6 +1269,7 @@ export type Database = {
         }
         Update: {
           color?: string
+          company_id?: string
           created_at?: string
           id?: string
           name?: string
@@ -1223,12 +1277,84 @@ export type Database = {
         }
         Relationships: []
       }
+      companies: {
+        Row: {
+          company_code: string
+          created_at: string
+          id: string
+          name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_code: string
+          created_at?: string
+          id?: string
+          name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_code?: string
+          created_at?: string
+          id?: string
+          name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      company_users: {
+        Row: {
+          company_id: string
+          created_at: string
+          display_name: string | null
+          id: string
+          role: string
+          status: string
+          updated_at: string
+          user_id: string
+          username: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          username: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_users_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_visits: {
         Row: {
           care_giver_id: string | null
           care_receiver_id: string | null
           check_in_time: string | null
           check_out_time: string | null
+          company_id: string
           created_at: string
           duration: number
           id: string
@@ -1242,6 +1368,7 @@ export type Database = {
           care_receiver_id?: string | null
           check_in_time?: string | null
           check_out_time?: string | null
+          company_id?: string
           created_at?: string
           duration?: number
           id?: string
@@ -1255,6 +1382,7 @@ export type Database = {
           care_receiver_id?: string | null
           check_in_time?: string | null
           check_out_time?: string | null
+          company_id?: string
           created_at?: string
           duration?: number
           id?: string
@@ -1285,6 +1413,7 @@ export type Database = {
           assigned_member: string
           care_giver: string
           check_in_status: string
+          company_id: string
           created_at: string
           id: string
           scheduled_time: string
@@ -1294,6 +1423,7 @@ export type Database = {
           assigned_member: string
           care_giver: string
           check_in_status?: string
+          company_id?: string
           created_at?: string
           id?: string
           scheduled_time: string
@@ -1303,6 +1433,7 @@ export type Database = {
           assigned_member?: string
           care_giver?: string
           check_in_status?: string
+          company_id?: string
           created_at?: string
           id?: string
           scheduled_time?: string
@@ -1313,6 +1444,7 @@ export type Database = {
       health_goals: {
         Row: {
           care_receiver_id: string
+          company_id: string
           created_at: string
           goal: string
           id: string
@@ -1322,6 +1454,7 @@ export type Database = {
         }
         Insert: {
           care_receiver_id: string
+          company_id?: string
           created_at?: string
           goal: string
           id?: string
@@ -1331,6 +1464,7 @@ export type Database = {
         }
         Update: {
           care_receiver_id?: string
+          company_id?: string
           created_at?: string
           goal?: string
           id?: string
@@ -1352,6 +1486,7 @@ export type Database = {
         Row: {
           administered_by: string | null
           care_receiver_id: string
+          company_id: string
           created_at: string
           date: string
           dosage: string
@@ -1362,6 +1497,7 @@ export type Database = {
         Insert: {
           administered_by?: string | null
           care_receiver_id: string
+          company_id?: string
           created_at?: string
           date: string
           dosage: string
@@ -1372,6 +1508,7 @@ export type Database = {
         Update: {
           administered_by?: string | null
           care_receiver_id?: string
+          company_id?: string
           created_at?: string
           date?: string
           dosage?: string
@@ -1419,6 +1556,7 @@ export type Database = {
       receiver_availability: {
         Row: {
           care_receiver_id: string
+          company_id: string
           created_at: string
           day_of_week: number
           end_time: string
@@ -1430,6 +1568,7 @@ export type Database = {
         }
         Insert: {
           care_receiver_id: string
+          company_id?: string
           created_at?: string
           day_of_week: number
           end_time?: string
@@ -1441,6 +1580,7 @@ export type Database = {
         }
         Update: {
           care_receiver_id?: string
+          company_id?: string
           created_at?: string
           day_of_week?: number
           end_time?: string
@@ -1455,6 +1595,7 @@ export type Database = {
       receiver_changelog: {
         Row: {
           care_receiver_id: string
+          company_id: string
           created_at: string
           description: string
           for_name: string | null
@@ -1466,6 +1607,7 @@ export type Database = {
         }
         Insert: {
           care_receiver_id: string
+          company_id?: string
           created_at?: string
           description?: string
           for_name?: string | null
@@ -1477,6 +1619,7 @@ export type Database = {
         }
         Update: {
           care_receiver_id?: string
+          company_id?: string
           created_at?: string
           description?: string
           for_name?: string | null
@@ -1493,6 +1636,7 @@ export type Database = {
           applies_from: string | null
           applies_until: string | null
           care_receiver_id: string
+          company_id: string
           created_at: string
           document_ref: string | null
           id: string
@@ -1504,6 +1648,7 @@ export type Database = {
           applies_from?: string | null
           applies_until?: string | null
           care_receiver_id: string
+          company_id?: string
           created_at?: string
           document_ref?: string | null
           id?: string
@@ -1515,6 +1660,7 @@ export type Database = {
           applies_from?: string | null
           applies_until?: string | null
           care_receiver_id?: string
+          company_id?: string
           created_at?: string
           document_ref?: string | null
           id?: string
@@ -1528,6 +1674,7 @@ export type Database = {
         Row: {
           care_receiver_id: string
           color: string
+          company_id: string
           created_at: string
           id: string
           name: string
@@ -1536,6 +1683,7 @@ export type Database = {
         Insert: {
           care_receiver_id: string
           color?: string
+          company_id?: string
           created_at?: string
           id?: string
           name: string
@@ -1544,6 +1692,7 @@ export type Database = {
         Update: {
           care_receiver_id?: string
           color?: string
+          company_id?: string
           created_at?: string
           id?: string
           name?: string
@@ -1555,6 +1704,7 @@ export type Database = {
         Row: {
           care_receiver_id: string
           category_id: string | null
+          company_id: string
           created_at: string
           file_name: string
           id: string
@@ -1567,6 +1717,7 @@ export type Database = {
         Insert: {
           care_receiver_id: string
           category_id?: string | null
+          company_id?: string
           created_at?: string
           file_name: string
           id?: string
@@ -1579,6 +1730,7 @@ export type Database = {
         Update: {
           care_receiver_id?: string
           category_id?: string | null
+          company_id?: string
           created_at?: string
           file_name?: string
           id?: string
@@ -1601,6 +1753,7 @@ export type Database = {
       receiver_holidays: {
         Row: {
           care_receiver_id: string
+          company_id: string
           created_at: string
           end_date: string | null
           entry_type: string
@@ -1614,6 +1767,7 @@ export type Database = {
         }
         Insert: {
           care_receiver_id: string
+          company_id?: string
           created_at?: string
           end_date?: string | null
           entry_type?: string
@@ -1627,6 +1781,7 @@ export type Database = {
         }
         Update: {
           care_receiver_id?: string
+          company_id?: string
           created_at?: string
           end_date?: string | null
           entry_type?: string
@@ -1644,6 +1799,7 @@ export type Database = {
         Row: {
           care_receiver_id: string
           closed_at: string | null
+          company_id: string
           created_at: string
           created_by: string | null
           created_for: string | null
@@ -1658,6 +1814,7 @@ export type Database = {
         Insert: {
           care_receiver_id: string
           closed_at?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           created_for?: string | null
@@ -1672,6 +1829,7 @@ export type Database = {
         Update: {
           care_receiver_id?: string
           closed_at?: string | null
+          company_id?: string
           created_at?: string
           created_by?: string | null
           created_for?: string | null
@@ -1691,6 +1849,7 @@ export type Database = {
           address2: string | null
           area: string | null
           care_receiver_id: string
+          company_id: string
           contact_type: string | null
           created_at: string
           email: string | null
@@ -1712,6 +1871,7 @@ export type Database = {
           address2?: string | null
           area?: string | null
           care_receiver_id: string
+          company_id?: string
           contact_type?: string | null
           created_at?: string
           email?: string | null
@@ -1733,6 +1893,7 @@ export type Database = {
           address2?: string | null
           area?: string | null
           care_receiver_id?: string
+          company_id?: string
           contact_type?: string | null
           created_at?: string
           email?: string | null
@@ -1755,6 +1916,7 @@ export type Database = {
         Row: {
           care_giver_id: string | null
           care_receiver_id: string
+          company_id: string
           created_at: string
           id: string
           note: string
@@ -1764,6 +1926,7 @@ export type Database = {
         Insert: {
           care_giver_id?: string | null
           care_receiver_id: string
+          company_id?: string
           created_at?: string
           id?: string
           note: string
@@ -1773,6 +1936,7 @@ export type Database = {
         Update: {
           care_giver_id?: string | null
           care_receiver_id?: string
+          company_id?: string
           created_at?: string
           id?: string
           note?: string
@@ -1784,6 +1948,7 @@ export type Database = {
       receiver_push_notifications: {
         Row: {
           care_receiver_id: string
+          company_id: string
           created_at: string
           created_by: string | null
           id: string
@@ -1791,6 +1956,7 @@ export type Database = {
         }
         Insert: {
           care_receiver_id: string
+          company_id?: string
           created_at?: string
           created_by?: string | null
           id?: string
@@ -1798,6 +1964,7 @@ export type Database = {
         }
         Update: {
           care_receiver_id?: string
+          company_id?: string
           created_at?: string
           created_by?: string | null
           id?: string
@@ -1808,6 +1975,7 @@ export type Database = {
       receiver_qualification_requirements: {
         Row: {
           care_receiver_id: string
+          company_id: string
           created_at: string
           id: string
           mandatory: boolean
@@ -1817,6 +1985,7 @@ export type Database = {
         }
         Insert: {
           care_receiver_id: string
+          company_id?: string
           created_at?: string
           id?: string
           mandatory?: boolean
@@ -1826,6 +1995,7 @@ export type Database = {
         }
         Update: {
           care_receiver_id?: string
+          company_id?: string
           created_at?: string
           id?: string
           mandatory?: boolean
@@ -1838,6 +2008,7 @@ export type Database = {
       receiver_qualifications: {
         Row: {
           care_receiver_id: string
+          company_id: string
           created_at: string
           expiry_date: string | null
           id: string
@@ -1851,6 +2022,7 @@ export type Database = {
         }
         Insert: {
           care_receiver_id: string
+          company_id?: string
           created_at?: string
           expiry_date?: string | null
           id?: string
@@ -1864,6 +2036,7 @@ export type Database = {
         }
         Update: {
           care_receiver_id?: string
+          company_id?: string
           created_at?: string
           expiry_date?: string | null
           id?: string
@@ -1881,6 +2054,7 @@ export type Database = {
         Row: {
           account: string | null
           care_receiver_id: string
+          company_id: string
           completed_at: string | null
           completed_by: string | null
           completion_notes: string | null
@@ -1897,6 +2071,7 @@ export type Database = {
         Insert: {
           account?: string | null
           care_receiver_id: string
+          company_id?: string
           completed_at?: string | null
           completed_by?: string | null
           completion_notes?: string | null
@@ -1913,6 +2088,7 @@ export type Database = {
         Update: {
           account?: string | null
           care_receiver_id?: string
+          company_id?: string
           completed_at?: string | null
           completed_by?: string | null
           completion_notes?: string | null
@@ -1932,6 +2108,7 @@ export type Database = {
         Row: {
           care_giver_id: string
           care_receiver_id: string
+          company_id: string
           created_at: string
           description: string | null
           id: string
@@ -1941,6 +2118,7 @@ export type Database = {
         Insert: {
           care_giver_id: string
           care_receiver_id: string
+          company_id?: string
           created_at?: string
           description?: string | null
           id?: string
@@ -1950,6 +2128,7 @@ export type Database = {
         Update: {
           care_giver_id?: string
           care_receiver_id?: string
+          company_id?: string
           created_at?: string
           description?: string | null
           id?: string
@@ -1962,6 +2141,7 @@ export type Database = {
         Row: {
           care_receiver_id: string
           category: string
+          company_id: string
           created_at: string
           description: string
           id: string
@@ -1972,6 +2152,7 @@ export type Database = {
         Insert: {
           care_receiver_id: string
           category: string
+          company_id?: string
           created_at?: string
           description?: string
           id?: string
@@ -1982,6 +2163,7 @@ export type Database = {
         Update: {
           care_receiver_id?: string
           category?: string
+          company_id?: string
           created_at?: string
           description?: string
           id?: string
@@ -2002,6 +2184,7 @@ export type Database = {
       shift_notes: {
         Row: {
           author: string
+          company_id: string
           created_at: string
           daily_visit_id: string
           id: string
@@ -2009,6 +2192,7 @@ export type Database = {
         }
         Insert: {
           author?: string
+          company_id?: string
           created_at?: string
           daily_visit_id: string
           id?: string
@@ -2016,6 +2200,7 @@ export type Database = {
         }
         Update: {
           author?: string
+          company_id?: string
           created_at?: string
           daily_visit_id?: string
           id?: string
@@ -2033,6 +2218,7 @@ export type Database = {
       }
       shift_tasks: {
         Row: {
+          company_id: string
           completed_at: string | null
           completed_by: string | null
           created_at: string
@@ -2042,6 +2228,7 @@ export type Database = {
           title: string
         }
         Insert: {
+          company_id?: string
           completed_at?: string | null
           completed_by?: string | null
           created_at?: string
@@ -2051,6 +2238,7 @@ export type Database = {
           title: string
         }
         Update: {
+          company_id?: string
           completed_at?: string | null
           completed_by?: string | null
           created_at?: string
@@ -2073,6 +2261,7 @@ export type Database = {
         Row: {
           care_giver_id: string | null
           care_receiver_id: string | null
+          company_id: string
           created_at: string
           day: number
           end_time: string
@@ -2085,6 +2274,7 @@ export type Database = {
         Insert: {
           care_giver_id?: string | null
           care_receiver_id?: string | null
+          company_id?: string
           created_at?: string
           day?: number
           end_time?: string
@@ -2097,6 +2287,7 @@ export type Database = {
         Update: {
           care_giver_id?: string | null
           care_receiver_id?: string | null
+          company_id?: string
           created_at?: string
           day?: number
           end_time?: string
@@ -2145,6 +2336,7 @@ export type Database = {
         Row: {
           care_receiver_id: string
           caregiver: string
+          company_id: string
           created_at: string
           date: string
           id: string
@@ -2153,6 +2345,7 @@ export type Database = {
         Insert: {
           care_receiver_id: string
           caregiver: string
+          company_id?: string
           created_at?: string
           date: string
           id?: string
@@ -2161,6 +2354,7 @@ export type Database = {
         Update: {
           care_receiver_id?: string
           caregiver?: string
+          company_id?: string
           created_at?: string
           date?: string
           id?: string
@@ -2181,12 +2375,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      current_company_id: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      is_company_admin: { Args: never; Returns: boolean }
+      is_super_admin: { Args: never; Returns: boolean }
+      resolve_login_email: {
+        Args: { _company_code: string; _username: string }
+        Returns: string
       }
     }
     Enums: {
