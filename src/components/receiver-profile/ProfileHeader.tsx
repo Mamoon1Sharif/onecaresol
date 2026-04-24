@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ArrowLeft, Heart, MapPin } from "lucide-react";
+import { AvatarUpload } from "@/components/AvatarUpload";
+import { getCareReceiverAvatar } from "@/lib/avatars";
 import type { Tables } from "@/integrations/supabase/types";
 
 type CareReceiver = Tables<"care_receivers">;
