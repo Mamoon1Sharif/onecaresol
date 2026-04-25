@@ -70,6 +70,8 @@ const DailyRoster = () => {
   const [teamFilter, setTeamFilter] = useState<string>("");
   const [serviceFilter, setServiceFilter] = useState<string>("");
   const [search, setSearch] = useState("");
+  const [detailVisit, setDetailVisit] = useState<any>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
 
   useEffect(() => {
     const ch = supabase
