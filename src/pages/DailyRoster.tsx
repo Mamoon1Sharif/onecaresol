@@ -82,6 +82,7 @@ const DailyRoster = () => {
   }, [refetch]);
 
   const rows = useMemo(() => {
+    const now = new Date();
     const mapped = rawVisits.map((v: any, idx: number) => {
       const cr = v.care_receivers ?? {};
       const cg = v.care_givers ?? {};
@@ -89,21 +90,46 @@ const DailyRoster = () => {
       const dur = v.duration ?? 0;
       const ref = `14${(597 + idx).toString().padStart(4, "0")}${(idx * 7 % 100).toString().padStart(2, "0")}`;
       const week = Math.ceil(((new Date(dateStr).getDate())) / 7);
-      const status = v.status === "Confirmed" ? "Complete" : v.status === "Pending" ? "Missed" : v.status;
+
+      // Compute visit start datetime
+      const visitStart = new Date(`${v.visit_date}T${String(start).padStart(2, "0")}:00:00`);
+      const isFuture = visitStart.getTime() > now.getTime();
+      const accepted = !!v.care_giver_id;
+
+      // Status logic
+      let status: string;
+      if (v.status === "Confirmed") {
+        status = "Complete";
+      } else if (isFuture) {
+        status = "Due";
+      } else if (v.status === "Pending") {
+        status = "Missed";
+      } else {
+        status = v.status;
+      }
+
       const postcode = (cr.address ?? "").split(" ").slice(-2).join(" ").toUpperCase() || "—";
       return {
         id: v.id,
         ref,
         date: getDateShort(dayOffset),
         status,
+        isFuture,
+        accepted,
         serviceUser: `${cr.name ?? "Unknown"}${postcode !== "—" ? "-" + postcode.replace(" ", "") : ""}`,
         serviceUserRaw: cr.name ?? "Unknown",
         scheduledStart: fmtHour(start),
         scheduledEnd: fmtHour(start + dur),
         duration: fmtHour(dur),
-        actualStart: v.check_in_time ? new Date(v.check_in_time).toTimeString().slice(0, 5) : fmtHour(start, 3),
-        actualEnd: v.check_out_time ? new Date(v.check_out_time).toTimeString().slice(0, 5) : fmtHour(start + dur, 0),
-        actualDuration: fmtHour(dur, 0),
+        actualStart: v.check_in_time ? new Date(v.check_in_time).toTimeString().slice(0, 5) : "",
+        actualEnd: v.check_out_time ? new Date(v.check_out_time).toTimeString().slice(0, 5) : "",
+        actualDuration: v.check_in_time && v.check_out_time
+          ? (() => {
+              const ms = new Date(v.check_out_time).getTime() - new Date(v.check_in_time).getTime();
+              const mins = Math.max(0, Math.round(ms / 60000));
+              return `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
+            })()
+          : "",
         teamMember: cg.name ?? "—",
         serviceCall: cr.care_type === "12h-live-in" ? "Private - Live-in" : cr.care_type === "8h-night" ? "WCC - Night" : cr.care_type === "8h-morning" ? "WCC - Mor..." : "Private Mor...",
         week: `Week ${(week % 4) || 1}`,
