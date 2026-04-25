@@ -97,10 +97,16 @@ const AddRota = () => {
   const handleSave = async () => {
     if (!selected) return;
     try {
-      // map weekday from chosen date (0=Sun..6=Sat → store 0-6)
       const day = new Date(form.date).getDay();
+      const staffId = form.staff1 && form.staff1.length > 0 ? form.staff1 : null;
+      const startMins = parseInt(form.startH) * 60 + parseInt(form.startM);
+      let endMins = parseInt(form.endH) * 60 + parseInt(form.endM);
+      if (endMins < startMins) endMins += 24 * 60;
+      const durHours = Math.max(1, Math.round((endMins - startMins) / 60));
+
+      // Save the recurring shift template (shifts table)
       await upsertShift.mutateAsync({
-        care_giver_id: form.staff1,
+        care_giver_id: staffId as any,
         care_receiver_id: selected.id,
         day,
         start_time: `${form.startH}:${form.startM}`,
@@ -108,6 +114,19 @@ const AddRota = () => {
         shift_type: form.serviceList,
         notes: `Rota Type: ${form.rotaType}${form.alert === "Yes" ? " · Alert" : ""}`,
       });
+
+      // Also create the actual daily visit so it shows up in Daily Rota
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { error: dvErr } = await supabase.from("daily_visits").insert({
+        care_receiver_id: selected.id,
+        care_giver_id: staffId,
+        visit_date: form.date,
+        start_hour: parseInt(form.startH),
+        duration: durHours,
+        status: staffId ? "Confirmed" : "Pending",
+      });
+      if (dvErr) throw dvErr;
+
       toast.success("Shift saved");
     } catch (err: any) {
       toast.error(err?.message ?? "Failed to save shift");
