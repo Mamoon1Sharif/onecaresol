@@ -11,11 +11,12 @@ import {
   ChevronLeft, ChevronRight, Check, Users, User, Link as LinkIcon,
   Map as MapIcon, Tag, FileText, Briefcase, Bell, PoundSterling,
   Camera, ArrowRight, ListChecks, Ban, ThumbsUp, Calendar,
-  TrendingUp, Clock, AlertCircle,
+  TrendingUp, Clock, AlertCircle, Info, XCircle,
 } from "lucide-react";
 import { useDailyVisits, useCareGivers, useCareReceivers } from "@/hooks/use-care-data";
 import { supabase } from "@/integrations/supabase/client";
 import { RosterViewSwitcher } from "@/components/RosterViewSwitcher";
+import { VisitDetailDialog } from "@/components/VisitDetailDialog";
 
 function getDateStr(offset: number) {
   const d = new Date();
@@ -51,6 +52,7 @@ const statusTone: Record<string, string> = {
   Complete: "text-success",
   Missed: "text-destructive font-semibold",
   Pending: "text-warning",
+  Due: "text-blue-600 font-semibold",
 };
 
 const ROW_BG_ALT = "bg-success/5";
@@ -68,6 +70,8 @@ const DailyRoster = () => {
   const [teamFilter, setTeamFilter] = useState<string>("");
   const [serviceFilter, setServiceFilter] = useState<string>("");
   const [search, setSearch] = useState("");
+  const [detailVisit, setDetailVisit] = useState<any>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
 
   useEffect(() => {
     const ch = supabase
@@ -78,6 +82,7 @@ const DailyRoster = () => {
   }, [refetch]);
 
   const rows = useMemo(() => {
+    const now = new Date();
     const mapped = rawVisits.map((v: any, idx: number) => {
       const cr = v.care_receivers ?? {};
       const cg = v.care_givers ?? {};
@@ -85,21 +90,46 @@ const DailyRoster = () => {
       const dur = v.duration ?? 0;
       const ref = `14${(597 + idx).toString().padStart(4, "0")}${(idx * 7 % 100).toString().padStart(2, "0")}`;
       const week = Math.ceil(((new Date(dateStr).getDate())) / 7);
-      const status = v.status === "Confirmed" ? "Complete" : v.status === "Pending" ? "Missed" : v.status;
+
+      // Compute visit start datetime
+      const visitStart = new Date(`${v.visit_date}T${String(start).padStart(2, "0")}:00:00`);
+      const isFuture = visitStart.getTime() > now.getTime();
+      const accepted = !!v.care_giver_id;
+
+      // Status logic
+      let status: string;
+      if (v.status === "Confirmed") {
+        status = "Complete";
+      } else if (isFuture) {
+        status = "Due";
+      } else if (v.status === "Pending") {
+        status = "Missed";
+      } else {
+        status = v.status;
+      }
+
       const postcode = (cr.address ?? "").split(" ").slice(-2).join(" ").toUpperCase() || "—";
       return {
         id: v.id,
         ref,
         date: getDateShort(dayOffset),
         status,
+        isFuture,
+        accepted,
         serviceUser: `${cr.name ?? "Unknown"}${postcode !== "—" ? "-" + postcode.replace(" ", "") : ""}`,
         serviceUserRaw: cr.name ?? "Unknown",
         scheduledStart: fmtHour(start),
         scheduledEnd: fmtHour(start + dur),
         duration: fmtHour(dur),
-        actualStart: v.check_in_time ? new Date(v.check_in_time).toTimeString().slice(0, 5) : fmtHour(start, 3),
-        actualEnd: v.check_out_time ? new Date(v.check_out_time).toTimeString().slice(0, 5) : fmtHour(start + dur, 0),
-        actualDuration: fmtHour(dur, 0),
+        actualStart: v.check_in_time ? new Date(v.check_in_time).toTimeString().slice(0, 5) : "",
+        actualEnd: v.check_out_time ? new Date(v.check_out_time).toTimeString().slice(0, 5) : "",
+        actualDuration: v.check_in_time && v.check_out_time
+          ? (() => {
+              const ms = new Date(v.check_out_time).getTime() - new Date(v.check_in_time).getTime();
+              const mins = Math.max(0, Math.round(ms / 60000));
+              return `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
+            })()
+          : "",
         teamMember: cg.name ?? "—",
         serviceCall: cr.care_type === "12h-live-in" ? "Private - Live-in" : cr.care_type === "8h-night" ? "WCC - Night" : cr.care_type === "8h-morning" ? "WCC - Mor..." : "Private Mor...",
         week: `Week ${(week % 4) || 1}`,
@@ -205,10 +235,10 @@ const DailyRoster = () => {
               <thead>
                 <tr className="bg-muted/60 border-b border-border">
                   <th className="p-2 border-r border-border w-8"><input type="checkbox" className="rounded" /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><AlertCircle className={COL_ICON_CLASS} /></th>
-                  <th className="p-2 border-r border-border text-center w-20"><Calendar className={COL_ICON_CLASS} /></th>
+                  <th className="p-2 border-r border-border text-center w-20" title="Visit ID"><Info className={COL_ICON_CLASS} /></th>
+                  <th className="p-2 border-r border-border text-center w-20" title="Date"><Calendar className={COL_ICON_CLASS} /></th>
                   <th className="p-2 border-r border-border text-left w-20">Status</th>
-                  <th className="p-2 border-r border-border text-center w-8"><Ban className={COL_ICON_CLASS} /></th>
+                  <th className="p-2 border-r border-border text-center w-8" title="Cancelled / Not accepted"><XCircle className={COL_ICON_CLASS} /></th>
                   <th className="p-2 border-r border-border text-center w-8"><ThumbsUp className={COL_ICON_CLASS} /></th>
                   <th className="p-2 border-r border-border text-center w-8"><LinkIcon className={COL_ICON_CLASS} /></th>
                   <th className="p-2 border-r border-border text-center w-8"><MapIcon className={COL_ICON_CLASS} /></th>
@@ -250,19 +280,39 @@ const DailyRoster = () => {
                   return (
                     <tr key={r.id} className={`${rowBg} border-b border-border hover:bg-muted/40 transition-colors`}>
                       <td className="p-1.5 border-r border-border text-center"><input type="checkbox" className="rounded" /></td>
-                      <td className="p-1.5 border-r border-border text-center"><span className="inline-block w-2 h-2 rounded-full bg-muted-foreground/40" /></td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">
-                        <a className="text-primary hover:underline cursor-pointer">{r.ref}</a>
+                      <td className="p-1.5 border-r border-border text-center">
+                        <button
+                          type="button"
+                          onClick={() => { setDetailVisit(r); setDetailOpen(true); }}
+                          className="text-primary hover:underline cursor-pointer font-mono text-[11px]"
+                          title="View visit details"
+                        >
+                          {r.ref}
+                        </button>
                       </td>
-                      <td className="p-1.5 border-r border-border font-mono text-[11px]">{r.date}</td>
+                      <td className="p-1.5 border-r border-border font-mono text-[11px] text-center">{r.date}</td>
                       <td className={`p-1.5 border-r border-border text-[11px] ${statusTone[r.status] ?? ""}`}>{r.status}</td>
-                      <td className="p-1.5 border-r border-border text-center"><Check className="h-3 w-3 text-success mx-auto" /></td>
-                      <td className="p-1.5 border-r border-border text-center"><Users className="h-3 w-3 text-muted-foreground mx-auto" /></td>
-                      <td className="p-1.5 border-r border-border text-center"><User className="h-3 w-3 text-muted-foreground mx-auto" /></td>
+                      <td className="p-1.5 border-r border-border text-center">
+                        {!r.accepted ? (
+                          <XCircle className="h-3.5 w-3.5 text-destructive mx-auto" />
+                        ) : null}
+                      </td>
+                      <td className="p-1.5 border-r border-border text-center"><ThumbsUp className="h-3 w-3 text-muted-foreground mx-auto" /></td>
+                      <td className="p-1.5 border-r border-border text-center"><LinkIcon className="h-3 w-3 text-muted-foreground mx-auto" /></td>
+                      <td className="p-1.5 border-r border-border text-center"><MapIcon className="h-3 w-3 text-muted-foreground mx-auto" /></td>
                       <td className="p-1.5 border-r border-border text-center"><span className={`inline-block w-3 h-3 rounded-full ${dot}`} /></td>
                       <td className="p-1.5 border-r border-border text-center">
                         {i % 5 === 0 && <span className="inline-block w-0 h-0 border-l-[5px] border-r-[5px] border-b-[8px] border-l-transparent border-r-transparent border-b-fuchsia-500 mx-auto" />}
                       </td>
+                      <td className="p-1.5 border-r border-border">
+                        <a className="text-primary hover:underline cursor-pointer text-[11px]">{r.serviceUser}</a>
+                      </td>
+                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{r.scheduledStart}</td>
+                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{r.scheduledEnd}</td>
+                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{r.duration}</td>
+                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{r.isFuture ? "" : r.actualStart}</td>
+                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{r.isFuture ? "" : r.actualEnd}</td>
+                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{r.isFuture ? "" : r.actualDuration}</td>
                       <td className="p-1.5 border-r border-border">
                         <a className="text-primary hover:underline cursor-pointer text-[11px]">{r.serviceUser}</a>
                       </td>
@@ -327,6 +377,8 @@ const DailyRoster = () => {
         <div className="bg-primary text-primary-foreground text-center py-2.5 text-sm font-medium rounded-md">
           You are looking at the live rota for all shifts on one day
         </div>
+
+        <VisitDetailDialog visit={detailVisit} open={detailOpen} onOpenChange={setDetailOpen} />
       </div>
     </AppLayout>
   );
