@@ -52,6 +52,7 @@ const statusTone: Record<string, string> = {
   Complete: "text-success",
   Missed: "text-destructive font-semibold",
   Pending: "text-warning",
+  Due: "text-blue-600 font-semibold",
 };
 
 const ROW_BG_ALT = "bg-success/5";
