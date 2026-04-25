@@ -168,7 +168,7 @@ export function PassDashboardView({ onBack }: { onBack: () => void }) {
       {/* Footer */}
       <Card className="px-6 py-4">
         <div className="flex items-center justify-between gap-2 flex-wrap text-[11px] text-muted-foreground">
-          <span>Care 4U Care Limited • Confidential</span>
+          <span>Confidential</span>
           <span>Page 1 of 1</span>
         </div>
       </Card>
