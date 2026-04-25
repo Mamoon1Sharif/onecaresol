@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,7 @@ import { Search, ArrowLeft, MapPin, Phone, User, Save, Loader2 } from "lucide-re
 import { useCareReceivers, useCareGivers, useUpsertShift } from "@/hooks/use-care-data";
 import { getCareReceiverAvatar } from "@/lib/avatars";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 function calcAge(dob?: string | null) {
   if (!dob) return null;
@@ -34,6 +36,7 @@ const AddRota = () => {
   const { data: receivers = [], isLoading } = useCareReceivers();
   const { data: caregivers = [] } = useCareGivers();
   const upsertShift = useUpsertShift();
+  const queryClient = useQueryClient();
 
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -97,6 +100,19 @@ const AddRota = () => {
   const handleSave = async () => {
     if (!selected) return;
     try {
+      const { data: auth } = await supabase.auth.getUser();
+      const userId = auth.user?.id;
+      if (!userId) throw new Error("You must be signed in to save a rota.");
+
+      const { data: companyUser, error: companyError } = await supabase
+        .from("company_users")
+        .select("company_id")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (companyError) throw companyError;
+      if (!companyUser?.company_id) throw new Error("Your account is not linked to a company.");
+
       const day = new Date(form.date).getDay();
       const staffId = form.staff1 && form.staff1.length > 0 ? form.staff1 : null;
       const startMins = parseInt(form.startH) * 60 + parseInt(form.startM);
@@ -116,8 +132,8 @@ const AddRota = () => {
       });
 
       // Also create the actual daily visit so it shows up in Daily Rota
-      const { supabase } = await import("@/integrations/supabase/client");
       const { error: dvErr } = await supabase.from("daily_visits").insert({
+        company_id: companyUser.company_id,
         care_receiver_id: selected.id,
         care_giver_id: staffId,
         visit_date: form.date,
@@ -126,6 +142,8 @@ const AddRota = () => {
         status: staffId ? "Confirmed" : "Pending",
       });
       if (dvErr) throw dvErr;
+
+      await queryClient.invalidateQueries({ queryKey: ["daily_visits"] });
 
       toast.success("Shift saved");
     } catch (err: any) {
