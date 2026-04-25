@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, HeartHandshake, CalendarDays, ChevronDown, LogOut, MapPin, MessageSquare, FileBarChart, Receipt, Activity, Sparkles, BookMarked, Building2, UserCog } from "lucide-react";
+import { LayoutDashboard, Users, HeartHandshake, CalendarDays, ChevronDown, LogOut, MapPin, MessageSquare, FileBarChart, Receipt, Activity, Sparkles, BookMarked, Building2, UserCog, Plus, Circle, Eye, Printer, Wrench } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
@@ -30,12 +30,21 @@ const topItems = [
   { title: "Insights", url: "/insights", icon: Sparkles },
   { title: "Care Givers", url: "/caregivers", icon: Users },
   { title: "Service Members", url: "/carereceivers", icon: HeartHandshake },
-  { title: "Roster", url: "/roster", icon: CalendarDays },
   { title: "Bookings", url: "/bookings", icon: BookMarked },
   { title: "Location Tracking", url: "/location-tracking", icon: MapPin },
   { title: "Communication Log", url: "/communication-log", icon: MessageSquare },
   { title: "Timeline", url: "/timeline", icon: Activity },
   { title: "Reports", url: "/reports", icon: FileBarChart },
+];
+
+const rotaSubItems = [
+  { title: "Add Rota", url: "/rota/add", icon: Plus },
+  { title: "Daily Rota", url: "/rota/daily", icon: Circle },
+  { title: "Advanced Rota", url: "/rota/advanced", icon: Circle },
+  { title: "Live Run Routes", url: "/rota/live-run-routes", icon: Circle },
+  { title: "The Monitor", url: "/rota/monitor", icon: Eye },
+  { title: "Printable Rota", url: "/rota/printable", icon: Printer },
+  { title: "Build Rota", url: "/rota/build", icon: Wrench },
 ];
 
 const invoicingSubItems = [
