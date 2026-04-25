@@ -11,11 +11,12 @@ import {
   ChevronLeft, ChevronRight, Check, Users, User, Link as LinkIcon,
   Map as MapIcon, Tag, FileText, Briefcase, Bell, PoundSterling,
   Camera, ArrowRight, ListChecks, Ban, ThumbsUp, Calendar,
-  TrendingUp, Clock, AlertCircle,
+  TrendingUp, Clock, AlertCircle, Info, XCircle,
 } from "lucide-react";
 import { useDailyVisits, useCareGivers, useCareReceivers } from "@/hooks/use-care-data";
 import { supabase } from "@/integrations/supabase/client";
 import { RosterViewSwitcher } from "@/components/RosterViewSwitcher";
+import { VisitDetailDialog } from "@/components/VisitDetailDialog";
 
 function getDateStr(offset: number) {
   const d = new Date();
