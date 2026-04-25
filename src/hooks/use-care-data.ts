@@ -60,6 +60,49 @@ export function useCareReceivers() {
   });
 }
 
+export function useAddCareReceiver() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (cr: {
+      name: string;
+      address?: string;
+      next_of_kin?: string;
+      next_of_kin_phone?: string;
+      care_status?: string;
+      care_type?: string;
+    }) => {
+      // Resolve the current user's company so we satisfy tenant RLS.
+      const { data: auth } = await supabase.auth.getUser();
+      const userId = auth.user?.id;
+      if (!userId) throw new Error("You must be signed in to add a service member.");
+      const { data: cu, error: cuErr } = await supabase
+        .from("company_users")
+        .select("company_id")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (cuErr) throw cuErr;
+      if (!cu?.company_id) throw new Error("Your account is not linked to a company.");
+
+      const { data, error } = await supabase
+        .from("care_receivers")
+        .insert({
+          name: cr.name,
+          address: cr.address ?? null,
+          next_of_kin: cr.next_of_kin ?? null,
+          next_of_kin_phone: cr.next_of_kin_phone ?? null,
+          care_status: cr.care_status ?? "Active",
+          care_type: cr.care_type ?? "8h-morning",
+          company_id: cu.company_id,
+        } as any)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["care_receivers"] }),
+  });
+}
+
 export function useCareReceiver(id: string | undefined) {
   return useQuery({
     queryKey: ["care_receivers", id],
