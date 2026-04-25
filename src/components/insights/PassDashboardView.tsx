@@ -65,7 +65,7 @@ export function PassDashboardView({ onBack }: { onBack: () => void }) {
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-              Care 4U Care Limited
+              Weekly Report
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">
               Weekly performance summary
