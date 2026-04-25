@@ -377,6 +377,8 @@ const DailyRoster = () => {
         <div className="bg-primary text-primary-foreground text-center py-2.5 text-sm font-medium rounded-md">
           You are looking at the live rota for all shifts on one day
         </div>
+
+        <VisitDetailDialog visit={detailVisit} open={detailOpen} onOpenChange={setDetailOpen} />
       </div>
     </AppLayout>
   );
