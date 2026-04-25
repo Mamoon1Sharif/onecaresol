@@ -1,13 +1,22 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Search, Plus, User, MapPin, Phone, Heart } from "lucide-react";
-import { useCareReceivers } from "@/hooks/use-care-data";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Search, Plus, MapPin, Phone, Heart, Loader2 } from "lucide-react";
+import { useCareReceivers, useAddCareReceiver } from "@/hooks/use-care-data";
 import { getCareReceiverAvatar } from "@/lib/avatars";
+import { toast } from "sonner";
 
 const statusStyles: Record<string, string> = {
   Active: "bg-success/15 text-success border-0",
@@ -15,14 +24,46 @@ const statusStyles: Record<string, string> = {
   Discharged: "bg-muted text-muted-foreground border-0",
 };
 
+const emptyForm = {
+  name: "",
+  address: "",
+  next_of_kin: "",
+  next_of_kin_phone: "",
+};
+
 const CareReceivers = () => {
   const { data: careReceivers = [], isLoading } = useCareReceivers();
   const [searchQuery, setSearchQuery] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [form, setForm] = useState(emptyForm);
   const navigate = useNavigate();
+  const addReceiver = useAddCareReceiver();
 
   const filtered = careReceivers
     .filter((cr) => cr.care_status !== "Discharged")
     .filter((cr) => cr.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.name.trim()) {
+      toast.error("Name is required");
+      return;
+    }
+    try {
+      const created = await addReceiver.mutateAsync({
+        name: form.name.trim(),
+        address: form.address.trim() || undefined,
+        next_of_kin: form.next_of_kin.trim() || undefined,
+        next_of_kin_phone: form.next_of_kin_phone.trim() || undefined,
+      });
+      toast.success("Service member added");
+      setDialogOpen(false);
+      setForm(emptyForm);
+      if (created?.id) navigate(`/carereceivers/${created.id}`);
+    } catch (err: any) {
+      toast.error(err?.message ?? "Failed to add service member");
+    }
+  };
 
   return (
     <AppLayout>
@@ -32,7 +73,9 @@ const CareReceivers = () => {
             <h1 className="text-2xl font-bold text-foreground">Service Members</h1>
             <p className="text-sm text-muted-foreground mt-1">Manage service members · {careReceivers.length} total</p>
           </div>
-          <Button className="gap-2"><Plus className="h-4 w-4" /> Add Service Member</Button>
+          <Button className="gap-2" onClick={() => setDialogOpen(true)}>
+            <Plus className="h-4 w-4" /> Add Service Member
+          </Button>
         </div>
 
         <div className="flex items-center gap-3">
@@ -97,6 +140,42 @@ const CareReceivers = () => {
           </div>
         )}
       </div>
+
+      <Dialog open={dialogOpen} onOpenChange={(open) => { setDialogOpen(open); if (!open) setForm(emptyForm); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Service Member</DialogTitle>
+            <DialogDescription>Create a new service member for your company.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name *</Label>
+              <Input id="name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Full name" autoFocus />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="address">Address</Label>
+              <Input id="address" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} placeholder="123 Main St" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="nok">Next of kin</Label>
+                <Input id="nok" value={form.next_of_kin} onChange={(e) => setForm({ ...form, next_of_kin: e.target.value })} placeholder="Name" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="nokp">NoK phone</Label>
+                <Input id="nokp" value={form.next_of_kin_phone} onChange={(e) => setForm({ ...form, next_of_kin_phone: e.target.value })} placeholder="07..." />
+              </div>
+            </div>
+            <DialogFooter className="gap-2">
+              <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={addReceiver.isPending} className="gap-2">
+                {addReceiver.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                Add Service Member
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 };
