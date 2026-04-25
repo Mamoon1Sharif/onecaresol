@@ -322,7 +322,7 @@ export default function InsightsDashboard() {
         {/* Top toolbar */}
         <div className="flex flex-wrap items-center gap-2 justify-between">
           <h1 className="text-base font-semibold text-foreground">
-            Care 4U Care Limited dashboard
+            Dashboard
           </h1>
 
           <div className="flex items-center gap-2">

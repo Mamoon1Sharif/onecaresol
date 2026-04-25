@@ -65,7 +65,7 @@ export function PassDashboardView({ onBack }: { onBack: () => void }) {
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-              Care 4U Care Limited
+              Weekly Report
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">
               Weekly performance summary
@@ -168,7 +168,7 @@ export function PassDashboardView({ onBack }: { onBack: () => void }) {
       {/* Footer */}
       <Card className="px-6 py-4">
         <div className="flex items-center justify-between gap-2 flex-wrap text-[11px] text-muted-foreground">
-          <span>Care 4U Care Limited • Confidential</span>
+          <span>Confidential</span>
           <span>Page 1 of 1</span>
         </div>
       </Card>
