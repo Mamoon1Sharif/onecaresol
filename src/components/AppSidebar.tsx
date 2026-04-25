@@ -71,6 +71,7 @@ export function AppSidebar() {
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
 
   const invoicingOpen = location.pathname.startsWith("/invoicing");
+  const rotaOpen = location.pathname.startsWith("/rota") || location.pathname.startsWith("/roster") || location.pathname.startsWith("/daily-roster");
 
   return (
     <Sidebar collapsible="icon">
@@ -116,6 +117,45 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               ))}
 
+
+              {/* Rota with sub-items */}
+              <Collapsible defaultOpen={rotaOpen} className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                      isActive={rotaOpen}
+                      tooltip="Rota"
+                      className="hover:bg-sidebar-accent"
+                    >
+                      <CalendarDays className="h-4 w-4" />
+                      {!collapsed && (
+                        <>
+                          <span className="flex-1">Rota</span>
+                          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                        </>
+                      )}
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {rotaSubItems.map((sub) => (
+                        <SidebarMenuSubItem key={sub.title}>
+                          <SidebarMenuSubButton asChild isActive={isActive(sub.url)}>
+                            <NavLink
+                              to={sub.url}
+                              className="hover:bg-sidebar-accent"
+                              activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                            >
+                              <sub.icon className="h-3.5 w-3.5" />
+                              <span>{sub.title}</span>
+                            </NavLink>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
 
               {/* Invoicing / Wages with sub-items */}
               <Collapsible defaultOpen={invoicingOpen} className="group/collapsible">
