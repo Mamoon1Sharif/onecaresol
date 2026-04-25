@@ -235,10 +235,10 @@ const DailyRoster = () => {
               <thead>
                 <tr className="bg-muted/60 border-b border-border">
                   <th className="p-2 border-r border-border w-8"><input type="checkbox" className="rounded" /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><AlertCircle className={COL_ICON_CLASS} /></th>
-                  <th className="p-2 border-r border-border text-center w-20"><Calendar className={COL_ICON_CLASS} /></th>
+                  <th className="p-2 border-r border-border text-center w-20" title="Visit ID"><Info className={COL_ICON_CLASS} /></th>
+                  <th className="p-2 border-r border-border text-center w-20" title="Date"><Calendar className={COL_ICON_CLASS} /></th>
                   <th className="p-2 border-r border-border text-left w-20">Status</th>
-                  <th className="p-2 border-r border-border text-center w-8"><Ban className={COL_ICON_CLASS} /></th>
+                  <th className="p-2 border-r border-border text-center w-8" title="Cancelled / Not accepted"><XCircle className={COL_ICON_CLASS} /></th>
                   <th className="p-2 border-r border-border text-center w-8"><ThumbsUp className={COL_ICON_CLASS} /></th>
                   <th className="p-2 border-r border-border text-center w-8"><LinkIcon className={COL_ICON_CLASS} /></th>
                   <th className="p-2 border-r border-border text-center w-8"><MapIcon className={COL_ICON_CLASS} /></th>
