@@ -250,7 +250,7 @@ export function useShifts() {
 export function useUpsertShift() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (s: { id?: string; care_giver_id: string; care_receiver_id: string; day: number; start_time: string; end_time: string; shift_type: string; notes: string }) => {
+    mutationFn: async (s: { id?: string; care_giver_id: string | null; care_receiver_id: string; day: number; start_time: string; end_time: string; shift_type: string; notes: string }) => {
       if (s.id) {
         const { error } = await supabase.from("shifts").update({ care_giver_id: s.care_giver_id, care_receiver_id: s.care_receiver_id, day: s.day, start_time: s.start_time, end_time: s.end_time, shift_type: s.shift_type, notes: s.notes }).eq("id", s.id);
         if (error) throw error;
