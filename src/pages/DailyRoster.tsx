@@ -280,19 +280,39 @@ const DailyRoster = () => {
                   return (
                     <tr key={r.id} className={`${rowBg} border-b border-border hover:bg-muted/40 transition-colors`}>
                       <td className="p-1.5 border-r border-border text-center"><input type="checkbox" className="rounded" /></td>
-                      <td className="p-1.5 border-r border-border text-center"><span className="inline-block w-2 h-2 rounded-full bg-muted-foreground/40" /></td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">
-                        <a className="text-primary hover:underline cursor-pointer">{r.ref}</a>
+                      <td className="p-1.5 border-r border-border text-center">
+                        <button
+                          type="button"
+                          onClick={() => { setDetailVisit(r); setDetailOpen(true); }}
+                          className="text-primary hover:underline cursor-pointer font-mono text-[11px]"
+                          title="View visit details"
+                        >
+                          {r.ref}
+                        </button>
                       </td>
-                      <td className="p-1.5 border-r border-border font-mono text-[11px]">{r.date}</td>
+                      <td className="p-1.5 border-r border-border font-mono text-[11px] text-center">{r.date}</td>
                       <td className={`p-1.5 border-r border-border text-[11px] ${statusTone[r.status] ?? ""}`}>{r.status}</td>
-                      <td className="p-1.5 border-r border-border text-center"><Check className="h-3 w-3 text-success mx-auto" /></td>
-                      <td className="p-1.5 border-r border-border text-center"><Users className="h-3 w-3 text-muted-foreground mx-auto" /></td>
-                      <td className="p-1.5 border-r border-border text-center"><User className="h-3 w-3 text-muted-foreground mx-auto" /></td>
+                      <td className="p-1.5 border-r border-border text-center">
+                        {!r.accepted ? (
+                          <XCircle className="h-3.5 w-3.5 text-destructive mx-auto" />
+                        ) : null}
+                      </td>
+                      <td className="p-1.5 border-r border-border text-center"><ThumbsUp className="h-3 w-3 text-muted-foreground mx-auto" /></td>
+                      <td className="p-1.5 border-r border-border text-center"><LinkIcon className="h-3 w-3 text-muted-foreground mx-auto" /></td>
+                      <td className="p-1.5 border-r border-border text-center"><MapIcon className="h-3 w-3 text-muted-foreground mx-auto" /></td>
                       <td className="p-1.5 border-r border-border text-center"><span className={`inline-block w-3 h-3 rounded-full ${dot}`} /></td>
                       <td className="p-1.5 border-r border-border text-center">
                         {i % 5 === 0 && <span className="inline-block w-0 h-0 border-l-[5px] border-r-[5px] border-b-[8px] border-l-transparent border-r-transparent border-b-fuchsia-500 mx-auto" />}
                       </td>
+                      <td className="p-1.5 border-r border-border">
+                        <a className="text-primary hover:underline cursor-pointer text-[11px]">{r.serviceUser}</a>
+                      </td>
+                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{r.scheduledStart}</td>
+                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{r.scheduledEnd}</td>
+                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{r.duration}</td>
+                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{r.isFuture ? "" : r.actualStart}</td>
+                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{r.isFuture ? "" : r.actualEnd}</td>
+                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{r.isFuture ? "" : r.actualDuration}</td>
                       <td className="p-1.5 border-r border-border">
                         <a className="text-primary hover:underline cursor-pointer text-[11px]">{r.serviceUser}</a>
                       </td>
