@@ -24,6 +24,12 @@ import MemberProfile from "./pages/MemberProfile.tsx";
 import Roster from "./pages/Roster.tsx";
 import DailyRoster from "./pages/DailyRoster.tsx";
 import MonthlyRoster from "./pages/MonthlyRoster.tsx";
+import AddRota from "./pages/rota/AddRota.tsx";
+import AdvancedRota from "./pages/rota/AdvancedRota.tsx";
+import LiveRunRoutes from "./pages/rota/LiveRunRoutes.tsx";
+import TheMonitor from "./pages/rota/TheMonitor.tsx";
+import PrintableRota from "./pages/rota/PrintableRota.tsx";
+import BuildRota from "./pages/rota/BuildRota.tsx";
 import HolidaysAbsence from "./pages/HolidaysAbsence.tsx";
 import Messaging from "./pages/Messaging.tsx";
 import Medication from "./pages/Medication.tsx";
@@ -90,6 +96,15 @@ const App = () => (
             <Route path="/roster/daily" element={<ProtectedRoute><DailyRoster /></ProtectedRoute>} />
             <Route path="/roster/monthly" element={<ProtectedRoute><MonthlyRoster /></ProtectedRoute>} />
             <Route path="/daily-roster" element={<ProtectedRoute><DailyRoster /></ProtectedRoute>} />
+            {/* Rota routes (new naming) */}
+            <Route path="/rota" element={<ProtectedRoute><Roster /></ProtectedRoute>} />
+            <Route path="/rota/add" element={<ProtectedRoute><AddRota /></ProtectedRoute>} />
+            <Route path="/rota/daily" element={<ProtectedRoute><DailyRoster /></ProtectedRoute>} />
+            <Route path="/rota/advanced" element={<ProtectedRoute><AdvancedRota /></ProtectedRoute>} />
+            <Route path="/rota/live-run-routes" element={<ProtectedRoute><LiveRunRoutes /></ProtectedRoute>} />
+            <Route path="/rota/monitor" element={<ProtectedRoute><TheMonitor /></ProtectedRoute>} />
+            <Route path="/rota/printable" element={<ProtectedRoute><PrintableRota /></ProtectedRoute>} />
+            <Route path="/rota/build" element={<ProtectedRoute><BuildRota /></ProtectedRoute>} />
             <Route path="/holidays-absence" element={<ProtectedRoute><HolidaysAbsence /></ProtectedRoute>} />
             <Route path="/location-tracking" element={<ProtectedRoute><LocationTracking /></ProtectedRoute>} />
             <Route path="/communication-log" element={<ProtectedRoute><CommunicationLog /></ProtectedRoute>} />

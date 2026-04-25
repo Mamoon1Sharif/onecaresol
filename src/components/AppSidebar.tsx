@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, HeartHandshake, CalendarDays, ChevronDown, LogOut, MapPin, MessageSquare, FileBarChart, Receipt, Activity, Sparkles, BookMarked, Building2, UserCog } from "lucide-react";
+import { LayoutDashboard, Users, HeartHandshake, CalendarDays, ChevronDown, LogOut, MapPin, MessageSquare, FileBarChart, Receipt, Activity, Sparkles, BookMarked, Building2, UserCog, Plus, Circle, Eye, Printer, Wrench } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
@@ -30,12 +30,21 @@ const topItems = [
   { title: "Insights", url: "/insights", icon: Sparkles },
   { title: "Care Givers", url: "/caregivers", icon: Users },
   { title: "Service Members", url: "/carereceivers", icon: HeartHandshake },
-  { title: "Roster", url: "/roster", icon: CalendarDays },
   { title: "Bookings", url: "/bookings", icon: BookMarked },
   { title: "Location Tracking", url: "/location-tracking", icon: MapPin },
   { title: "Communication Log", url: "/communication-log", icon: MessageSquare },
   { title: "Timeline", url: "/timeline", icon: Activity },
   { title: "Reports", url: "/reports", icon: FileBarChart },
+];
+
+const rotaSubItems = [
+  { title: "Add Rota", url: "/rota/add", icon: Plus },
+  { title: "Daily Rota", url: "/rota/daily", icon: Circle },
+  { title: "Advanced Rota", url: "/rota/advanced", icon: Circle },
+  { title: "Live Run Routes", url: "/rota/live-run-routes", icon: Circle },
+  { title: "The Monitor", url: "/rota/monitor", icon: Eye },
+  { title: "Printable Rota", url: "/rota/printable", icon: Printer },
+  { title: "Build Rota", url: "/rota/build", icon: Wrench },
 ];
 
 const invoicingSubItems = [
@@ -62,6 +71,7 @@ export function AppSidebar() {
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
 
   const invoicingOpen = location.pathname.startsWith("/invoicing");
+  const rotaOpen = location.pathname.startsWith("/rota") || location.pathname.startsWith("/roster") || location.pathname.startsWith("/daily-roster");
 
   return (
     <Sidebar collapsible="icon">
@@ -107,6 +117,45 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               ))}
 
+
+              {/* Rota with sub-items */}
+              <Collapsible defaultOpen={rotaOpen} className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton
+                      isActive={rotaOpen}
+                      tooltip="Rota"
+                      className="hover:bg-sidebar-accent"
+                    >
+                      <CalendarDays className="h-4 w-4" />
+                      {!collapsed && (
+                        <>
+                          <span className="flex-1">Rota</span>
+                          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                        </>
+                      )}
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {rotaSubItems.map((sub) => (
+                        <SidebarMenuSubItem key={sub.title}>
+                          <SidebarMenuSubButton asChild isActive={isActive(sub.url)}>
+                            <NavLink
+                              to={sub.url}
+                              className="hover:bg-sidebar-accent"
+                              activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                            >
+                              <sub.icon className="h-3.5 w-3.5" />
+                              <span>{sub.title}</span>
+                            </NavLink>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
 
               {/* Invoicing / Wages with sub-items */}
               <Collapsible defaultOpen={invoicingOpen} className="group/collapsible">
