@@ -151,19 +151,19 @@ const FALLBACK_RECEIVERS = [
 // Booking chip
 // ─────────────────────────────────────────────────────────────────────
 const statusBar: Record<BookingStatus, string> = {
-  COMPLETED: "bg-emerald-500",
-  STARTED: "bg-blue-500",
-  SCHEDULED: "bg-slate-300",
+  COMPLETED: "bg-success",
+  STARTED: "bg-primary",
+  SCHEDULED: "bg-muted-foreground/40",
 };
 const statusText: Record<BookingStatus, string> = {
-  COMPLETED: "text-emerald-700 dark:text-emerald-400",
-  STARTED: "text-blue-700 dark:text-blue-400",
-  SCHEDULED: "text-slate-500 dark:text-slate-400",
+  COMPLETED: "text-success",
+  STARTED: "text-primary",
+  SCHEDULED: "text-muted-foreground",
 };
 const statusBg: Record<BookingStatus, string> = {
-  COMPLETED: "bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-950/60",
-  STARTED: "bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-950/60",
-  SCHEDULED: "bg-muted/30 hover:bg-muted/60",
+  COMPLETED: "bg-success/10 hover:bg-success/15",
+  STARTED: "bg-primary/10 hover:bg-primary/15",
+  SCHEDULED: "bg-muted/40 hover:bg-muted/60",
 };
 
 function BookingCard({ b, onOpen }: { b: BookingChip; onOpen: () => void }) {
@@ -261,7 +261,7 @@ export default function Bookings() {
       <div className="space-y-3">
         {/* Top toolbar */}
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          {/* View toggle (purple) */}
+          {/* View toggle */}
           <div className="inline-flex rounded-md overflow-hidden border bg-card">
             <button
               type="button"
@@ -269,7 +269,6 @@ export default function Bookings() {
               className={`px-4 py-1.5 text-xs font-medium transition-colors ${
                 view === "week" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"
               }`}
-              style={view === "week" ? { background: "hsl(265 70% 45%)" } : undefined}
             >
               Week
             </button>
@@ -279,7 +278,6 @@ export default function Bookings() {
               className={`px-4 py-1.5 text-xs font-medium transition-colors ${
                 view === "today" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"
               }`}
-              style={view === "today" ? { background: "hsl(265 70% 45%)" } : undefined}
             >
               Today
             </button>
@@ -289,20 +287,17 @@ export default function Bookings() {
           <div className="inline-flex items-center gap-1">
             <Button
               size="icon"
-              className="h-8 w-8 rounded-md text-primary-foreground"
-              style={{ background: "hsl(265 70% 45%)" }}
+              className="h-8 w-8 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => setWeekOffset((w) => w - 1)}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <div className="px-4 h-8 flex items-center text-xs font-medium text-primary-foreground rounded-md tabular-nums"
-                 style={{ background: "hsl(265 70% 45%)" }}>
+            <div className="px-4 h-8 flex items-center text-xs font-medium text-primary-foreground rounded-md tabular-nums bg-primary">
               {fmtRange(weekDates[0], weekDates[6])}
             </div>
             <Button
               size="icon"
-              className="h-8 w-8 rounded-md text-primary-foreground"
-              style={{ background: "hsl(265 70% 45%)" }}
+              className="h-8 w-8 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => setWeekOffset((w) => w + 1)}
             >
               <ChevronRight className="h-4 w-4" />
@@ -351,9 +346,8 @@ export default function Bookings() {
                 <Button
                   key={n}
                   size="sm"
-                  className={`h-7 w-7 p-0 text-xs ${active ? "text-primary-foreground" : ""}`}
+                  className="h-7 w-7 p-0 text-xs"
                   variant={active ? "default" : "outline"}
-                  style={active ? { background: "hsl(265 70% 45%)" } : undefined}
                   onClick={() => setPage(n)}
                 >
                   {n}
@@ -391,8 +385,7 @@ export default function Bookings() {
             >
               {/* Header row */}
               <div
-                className="text-xs font-semibold text-primary-foreground p-3 border-r border-primary-foreground/20"
-                style={{ background: "hsl(265 70% 30%)" }}
+                className="text-xs font-semibold text-primary-foreground p-3 border-r border-primary-foreground/20 bg-primary"
               >
                 <div className="mb-2">Customer</div>
                 <div className="relative">
@@ -443,10 +436,9 @@ export default function Bookings() {
                 return (
                   <div
                     key={d.toISOString()}
-                    className={`text-xs font-semibold text-primary-foreground p-3 border-r border-primary-foreground/20 ${
+                    className={`text-xs font-semibold text-primary-foreground p-3 border-r border-primary-foreground/20 bg-primary ${
                       isToday ? "ring-2 ring-inset ring-warning" : ""
                     }`}
-                    style={{ background: "hsl(265 70% 30%)" }}
                   >
                     {h.ord}
                   </div>
@@ -480,13 +472,13 @@ export default function Bookings() {
         {/* Legend */}
         <div className="flex items-center gap-4 text-[11px] text-muted-foreground px-1">
           <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block h-2 w-2 rounded-sm bg-emerald-500" /> Completed
+            <span className="inline-block h-2 w-2 rounded-sm bg-success" /> Completed
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block h-2 w-2 rounded-sm bg-blue-500" /> Started
+            <span className="inline-block h-2 w-2 rounded-sm bg-primary" /> Started
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block h-2 w-2 rounded-sm bg-slate-300" /> Scheduled
+            <span className="inline-block h-2 w-2 rounded-sm bg-muted-foreground/40" /> Scheduled
           </span>
           <span className="inline-flex items-center gap-1.5 ml-auto">
             <Link2 className="h-3 w-3" /> Linked / multi-carer visit
