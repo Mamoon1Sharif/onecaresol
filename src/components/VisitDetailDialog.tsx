@@ -432,7 +432,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                     </thead>
                     <tbody>
                       {shadow.length === 0 ? (
-                        <tr><td colSpan={7} className="p-4 text-center text-muted-foreground text-xs">No data available in table</td></tr>
+                        <tr><td colSpan={6} className="p-4 text-center text-muted-foreground text-xs">No data available in table</td></tr>
                       ) : (
                         shadow.map((s, i) => (
                           <tr key={i} className="border-b border-border">
