@@ -436,10 +436,9 @@ export default function Bookings() {
                 return (
                   <div
                     key={d.toISOString()}
-                    className={`text-xs font-semibold text-primary-foreground p-3 border-r border-primary-foreground/20 ${
+                    className={`text-xs font-semibold text-primary-foreground p-3 border-r border-primary-foreground/20 bg-primary ${
                       isToday ? "ring-2 ring-inset ring-warning" : ""
                     }`}
-                    style={{ background: "hsl(265 70% 30%)" }}
                   >
                     {h.ord}
                   </div>
