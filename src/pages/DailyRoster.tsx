@@ -385,13 +385,14 @@ const DailyRoster = () => {
                         </div>
                       </div>
                     </td>
-                    <td colSpan={23}></td>
+                    <td colSpan={12}></td>
                   </tr>
                 </tfoot>
               )}
             </table>
           </div>
         </Card>
+        </TooltipProvider>
 
         <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
           <span>Showing <strong className="text-foreground">1</strong> to <strong className="text-foreground">{rows.length}</strong> of <strong className="text-foreground">{rows.length}</strong></span>
