@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, HeartHandshake, CalendarDays, ChevronDown, LogOut, MapPin, MessageSquare, FileBarChart, Receipt, Activity, Sparkles, BookMarked, Building2, UserCog, Plus, Circle, Eye, Printer, Wrench } from "lucide-react";
+import { LayoutDashboard, Users, HeartHandshake, CalendarDays, ChevronDown, LogOut, MapPin, MessageSquare, FileBarChart, Receipt, Activity, Sparkles, BookMarked, Building2, UserCog, Plus, Circle, Eye, Printer, Wrench, AlertTriangle } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
@@ -45,6 +45,7 @@ const rotaSubItems = [
   { title: "The Monitor", url: "/rota/monitor", icon: Eye },
   { title: "Printable Rota", url: "/rota/printable", icon: Printer },
   { title: "Build Rota", url: "/rota/build", icon: Wrench },
+  { title: "Conflicts", url: "/rota/conflicts", icon: AlertTriangle },
 ];
 
 const invoicingSubItems = [
