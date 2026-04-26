@@ -23,6 +23,7 @@ import {
   GripVertical,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { EditRotaDialog, type EditRotaShift } from "@/components/EditRotaDialog";
 
 /* -------------------------------------------------------------------------- */
 /*  Data                                                                       */
