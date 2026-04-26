@@ -345,16 +345,22 @@ const AddRota = () => {
                 <Row label="Keysafe" value={selected.keysafe || `C${(hashStr(selected.id + "ks") % 9000 + 1000)}`} />
               </div>
 
-              {(selected.allergies?.length || selected.diagnoses?.length) && (
+              {(selected.allergies || selected.diagnoses) && (
                 <>
                   <Separator className="my-4" />
                   <div className="text-sm font-semibold mb-2 text-foreground">Health</div>
                   <div className="divide-y text-sm">
-                    {selected.allergies && selected.allergies.length > 0 && (
-                      <Row label="Allergies" value={selected.allergies.join(", ")} />
+                    {selected.allergies && (
+                      <Row
+                        label="Allergies"
+                        value={Array.isArray(selected.allergies) ? selected.allergies.join(", ") : String(selected.allergies)}
+                      />
                     )}
-                    {selected.diagnoses && selected.diagnoses.length > 0 && (
-                      <Row label="Diagnoses" value={selected.diagnoses.join(", ")} />
+                    {selected.diagnoses && (
+                      <Row
+                        label="Diagnoses"
+                        value={Array.isArray(selected.diagnoses) ? selected.diagnoses.join(", ") : String(selected.diagnoses)}
+                      />
                     )}
                   </div>
                 </>
