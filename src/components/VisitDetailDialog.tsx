@@ -466,7 +466,8 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                   <SelectTrigger className="h-9 mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Due">Due</SelectItem>
-                    <SelectItem value="Complete">Complete</SelectItem>
+                    <SelectItem value="In Progress">In Progress</SelectItem>
+                    <SelectItem value="Finished">Finished</SelectItem>
                     <SelectItem value="Missed">Missed</SelectItem>
                     <SelectItem value="Cancelled">Cancelled</SelectItem>
                   </SelectContent>
