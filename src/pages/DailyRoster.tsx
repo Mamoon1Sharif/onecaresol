@@ -39,11 +39,14 @@ function getDateShort(offset: number) {
 
 function fmtHour(h?: number, mm = 0) {
   if (h === undefined) return "";
-  return `${String(h).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+  // wrap into 0-23 so durations crossing midnight don't render as 25:00, 29:00, etc.
+  const hr = ((h % 24) + 24) % 24;
+  return `${String(hr).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
 }
 
 function statusLabel(s: string) {
-  if (s === "Confirmed") return "Complete";
+  // Live rota — never show "Complete". Map confirmed visits to In Progress.
+  if (s === "Confirmed") return "In Progress";
   if (s === "Pending") return "Missed";
   return s;
 }
