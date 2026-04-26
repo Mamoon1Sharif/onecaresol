@@ -879,7 +879,7 @@ function EditServiceDatesDialog({ open, onOpenChange, cr, onSave }: { open: bool
           <div className="space-y-1"><Label className="text-xs">Account Status</Label>
             <Select value={v.account_status} onValueChange={(s) => setV({ ...v, account_status: s })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{["Active","Inactive","On Hold","Discharged"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+              <SelectContent>{["Active","On Hold","Discharged"].map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
             </Select>
           </div>
         </div>
