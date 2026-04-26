@@ -441,7 +441,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                             <td className="p-1.5 border-r border-border">{s.status}</td>
                             <td className="p-1.5 border-r border-border">{s.serviceUser}</td>
                             <td className="p-1.5 border-r border-border">{s.teamMember}</td>
-                            <td className="p-1.5 border-r border-border">{s.serviceCall}</td>
+                            
                             <td className="p-1.5">{s.week}</td>
                           </tr>
                         ))
