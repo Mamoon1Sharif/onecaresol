@@ -13,6 +13,7 @@ import CareGiverProfile from "./pages/CareGiverProfile.tsx";
 import AddCareGiver from "./pages/AddCareGiver.tsx";
 import CareGiverSchedule from "./pages/CareGiverSchedule.tsx";
 import CareReceivers from "./pages/CareReceivers.tsx";
+import AddCareReceiver from "./pages/AddCareReceiver.tsx";
 import CareReceiverProfile from "./pages/CareReceiverProfile.tsx";
 import ReceiverMessaging from "./pages/ReceiverMessaging.tsx";
 import ReceiverMedication from "./pages/ReceiverMedication.tsx";
@@ -85,6 +86,7 @@ const App = () => (
             <Route path="/caregivers/:id" element={<ProtectedRoute><CareGiverProfile /></ProtectedRoute>} />
             <Route path="/caregivers/:id/schedule" element={<ProtectedRoute><CareGiverSchedule /></ProtectedRoute>} />
             <Route path="/carereceivers" element={<ProtectedRoute><CareReceivers /></ProtectedRoute>} />
+            <Route path="/carereceivers/new" element={<ProtectedRoute><AddCareReceiver /></ProtectedRoute>} />
             <Route path="/carereceivers/:id" element={<ProtectedRoute><CareReceiverProfile /></ProtectedRoute>} />
             <Route path="/carereceivers/:id/messaging" element={<ProtectedRoute><ReceiverMessaging /></ProtectedRoute>} />
             <Route path="/carereceivers/:id/medication" element={<ProtectedRoute><ReceiverMedication /></ProtectedRoute>} />
