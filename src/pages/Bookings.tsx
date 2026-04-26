@@ -8,9 +8,10 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
+import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
-  ChevronLeft, ChevronRight, Filter, Link2, Search, Plus,
+  ChevronLeft, ChevronRight, Filter, Link2, Search, Plus, CalendarDays,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useCareReceivers, useCareGivers } from "@/hooks/use-care-data";
