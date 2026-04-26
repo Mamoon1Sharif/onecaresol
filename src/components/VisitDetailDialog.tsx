@@ -566,3 +566,118 @@ function ShadowForm({ visit, onCancel, onSave }: { visit: VisitRow; onCancel: ()
     </>
   );
 }
+
+interface TaskItem {
+  id: string;
+  title: string;
+  done: boolean;
+  completedAt?: string;
+}
+
+function ShiftTasks({ shiftEnd, clockOut }: { shiftEnd: string; clockOut: string | null }) {
+  const [tasks, setTasks] = useState<TaskItem[]>([
+    { id: "t1", title: "Personal care — wash & dress", done: true, completedAt: "08:14" },
+    { id: "t2", title: "Administer morning medication", done: true, completedAt: "08:32" },
+    { id: "t3", title: "Prepare breakfast & assist with eating", done: true, completedAt: "09:05" },
+    { id: "t4", title: "Light housekeeping in kitchen", done: false },
+    { id: "t5", title: "Lunchtime medication & meal", done: false },
+    { id: "t6", title: "Record fluid & food intake", done: false },
+  ]);
+  const [draft, setDraft] = useState("");
+
+  const completed = tasks.filter((t) => t.done);
+  const pending = tasks.filter((t) => !t.done);
+  const pct = tasks.length ? Math.round((completed.length / tasks.length) * 100) : 0;
+
+  const toggle = (id: string) =>
+    setTasks((arr) =>
+      arr.map((t) =>
+        t.id === id
+          ? { ...t, done: !t.done, completedAt: !t.done ? new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : undefined }
+          : t,
+      ),
+    );
+
+  const addTask = () => {
+    if (!draft.trim()) return;
+    setTasks((arr) => [...arr, { id: crypto.randomUUID(), title: draft.trim(), done: false }]);
+    setDraft("");
+  };
+
+  return (
+    <>
+      <div className="flex items-center justify-between border-b pb-1 mb-3">
+        <h3 className="text-sm font-semibold text-primary flex items-center gap-1.5">
+          <ListChecks className="h-3.5 w-3.5" /> Care Tasks
+          <span className="text-[11px] font-normal text-muted-foreground ml-1">
+            ({completed.length}/{tasks.length} complete · {pct}%)
+          </span>
+        </h3>
+        <span className="text-[11px] text-muted-foreground">
+          {clockOut ? "Shift ended" : `Pending until ${shiftEnd}`}
+        </span>
+      </div>
+
+      <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-3">
+        <div className="h-full bg-success transition-all" style={{ width: `${pct}%` }} />
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-3">
+        {/* Completed */}
+        <div className="rounded border border-border bg-success/5 p-2">
+          <div className="text-[11px] font-semibold text-success uppercase tracking-wide mb-1.5 flex items-center gap-1">
+            <CheckCircle2 className="h-3 w-3" /> Completed ({completed.length})
+          </div>
+          {completed.length === 0 ? (
+            <p className="text-[11px] text-muted-foreground text-center py-2">None yet.</p>
+          ) : (
+            <ul className="space-y-1">
+              {completed.map((t) => (
+                <li key={t.id} className="flex items-center gap-2 text-xs">
+                  <input type="checkbox" checked readOnly onClick={() => toggle(t.id)} className="rounded text-success" />
+                  <span className="line-through text-muted-foreground flex-1">{t.title}</span>
+                  <span className="font-mono text-[10px] text-success">{t.completedAt}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Pending */}
+        <div className="rounded border border-border bg-amber-50 p-2">
+          <div className="text-[11px] font-semibold text-amber-700 uppercase tracking-wide mb-1.5 flex items-center gap-1">
+            <CircleDot className="h-3 w-3" /> Pending until end of shift ({pending.length})
+          </div>
+          {pending.length === 0 ? (
+            <p className="text-[11px] text-muted-foreground text-center py-2">All tasks done. 🎉</p>
+          ) : (
+            <ul className="space-y-1">
+              {pending.map((t) => (
+                <li key={t.id} className="flex items-center gap-2 text-xs">
+                  <input type="checkbox" onChange={() => toggle(t.id)} className="rounded" />
+                  <span className="flex-1 text-foreground">{t.title}</span>
+                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => setTasks((arr) => arr.filter((x) => x.id !== t.id))}>
+                    <Trash2 className="h-3 w-3 text-destructive" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
+      <div className="flex gap-2 mt-3">
+        <Input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && addTask()}
+          placeholder="Add a new care task..."
+          className="h-8 text-xs"
+        />
+        <Button size="sm" onClick={addTask} className="bg-success hover:bg-success/90 text-success-foreground h-8 text-xs gap-1">
+          <Plus className="h-3.5 w-3.5" /> Add Task
+        </Button>
+      </div>
+    </>
+  );
+}
