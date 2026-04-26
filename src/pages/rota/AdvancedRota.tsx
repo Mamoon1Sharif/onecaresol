@@ -676,6 +676,13 @@ export default function AdvancedRota() {
           </span>
         </div>
       </div>
+
+      <EditRotaDialog
+        open={!!editing}
+        onOpenChange={(o) => !o && setEditing(null)}
+        shift={editing}
+        onSave={handleSaveEdit}
+      />
     </AppLayout>
   );
 }
