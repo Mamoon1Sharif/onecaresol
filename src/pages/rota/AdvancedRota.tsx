@@ -59,99 +59,201 @@ const ROW_HEIGHT = 56; // px
 const PX_PER_HOUR = 64; // 24h * 64 = 1536px
 const HEADER_H = 28;
 
-const initialShifts: Shift[] = [
+// Base shift templates per staff (without status — derived from date)
+interface ShiftTemplate {
+  staff: string;
+  start: number;
+  end: number;
+  client: string;
+  ref: string;
+  service: string;
+  kind?: "oncall" | "visit"; // oncall stays oncall regardless of date
+}
+
+const SHIFT_TEMPLATES: ShiftTemplate[] = [
   // Unassigned
-  { id: "s1", staff: "Unassigned Shifts", start: 7.083, end: 8.917, client: "Maryam Tariq", ref: "145632433", service: "CHC - Morning Call - Missed", status: "missed" },
-  { id: "s2", staff: "Unassigned Shifts", start: 12.5, end: 13.75, client: "Janet Henda", ref: "145978404", service: "WCC - Lunch", status: "scheduled" },
+  { staff: "Unassigned Shifts", start: 7.083, end: 8.917, client: "Maryam Tariq", ref: "145632433", service: "CHC - Morning Call" },
+  { staff: "Unassigned Shifts", start: 12.5, end: 13.75, client: "Janet Henda", ref: "145978404", service: "WCC - Lunch" },
 
   // Ewelina Delport
-  { id: "s3", staff: "Ewelina Delport", start: 6.917, end: 8.917, client: "On Call", ref: "145879338", service: "On Call - Missed", status: "oncall" },
-  { id: "s4", staff: "Ewelina Delport", start: 9, end: 21, client: "On Call", ref: "145978644", service: "On Call - Missed", status: "oncall" },
-  { id: "s5", staff: "Ewelina Delport", start: 7.5, end: 8.25, client: "Raymond Goodall", ref: "145698523", service: "WCC - Morning", status: "complete" },
-  { id: "s6", staff: "Ewelina Delport", start: 7.5, end: 8.25, client: "Peter Booth", ref: "145978721", service: "WCC - Morning", status: "complete" },
-  { id: "s7", staff: "Ewelina Delport", start: 8.5, end: 9.25, client: "Eileen Thorn", ref: "145978856", service: "WCC - Morning", status: "complete" },
-  { id: "s8", staff: "Ewelina Delport", start: 13, end: 13.75, client: "Marion Poulter", ref: "145641212", service: "WCC - Lunch", status: "complete" },
-  { id: "s9", staff: "Ewelina Delport", start: 13.5, end: 14.25, client: "Peter Booth", ref: "145978721", service: "WCC - Lunch", status: "complete" },
+  { staff: "Ewelina Delport", start: 6.917, end: 8.917, client: "On Call", ref: "145879338", service: "On Call", kind: "oncall" },
+  { staff: "Ewelina Delport", start: 9, end: 21, client: "On Call", ref: "145978644", service: "On Call", kind: "oncall" },
+  { staff: "Ewelina Delport", start: 7.5, end: 8.25, client: "Raymond Goodall", ref: "145698523", service: "WCC - Morning" },
+  { staff: "Ewelina Delport", start: 7.5, end: 8.25, client: "Peter Booth", ref: "145978721", service: "WCC - Morning" },
+  { staff: "Ewelina Delport", start: 8.5, end: 9.25, client: "Eileen Thorn", ref: "145978856", service: "WCC - Morning" },
+  { staff: "Ewelina Delport", start: 13, end: 13.75, client: "Marion Poulter", ref: "145641212", service: "WCC - Lunch" },
+  { staff: "Ewelina Delport", start: 13.5, end: 14.25, client: "Peter Booth", ref: "145978721", service: "WCC - Lunch" },
 
   // Jodie Hawtin
-  { id: "s10", staff: "Jodie Hawtin", start: 7.5, end: 8.25, client: "Raymond Goodall", ref: "145978664", service: "WCC - Morning", status: "complete" },
-  { id: "s11", staff: "Jodie Hawtin", start: 8.25, end: 9, client: "Marion Poulter", ref: "145978611", service: "WCC - Morning", status: "complete" },
-  { id: "s12", staff: "Jodie Hawtin", start: 9, end: 9.75, client: "Eileen Thorn", ref: "145978650", service: "WCC - Morning", status: "complete" },
-  { id: "s13", staff: "Jodie Hawtin", start: 11, end: 11.75, client: "Marion Poulter", ref: "145978657", service: "WCC", status: "complete" },
-  { id: "s14", staff: "Jodie Hawtin", start: 12.5, end: 13.25, client: "Raymond Goodall", ref: "145978664", service: "WCC", status: "complete" },
-  { id: "s15", staff: "Jodie Hawtin", start: 16.5, end: 17.25, client: "Marion Poulter", ref: "145978657", service: "WCC", status: "complete" },
-  { id: "s16", staff: "Jodie Hawtin", start: 17.25, end: 18, client: "Colin Evans", ref: "145978701", service: "WCC", status: "complete" },
-  { id: "s17", staff: "Jodie Hawtin", start: 18, end: 18.75, client: "Joan Marcher", ref: "145978731", service: "WCC", status: "complete" },
-  { id: "s18", staff: "Jodie Hawtin", start: 18.75, end: 19.5, client: "Peter Booth", ref: "145978721", service: "WCC", status: "complete" },
-  { id: "s19", staff: "Jodie Hawtin", start: 19.5, end: 20.25, client: "Carol Sawyer", ref: "145978845", service: "WCC", status: "complete" },
+  { staff: "Jodie Hawtin", start: 7.5, end: 8.25, client: "Raymond Goodall", ref: "145978664", service: "WCC - Morning" },
+  { staff: "Jodie Hawtin", start: 8.25, end: 9, client: "Marion Poulter", ref: "145978611", service: "WCC - Morning" },
+  { staff: "Jodie Hawtin", start: 9, end: 9.75, client: "Eileen Thorn", ref: "145978650", service: "WCC - Morning" },
+  { staff: "Jodie Hawtin", start: 11, end: 11.75, client: "Marion Poulter", ref: "145978657", service: "WCC" },
+  { staff: "Jodie Hawtin", start: 12.5, end: 13.25, client: "Raymond Goodall", ref: "145978664", service: "WCC" },
+  { staff: "Jodie Hawtin", start: 16.5, end: 17.25, client: "Marion Poulter", ref: "145978657", service: "WCC" },
+  { staff: "Jodie Hawtin", start: 17.25, end: 18, client: "Colin Evans", ref: "145978701", service: "WCC" },
+  { staff: "Jodie Hawtin", start: 18, end: 18.75, client: "Joan Marcher", ref: "145978731", service: "WCC" },
+  { staff: "Jodie Hawtin", start: 18.75, end: 19.5, client: "Peter Booth", ref: "145978721", service: "WCC" },
+  { staff: "Jodie Hawtin", start: 19.5, end: 20.25, client: "Carol Sawyer", ref: "145978845", service: "WCC" },
 
   // Sukhleen Kaur
-  { id: "s20", staff: "Sukhleen Kaur", start: 7, end: 7.75, client: "Wendy Rawlins", ref: "145978773", service: "WCC - Morning", status: "complete" },
-  { id: "s21", staff: "Sukhleen Kaur", start: 7.75, end: 8.5, client: "Colin Evans", ref: "145978701", service: "WCC", status: "complete" },
-  { id: "s22", staff: "Sukhleen Kaur", start: 8.5, end: 9.25, client: "Carol Sawyer", ref: "145978710", service: "WCC", status: "complete" },
-  { id: "s23", staff: "Sukhleen Kaur", start: 9.5, end: 10.25, client: "James Hamilton", ref: "145978722", service: "WCC", status: "complete" },
-  { id: "s24", staff: "Sukhleen Kaur", start: 10.25, end: 11, client: "Michael Taylor", ref: "145978745", service: "WCC", status: "complete" },
-  { id: "s25", staff: "Sukhleen Kaur", start: 11, end: 11.75, client: "Dulcie Sadham", ref: "145978721", service: "WCC", status: "complete" },
+  { staff: "Sukhleen Kaur", start: 7, end: 7.75, client: "Wendy Rawlins", ref: "145978773", service: "WCC - Morning" },
+  { staff: "Sukhleen Kaur", start: 7.75, end: 8.5, client: "Colin Evans", ref: "145978701", service: "WCC" },
+  { staff: "Sukhleen Kaur", start: 8.5, end: 9.25, client: "Carol Sawyer", ref: "145978710", service: "WCC" },
+  { staff: "Sukhleen Kaur", start: 9.5, end: 10.25, client: "James Hamilton", ref: "145978722", service: "WCC" },
+  { staff: "Sukhleen Kaur", start: 10.25, end: 11, client: "Michael Taylor", ref: "145978745", service: "WCC" },
+  { staff: "Sukhleen Kaur", start: 11, end: 11.75, client: "Dulcie Sadham", ref: "145978721", service: "WCC" },
 
   // Maria Khalil
-  { id: "s26", staff: "Maria Khalil", start: 7.5, end: 8.25, client: "Norman Iles", ref: "145978827", service: "WCC", status: "complete" },
-  { id: "s27", staff: "Maria Khalil", start: 8.25, end: 9, client: "Helen Hawks", ref: "145978876", service: "WCC", status: "complete" },
-  { id: "s28", staff: "Maria Khalil", start: 9.5, end: 10.25, client: "Michael Taylor", ref: "145978701", service: "WCC", status: "complete" },
-  { id: "s29", staff: "Maria Khalil", start: 11, end: 11.75, client: "Anthony Taylor", ref: "145978701", service: "WCC", status: "complete" },
-  { id: "s30", staff: "Maria Khalil", start: 11.75, end: 12.5, client: "Helen Hawks", ref: "145978735", service: "WCC", status: "complete" },
-  { id: "s31", staff: "Maria Khalil", start: 17, end: 17.75, client: "James Hamilton", ref: "145978744", service: "WCC", status: "complete" },
-  { id: "s32", staff: "Maria Khalil", start: 17.75, end: 18.5, client: "Edna Morris", ref: "145978745", service: "WCC", status: "complete" },
-  { id: "s33", staff: "Maria Khalil", start: 18.5, end: 19.25, client: "Michael Taylor", ref: "145978745", service: "WCC", status: "complete" },
-  { id: "s34", staff: "Maria Khalil", start: 19.25, end: 20, client: "Wendy Rawlins", ref: "145978743", service: "WCC", status: "complete" },
-  { id: "s35", staff: "Maria Khalil", start: 20, end: 20.75, client: "Dulcie Sadham", ref: "145978721", service: "WCC", status: "complete" },
+  { staff: "Maria Khalil", start: 7.5, end: 8.25, client: "Norman Iles", ref: "145978827", service: "WCC" },
+  { staff: "Maria Khalil", start: 8.25, end: 9, client: "Helen Hawks", ref: "145978876", service: "WCC" },
+  { staff: "Maria Khalil", start: 9.5, end: 10.25, client: "Michael Taylor", ref: "145978701", service: "WCC" },
+  { staff: "Maria Khalil", start: 11, end: 11.75, client: "Anthony Taylor", ref: "145978701", service: "WCC" },
+  { staff: "Maria Khalil", start: 11.75, end: 12.5, client: "Helen Hawks", ref: "145978735", service: "WCC" },
+  { staff: "Maria Khalil", start: 17, end: 17.75, client: "James Hamilton", ref: "145978744", service: "WCC" },
+  { staff: "Maria Khalil", start: 17.75, end: 18.5, client: "Edna Morris", ref: "145978745", service: "WCC" },
+  { staff: "Maria Khalil", start: 18.5, end: 19.25, client: "Michael Taylor", ref: "145978745", service: "WCC" },
+  { staff: "Maria Khalil", start: 19.25, end: 20, client: "Wendy Rawlins", ref: "145978743", service: "WCC" },
+  { staff: "Maria Khalil", start: 20, end: 20.75, client: "Dulcie Sadham", ref: "145978721", service: "WCC" },
 
   // Alison McBride
-  { id: "s36", staff: "Alison McBride", start: 8, end: 8.75, client: "Christine Jagger", ref: "145978650", service: "WCC", status: "complete" },
-  { id: "s37", staff: "Alison McBride", start: 8.75, end: 9.5, client: "Marion Such", ref: "145978701", service: "WCC", status: "complete" },
-  { id: "s38", staff: "Alison McBride", start: 9.5, end: 10.25, client: "Brenda Prince", ref: "145978745", service: "WCC", status: "complete" },
-  { id: "s39", staff: "Alison McBride", start: 13.5, end: 14.25, client: "Doreen Mason", ref: "145978701", service: "WCC", status: "complete" },
-  { id: "s40", staff: "Alison McBride", start: 14.25, end: 15, client: "Pamela Davis", ref: "145978745", service: "WCC", status: "complete" },
-  { id: "s41", staff: "Alison McBride", start: 15, end: 15.75, client: "Pamela Johnson", ref: "145978743", service: "WCC", status: "complete" },
-  { id: "s42", staff: "Alison McBride", start: 15.75, end: 16.5, client: "Brenda Prince", ref: "145978745", service: "WCC", status: "complete" },
-  { id: "s43", staff: "Alison McBride", start: 16.5, end: 17.25, client: "Christine Jagger", ref: "145978650", service: "WCC", status: "complete" },
-  { id: "s44", staff: "Alison McBride", start: 17.25, end: 18, client: "Roger Pebar", ref: "145978745", service: "WCC", status: "complete" },
+  { staff: "Alison McBride", start: 8, end: 8.75, client: "Christine Jagger", ref: "145978650", service: "WCC" },
+  { staff: "Alison McBride", start: 8.75, end: 9.5, client: "Marion Such", ref: "145978701", service: "WCC" },
+  { staff: "Alison McBride", start: 9.5, end: 10.25, client: "Brenda Prince", ref: "145978745", service: "WCC" },
+  { staff: "Alison McBride", start: 13.5, end: 14.25, client: "Doreen Mason", ref: "145978701", service: "WCC" },
+  { staff: "Alison McBride", start: 14.25, end: 15, client: "Pamela Davis", ref: "145978745", service: "WCC" },
+  { staff: "Alison McBride", start: 15, end: 15.75, client: "Pamela Johnson", ref: "145978743", service: "WCC" },
+  { staff: "Alison McBride", start: 15.75, end: 16.5, client: "Brenda Prince", ref: "145978745", service: "WCC" },
+  { staff: "Alison McBride", start: 16.5, end: 17.25, client: "Christine Jagger", ref: "145978650", service: "WCC" },
+  { staff: "Alison McBride", start: 17.25, end: 18, client: "Roger Pebar", ref: "145978745", service: "WCC" },
 
   // Ellie Milton
-  { id: "s45", staff: "Ellie Milton", start: 7.5, end: 8.25, client: "Stella Orgee", ref: "145978611", service: "WCC", status: "complete" },
-  { id: "s46", staff: "Ellie Milton", start: 8.25, end: 9, client: "Christine Jagger", ref: "145978650", service: "WCC", status: "complete" },
-  { id: "s47", staff: "Ellie Milton", start: 9, end: 9.75, client: "Marion Such", ref: "145978701", service: "WCC", status: "complete" },
-  { id: "s48", staff: "Ellie Milton", start: 10, end: 11, client: "Carol Taylor", ref: "145978735", service: "Private Morning", status: "complete" },
-  { id: "s49", staff: "Ellie Milton", start: 11, end: 11.75, client: "Edna Morris", ref: "145978745", service: "WCC", status: "complete" },
-  { id: "s50", staff: "Ellie Milton", start: 11.75, end: 12.5, client: "Christine Taylor", ref: "145978743", service: "WCC", status: "complete" },
+  { staff: "Ellie Milton", start: 7.5, end: 8.25, client: "Stella Orgee", ref: "145978611", service: "WCC" },
+  { staff: "Ellie Milton", start: 8.25, end: 9, client: "Christine Jagger", ref: "145978650", service: "WCC" },
+  { staff: "Ellie Milton", start: 9, end: 9.75, client: "Marion Such", ref: "145978701", service: "WCC" },
+  { staff: "Ellie Milton", start: 10, end: 11, client: "Carol Taylor", ref: "145978735", service: "Private Morning" },
+  { staff: "Ellie Milton", start: 11, end: 11.75, client: "Edna Morris", ref: "145978745", service: "WCC" },
+  { staff: "Ellie Milton", start: 11.75, end: 12.5, client: "Christine Taylor", ref: "145978743", service: "WCC" },
 
   // Rita Muneeb
-  { id: "s51", staff: "Rita Muneeb", start: 7, end: 7.75, client: "Thomas Iles", ref: "145978621", service: "WCC", status: "complete" },
-  { id: "s52", staff: "Rita Muneeb", start: 7.75, end: 8.5, client: "Edna Morris", ref: "145978690", service: "WCC", status: "complete" },
-  { id: "s53", staff: "Rita Muneeb", start: 8.5, end: 9.25, client: "Janet Henda", ref: "145978745", service: "WCC", status: "complete" },
-  { id: "s54", staff: "Rita Muneeb", start: 9.25, end: 10, client: "Thomas Iles", ref: "145978701", service: "WCC", status: "complete" },
-  { id: "s55", staff: "Rita Muneeb", start: 0, end: 8, client: "Betty Miles", ref: "145973330", service: "Private - Live-in Care (Basic) - Complete", status: "complete" },
-  { id: "s56", staff: "Rita Muneeb", start: 8, end: 12, client: "Betty Miles", ref: "145978650", service: "Private - Live-in Care (Basic) - Complete", status: "complete" },
-  { id: "s57", staff: "Rita Muneeb", start: 12, end: 14, client: "Betty Miles", ref: "145978666", service: "Private - Live-in Care (Basic) - Complete", status: "complete" },
+  { staff: "Rita Muneeb", start: 7, end: 7.75, client: "Thomas Iles", ref: "145978621", service: "WCC" },
+  { staff: "Rita Muneeb", start: 7.75, end: 8.5, client: "Edna Morris", ref: "145978690", service: "WCC" },
+  { staff: "Rita Muneeb", start: 8.5, end: 9.25, client: "Janet Henda", ref: "145978745", service: "WCC" },
+  { staff: "Rita Muneeb", start: 9.25, end: 10, client: "Thomas Iles", ref: "145978701", service: "WCC" },
+  { staff: "Rita Muneeb", start: 0, end: 8, client: "Betty Miles", ref: "145973330", service: "Private - Live-in Care (Basic)" },
+  { staff: "Rita Muneeb", start: 8, end: 12, client: "Betty Miles", ref: "145978650", service: "Private - Live-in Care (Basic)" },
+  { staff: "Rita Muneeb", start: 12, end: 14, client: "Betty Miles", ref: "145978666", service: "Private - Live-in Care (Basic)" },
 
   // Javeria Nisar
-  { id: "s58", staff: "Javeria Nisar", start: 14, end: 16, client: "Betty Miles", ref: "145978670", service: "Private - Live-in Care (Basic) - Complete", status: "complete" },
-  { id: "s59", staff: "Javeria Nisar", start: 16, end: 20, client: "Betty Miles", ref: "145978680", service: "Private - Live-in Care (Basic) - Complete", status: "complete" },
-  { id: "s60", staff: "Javeria Nisar", start: 20, end: 24, client: "Betty Miles", ref: "145978677", service: "Private - Live-in Care (Basic) - In Progress", status: "in-progress" },
+  { staff: "Javeria Nisar", start: 14, end: 16, client: "Betty Miles", ref: "145978670", service: "Private - Live-in Care (Basic)" },
+  { staff: "Javeria Nisar", start: 16, end: 20, client: "Betty Miles", ref: "145978680", service: "Private - Live-in Care (Basic)" },
+  { staff: "Javeria Nisar", start: 20, end: 24, client: "Betty Miles", ref: "145978677", service: "Private - Live-in Care (Basic)" },
 
   // Magdalena Pawelska
-  { id: "s61", staff: "Magdalena Pawelska", start: 20, end: 21, client: "Enid Joyce", ref: "145978691", service: "Private", status: "scheduled" },
-  { id: "s62", staff: "Magdalena Pawelska", start: 21, end: 22.25, client: "Richard Peplow", ref: "145978763", service: "Private", status: "scheduled" },
+  { staff: "Magdalena Pawelska", start: 20, end: 21, client: "Enid Joyce", ref: "145978691", service: "Private" },
+  { staff: "Magdalena Pawelska", start: 21, end: 22.25, client: "Richard Peplow", ref: "145978763", service: "Private" },
 
   // Shaista Rafiq
-  { id: "s63", staff: "Shaista Rafiq", start: 7.5, end: 8.25, client: "Winifred Griffiths", ref: "145978672", service: "Private", status: "scheduled" },
-  { id: "s64", staff: "Shaista Rafiq", start: 8.5, end: 9.25, client: "Dorothy Smith", ref: "145978727", service: "WCC - Morning", status: "scheduled" },
-  { id: "s65", staff: "Shaista Rafiq", start: 9.5, end: 10.5, client: "Pamela McCaddie", ref: "145978735", service: "WCC - Morning", status: "scheduled" },
-  { id: "s66", staff: "Shaista Rafiq", start: 11, end: 12, client: "Carol Sawyer", ref: "145978769", service: "WCC", status: "scheduled" },
-  { id: "s67", staff: "Shaista Rafiq", start: 16.5, end: 17.25, client: "Joan Lewis", ref: "145978721", service: "WCC", status: "scheduled" },
-  { id: "s68", staff: "Shaista Rafiq", start: 17.25, end: 18, client: "Christine Taylor", ref: "145978745", service: "WCC", status: "scheduled" },
-  { id: "s69", staff: "Shaista Rafiq", start: 18, end: 18.75, client: "Thomas Iles", ref: "145978701", service: "WCC", status: "scheduled" },
-  { id: "s70", staff: "Shaista Rafiq", start: 18.75, end: 19.5, client: "Wendy Rawlins", ref: "145978690", service: "WCC", status: "scheduled" },
+  { staff: "Shaista Rafiq", start: 7.5, end: 8.25, client: "Winifred Griffiths", ref: "145978672", service: "Private" },
+  { staff: "Shaista Rafiq", start: 8.5, end: 9.25, client: "Dorothy Smith", ref: "145978727", service: "WCC - Morning" },
+  { staff: "Shaista Rafiq", start: 9.5, end: 10.5, client: "Pamela McCaddie", ref: "145978735", service: "WCC - Morning" },
+  { staff: "Shaista Rafiq", start: 11, end: 12, client: "Carol Sawyer", ref: "145978769", service: "WCC" },
+  { staff: "Shaista Rafiq", start: 16.5, end: 17.25, client: "Joan Lewis", ref: "145978721", service: "WCC" },
+  { staff: "Shaista Rafiq", start: 17.25, end: 18, client: "Christine Taylor", ref: "145978745", service: "WCC" },
+  { staff: "Shaista Rafiq", start: 18, end: 18.75, client: "Thomas Iles", ref: "145978701", service: "WCC" },
+  { staff: "Shaista Rafiq", start: 18.75, end: 19.5, client: "Wendy Rawlins", ref: "145978690", service: "WCC" },
 ];
+
+// Seeded PRNG for stable per-day variation
+function mulberry32(seed: number) {
+  return function () {
+    seed |= 0;
+    seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function dayKey(d: Date) {
+  return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+}
+
+function isSameDay(a: Date, b: Date) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+function buildShiftsForDate(date: Date): Shift[] {
+  const today = new Date();
+  const todayKey = dayKey(today);
+  const dKey = dayKey(date);
+  const isPast = dKey < todayKey;
+  const isToday = dKey === todayKey;
+  const isFuture = dKey > todayKey;
+  const nowHours = today.getHours() + today.getMinutes() / 60;
+
+  const rng = mulberry32(dKey);
+
+  return SHIFT_TEMPLATES
+    // For future days, drop a random subset to make every day look different
+    .filter((t) => {
+      if (t.kind === "oncall") return true;
+      if (isFuture) return rng() > 0.15; // ~85% kept
+      if (isPast) return rng() > 0.05;
+      return true;
+    })
+    .map((t, idx) => {
+      // Slight per-day jitter on start time (-15..+15 min) for realism, except live-in/oncall
+      let start = t.start;
+      let end = t.end;
+      if (t.kind !== "oncall" && end - start <= 2) {
+        const jitter = (Math.round((rng() - 0.5) * 2) * 0.25); // -0.25, 0, 0.25
+        start = Math.max(0, Math.min(23.5, start + jitter));
+        end = Math.max(start + 0.25, end + jitter);
+      }
+
+      let status: ShiftStatus;
+      if (t.kind === "oncall") {
+        status = isFuture ? "scheduled" : isPast ? "complete" : "oncall";
+      } else if (isFuture) {
+        status = "scheduled";
+      } else if (isPast) {
+        // Mostly complete, occasional missed
+        status = rng() < 0.06 ? "missed" : "complete";
+      } else {
+        // Today: based on current time
+        if (end <= nowHours) {
+          status = rng() < 0.05 ? "missed" : "complete";
+        } else if (start <= nowHours && nowHours < end) {
+          status = "in-progress";
+        } else {
+          status = "scheduled";
+        }
+      }
+
+      // Build per-day unique id
+      return {
+        id: `${dKey}-${idx}`,
+        staff: t.staff,
+        start,
+        end,
+        client: t.client,
+        ref: t.ref,
+        service: t.service + statusSuffix(status),
+        status,
+      };
+    });
+}
+
+function statusSuffix(s: ShiftStatus) {
+  switch (s) {
+    case "complete": return " - Complete";
+    case "in-progress": return " - In Progress";
+    case "missed": return " - Missed";
+    case "oncall": return " - On Call";
+    default: return "";
+  }
+}
 
 /* -------------------------------------------------------------------------- */
 /*  Helpers                                                                    */
