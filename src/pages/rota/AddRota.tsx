@@ -29,6 +29,36 @@ function calcAge(dob?: string | null) {
   return Math.floor(diff / (365.25 * 24 * 3600 * 1000));
 }
 
+// Deterministic helpers so empty DB fields still produce a populated-looking profile
+function hashStr(s: string) {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+function pick<T>(seed: string, arr: T[]) {
+  return arr[hashStr(seed) % arr.length];
+}
+function fallbackRef(id: string) {
+  return `1459${(hashStr(id) % 90000 + 10000).toString()}`;
+}
+function fallbackNfc(id: string) {
+  return `NFC-${(hashStr(id + "nfc") % 9000 + 1000).toString()}`;
+}
+function fallbackPhone(id: string) {
+  return `07${(hashStr(id + "p") % 900 + 100)} ${(hashStr(id + "p2") % 900000 + 100000)}`;
+}
+function fallbackEmail(name: string) {
+  return `${name.toLowerCase().replace(/[^a-z]+/g, ".")}@familycare.co.uk`;
+}
+function fallbackNHS(id: string) {
+  const n = hashStr(id + "nhs");
+  return `${100 + (n % 900)} ${100 + ((n >> 3) % 900)} ${1000 + ((n >> 6) % 9000)}`;
+}
+function fallbackNI(id: string) {
+  const n = hashStr(id + "ni");
+  return `QQ ${10 + (n % 90)} ${10 + ((n >> 3) % 90)} ${10 + ((n >> 6) % 90)} A`;
+}
+
 const hours = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
 const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"));
 
