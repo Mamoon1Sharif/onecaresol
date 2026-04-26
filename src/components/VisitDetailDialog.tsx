@@ -483,10 +483,6 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                   <Input value={editEnd || visit.scheduledEnd} onChange={(e) => setEditEnd(e.target.value)} className="h-9 mt-1" />
                 </div>
               </div>
-              <div>
-                <label className="text-xs font-medium">Service Call</label>
-                <Input value={editServiceCall || visit.serviceCall} onChange={(e) => setEditServiceCall(e.target.value)} className="h-9 mt-1" />
-              </div>
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" size="sm" onClick={() => setEditOpen(false)}>Cancel</Button>
