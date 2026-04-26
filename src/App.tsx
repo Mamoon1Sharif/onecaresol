@@ -31,6 +31,7 @@ import LiveRunRoutes from "./pages/rota/LiveRunRoutes.tsx";
 import TheMonitor from "./pages/rota/TheMonitor.tsx";
 import PrintableRota from "./pages/rota/PrintableRota.tsx";
 import BuildRota from "./pages/rota/BuildRota.tsx";
+import Conflicts from "./pages/rota/Conflicts.tsx";
 import HolidaysAbsence from "./pages/HolidaysAbsence.tsx";
 import Messaging from "./pages/Messaging.tsx";
 import Medication from "./pages/Medication.tsx";
@@ -107,6 +108,7 @@ const App = () => (
             <Route path="/rota/monitor" element={<ProtectedRoute><TheMonitor /></ProtectedRoute>} />
             <Route path="/rota/printable" element={<ProtectedRoute><PrintableRota /></ProtectedRoute>} />
             <Route path="/rota/build" element={<ProtectedRoute><BuildRota /></ProtectedRoute>} />
+            <Route path="/rota/conflicts" element={<ProtectedRoute><Conflicts /></ProtectedRoute>} />
             <Route path="/holidays-absence" element={<ProtectedRoute><HolidaysAbsence /></ProtectedRoute>} />
             <Route path="/location-tracking" element={<ProtectedRoute><LocationTracking /></ProtectedRoute>} />
             <Route path="/communication-log" element={<ProtectedRoute><CommunicationLog /></ProtectedRoute>} />
