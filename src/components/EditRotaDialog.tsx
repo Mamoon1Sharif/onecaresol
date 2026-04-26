@@ -39,7 +39,14 @@ import {
   Pill,
   Users,
   Lock,
+  Search,
+  Check,
+  X as XIcon,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 
 export interface EditRotaShift {
   id: string;
