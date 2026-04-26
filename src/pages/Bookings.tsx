@@ -385,8 +385,7 @@ export default function Bookings() {
             >
               {/* Header row */}
               <div
-                className="text-xs font-semibold text-primary-foreground p-3 border-r border-primary-foreground/20"
-                style={{ background: "hsl(265 70% 30%)" }}
+                className="text-xs font-semibold text-primary-foreground p-3 border-r border-primary-foreground/20 bg-primary"
               >
                 <div className="mb-2">Customer</div>
                 <div className="relative">
