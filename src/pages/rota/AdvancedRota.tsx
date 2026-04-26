@@ -287,13 +287,14 @@ function statusStyles(s: ShiftStatus) {
 const HOURS = Array.from({ length: 48 }, (_, i) => i / 2); // every 30 min, 00:00 → 23:30
 
 export default function AdvancedRota() {
-  const [shifts, setShifts] = useState<Shift[]>(initialShifts);
+  const [date, setDate] = useState(() => new Date());
+  // Overrides per day per shift id (stores edited start/end/staff after drag)
+  const [overrides, setOverrides] = useState<Record<string, Partial<Shift>>>({});
   const [bulkSelect, setBulkSelect] = useState(false);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [filterTeam, setFilterTeam] = useState("today");
   const [filterCancelled, setFilterCancelled] = useState("hide");
   const [filterUncovered, setFilterUncovered] = useState("include");
-  const [date, setDate] = useState(new Date(2026, 3, 26));
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [drag, setDrag] = useState<{
     id: string;
