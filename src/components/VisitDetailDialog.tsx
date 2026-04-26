@@ -251,6 +251,50 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
               </p>
             </section>
 
+            {/* ============== SHIFT TIMELINE ============== */}
+            <section>
+              <h3 className="text-sm font-semibold text-primary border-b pb-1 mb-3 flex items-center gap-1.5">
+                <Activity className="h-3.5 w-3.5" /> Shift Timeline
+              </h3>
+              {(() => {
+                const events: { time: string; label: string; icon: any; tone: string; sub?: string }[] = [];
+                events.push({ time: editStart || visit.scheduledStart, label: "Shift scheduled to start", icon: Calendar, tone: "text-blue-600", sub: "Built from rota template" });
+                if (clockIn || visit.actualStart) {
+                  events.push({ time: clockIn || visit.actualStart, label: `${visit.teamMember} clocked in`, icon: LogIn, tone: "text-success", sub: "GPS verified at service-user address" });
+                  events.push({ time: clockIn || visit.actualStart, label: "Shift in progress", icon: PlayCircle, tone: "text-success" });
+                }
+                if (clockOut || visit.actualEnd) {
+                  events.push({ time: clockOut || visit.actualEnd, label: `${visit.teamMember} clocked out`, icon: LogOut, tone: "text-rose-600", sub: `Total worked: ${duration !== "0 minutes" ? duration : visit.actualDuration || "—"}` });
+                }
+                events.push({ time: editEnd || visit.scheduledEnd, label: "Shift scheduled to end", icon: Calendar, tone: "text-blue-600" });
+
+                return (
+                  <ol className="relative border-l-2 border-border ml-3 space-y-4 py-1">
+                    {events.map((e, i) => {
+                      const Ico = e.icon;
+                      return (
+                        <li key={i} className="ml-5">
+                          <span className={`absolute -left-[11px] flex items-center justify-center h-5 w-5 rounded-full bg-card border-2 border-border ${e.tone}`}>
+                            <Ico className="h-2.5 w-2.5" />
+                          </span>
+                          <div className="flex items-baseline gap-2">
+                            <span className="font-mono text-xs font-semibold text-foreground">{e.time || "—"}</span>
+                            <span className="text-xs text-foreground">{e.label}</span>
+                          </div>
+                          {e.sub && <p className="text-[10px] text-muted-foreground mt-0.5">{e.sub}</p>}
+                        </li>
+                      );
+                    })}
+                  </ol>
+                );
+              })()}
+            </section>
+
+            {/* ============== TASKS ============== */}
+            <section>
+              <ShiftTasks shiftEnd={editEnd || visit.scheduledEnd} clockOut={clockOut || visit.actualEnd} />
+            </section>
+
             {/* ============== ASSIGNED TEAM MEMBERS ============== */}
             <section>
               <h3 className="text-sm font-semibold text-foreground border-b pb-1 mb-3">Assigned Team Members</h3>
