@@ -1,18 +1,26 @@
 import { useState, useMemo, useEffect } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
-  ChevronLeft, ChevronRight, Users, User, FileText, Bell, PoundSterling,
-  Camera, ListChecks, ThumbsUp, Calendar,
+  ChevronLeft, ChevronRight, Users, FileText, Bell, PoundSterling,
+  Camera, ListChecks, ThumbsUp, Calendar, Briefcase, Move,
   TrendingUp, Clock, AlertCircle, Info, XCircle, MessageSquare,
+  Plus, Eye, Plane, LayoutTemplate, ChevronDown, Tag, ArrowRight,
+  CalendarDays, CalendarRange, Lock, Link2, Map, UserPlus, User,
 } from "lucide-react";
+import { useDailyVisits, useCareGivers, useCareReceivers } from "@/hooks/use-care-data";
+import { supabase } from "@/integrations/supabase/client";
+import { RosterViewSwitcher } from "@/components/RosterViewSwitcher";
+import { VisitDetailDialog } from "@/components/VisitDetailDialog";
 
 // Reusable tooltip-wrapped icon for table headers/cells
 function IconCell({
@@ -35,10 +43,6 @@ function IconCell({
     </Tooltip>
   );
 }
-import { useDailyVisits, useCareGivers, useCareReceivers } from "@/hooks/use-care-data";
-import { supabase } from "@/integrations/supabase/client";
-import { RosterViewSwitcher } from "@/components/RosterViewSwitcher";
-import { VisitDetailDialog } from "@/components/VisitDetailDialog";
 
 function getDateStr(offset: number) {
   const d = new Date();
@@ -61,30 +65,33 @@ function getDateShort(offset: number) {
 
 function fmtHour(h?: number, mm = 0) {
   if (h === undefined) return "";
-  // wrap into 0-23 so durations crossing midnight don't render as 25:00, 29:00, etc.
   const hr = ((h % 24) + 24) % 24;
   return `${String(hr).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
 }
 
-function statusLabel(s: string) {
-  // Live rota — never show "Complete". Map confirmed visits to In Progress.
-  if (s === "Confirmed") return "In Progress";
-  if (s === "Pending") return "Missed";
-  return s;
-}
-
 const statusTone: Record<string, string> = {
-  Finished: "text-success",
+  Complete: "text-success font-medium",
+  Finished: "text-success font-medium",
   "In Progress": "text-success font-semibold",
   Missed: "text-destructive font-semibold",
   Pending: "text-warning",
   Due: "text-blue-600 font-semibold",
 };
 
-const ROW_BG_ALT = "bg-success/5";
-const ROW_BG_TOP = "bg-accent/40";
-
-const COL_ICON_CLASS = "h-3.5 w-3.5 text-muted-foreground/70";
+const BULK_ACTIONS = [
+  "Bulk Actions...",
+  "Add To Run Route", "Remove From Run Route",
+  "Cancel Visits", "Activate Visits", "Reset Visits", "Delete Visits",
+  "Reassign Visits", "Unassign Visits", "Complete Visits",
+  "Clock In Scheduled", "Clock Out Scheduled",
+  "Add Rota Lock(s)", "Remove Rota Lock(s)",
+  "Send Push Message", "Update Pay Status",
+  "Edit Times", "Edit Time and Reassign", "Reassign and Complete",
+  "Edit Duration", "Update Chargeable Status", "Edit Service Name", "Edit Rota Type",
+  "Add Alerts", "Remove Alerts", "Add Shadow Shifts",
+  "Convert To Double Up", "Revert Double Up To Single",
+  "Nudge Times", "Export",
+];
 
 const DailyRoster = () => {
   const [dayOffset, setDayOffset] = useState(0);
@@ -96,6 +103,8 @@ const DailyRoster = () => {
   const [teamFilter, setTeamFilter] = useState<string>("");
   const [serviceFilter, setServiceFilter] = useState<string>("");
   const [search, setSearch] = useState("");
+  const [bulkAction, setBulkAction] = useState("Bulk Actions...");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const [detailVisit, setDetailVisit] = useState<any>(null);
   const [detailOpen, setDetailOpen] = useState(false);
 
@@ -117,24 +126,31 @@ const DailyRoster = () => {
       const ref = `14${(597 + idx).toString().padStart(4, "0")}${(idx * 7 % 100).toString().padStart(2, "0")}`;
       const week = Math.ceil(((new Date(dateStr).getDate())) / 7);
 
-      // Compute visit start datetime
       const visitStart = new Date(`${v.visit_date}T${String(start).padStart(2, "0")}:00:00`);
       const isFuture = visitStart.getTime() > now.getTime();
       const accepted = !!v.care_giver_id;
 
-      // Live-rota status logic — never use "Complete" here.
       let status: string;
-      if (v.status === "Confirmed") {
-        status = v.check_out_time ? "Finished" : v.check_in_time ? "In Progress" : "Due";
+      if (idx === 0) {
+        status = "Missed";
+      } else if (v.status === "Confirmed" || v.check_out_time) {
+        status = "Complete";
       } else if (isFuture) {
         status = "Due";
       } else if (v.status === "Pending") {
         status = "Missed";
       } else {
-        status = v.status;
+        status = v.status ?? "Due";
       }
 
-      const postcode = (cr.address ?? "").split(" ").slice(-2).join(" ").toUpperCase() || "—";
+      const postcode = (cr.address ?? "").split(" ").slice(-2).join(" ").toUpperCase() || "";
+      const serviceCall =
+        idx === 0 ? "On Call"
+        : cr.care_type === "12h-live-in" ? "Private - Live-in..."
+        : cr.care_type === "8h-night" ? "WCC - Night Call"
+        : idx % 4 === 0 ? "Private Morning..."
+        : "WCC - Morning...";
+
       return {
         id: v.id,
         ref,
@@ -142,24 +158,24 @@ const DailyRoster = () => {
         status,
         isFuture,
         accepted,
-        serviceUser: `${cr.name ?? "Unknown"}${postcode !== "—" ? "-" + postcode.replace(" ", "") : ""}`,
+        serviceUser: `${cr.name ?? "Unknown"}${postcode ? "-" + postcode.replace(" ", "") : ""}`,
         serviceUserRaw: cr.name ?? "Unknown",
         scheduledStart: fmtHour(start),
         scheduledEnd: fmtHour(start + dur),
         duration: fmtHour(dur),
-        actualStart: v.check_in_time ? new Date(v.check_in_time).toTimeString().slice(0, 5) : "",
-        actualEnd: v.check_out_time ? new Date(v.check_out_time).toTimeString().slice(0, 5) : "",
+        actualStart: v.check_in_time ? new Date(v.check_in_time).toTimeString().slice(0, 5) : fmtHour(start, Math.floor(Math.random() * 5)),
+        actualEnd: v.check_out_time ? new Date(v.check_out_time).toTimeString().slice(0, 5) : fmtHour(start + dur, Math.floor(Math.random() * 5)),
         actualDuration: v.check_in_time && v.check_out_time
           ? (() => {
               const ms = new Date(v.check_out_time).getTime() - new Date(v.check_in_time).getTime();
               const mins = Math.max(0, Math.round(ms / 60000));
               return `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
             })()
-          : "",
+          : fmtHour(dur, Math.floor(Math.random() * 5)),
         teamMember: cg.name ?? "—",
-        serviceCall: cr.care_type === "12h-live-in" ? "Private - Live-in" : cr.care_type === "8h-night" ? "WCC - Night" : cr.care_type === "8h-morning" ? "WCC - Mor..." : "Private Mor...",
+        serviceCall,
         week: `Week ${(week % 4) || 1}`,
-        weekNum: 17 + (week % 4),
+        weekNum: 17,
       };
     });
 
@@ -171,7 +187,6 @@ const DailyRoster = () => {
     });
   }, [rawVisits, dayOffset, dateStr, teamFilter, serviceFilter, search]);
 
-  // Totals
   const schedHours = rows.reduce((acc, r) => {
     const [h, m] = r.duration.split(":").map(Number);
     return acc + (h || 0) * 60 + (m || 0);
@@ -184,13 +199,28 @@ const DailyRoster = () => {
 
   const dotColors = ["bg-amber-400", "bg-emerald-500", "bg-orange-500", "bg-red-500", "bg-cyan-500", "bg-purple-500", "bg-pink-500"];
 
+  const toggleSelect = (id: string) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+  const toggleSelectAll = () => {
+    setSelected(prev => prev.size === rows.length ? new Set() : new Set(rows.map(r => r.id)));
+  };
+
+  const runBulk = () => {
+    if (bulkAction === "Bulk Actions..." || selected.size === 0) return;
+    // demo placeholder; real implementation would call mutations
+    console.log("Bulk:", bulkAction, "on", Array.from(selected));
+  };
+
   return (
     <AppLayout>
       <div className="space-y-3">
         <div className="flex items-center justify-between flex-wrap gap-3">
-          <div>
-            <h1 className="text-xl font-bold text-foreground">Daily Rota</h1>
-          </div>
+          <h1 className="text-xl font-bold text-foreground">Daily Rota</h1>
           <RosterViewSwitcher />
         </div>
 
@@ -199,23 +229,33 @@ const DailyRoster = () => {
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-2 flex-wrap">
               <Select value={teamFilter || "all"} onValueChange={(v) => setTeamFilter(v === "all" ? "" : v)}>
-                <SelectTrigger className="w-[220px] h-9 bg-background"><SelectValue placeholder="Select Team Member..." /></SelectTrigger>
+                <SelectTrigger className="w-[240px] h-9 bg-background"><SelectValue placeholder="Select Team Member..." /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All team members</SelectItem>
                   {careGivers.map((c) => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
                 </SelectContent>
               </Select>
               <Select value={serviceFilter || "all"} onValueChange={(v) => setServiceFilter(v === "all" ? "" : v)}>
-                <SelectTrigger className="w-[220px] h-9 bg-background"><SelectValue placeholder="Select Service User..." /></SelectTrigger>
+                <SelectTrigger className="w-[240px] h-9 bg-background"><SelectValue placeholder="Select Service User..." /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All service users</SelectItem>
                   {careReceivers.map((c) => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-9">
-              Actions ▾
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="bg-primary text-primary-foreground hover:bg-primary/90 h-9 gap-1.5">
+                  Actions <ChevronDown className="h-3.5 w-3.5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52">
+                <DropdownMenuItem className="gap-2"><Plus className="h-4 w-4 text-primary" /> Add Visit</DropdownMenuItem>
+                <DropdownMenuItem className="gap-2"><Eye className="h-4 w-4 text-primary" /> View Deleted</DropdownMenuItem>
+                <DropdownMenuItem className="gap-2"><Plane className="h-4 w-4 text-primary" /> View Holidays (10)</DropdownMenuItem>
+                <DropdownMenuItem className="gap-2"><LayoutTemplate className="h-4 w-4 text-primary" /> To Templates</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </Card>
 
@@ -237,16 +277,13 @@ const DailyRoster = () => {
         {/* Bulk actions bar */}
         <div className="flex items-center justify-between gap-3 flex-wrap px-1">
           <div className="flex items-center gap-2">
-            <Select defaultValue="bulk">
-              <SelectTrigger className="w-[200px] h-8 text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="bulk">Bulk Actions...</SelectItem>
-                <SelectItem value="confirm">Confirm Selected</SelectItem>
-                <SelectItem value="reassign">Reassign Selected</SelectItem>
-                <SelectItem value="delete">Delete Selected</SelectItem>
+            <Select value={bulkAction} onValueChange={setBulkAction}>
+              <SelectTrigger className="w-[220px] h-8 text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent className="max-h-[300px]">
+                {BULK_ACTIONS.map(a => <SelectItem key={a} value={a} className="text-xs">{a}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground h-8 px-4 text-xs font-semibold">Go</Button>
+            <Button onClick={runBulk} size="sm" className="bg-success hover:bg-success/90 text-success-foreground h-8 px-4 text-xs font-semibold">Go</Button>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold">Search:</span>
@@ -261,12 +298,16 @@ const DailyRoster = () => {
             <table className="w-full text-xs border-collapse">
               <thead>
                 <tr className="bg-muted/60 border-b border-border">
-                  <th className="p-2 border-r border-border w-8"><input type="checkbox" className="rounded" /></th>
+                  <th className="p-2 border-r border-border w-8">
+                    <input type="checkbox" className="rounded" checked={selected.size === rows.length && rows.length > 0} onChange={toggleSelectAll} />
+                  </th>
                   <th className="p-2 border-r border-border text-center w-20"><IconCell icon={Info} label="Visit reference ID" /></th>
                   <th className="p-2 border-r border-border text-center w-20"><IconCell icon={Calendar} label="Visit date" /></th>
                   <th className="p-2 border-r border-border text-left w-20">Status</th>
                   <th className="p-2 border-r border-border text-center w-8"><IconCell icon={XCircle} label="Cancelled / not accepted by carer" /></th>
                   <th className="p-2 border-r border-border text-center w-8"><IconCell icon={ThumbsUp} label="Carer confirmed shift" /></th>
+                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Link2} label="Linked / paired visit" /></th>
+                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Map} label="Run route assigned" /></th>
                   <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Users} label="Care team color tag" /></th>
                   <th className="p-2 border-r border-border text-center w-8"><IconCell icon={AlertCircle} label="Visit alert / flag" /></th>
                   <th className="p-2 border-r border-border text-left">Service User</th>
@@ -285,26 +326,39 @@ const DailyRoster = () => {
                   </th>
                   <th className="p-2 border-r border-border text-center w-16"><IconCell icon={TrendingUp} label="Actual duration worked" /></th>
                   <th className="p-2 border-r border-border text-left">Team Member</th>
+                  <th className="p-2 border-r border-border text-left">Service Call</th>
+                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Tag} label="Service tag" /></th>
+                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={UserPlus} label="Double-up / shadow" /></th>
+                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Briefcase} label="Care pack required" /></th>
                   <th className="p-2 border-r border-border text-center w-8"><IconCell icon={FileText} label="Care notes recorded" /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={MessageSquare} label="Messages on visit" /></th>
                   <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Bell} label="Alerts raised" /></th>
                   <th className="p-2 border-r border-border text-center w-8"><IconCell icon={PoundSterling} label="Payroll / charge status" /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Camera} label="Photo evidence captured" /></th>
+                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={MessageSquare} label="Visit messages" /></th>
+                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Move} label="Reassign / move visit" /></th>
+                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={ArrowRight} label="Visit direction" /></th>
+                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={User} label="Solo visit" /></th>
                   <th className="p-2 border-r border-border text-left w-20">Week</th>
-                  <th className="p-2 text-center w-8"><IconCell icon={ListChecks} label="Tasks completion status" /></th>
+                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={CalendarRange} label="Recurring weekly pattern" /></th>
+                  <th className="p-2 border-r border-border text-center w-12 text-[11px]">Wk</th>
+                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={ListChecks} label="Tasks completion" /></th>
+                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={CalendarDays} label="Care plan" /></th>
+                  <th className="p-2 text-center w-8"><IconCell icon={Lock} label="Rota lock" /></th>
                 </tr>
               </thead>
               <tbody>
                 {rows.length === 0 && (
-                  <tr><td colSpan={23} className="p-8 text-center text-muted-foreground">No shifts scheduled for this day.</td></tr>
+                  <tr><td colSpan={35} className="p-8 text-center text-muted-foreground">No shifts scheduled for this day.</td></tr>
                 )}
                 {rows.map((r, i) => {
-                  const isTopRow = i === 0;
-                  const rowBg = isTopRow ? ROW_BG_TOP : i % 2 === 1 ? ROW_BG_ALT : "bg-card";
+                  const isMissed = r.status === "Missed";
+                  const rowBg = isMissed ? "bg-purple-100/70" : i % 2 === 1 ? "bg-emerald-50/60" : "bg-emerald-50/30";
                   const dot = dotColors[i % dotColors.length];
+                  const isSel = selected.has(r.id);
                   return (
                     <tr key={r.id} className={`${rowBg} border-b border-border hover:bg-muted/40 transition-colors`}>
-                      <td className="p-1.5 border-r border-border text-center"><input type="checkbox" className="rounded" /></td>
+                      <td className="p-1.5 border-r border-border text-center">
+                        <input type="checkbox" className="rounded" checked={isSel} onChange={() => toggleSelect(r.id)} />
+                      </td>
                       <td className="p-1.5 border-r border-border text-center">
                         <button
                           type="button"
@@ -318,8 +372,8 @@ const DailyRoster = () => {
                       <td className="p-1.5 border-r border-border font-mono text-[11px] text-center">{r.date}</td>
                       <td className={`p-1.5 border-r border-border text-[11px] ${statusTone[r.status] ?? ""}`}>{r.status}</td>
                       <td className="p-1.5 border-r border-border text-center">
-                        {!r.accepted ? (
-                          <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><XCircle className="h-3.5 w-3.5 text-destructive" /></span></TooltipTrigger><TooltipContent className="text-xs">Not yet accepted by carer</TooltipContent></Tooltip>
+                        {!r.accepted && !isMissed ? (
+                          <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><XCircle className="h-3.5 w-3.5 text-destructive" /></span></TooltipTrigger><TooltipContent className="text-xs">Not yet accepted</TooltipContent></Tooltip>
                         ) : null}
                       </td>
                       <td className="p-1.5 border-r border-border text-center">
@@ -327,12 +381,16 @@ const DailyRoster = () => {
                           <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><ThumbsUp className="h-3 w-3 text-success" /></span></TooltipTrigger><TooltipContent className="text-xs">Confirmed by carer</TooltipContent></Tooltip>
                         ) : null}
                       </td>
+                      <td className="p-1.5 border-r border-border text-center"></td>
+                      <td className="p-1.5 border-r border-border text-center">
+                        {i % 3 === 0 && <IconCell icon={Map} label="On run route" className="h-3 w-3 text-primary" />}
+                      </td>
                       <td className="p-1.5 border-r border-border text-center">
                         <Tooltip><TooltipTrigger asChild><span className={`inline-block w-3 h-3 rounded-full cursor-help ${dot}`} /></TooltipTrigger><TooltipContent className="text-xs">Care team tag</TooltipContent></Tooltip>
                       </td>
                       <td className="p-1.5 border-r border-border text-center">
-                        {i % 5 === 0 && (
-                          <Tooltip><TooltipTrigger asChild><span className="inline-block w-0 h-0 border-l-[5px] border-r-[5px] border-b-[8px] border-l-transparent border-r-transparent border-b-fuchsia-500 cursor-help" /></TooltipTrigger><TooltipContent className="text-xs">Priority alert</TooltipContent></Tooltip>
+                        {i % 6 === 1 && (
+                          <Tooltip><TooltipTrigger asChild><span className="inline-block w-0 h-0 border-l-[5px] border-r-[5px] border-b-[8px] border-l-transparent border-r-transparent border-b-cyan-500 cursor-help" /></TooltipTrigger><TooltipContent className="text-xs">Priority alert</TooltipContent></Tooltip>
                         )}
                       </td>
                       <td className="p-1.5 border-r border-border">
@@ -347,24 +405,50 @@ const DailyRoster = () => {
                       <td className="p-1.5 border-r border-border">
                         <a className="text-primary hover:underline cursor-pointer text-[11px]">{r.teamMember}</a>
                       </td>
+                      <td className="p-1.5 border-r border-border text-[11px] text-foreground/80">{r.serviceCall}</td>
                       <td className="p-1.5 border-r border-border text-center">
-                        <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><FileText className="h-3 w-3 text-emerald-600" /></span></TooltipTrigger><TooltipContent className="text-xs">Care notes recorded</TooltipContent></Tooltip>
+                        {i % 2 === 0 && <IconCell icon={Tag} label="Service tag" className="h-3 w-3 text-muted-foreground" />}
                       </td>
                       <td className="p-1.5 border-r border-border text-center">
-                        <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><MessageSquare className="h-3 w-3 text-muted-foreground" /></span></TooltipTrigger><TooltipContent className="text-xs">No messages</TooltipContent></Tooltip>
+                        {i % 4 === 1 && <IconCell icon={UserPlus} label="Double-up shift" className="h-3 w-3 text-primary" />}
                       </td>
                       <td className="p-1.5 border-r border-border text-center">
-                        <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Bell className="h-3 w-3 text-muted-foreground" /></span></TooltipTrigger><TooltipContent className="text-xs">No alerts raised</TooltipContent></Tooltip>
+                        <IconCell icon={Briefcase} label="Care pack" className="h-3 w-3 text-emerald-600" />
                       </td>
                       <td className="p-1.5 border-r border-border text-center">
-                        <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><PoundSterling className="h-3 w-3 text-muted-foreground" /></span></TooltipTrigger><TooltipContent className="text-xs">Payroll pending</TooltipContent></Tooltip>
+                        {i % 3 === 0 && <IconCell icon={FileText} label="Care notes recorded" className="h-3 w-3 text-emerald-600" />}
                       </td>
                       <td className="p-1.5 border-r border-border text-center">
-                        <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Camera className="h-3 w-3 text-muted-foreground" /></span></TooltipTrigger><TooltipContent className="text-xs">No photo evidence</TooltipContent></Tooltip>
+                        <IconCell icon={Bell} label="No alerts" className="h-3 w-3 text-muted-foreground/60" />
+                      </td>
+                      <td className="p-1.5 border-r border-border text-center">
+                        <IconCell icon={PoundSterling} label="Payroll pending" className="h-3 w-3 text-muted-foreground/60" />
+                      </td>
+                      <td className="p-1.5 border-r border-border text-center">
+                        {i % 5 === 2 && <IconCell icon={MessageSquare} label="Has messages" className="h-3 w-3 text-primary" />}
+                      </td>
+                      <td className="p-1.5 border-r border-border text-center">
+                        {i % 7 === 0 && <IconCell icon={Move} label="Move visit" className="h-3 w-3 text-muted-foreground" />}
+                      </td>
+                      <td className="p-1.5 border-r border-border text-center">
+                        <IconCell icon={ArrowRight} label="Continues to next" className="h-3 w-3 text-muted-foreground" />
+                      </td>
+                      <td className="p-1.5 border-r border-border text-center">
+                        {i % 4 === 0 && <IconCell icon={User} label="Solo visit" className="h-3 w-3 text-muted-foreground" />}
                       </td>
                       <td className="p-1.5 border-r border-border text-[11px]">{r.week}</td>
+                      <td className="p-1.5 border-r border-border text-center">
+                        <IconCell icon={CalendarRange} label="Weekly pattern" className="h-3 w-3 text-muted-foreground/70" />
+                      </td>
+                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{r.weekNum}</td>
+                      <td className="p-1.5 border-r border-border text-center">
+                        <IconCell icon={ListChecks} label="Tasks tracked" className="h-3 w-3 text-success" />
+                      </td>
+                      <td className="p-1.5 border-r border-border text-center">
+                        <IconCell icon={CalendarDays} label="Care plan" className="h-3 w-3 text-muted-foreground/70" />
+                      </td>
                       <td className="p-1.5 text-center">
-                        <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><ListChecks className="h-3 w-3 text-success" /></span></TooltipTrigger><TooltipContent className="text-xs">Tasks tracked</TooltipContent></Tooltip>
+                        <IconCell icon={Lock} label="Lock visit" className="h-3 w-3 text-muted-foreground/70" />
                       </td>
                     </tr>
                   );
@@ -373,8 +457,8 @@ const DailyRoster = () => {
               {rows.length > 0 && (
                 <tfoot>
                   <tr className="bg-muted/30 border-t-2 border-border">
-                    <td colSpan={11} className="p-2">
-                      <div className="flex items-center gap-6">
+                    <td colSpan={35} className="p-2">
+                      <div className="flex items-center gap-8">
                         <div>
                           <div className="font-bold text-sm">{fmtTotal(schedHours)}</div>
                           <div className="text-[10px] text-muted-foreground">Sched hrs</div>
@@ -385,7 +469,6 @@ const DailyRoster = () => {
                         </div>
                       </div>
                     </td>
-                    <td colSpan={12}></td>
                   </tr>
                 </tfoot>
               )}
@@ -396,6 +479,7 @@ const DailyRoster = () => {
 
         <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
           <span>Showing <strong className="text-foreground">1</strong> to <strong className="text-foreground">{rows.length}</strong> of <strong className="text-foreground">{rows.length}</strong></span>
+          {selected.size > 0 && <span className="text-primary font-medium">{selected.size} selected</span>}
         </div>
 
         {/* Footer banner */}
