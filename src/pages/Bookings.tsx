@@ -261,7 +261,7 @@ export default function Bookings() {
       <div className="space-y-3">
         {/* Top toolbar */}
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          {/* View toggle (purple) */}
+          {/* View toggle */}
           <div className="inline-flex rounded-md overflow-hidden border bg-card">
             <button
               type="button"
@@ -269,7 +269,6 @@ export default function Bookings() {
               className={`px-4 py-1.5 text-xs font-medium transition-colors ${
                 view === "week" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"
               }`}
-              style={view === "week" ? { background: "hsl(265 70% 45%)" } : undefined}
             >
               Week
             </button>
@@ -279,7 +278,6 @@ export default function Bookings() {
               className={`px-4 py-1.5 text-xs font-medium transition-colors ${
                 view === "today" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"
               }`}
-              style={view === "today" ? { background: "hsl(265 70% 45%)" } : undefined}
             >
               Today
             </button>
@@ -289,20 +287,17 @@ export default function Bookings() {
           <div className="inline-flex items-center gap-1">
             <Button
               size="icon"
-              className="h-8 w-8 rounded-md text-primary-foreground"
-              style={{ background: "hsl(265 70% 45%)" }}
+              className="h-8 w-8 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => setWeekOffset((w) => w - 1)}
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <div className="px-4 h-8 flex items-center text-xs font-medium text-primary-foreground rounded-md tabular-nums"
-                 style={{ background: "hsl(265 70% 45%)" }}>
+            <div className="px-4 h-8 flex items-center text-xs font-medium text-primary-foreground rounded-md tabular-nums bg-primary">
               {fmtRange(weekDates[0], weekDates[6])}
             </div>
             <Button
               size="icon"
-              className="h-8 w-8 rounded-md text-primary-foreground"
-              style={{ background: "hsl(265 70% 45%)" }}
+              className="h-8 w-8 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
               onClick={() => setWeekOffset((w) => w + 1)}
             >
               <ChevronRight className="h-4 w-4" />
