@@ -134,9 +134,6 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
               <p className="text-xs text-muted-foreground">{visit.serviceUserRaw} · {visit.date}</p>
             </div>
           </div>
-          <Button variant="ghost" size="icon" onClick={() => onOpenChange(false)} className="h-8 w-8">
-            <X className="h-4 w-4" />
-          </Button>
         </div>
 
         <ScrollArea className="h-[calc(92vh-56px)]">
