@@ -52,7 +52,8 @@ function statusLabel(s: string) {
 }
 
 const statusTone: Record<string, string> = {
-  Complete: "text-success",
+  Finished: "text-success",
+  "In Progress": "text-success font-semibold",
   Missed: "text-destructive font-semibold",
   Pending: "text-warning",
   Due: "text-blue-600 font-semibold",
