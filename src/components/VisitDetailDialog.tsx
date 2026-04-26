@@ -10,7 +10,8 @@ import { getCareGiverAvatar } from "@/lib/avatars";
 import {
   Pencil, Plus, Lock, Info, Calendar, TrendingUp, Clock, ThumbsUp, Link as LinkIcon,
   Map as MapIcon, Users, AlertCircle, User, ArrowRight, FileText, Briefcase, Bell,
-  PoundSterling, Camera, ListChecks, XCircle, Trash2, X,
+  PoundSterling, Camera, ListChecks, XCircle, Trash2, X, CheckCircle2, Activity,
+  LogIn, LogOut, PlayCircle, CircleDot,
 } from "lucide-react";
 
 interface VisitRow {
@@ -172,34 +173,24 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                     <thead>
                       <tr className="bg-muted/40 border-b border-border">
                         <th className="p-2 border-r border-border w-8"><input type="checkbox" className="rounded" /></th>
-                        <th className="p-2 border-r border-border text-center w-16"><Info className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-20"><Calendar className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-left w-20">Status</th>
-                        <th className="p-2 border-r border-border text-center w-8"><XCircle className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-8"><ThumbsUp className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-8"><LinkIcon className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-8"><MapIcon className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-8"><Users className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-8"><AlertCircle className={COL_ICON} /></th>
+                        <th className="p-2 border-r border-border text-left w-20">Ref</th>
+                        <th className="p-2 border-r border-border text-left w-20">Date</th>
+                        <th className="p-2 border-r border-border text-left w-24">Status</th>
+                        <th className="p-2 border-r border-border text-center w-10" title="Accepted"><ThumbsUp className={COL_ICON} /></th>
+                        <th className="p-2 border-r border-border text-center w-10" title="Linked"><LinkIcon className={COL_ICON} /></th>
+                        <th className="p-2 border-r border-border text-center w-10" title="Location"><MapIcon className={COL_ICON} /></th>
+                        <th className="p-2 border-r border-border text-center w-10" title="Team"><Users className={COL_ICON} /></th>
+                        <th className="p-2 border-r border-border text-center w-10" title="Alerts"><AlertCircle className={COL_ICON} /></th>
                         <th className="p-2 border-r border-border text-left">Service User</th>
-                        <th className="p-2 border-r border-border text-center w-16 bg-emerald-100"><Calendar className="h-3.5 w-3.5 text-emerald-700 mx-auto" /></th>
-                        <th className="p-2 border-r border-border text-center w-16 bg-rose-100"><Calendar className="h-3.5 w-3.5 text-rose-700 mx-auto" /></th>
-                        <th className="p-2 border-r border-border text-center w-16"><TrendingUp className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-16 bg-emerald-100"><Clock className="h-3.5 w-3.5 text-emerald-700 mx-auto" /></th>
-                        <th className="p-2 border-r border-border text-center w-16 bg-rose-100"><Clock className="h-3.5 w-3.5 text-rose-700 mx-auto" /></th>
-                        <th className="p-2 border-r border-border text-center w-16"><TrendingUp className={COL_ICON} /></th>
+                        <th className="p-2 border-r border-border text-center w-16 bg-emerald-100" title="Scheduled Start"><Calendar className="h-3.5 w-3.5 text-emerald-700 mx-auto" /></th>
+                        <th className="p-2 border-r border-border text-center w-16 bg-rose-100" title="Scheduled End"><Calendar className="h-3.5 w-3.5 text-rose-700 mx-auto" /></th>
+                        <th className="p-2 border-r border-border text-center w-16" title="Duration"><TrendingUp className={COL_ICON} /></th>
+                        <th className="p-2 border-r border-border text-center w-16 bg-emerald-100" title="Clocked In"><Clock className="h-3.5 w-3.5 text-emerald-700 mx-auto" /></th>
+                        <th className="p-2 border-r border-border text-center w-16 bg-rose-100" title="Clocked Out"><Clock className="h-3.5 w-3.5 text-rose-700 mx-auto" /></th>
+                        <th className="p-2 border-r border-border text-center w-16" title="Worked"><TrendingUp className={COL_ICON} /></th>
                         <th className="p-2 border-r border-border text-left">Team Member</th>
-                        <th className="p-2 border-r border-border text-left">Service Call</th>
-                        <th className="p-2 border-r border-border text-center w-8"><User className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-8"><ArrowRight className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-8"><FileText className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-8"><Briefcase className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-8"><Bell className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-8"><PoundSterling className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-8"><Camera className={COL_ICON} /></th>
                         <th className="p-2 border-r border-border text-left w-20">Week</th>
-                        <th className="p-2 border-r border-border text-center w-12">17</th>
-                        <th className="p-2 text-center w-8"><ListChecks className={COL_ICON} /></th>
+                        <th className="p-2 text-center w-10"><Lock className={COL_ICON} /></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -209,49 +200,46 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                           <a className="text-primary hover:underline cursor-pointer font-mono text-[11px]">{visit.ref}</a>
                         </td>
                         <td className="p-1.5 border-r border-border font-mono text-[11px] text-center">{visit.date}</td>
-                        <td className="p-1.5 border-r border-border text-[11px] font-semibold text-destructive">{editStatus || visit.status}</td>
-                        <td className="p-1.5 border-r border-border text-center">{!visit.accepted && <XCircle className="h-3.5 w-3.5 text-destructive mx-auto" />}</td>
-                        <td className="p-1.5 border-r border-border text-center"><ThumbsUp className="h-3 w-3 text-muted-foreground mx-auto" /></td>
-                        <td className="p-1.5 border-r border-border text-center"><LinkIcon className="h-3 w-3 text-muted-foreground mx-auto" /></td>
-                        <td className="p-1.5 border-r border-border text-center"><User className="h-3 w-3 text-muted-foreground mx-auto" /></td>
-                        <td className="p-1.5 border-r border-border text-center"><span className="inline-block w-3 h-3 rounded-full bg-amber-400" /></td>
-                        <td className="p-1.5 border-r border-border" />
+                        <td className="p-1.5 border-r border-border text-[11px] font-semibold">
+                          {(() => {
+                            const s = editStatus || visit.status;
+                            // Live rota: never show "Complete".
+                            const live = s === "Complete" ? "In Progress" : s;
+                            const tone = live === "Missed" ? "text-destructive" : live === "In Progress" || live === "Finished" ? "text-success" : "text-blue-600";
+                            return <span className={tone}>{live}</span>;
+                          })()}
+                        </td>
+                        <td className="p-1.5 border-r border-border text-center">{visit.accepted ? <CheckCircle2 className="h-3.5 w-3.5 text-success mx-auto" /> : <span className="text-muted-foreground/40 text-[11px]">—</span>}</td>
+                        <td className="p-1.5 border-r border-border text-center text-muted-foreground/40 text-[11px]">—</td>
+                        <td className="p-1.5 border-r border-border text-center text-muted-foreground/40 text-[11px]">—</td>
+                        <td className="p-1.5 border-r border-border text-center"><span className="inline-block w-2.5 h-2.5 rounded-full bg-amber-400" /></td>
+                        <td className="p-1.5 border-r border-border text-center text-muted-foreground/40 text-[11px]">—</td>
                         <td className="p-1.5 border-r border-border">
                           <a className="text-primary hover:underline cursor-pointer text-[11px]">{visit.serviceUser}</a>
                         </td>
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{editStart || visit.scheduledStart}</td>
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{editEnd || visit.scheduledEnd}</td>
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{visit.duration}</td>
-                        <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{visit.isFuture ? "" : visit.actualStart}</td>
-                        <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{visit.isFuture ? "" : visit.actualEnd}</td>
-                        <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{visit.isFuture ? "" : visit.actualDuration}</td>
+                        <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{visit.isFuture ? "—" : (clockIn || visit.actualStart || "—")}</td>
+                        <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{visit.isFuture ? "—" : (clockOut || visit.actualEnd || "—")}</td>
+                        <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{visit.isFuture ? "—" : (visit.actualDuration || "—")}</td>
                         <td className="p-1.5 border-r border-border">
                           <a className="text-primary hover:underline cursor-pointer text-[11px]">{visit.teamMember}</a>
                         </td>
-                        <td className="p-1.5 border-r border-border text-[11px]">{editServiceCall || visit.serviceCall}</td>
-                        <td className="p-1.5 border-r border-border" />
-                        <td className="p-1.5 border-r border-border" />
-                        <td className="p-1.5 border-r border-border" />
-                        <td className="p-1.5 border-r border-border" />
-                        <td className="p-1.5 border-r border-border text-center"><Bell className="h-3 w-3 text-amber-500 mx-auto" /></td>
-                        <td className="p-1.5 border-r border-border" />
-                        <td className="p-1.5 border-r border-border" />
                         <td className="p-1.5 border-r border-border text-[11px]">{visit.week ?? "Week 1"}</td>
-                        <td className="p-1.5 border-r border-border text-center text-[11px]">{visit.weekNum ?? 17}</td>
                         <td className="p-1.5 text-center"><Lock className="h-3 w-3 text-muted-foreground mx-auto" /></td>
                       </tr>
                       <tr className="border-b border-border bg-card">
-                        <td className="p-1.5 border-r border-border" />
-                        <td className="p-1.5 border-r border-border" />
-                        <td className="p-1.5 border-r border-border text-[11px] font-mono">
+                        <td className="p-1.5 border-r border-border" colSpan={11} />
+                        <td className="p-1.5 border-r border-border text-[11px] font-mono" colSpan={3}>
                           <div>{visit.duration}</div>
                           <div className="text-[10px] text-muted-foreground">Sched hrs</div>
                         </td>
-                        <td className="p-1.5 border-r border-border text-[11px] font-mono">
+                        <td className="p-1.5 border-r border-border text-[11px] font-mono" colSpan={3}>
                           <div>{visit.actualDuration || "00:00"}</div>
                           <div className="text-[10px] text-muted-foreground">Clock hrs</div>
                         </td>
-                        <td className="p-1.5 border-r border-border" colSpan={26} />
+                        <td className="p-1.5 border-r border-border" colSpan={3} />
                       </tr>
                     </tbody>
                   </table>
@@ -261,6 +249,50 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
               <p className="text-xs text-center text-primary mt-2">
                 Built from template: <a className="font-semibold hover:underline cursor-pointer">{built}</a>
               </p>
+            </section>
+
+            {/* ============== SHIFT TIMELINE ============== */}
+            <section>
+              <h3 className="text-sm font-semibold text-primary border-b pb-1 mb-3 flex items-center gap-1.5">
+                <Activity className="h-3.5 w-3.5" /> Shift Timeline
+              </h3>
+              {(() => {
+                const events: { time: string; label: string; icon: any; tone: string; sub?: string }[] = [];
+                events.push({ time: editStart || visit.scheduledStart, label: "Shift scheduled to start", icon: Calendar, tone: "text-blue-600", sub: "Built from rota template" });
+                if (clockIn || visit.actualStart) {
+                  events.push({ time: clockIn || visit.actualStart, label: `${visit.teamMember} clocked in`, icon: LogIn, tone: "text-success", sub: "GPS verified at service-user address" });
+                  events.push({ time: clockIn || visit.actualStart, label: "Shift in progress", icon: PlayCircle, tone: "text-success" });
+                }
+                if (clockOut || visit.actualEnd) {
+                  events.push({ time: clockOut || visit.actualEnd, label: `${visit.teamMember} clocked out`, icon: LogOut, tone: "text-rose-600", sub: `Total worked: ${duration !== "0 minutes" ? duration : visit.actualDuration || "—"}` });
+                }
+                events.push({ time: editEnd || visit.scheduledEnd, label: "Shift scheduled to end", icon: Calendar, tone: "text-blue-600" });
+
+                return (
+                  <ol className="relative border-l-2 border-border ml-3 space-y-4 py-1">
+                    {events.map((e, i) => {
+                      const Ico = e.icon;
+                      return (
+                        <li key={i} className="ml-5">
+                          <span className={`absolute -left-[11px] flex items-center justify-center h-5 w-5 rounded-full bg-card border-2 border-border ${e.tone}`}>
+                            <Ico className="h-2.5 w-2.5" />
+                          </span>
+                          <div className="flex items-baseline gap-2">
+                            <span className="font-mono text-xs font-semibold text-foreground">{e.time || "—"}</span>
+                            <span className="text-xs text-foreground">{e.label}</span>
+                          </div>
+                          {e.sub && <p className="text-[10px] text-muted-foreground mt-0.5">{e.sub}</p>}
+                        </li>
+                      );
+                    })}
+                  </ol>
+                );
+              })()}
+            </section>
+
+            {/* ============== TASKS ============== */}
+            <section>
+              <ShiftTasks shiftEnd={editEnd || visit.scheduledEnd} clockOut={clockOut || visit.actualEnd} />
             </section>
 
             {/* ============== ASSIGNED TEAM MEMBERS ============== */}
@@ -394,13 +426,13 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                         <th className="p-2 border-r border-border text-left w-20">Status</th>
                         <th className="p-2 border-r border-border text-left">Service User</th>
                         <th className="p-2 border-r border-border text-left">Team Member</th>
-                        <th className="p-2 border-r border-border text-left">Service Call</th>
+                        
                         <th className="p-2 text-left w-20">Week</th>
                       </tr>
                     </thead>
                     <tbody>
                       {shadow.length === 0 ? (
-                        <tr><td colSpan={7} className="p-4 text-center text-muted-foreground text-xs">No data available in table</td></tr>
+                        <tr><td colSpan={6} className="p-4 text-center text-muted-foreground text-xs">No data available in table</td></tr>
                       ) : (
                         shadow.map((s, i) => (
                           <tr key={i} className="border-b border-border">
@@ -409,7 +441,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                             <td className="p-1.5 border-r border-border">{s.status}</td>
                             <td className="p-1.5 border-r border-border">{s.serviceUser}</td>
                             <td className="p-1.5 border-r border-border">{s.teamMember}</td>
-                            <td className="p-1.5 border-r border-border">{s.serviceCall}</td>
+                            
                             <td className="p-1.5">{s.week}</td>
                           </tr>
                         ))
@@ -434,7 +466,8 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                   <SelectTrigger className="h-9 mt-1"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Due">Due</SelectItem>
-                    <SelectItem value="Complete">Complete</SelectItem>
+                    <SelectItem value="In Progress">In Progress</SelectItem>
+                    <SelectItem value="Finished">Finished</SelectItem>
                     <SelectItem value="Missed">Missed</SelectItem>
                     <SelectItem value="Cancelled">Cancelled</SelectItem>
                   </SelectContent>
@@ -449,10 +482,6 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                   <label className="text-xs font-medium">Scheduled End</label>
                   <Input value={editEnd || visit.scheduledEnd} onChange={(e) => setEditEnd(e.target.value)} className="h-9 mt-1" />
                 </div>
-              </div>
-              <div>
-                <label className="text-xs font-medium">Service Call</label>
-                <Input value={editServiceCall || visit.serviceCall} onChange={(e) => setEditServiceCall(e.target.value)} className="h-9 mt-1" />
               </div>
             </div>
             <div className="flex justify-end gap-2 mt-4">
@@ -532,6 +561,121 @@ function ShadowForm({ visit, onCancel, onSave }: { visit: VisitRow; onCancel: ()
           })}
         >
           Add
+        </Button>
+      </div>
+    </>
+  );
+}
+
+interface TaskItem {
+  id: string;
+  title: string;
+  done: boolean;
+  completedAt?: string;
+}
+
+function ShiftTasks({ shiftEnd, clockOut }: { shiftEnd: string; clockOut: string | null }) {
+  const [tasks, setTasks] = useState<TaskItem[]>([
+    { id: "t1", title: "Personal care — wash & dress", done: true, completedAt: "08:14" },
+    { id: "t2", title: "Administer morning medication", done: true, completedAt: "08:32" },
+    { id: "t3", title: "Prepare breakfast & assist with eating", done: true, completedAt: "09:05" },
+    { id: "t4", title: "Light housekeeping in kitchen", done: false },
+    { id: "t5", title: "Lunchtime medication & meal", done: false },
+    { id: "t6", title: "Record fluid & food intake", done: false },
+  ]);
+  const [draft, setDraft] = useState("");
+
+  const completed = tasks.filter((t) => t.done);
+  const pending = tasks.filter((t) => !t.done);
+  const pct = tasks.length ? Math.round((completed.length / tasks.length) * 100) : 0;
+
+  const toggle = (id: string) =>
+    setTasks((arr) =>
+      arr.map((t) =>
+        t.id === id
+          ? { ...t, done: !t.done, completedAt: !t.done ? new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : undefined }
+          : t,
+      ),
+    );
+
+  const addTask = () => {
+    if (!draft.trim()) return;
+    setTasks((arr) => [...arr, { id: crypto.randomUUID(), title: draft.trim(), done: false }]);
+    setDraft("");
+  };
+
+  return (
+    <>
+      <div className="flex items-center justify-between border-b pb-1 mb-3">
+        <h3 className="text-sm font-semibold text-primary flex items-center gap-1.5">
+          <ListChecks className="h-3.5 w-3.5" /> Care Tasks
+          <span className="text-[11px] font-normal text-muted-foreground ml-1">
+            ({completed.length}/{tasks.length} complete · {pct}%)
+          </span>
+        </h3>
+        <span className="text-[11px] text-muted-foreground">
+          {clockOut ? "Shift ended" : `Pending until ${shiftEnd}`}
+        </span>
+      </div>
+
+      <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-3">
+        <div className="h-full bg-success transition-all" style={{ width: `${pct}%` }} />
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-3">
+        {/* Completed */}
+        <div className="rounded border border-border bg-success/5 p-2">
+          <div className="text-[11px] font-semibold text-success uppercase tracking-wide mb-1.5 flex items-center gap-1">
+            <CheckCircle2 className="h-3 w-3" /> Completed ({completed.length})
+          </div>
+          {completed.length === 0 ? (
+            <p className="text-[11px] text-muted-foreground text-center py-2">None yet.</p>
+          ) : (
+            <ul className="space-y-1">
+              {completed.map((t) => (
+                <li key={t.id} className="flex items-center gap-2 text-xs">
+                  <input type="checkbox" checked readOnly onClick={() => toggle(t.id)} className="rounded text-success" />
+                  <span className="line-through text-muted-foreground flex-1">{t.title}</span>
+                  <span className="font-mono text-[10px] text-success">{t.completedAt}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Pending */}
+        <div className="rounded border border-border bg-amber-50 p-2">
+          <div className="text-[11px] font-semibold text-amber-700 uppercase tracking-wide mb-1.5 flex items-center gap-1">
+            <CircleDot className="h-3 w-3" /> Pending until end of shift ({pending.length})
+          </div>
+          {pending.length === 0 ? (
+            <p className="text-[11px] text-muted-foreground text-center py-2">All tasks done. 🎉</p>
+          ) : (
+            <ul className="space-y-1">
+              {pending.map((t) => (
+                <li key={t.id} className="flex items-center gap-2 text-xs">
+                  <input type="checkbox" onChange={() => toggle(t.id)} className="rounded" />
+                  <span className="flex-1 text-foreground">{t.title}</span>
+                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => setTasks((arr) => arr.filter((x) => x.id !== t.id))}>
+                    <Trash2 className="h-3 w-3 text-destructive" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
+      <div className="flex gap-2 mt-3">
+        <Input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && addTask()}
+          placeholder="Add a new care task..."
+          className="h-8 text-xs"
+        />
+        <Button size="sm" onClick={addTask} className="bg-success hover:bg-success/90 text-success-foreground h-8 text-xs gap-1">
+          <Plus className="h-3.5 w-3.5" /> Add Task
         </Button>
       </div>
     </>

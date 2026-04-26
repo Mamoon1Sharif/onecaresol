@@ -39,17 +39,21 @@ function getDateShort(offset: number) {
 
 function fmtHour(h?: number, mm = 0) {
   if (h === undefined) return "";
-  return `${String(h).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+  // wrap into 0-23 so durations crossing midnight don't render as 25:00, 29:00, etc.
+  const hr = ((h % 24) + 24) % 24;
+  return `${String(hr).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
 }
 
 function statusLabel(s: string) {
-  if (s === "Confirmed") return "Complete";
+  // Live rota — never show "Complete". Map confirmed visits to In Progress.
+  if (s === "Confirmed") return "In Progress";
   if (s === "Pending") return "Missed";
   return s;
 }
 
 const statusTone: Record<string, string> = {
-  Complete: "text-success",
+  Finished: "text-success",
+  "In Progress": "text-success font-semibold",
   Missed: "text-destructive font-semibold",
   Pending: "text-warning",
   Due: "text-blue-600 font-semibold",
@@ -96,10 +100,10 @@ const DailyRoster = () => {
       const isFuture = visitStart.getTime() > now.getTime();
       const accepted = !!v.care_giver_id;
 
-      // Status logic
+      // Live-rota status logic — never use "Complete" here.
       let status: string;
       if (v.status === "Confirmed") {
-        status = "Complete";
+        status = v.check_out_time ? "Finished" : v.check_in_time ? "In Progress" : "Due";
       } else if (isFuture) {
         status = "Due";
       } else if (v.status === "Pending") {
