@@ -406,7 +406,7 @@ export default function Bookings() {
             >
               {/* Header row */}
               <div
-                className="text-xs font-semibold text-primary-foreground p-3 border-r border-primary-foreground/20 bg-primary"
+                className="text-xs font-semibold text-foreground p-3 border-r border-b border-border bg-muted/60"
               >
                 <div className="mb-2">Customer</div>
                 <div className="relative">
@@ -415,7 +415,7 @@ export default function Bookings() {
                     value={search}
                     onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                     placeholder=""
-                    className="h-7 pl-7 pr-7 text-[11px] bg-card text-foreground"
+                    className="h-7 pl-7 pr-7 text-[11px] bg-background text-foreground"
                   />
                   <Popover>
                     <PopoverTrigger asChild>
@@ -457,11 +457,12 @@ export default function Bookings() {
                 return (
                   <div
                     key={d.toISOString()}
-                    className={`text-xs font-semibold text-primary-foreground p-3 border-r border-primary-foreground/20 bg-primary ${
-                      isToday ? "ring-2 ring-inset ring-warning" : ""
+                    className={`text-xs font-semibold p-3 border-r border-b border-border bg-muted/60 ${
+                      isToday ? "text-primary bg-accent" : "text-foreground"
                     }`}
                   >
                     {h.ord}
+                    {isToday && <span className="ml-1 text-[10px] font-medium text-primary">• Today</span>}
                   </div>
                 );
               })}
