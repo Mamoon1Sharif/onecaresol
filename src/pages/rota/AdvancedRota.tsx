@@ -287,6 +287,16 @@ function statusStyles(s: ShiftStatus) {
 
 const HOURS = Array.from({ length: 48 }, (_, i) => i / 2); // every 30 min, 00:00 → 23:30
 
+function statusLabel(s: ShiftStatus): string {
+  switch (s) {
+    case "complete": return "Complete";
+    case "in-progress": return "In Progress";
+    case "scheduled": return "Scheduled";
+    case "missed": return "Missed";
+    case "oncall": return "On Call";
+  }
+}
+
 export default function AdvancedRota() {
   const [date, setDate] = useState(() => new Date());
   // Overrides per day per shift id (stores edited start/end/staff after drag)
