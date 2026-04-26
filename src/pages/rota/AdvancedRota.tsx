@@ -319,6 +319,15 @@ export default function AdvancedRota() {
 
   const totalGridWidth = 24 * PX_PER_HOUR;
 
+  // Build shifts for the current day, then apply any user overrides
+  const shifts = useMemo<Shift[]>(() => {
+    const base = buildShiftsForDate(date);
+    return base.map((s) => {
+      const ov = overrides[s.id];
+      return ov ? { ...s, ...ov } : s;
+    });
+  }, [date, overrides]);
+
   /* ---------------------------- Drag & Drop -------------------------------- */
 
   function onPointerDownShift(e: React.PointerEvent, s: Shift) {
