@@ -151,19 +151,19 @@ const FALLBACK_RECEIVERS = [
 // Booking chip
 // ─────────────────────────────────────────────────────────────────────
 const statusBar: Record<BookingStatus, string> = {
-  COMPLETED: "bg-emerald-500",
-  STARTED: "bg-blue-500",
-  SCHEDULED: "bg-slate-300",
+  COMPLETED: "bg-success",
+  STARTED: "bg-primary",
+  SCHEDULED: "bg-muted-foreground/40",
 };
 const statusText: Record<BookingStatus, string> = {
-  COMPLETED: "text-emerald-700 dark:text-emerald-400",
-  STARTED: "text-blue-700 dark:text-blue-400",
-  SCHEDULED: "text-slate-500 dark:text-slate-400",
+  COMPLETED: "text-success",
+  STARTED: "text-primary",
+  SCHEDULED: "text-muted-foreground",
 };
 const statusBg: Record<BookingStatus, string> = {
-  COMPLETED: "bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-950/40 dark:hover:bg-emerald-950/60",
-  STARTED: "bg-blue-50 hover:bg-blue-100 dark:bg-blue-950/40 dark:hover:bg-blue-950/60",
-  SCHEDULED: "bg-muted/30 hover:bg-muted/60",
+  COMPLETED: "bg-success/10 hover:bg-success/15",
+  STARTED: "bg-primary/10 hover:bg-primary/15",
+  SCHEDULED: "bg-muted/40 hover:bg-muted/60",
 };
 
 function BookingCard({ b, onOpen }: { b: BookingChip; onOpen: () => void }) {
