@@ -472,13 +472,13 @@ export default function Bookings() {
         {/* Legend */}
         <div className="flex items-center gap-4 text-[11px] text-muted-foreground px-1">
           <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block h-2 w-2 rounded-sm bg-emerald-500" /> Completed
+            <span className="inline-block h-2 w-2 rounded-sm bg-success" /> Completed
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block h-2 w-2 rounded-sm bg-blue-500" /> Started
+            <span className="inline-block h-2 w-2 rounded-sm bg-primary" /> Started
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="inline-block h-2 w-2 rounded-sm bg-slate-300" /> Scheduled
+            <span className="inline-block h-2 w-2 rounded-sm bg-muted-foreground/40" /> Scheduled
           </span>
           <span className="inline-flex items-center gap-1.5 ml-auto">
             <Link2 className="h-3 w-3" /> Linked / multi-carer visit
