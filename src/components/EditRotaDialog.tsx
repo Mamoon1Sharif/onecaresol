@@ -461,11 +461,7 @@ export function EditRotaDialog({ open, onOpenChange, shift, onSave }: Props) {
               )}
 
               {active === "medication" && (
-                <PlaceholderPanel
-                  title="Medication"
-                  description="Manage medication for this visit. Linked from the service user's MAR chart."
-                  cta="Open MAR"
-                />
+                <MedicationPanel shift={shift} />
               )}
 
               {active === "shadows" && (
