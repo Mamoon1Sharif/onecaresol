@@ -377,13 +377,14 @@ export default function AdvancedRota() {
 
   function onPointerUpGrid() {
     if (drag && hoverGhost) {
-      setShifts((prev) =>
-        prev.map((s) =>
-          s.id === drag.id
-            ? { ...s, staff: hoverGhost.staff, start: hoverGhost.start, end: hoverGhost.end }
-            : s
-        )
-      );
+      setOverrides((prev) => ({
+        ...prev,
+        [drag.id]: {
+          staff: hoverGhost.staff,
+          start: hoverGhost.start,
+          end: hoverGhost.end,
+        },
+      }));
     }
     setDrag(null);
     setHoverGhost(null);
