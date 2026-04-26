@@ -331,8 +331,83 @@ const Conflicts = () => {
           <span>Showing <strong className="text-foreground">1</strong> to <strong className="text-foreground">{rows.length}</strong> of <strong className="text-foreground">{totalMissing}</strong></span>
           {selected.size > 0 && <span className="text-primary font-medium">{selected.size} selected</span>}
         </div>
+
+        {/* Clashing Rotas Section */}
+        <ClashingRotasSection />
       </div>
     </AppLayout>
+  );
+};
+
+const CLASHING_PAIRS = [
+  {
+    a: { staff: "Sumayyah Shafiq", ref: "147844258", date: "06/05/2026", start: "19:30", end: "20:00", client: "Thomas Henderson" },
+    b: { ref: "147844276", date: "06/05/2026", start: "19:45", end: "20:00", client: "Edna Morris" },
+  },
+  {
+    a: { staff: "Lisa Archer", ref: "147844660", date: "07/05/2026", start: "09:35", end: "10:20", client: "Michael Taylor" },
+    b: { ref: "147844618", date: "07/05/2026", start: "10:00", end: "10:30", client: "Craig Murray" },
+  },
+];
+
+function ClashingRotasSection() {
+  return (
+    <Card className="rounded-sm border border-border overflow-hidden">
+      <div className="border-t-2 border-t-destructive/80 px-4 pt-3 pb-2">
+        <h3 className="text-sm font-semibold text-foreground">({CLASHING_PAIRS.length}) clashing rotas</h3>
+      </div>
+      <div className="px-4 pb-4">
+        <p className="text-xs text-muted-foreground mb-3">
+          These shifts <span className="text-warning font-medium">clash</span> with each other
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-[12px] border-collapse">
+            <thead>
+              <tr>
+                <th className="bg-[hsl(245_60%_92%)] text-left p-2 font-semibold text-foreground border border-border">Staff</th>
+                <th className="bg-[hsl(200_70%_94%)] text-left p-2 font-semibold text-foreground border border-border">Ref</th>
+                <th className="bg-[hsl(200_70%_94%)] text-left p-2 font-semibold text-foreground border border-border">Date</th>
+                <th className="bg-[hsl(200_70%_94%)] text-left p-2 font-semibold text-foreground border border-border">Start</th>
+                <th className="bg-[hsl(200_70%_94%)] text-left p-2 font-semibold text-foreground border border-border">End</th>
+                <th className="bg-[hsl(200_70%_94%)] text-left p-2 font-semibold text-foreground border border-border">Client</th>
+                <th className="bg-[hsl(0_70%_94%)] text-left p-2 font-semibold text-foreground border border-border">Ref</th>
+                <th className="bg-[hsl(0_70%_94%)] text-left p-2 font-semibold text-foreground border border-border">Date</th>
+                <th className="bg-[hsl(0_70%_94%)] text-left p-2 font-semibold text-foreground border border-border">Start</th>
+                <th className="bg-[hsl(0_70%_94%)] text-left p-2 font-semibold text-foreground border border-border">End</th>
+                <th className="bg-[hsl(0_70%_94%)] text-left p-2 font-semibold text-foreground border border-border">Client</th>
+              </tr>
+            </thead>
+            <tbody>
+              {CLASHING_PAIRS.map((p, i) => (
+                <tr key={i}>
+                  <td className="bg-[hsl(245_60%_96%)] p-2 border border-border">
+                    <button className="text-primary hover:underline font-medium">{p.a.staff}</button>
+                  </td>
+                  <td className="bg-[hsl(200_70%_97%)] p-2 border border-border">
+                    <button className="text-destructive hover:underline font-mono">{p.a.ref}</button>
+                  </td>
+                  <td className="bg-[hsl(200_70%_97%)] p-2 border border-border text-foreground">{p.a.date}</td>
+                  <td className="bg-[hsl(200_70%_97%)] p-2 border border-border text-foreground">{p.a.start}</td>
+                  <td className="bg-[hsl(200_70%_97%)] p-2 border border-border text-foreground">{p.a.end}</td>
+                  <td className="bg-[hsl(200_70%_97%)] p-2 border border-border">
+                    <button className="text-primary hover:underline">{p.a.client}</button>
+                  </td>
+                  <td className="bg-[hsl(0_70%_97%)] p-2 border border-border">
+                    <button className="text-destructive hover:underline font-mono">{p.b.ref}</button>
+                  </td>
+                  <td className="bg-[hsl(0_70%_97%)] p-2 border border-border text-foreground">{p.b.date}</td>
+                  <td className="bg-[hsl(0_70%_97%)] p-2 border border-border text-foreground">{p.b.start}</td>
+                  <td className="bg-[hsl(0_70%_97%)] p-2 border border-border text-foreground">{p.b.end}</td>
+                  <td className="bg-[hsl(0_70%_97%)] p-2 border border-border">
+                    <button className="text-primary hover:underline">{p.b.client}</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </Card>
   );
 };
 
