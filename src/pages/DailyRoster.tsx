@@ -7,12 +7,34 @@ import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
-  ChevronLeft, ChevronRight, Check, Users, User, Link as LinkIcon,
-  Map as MapIcon, Tag, FileText, Briefcase, Bell, PoundSterling,
-  Camera, ArrowRight, ListChecks, Ban, ThumbsUp, Calendar,
-  TrendingUp, Clock, AlertCircle, Info, XCircle,
+  ChevronLeft, ChevronRight, Users, User, FileText, Bell, PoundSterling,
+  Camera, ListChecks, ThumbsUp, Calendar,
+  TrendingUp, Clock, AlertCircle, Info, XCircle, MessageSquare,
 } from "lucide-react";
+
+// Reusable tooltip-wrapped icon for table headers/cells
+function IconCell({
+  icon: Icon,
+  label,
+  className = "h-3.5 w-3.5 text-muted-foreground/70",
+}: {
+  icon: any;
+  label: string;
+  className?: string;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="inline-flex items-center justify-center cursor-help">
+          <Icon className={className} />
+        </span>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="text-xs">{label}</TooltipContent>
+    </Tooltip>
+  );
+}
 import { useDailyVisits, useCareGivers, useCareReceivers } from "@/hooks/use-care-data";
 import { supabase } from "@/integrations/supabase/client";
 import { RosterViewSwitcher } from "@/components/RosterViewSwitcher";
