@@ -346,9 +346,8 @@ export default function Bookings() {
                 <Button
                   key={n}
                   size="sm"
-                  className={`h-7 w-7 p-0 text-xs ${active ? "text-primary-foreground" : ""}`}
+                  className="h-7 w-7 p-0 text-xs"
                   variant={active ? "default" : "outline"}
-                  style={active ? { background: "hsl(265 70% 45%)" } : undefined}
                   onClick={() => setPage(n)}
                 >
                   {n}
