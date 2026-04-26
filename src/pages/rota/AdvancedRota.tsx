@@ -301,6 +301,9 @@ export default function AdvancedRota() {
     id: string;
     offsetHours: number;
     rowOffsetY: number;
+    originX: number;
+    originY: number;
+    moved: boolean;
   } | null>(null);
   const [hoverGhost, setHoverGhost] = useState<{
     id: string;
@@ -308,6 +311,7 @@ export default function AdvancedRota() {
     start: number;
     end: number;
   } | null>(null);
+  const [editing, setEditing] = useState<EditRotaShift | null>(null);
 
   const gridRef = useRef<HTMLDivElement>(null);
 
