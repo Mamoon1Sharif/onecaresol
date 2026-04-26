@@ -7,12 +7,34 @@ import { Input } from "@/components/ui/input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
-  ChevronLeft, ChevronRight, Check, Users, User, Link as LinkIcon,
-  Map as MapIcon, Tag, FileText, Briefcase, Bell, PoundSterling,
-  Camera, ArrowRight, ListChecks, Ban, ThumbsUp, Calendar,
-  TrendingUp, Clock, AlertCircle, Info, XCircle,
+  ChevronLeft, ChevronRight, Users, User, FileText, Bell, PoundSterling,
+  Camera, ListChecks, ThumbsUp, Calendar,
+  TrendingUp, Clock, AlertCircle, Info, XCircle, MessageSquare,
 } from "lucide-react";
+
+// Reusable tooltip-wrapped icon for table headers/cells
+function IconCell({
+  icon: Icon,
+  label,
+  className = "h-3.5 w-3.5 text-muted-foreground/70",
+}: {
+  icon: any;
+  label: string;
+  className?: string;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="inline-flex items-center justify-center cursor-help">
+          <Icon className={className} />
+        </span>
+      </TooltipTrigger>
+      <TooltipContent side="top" className="text-xs">{label}</TooltipContent>
+    </Tooltip>
+  );
+}
 import { useDailyVisits, useCareGivers, useCareReceivers } from "@/hooks/use-care-data";
 import { supabase } from "@/integrations/supabase/client";
 import { RosterViewSwitcher } from "@/components/RosterViewSwitcher";
@@ -233,49 +255,48 @@ const DailyRoster = () => {
         </div>
 
         {/* Spreadsheet table */}
+        <TooltipProvider delayDuration={150}>
         <Card className="border border-border overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-xs border-collapse">
               <thead>
                 <tr className="bg-muted/60 border-b border-border">
                   <th className="p-2 border-r border-border w-8"><input type="checkbox" className="rounded" /></th>
-                  <th className="p-2 border-r border-border text-center w-20" title="Visit ID"><Info className={COL_ICON_CLASS} /></th>
-                  <th className="p-2 border-r border-border text-center w-20" title="Date"><Calendar className={COL_ICON_CLASS} /></th>
+                  <th className="p-2 border-r border-border text-center w-20"><IconCell icon={Info} label="Visit reference ID" /></th>
+                  <th className="p-2 border-r border-border text-center w-20"><IconCell icon={Calendar} label="Visit date" /></th>
                   <th className="p-2 border-r border-border text-left w-20">Status</th>
-                  <th className="p-2 border-r border-border text-center w-8" title="Cancelled / Not accepted"><XCircle className={COL_ICON_CLASS} /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><ThumbsUp className={COL_ICON_CLASS} /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><LinkIcon className={COL_ICON_CLASS} /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><MapIcon className={COL_ICON_CLASS} /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><Users className={COL_ICON_CLASS} /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><AlertCircle className={COL_ICON_CLASS} /></th>
+                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={XCircle} label="Cancelled / not accepted by carer" /></th>
+                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={ThumbsUp} label="Carer confirmed shift" /></th>
+                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Users} label="Care team color tag" /></th>
+                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={AlertCircle} label="Visit alert / flag" /></th>
                   <th className="p-2 border-r border-border text-left">Service User</th>
-                  <th className="p-2 border-r border-border text-center w-16 bg-emerald-100"><Calendar className="h-3.5 w-3.5 text-emerald-700 mx-auto" /></th>
-                  <th className="p-2 border-r border-border text-center w-16 bg-rose-100"><Calendar className="h-3.5 w-3.5 text-rose-700 mx-auto" /></th>
-                  <th className="p-2 border-r border-border text-center w-16"><TrendingUp className={COL_ICON_CLASS} /></th>
-                  <th className="p-2 border-r border-border text-center w-16 bg-emerald-100"><Clock className="h-3.5 w-3.5 text-emerald-700 mx-auto" /></th>
-                  <th className="p-2 border-r border-border text-center w-16 bg-rose-100"><Clock className="h-3.5 w-3.5 text-rose-700 mx-auto" /></th>
-                  <th className="p-2 border-r border-border text-center w-16"><TrendingUp className={COL_ICON_CLASS} /></th>
+                  <th className="p-2 border-r border-border text-center w-16 bg-emerald-100">
+                    <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Calendar className="h-3.5 w-3.5 text-emerald-700" /></span></TooltipTrigger><TooltipContent className="text-xs">Scheduled start time</TooltipContent></Tooltip>
+                  </th>
+                  <th className="p-2 border-r border-border text-center w-16 bg-rose-100">
+                    <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Calendar className="h-3.5 w-3.5 text-rose-700" /></span></TooltipTrigger><TooltipContent className="text-xs">Scheduled end time</TooltipContent></Tooltip>
+                  </th>
+                  <th className="p-2 border-r border-border text-center w-16"><IconCell icon={TrendingUp} label="Scheduled duration" /></th>
+                  <th className="p-2 border-r border-border text-center w-16 bg-emerald-100">
+                    <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Clock className="h-3.5 w-3.5 text-emerald-700" /></span></TooltipTrigger><TooltipContent className="text-xs">Actual clock-in time</TooltipContent></Tooltip>
+                  </th>
+                  <th className="p-2 border-r border-border text-center w-16 bg-rose-100">
+                    <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Clock className="h-3.5 w-3.5 text-rose-700" /></span></TooltipTrigger><TooltipContent className="text-xs">Actual clock-out time</TooltipContent></Tooltip>
+                  </th>
+                  <th className="p-2 border-r border-border text-center w-16"><IconCell icon={TrendingUp} label="Actual duration worked" /></th>
                   <th className="p-2 border-r border-border text-left">Team Member</th>
-                  <th className="p-2 border-r border-border text-left">Service Call</th>
-                  <th className="p-2 border-r border-border text-center w-8"><User className={COL_ICON_CLASS} /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><ArrowRight className={COL_ICON_CLASS} /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><FileText className={COL_ICON_CLASS} /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><Briefcase className={COL_ICON_CLASS} /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><Bell className={COL_ICON_CLASS} /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><PoundSterling className={COL_ICON_CLASS} /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><Camera className={COL_ICON_CLASS} /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><ArrowRight className={COL_ICON_CLASS} /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><User className={COL_ICON_CLASS} /></th>
+                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={FileText} label="Care notes recorded" /></th>
+                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={MessageSquare} label="Messages on visit" /></th>
+                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Bell} label="Alerts raised" /></th>
+                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={PoundSterling} label="Payroll / charge status" /></th>
+                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Camera} label="Photo evidence captured" /></th>
                   <th className="p-2 border-r border-border text-left w-20">Week</th>
-                  <th className="p-2 border-r border-border text-center w-8"><FileText className={COL_ICON_CLASS} /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><Calendar className={COL_ICON_CLASS} /></th>
-                  <th className="p-2 border-r border-border text-center w-12">17</th>
-                  <th className="p-2 text-center w-8"><ListChecks className={COL_ICON_CLASS} /></th>
+                  <th className="p-2 text-center w-8"><IconCell icon={ListChecks} label="Tasks completion status" /></th>
                 </tr>
               </thead>
               <tbody>
                 {rows.length === 0 && (
-                  <tr><td colSpan={34} className="p-8 text-center text-muted-foreground">No shifts scheduled for this day.</td></tr>
+                  <tr><td colSpan={23} className="p-8 text-center text-muted-foreground">No shifts scheduled for this day.</td></tr>
                 )}
                 {rows.map((r, i) => {
                   const isTopRow = i === 0;
@@ -298,15 +319,21 @@ const DailyRoster = () => {
                       <td className={`p-1.5 border-r border-border text-[11px] ${statusTone[r.status] ?? ""}`}>{r.status}</td>
                       <td className="p-1.5 border-r border-border text-center">
                         {!r.accepted ? (
-                          <XCircle className="h-3.5 w-3.5 text-destructive mx-auto" />
+                          <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><XCircle className="h-3.5 w-3.5 text-destructive" /></span></TooltipTrigger><TooltipContent className="text-xs">Not yet accepted by carer</TooltipContent></Tooltip>
                         ) : null}
                       </td>
-                      <td className="p-1.5 border-r border-border text-center"><ThumbsUp className="h-3 w-3 text-muted-foreground mx-auto" /></td>
-                      <td className="p-1.5 border-r border-border text-center"><LinkIcon className="h-3 w-3 text-muted-foreground mx-auto" /></td>
-                      <td className="p-1.5 border-r border-border text-center"><MapIcon className="h-3 w-3 text-muted-foreground mx-auto" /></td>
-                      <td className="p-1.5 border-r border-border text-center"><span className={`inline-block w-3 h-3 rounded-full ${dot}`} /></td>
                       <td className="p-1.5 border-r border-border text-center">
-                        {i % 5 === 0 && <span className="inline-block w-0 h-0 border-l-[5px] border-r-[5px] border-b-[8px] border-l-transparent border-r-transparent border-b-fuchsia-500 mx-auto" />}
+                        {r.accepted ? (
+                          <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><ThumbsUp className="h-3 w-3 text-success" /></span></TooltipTrigger><TooltipContent className="text-xs">Confirmed by carer</TooltipContent></Tooltip>
+                        ) : null}
+                      </td>
+                      <td className="p-1.5 border-r border-border text-center">
+                        <Tooltip><TooltipTrigger asChild><span className={`inline-block w-3 h-3 rounded-full cursor-help ${dot}`} /></TooltipTrigger><TooltipContent className="text-xs">Care team tag</TooltipContent></Tooltip>
+                      </td>
+                      <td className="p-1.5 border-r border-border text-center">
+                        {i % 5 === 0 && (
+                          <Tooltip><TooltipTrigger asChild><span className="inline-block w-0 h-0 border-l-[5px] border-r-[5px] border-b-[8px] border-l-transparent border-r-transparent border-b-fuchsia-500 cursor-help" /></TooltipTrigger><TooltipContent className="text-xs">Priority alert</TooltipContent></Tooltip>
+                        )}
                       </td>
                       <td className="p-1.5 border-r border-border">
                         <a className="text-primary hover:underline cursor-pointer text-[11px]">{r.serviceUser}</a>
@@ -318,34 +345,27 @@ const DailyRoster = () => {
                       <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{r.isFuture ? "" : r.actualEnd}</td>
                       <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{r.isFuture ? "" : r.actualDuration}</td>
                       <td className="p-1.5 border-r border-border">
-                        <a className="text-primary hover:underline cursor-pointer text-[11px]">{r.serviceUser}</a>
-                      </td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{r.scheduledStart}</td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{r.scheduledEnd}</td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{r.duration}</td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{r.actualStart}</td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{r.actualEnd}</td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{r.actualDuration}</td>
-                      <td className="p-1.5 border-r border-border">
                         <a className="text-primary hover:underline cursor-pointer text-[11px]">{r.teamMember}</a>
                       </td>
-                      <td className="p-1.5 border-r border-border text-[11px]">{r.serviceCall}</td>
-                      <td className="p-1.5 border-r border-border text-center"><Tag className="h-3 w-3 text-muted-foreground mx-auto" /></td>
-                      <td className="p-1.5 border-r border-border text-center"><ArrowRight className="h-3 w-3 text-muted-foreground mx-auto" /></td>
-                      <td className="p-1.5 border-r border-border text-center"><FileText className="h-3 w-3 text-emerald-600 mx-auto" /></td>
                       <td className="p-1.5 border-r border-border text-center">
-                        <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-emerald-500 text-white"><Briefcase className="h-2.5 w-2.5" /></span>
+                        <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><FileText className="h-3 w-3 text-emerald-600" /></span></TooltipTrigger><TooltipContent className="text-xs">Care notes recorded</TooltipContent></Tooltip>
                       </td>
-                      <td className="p-1.5 border-r border-border text-center"><Bell className="h-3 w-3 text-muted-foreground mx-auto" /></td>
-                      <td className="p-1.5 border-r border-border text-center"><PoundSterling className="h-3 w-3 text-muted-foreground mx-auto" /></td>
-                      <td className="p-1.5 border-r border-border text-center"><Camera className="h-3 w-3 text-muted-foreground mx-auto" /></td>
-                      <td className="p-1.5 border-r border-border text-center"><ArrowRight className="h-3 w-3 text-muted-foreground mx-auto" /></td>
-                      <td className="p-1.5 border-r border-border text-center"><User className="h-3 w-3 text-muted-foreground mx-auto" /></td>
+                      <td className="p-1.5 border-r border-border text-center">
+                        <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><MessageSquare className="h-3 w-3 text-muted-foreground" /></span></TooltipTrigger><TooltipContent className="text-xs">No messages</TooltipContent></Tooltip>
+                      </td>
+                      <td className="p-1.5 border-r border-border text-center">
+                        <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Bell className="h-3 w-3 text-muted-foreground" /></span></TooltipTrigger><TooltipContent className="text-xs">No alerts raised</TooltipContent></Tooltip>
+                      </td>
+                      <td className="p-1.5 border-r border-border text-center">
+                        <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><PoundSterling className="h-3 w-3 text-muted-foreground" /></span></TooltipTrigger><TooltipContent className="text-xs">Payroll pending</TooltipContent></Tooltip>
+                      </td>
+                      <td className="p-1.5 border-r border-border text-center">
+                        <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Camera className="h-3 w-3 text-muted-foreground" /></span></TooltipTrigger><TooltipContent className="text-xs">No photo evidence</TooltipContent></Tooltip>
+                      </td>
                       <td className="p-1.5 border-r border-border text-[11px]">{r.week}</td>
-                      <td className="p-1.5 border-r border-border text-center"><FileText className="h-3 w-3 text-muted-foreground mx-auto" /></td>
-                      <td className="p-1.5 border-r border-border text-center"><Calendar className="h-3 w-3 text-muted-foreground mx-auto" /></td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{r.weekNum}</td>
-                      <td className="p-1.5 text-center"><ListChecks className="h-3 w-3 text-success mx-auto" /></td>
+                      <td className="p-1.5 text-center">
+                        <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><ListChecks className="h-3 w-3 text-success" /></span></TooltipTrigger><TooltipContent className="text-xs">Tasks tracked</TooltipContent></Tooltip>
+                      </td>
                     </tr>
                   );
                 })}
@@ -365,13 +385,14 @@ const DailyRoster = () => {
                         </div>
                       </div>
                     </td>
-                    <td colSpan={23}></td>
+                    <td colSpan={12}></td>
                   </tr>
                 </tfoot>
               )}
             </table>
           </div>
         </Card>
+        </TooltipProvider>
 
         <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
           <span>Showing <strong className="text-foreground">1</strong> to <strong className="text-foreground">{rows.length}</strong> of <strong className="text-foreground">{rows.length}</strong></span>
