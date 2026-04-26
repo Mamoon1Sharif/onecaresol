@@ -260,77 +260,97 @@ export default function Bookings() {
   return (
     <AppLayout>
       <div className="space-y-3">
-        {/* Top toolbar */}
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          {/* View toggle */}
-          <div className="inline-flex rounded-md overflow-hidden border bg-card">
-            <button
-              type="button"
-              onClick={() => setView("week")}
-              className={`px-4 py-1.5 text-xs font-medium transition-colors ${
-                view === "week" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"
-              }`}
-            >
-              Week
-            </button>
-            <button
-              type="button"
-              onClick={() => setView("today")}
-              className={`px-4 py-1.5 text-xs font-medium transition-colors ${
-                view === "today" ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-muted"
-              }`}
-            >
-              Today
-            </button>
-          </div>
-
-          {/* Week navigation */}
-          <div className="inline-flex items-center gap-1">
-            <Button
-              size="icon"
-              className="h-8 w-8 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={() => setWeekOffset((w) => w - 1)}
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <div className="px-4 h-8 flex items-center text-xs font-medium text-primary-foreground rounded-md tabular-nums bg-primary">
-              {fmtRange(weekDates[0], weekDates[6])}
-            </div>
-            <Button
-              size="icon"
-              className="h-8 w-8 rounded-md bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={() => setWeekOffset((w) => w + 1)}
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Booked / All */}
-          <div className="inline-flex rounded-md overflow-hidden border bg-card">
-            <button
-              type="button"
-              onClick={() => setBookedOnly(true)}
-              className={`px-4 py-1.5 text-xs font-medium transition-colors ${
-                bookedOnly ? "bg-success text-success-foreground" : "text-foreground hover:bg-muted"
-              }`}
-            >
-              Booked only
-            </button>
-            <button
-              type="button"
-              onClick={() => setBookedOnly(false)}
-              className={`px-4 py-1.5 text-xs font-medium transition-colors ${
-                !bookedOnly ? "bg-success text-success-foreground" : "text-foreground hover:bg-muted"
-              }`}
-            >
-              All
-            </button>
-          </div>
+        {/* Page title */}
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
+            <CalendarDays className="h-5 w-5 text-primary" />
+            Bookings
+          </h1>
         </div>
 
+        {/* Top toolbar (matches DailyRoster filter card style) */}
+        <Card className="p-3 bg-muted/30 border-border">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            {/* View toggle */}
+            <div className="inline-flex rounded-md overflow-hidden border border-border bg-background">
+              <button
+                type="button"
+                onClick={() => setView("week")}
+                className={`px-4 py-1.5 text-xs font-medium transition-colors ${
+                  view === "week"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-foreground hover:bg-muted"
+                }`}
+              >
+                Week
+              </button>
+              <button
+                type="button"
+                onClick={() => setView("today")}
+                className={`px-4 py-1.5 text-xs font-medium transition-colors ${
+                  view === "today"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-foreground hover:bg-muted"
+                }`}
+              >
+                Today
+              </button>
+            </div>
+
+            {/* Week navigation */}
+            <div className="inline-flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setWeekOffset((w) => w - 1)}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <div className="px-3 h-8 flex items-center text-xs font-medium text-foreground rounded-md tabular-nums bg-background border border-border min-w-[260px] justify-center">
+                {fmtRange(weekDates[0], weekDates[6])}
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => setWeekOffset((w) => w + 1)}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Booked / All */}
+            <div className="inline-flex rounded-md overflow-hidden border border-border bg-background">
+              <button
+                type="button"
+                onClick={() => setBookedOnly(true)}
+                className={`px-4 py-1.5 text-xs font-medium transition-colors ${
+                  bookedOnly
+                    ? "bg-primary text-primary-foreground"
+                    : "text-foreground hover:bg-muted"
+                }`}
+              >
+                Booked only
+              </button>
+              <button
+                type="button"
+                onClick={() => setBookedOnly(false)}
+                className={`px-4 py-1.5 text-xs font-medium transition-colors ${
+                  !bookedOnly
+                    ? "bg-primary text-primary-foreground"
+                    : "text-foreground hover:bg-muted"
+                }`}
+              >
+                All
+              </button>
+            </div>
+          </div>
+        </Card>
+
         {/* Pagination chips + add */}
-        <div className="flex items-center justify-between gap-3">
-          <div className="inline-flex items-center gap-1 mx-auto">
+        <div className="flex items-center justify-between gap-3 px-1">
+          <div className="inline-flex items-center gap-1">
             <Button
               size="sm"
               variant="outline"
