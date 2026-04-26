@@ -13,6 +13,7 @@ import CareGiverProfile from "./pages/CareGiverProfile.tsx";
 import AddCareGiver from "./pages/AddCareGiver.tsx";
 import CareGiverSchedule from "./pages/CareGiverSchedule.tsx";
 import CareReceivers from "./pages/CareReceivers.tsx";
+import AddCareReceiver from "./pages/AddCareReceiver.tsx";
 import CareReceiverProfile from "./pages/CareReceiverProfile.tsx";
 import ReceiverMessaging from "./pages/ReceiverMessaging.tsx";
 import ReceiverMedication from "./pages/ReceiverMedication.tsx";
