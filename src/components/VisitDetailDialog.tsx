@@ -10,7 +10,8 @@ import { getCareGiverAvatar } from "@/lib/avatars";
 import {
   Pencil, Plus, Lock, Info, Calendar, TrendingUp, Clock, ThumbsUp, Link as LinkIcon,
   Map as MapIcon, Users, AlertCircle, User, ArrowRight, FileText, Briefcase, Bell,
-  PoundSterling, Camera, ListChecks, XCircle, Trash2, X,
+  PoundSterling, Camera, ListChecks, XCircle, Trash2, X, CheckCircle2, Activity,
+  LogIn, LogOut, PlayCircle, CircleDot,
 } from "lucide-react";
 
 interface VisitRow {
