@@ -99,10 +99,10 @@ const DailyRoster = () => {
       const isFuture = visitStart.getTime() > now.getTime();
       const accepted = !!v.care_giver_id;
 
-      // Status logic
+      // Live-rota status logic — never use "Complete" here.
       let status: string;
       if (v.status === "Confirmed") {
-        status = "Complete";
+        status = v.check_out_time ? "Finished" : v.check_in_time ? "In Progress" : "Due";
       } else if (isFuture) {
         status = "Due";
       } else if (v.status === "Pending") {
