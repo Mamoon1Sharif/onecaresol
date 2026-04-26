@@ -426,7 +426,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                         <th className="p-2 border-r border-border text-left w-20">Status</th>
                         <th className="p-2 border-r border-border text-left">Service User</th>
                         <th className="p-2 border-r border-border text-left">Team Member</th>
-                        <th className="p-2 border-r border-border text-left">Service Call</th>
+                        
                         <th className="p-2 text-left w-20">Week</th>
                       </tr>
                     </thead>
