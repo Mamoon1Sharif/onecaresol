@@ -173,34 +173,24 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                     <thead>
                       <tr className="bg-muted/40 border-b border-border">
                         <th className="p-2 border-r border-border w-8"><input type="checkbox" className="rounded" /></th>
-                        <th className="p-2 border-r border-border text-center w-16"><Info className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-20"><Calendar className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-left w-20">Status</th>
-                        <th className="p-2 border-r border-border text-center w-8"><XCircle className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-8"><ThumbsUp className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-8"><LinkIcon className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-8"><MapIcon className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-8"><Users className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-8"><AlertCircle className={COL_ICON} /></th>
+                        <th className="p-2 border-r border-border text-left w-20">Ref</th>
+                        <th className="p-2 border-r border-border text-left w-20">Date</th>
+                        <th className="p-2 border-r border-border text-left w-24">Status</th>
+                        <th className="p-2 border-r border-border text-center w-10" title="Accepted"><ThumbsUp className={COL_ICON} /></th>
+                        <th className="p-2 border-r border-border text-center w-10" title="Linked"><LinkIcon className={COL_ICON} /></th>
+                        <th className="p-2 border-r border-border text-center w-10" title="Location"><MapIcon className={COL_ICON} /></th>
+                        <th className="p-2 border-r border-border text-center w-10" title="Team"><Users className={COL_ICON} /></th>
+                        <th className="p-2 border-r border-border text-center w-10" title="Alerts"><AlertCircle className={COL_ICON} /></th>
                         <th className="p-2 border-r border-border text-left">Service User</th>
-                        <th className="p-2 border-r border-border text-center w-16 bg-emerald-100"><Calendar className="h-3.5 w-3.5 text-emerald-700 mx-auto" /></th>
-                        <th className="p-2 border-r border-border text-center w-16 bg-rose-100"><Calendar className="h-3.5 w-3.5 text-rose-700 mx-auto" /></th>
-                        <th className="p-2 border-r border-border text-center w-16"><TrendingUp className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-16 bg-emerald-100"><Clock className="h-3.5 w-3.5 text-emerald-700 mx-auto" /></th>
-                        <th className="p-2 border-r border-border text-center w-16 bg-rose-100"><Clock className="h-3.5 w-3.5 text-rose-700 mx-auto" /></th>
-                        <th className="p-2 border-r border-border text-center w-16"><TrendingUp className={COL_ICON} /></th>
+                        <th className="p-2 border-r border-border text-center w-16 bg-emerald-100" title="Scheduled Start"><Calendar className="h-3.5 w-3.5 text-emerald-700 mx-auto" /></th>
+                        <th className="p-2 border-r border-border text-center w-16 bg-rose-100" title="Scheduled End"><Calendar className="h-3.5 w-3.5 text-rose-700 mx-auto" /></th>
+                        <th className="p-2 border-r border-border text-center w-16" title="Duration"><TrendingUp className={COL_ICON} /></th>
+                        <th className="p-2 border-r border-border text-center w-16 bg-emerald-100" title="Clocked In"><Clock className="h-3.5 w-3.5 text-emerald-700 mx-auto" /></th>
+                        <th className="p-2 border-r border-border text-center w-16 bg-rose-100" title="Clocked Out"><Clock className="h-3.5 w-3.5 text-rose-700 mx-auto" /></th>
+                        <th className="p-2 border-r border-border text-center w-16" title="Worked"><TrendingUp className={COL_ICON} /></th>
                         <th className="p-2 border-r border-border text-left">Team Member</th>
-                        <th className="p-2 border-r border-border text-left">Service Call</th>
-                        <th className="p-2 border-r border-border text-center w-8"><User className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-8"><ArrowRight className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-8"><FileText className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-8"><Briefcase className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-8"><Bell className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-8"><PoundSterling className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-center w-8"><Camera className={COL_ICON} /></th>
                         <th className="p-2 border-r border-border text-left w-20">Week</th>
-                        <th className="p-2 border-r border-border text-center w-12">17</th>
-                        <th className="p-2 text-center w-8"><ListChecks className={COL_ICON} /></th>
+                        <th className="p-2 text-center w-10"><Lock className={COL_ICON} /></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -210,49 +200,46 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                           <a className="text-primary hover:underline cursor-pointer font-mono text-[11px]">{visit.ref}</a>
                         </td>
                         <td className="p-1.5 border-r border-border font-mono text-[11px] text-center">{visit.date}</td>
-                        <td className="p-1.5 border-r border-border text-[11px] font-semibold text-destructive">{editStatus || visit.status}</td>
-                        <td className="p-1.5 border-r border-border text-center">{!visit.accepted && <XCircle className="h-3.5 w-3.5 text-destructive mx-auto" />}</td>
-                        <td className="p-1.5 border-r border-border text-center"><ThumbsUp className="h-3 w-3 text-muted-foreground mx-auto" /></td>
-                        <td className="p-1.5 border-r border-border text-center"><LinkIcon className="h-3 w-3 text-muted-foreground mx-auto" /></td>
-                        <td className="p-1.5 border-r border-border text-center"><User className="h-3 w-3 text-muted-foreground mx-auto" /></td>
-                        <td className="p-1.5 border-r border-border text-center"><span className="inline-block w-3 h-3 rounded-full bg-amber-400" /></td>
-                        <td className="p-1.5 border-r border-border" />
+                        <td className="p-1.5 border-r border-border text-[11px] font-semibold">
+                          {(() => {
+                            const s = editStatus || visit.status;
+                            // Live rota: never show "Complete".
+                            const live = s === "Complete" ? "In Progress" : s;
+                            const tone = live === "Missed" ? "text-destructive" : live === "In Progress" || live === "Finished" ? "text-success" : "text-blue-600";
+                            return <span className={tone}>{live}</span>;
+                          })()}
+                        </td>
+                        <td className="p-1.5 border-r border-border text-center">{visit.accepted ? <CheckCircle2 className="h-3.5 w-3.5 text-success mx-auto" /> : <span className="text-muted-foreground/40 text-[11px]">—</span>}</td>
+                        <td className="p-1.5 border-r border-border text-center text-muted-foreground/40 text-[11px]">—</td>
+                        <td className="p-1.5 border-r border-border text-center text-muted-foreground/40 text-[11px]">—</td>
+                        <td className="p-1.5 border-r border-border text-center"><span className="inline-block w-2.5 h-2.5 rounded-full bg-amber-400" /></td>
+                        <td className="p-1.5 border-r border-border text-center text-muted-foreground/40 text-[11px]">—</td>
                         <td className="p-1.5 border-r border-border">
                           <a className="text-primary hover:underline cursor-pointer text-[11px]">{visit.serviceUser}</a>
                         </td>
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{editStart || visit.scheduledStart}</td>
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{editEnd || visit.scheduledEnd}</td>
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{visit.duration}</td>
-                        <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{visit.isFuture ? "" : visit.actualStart}</td>
-                        <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{visit.isFuture ? "" : visit.actualEnd}</td>
-                        <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{visit.isFuture ? "" : visit.actualDuration}</td>
+                        <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{visit.isFuture ? "—" : (clockIn || visit.actualStart || "—")}</td>
+                        <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{visit.isFuture ? "—" : (clockOut || visit.actualEnd || "—")}</td>
+                        <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{visit.isFuture ? "—" : (visit.actualDuration || "—")}</td>
                         <td className="p-1.5 border-r border-border">
                           <a className="text-primary hover:underline cursor-pointer text-[11px]">{visit.teamMember}</a>
                         </td>
-                        <td className="p-1.5 border-r border-border text-[11px]">{editServiceCall || visit.serviceCall}</td>
-                        <td className="p-1.5 border-r border-border" />
-                        <td className="p-1.5 border-r border-border" />
-                        <td className="p-1.5 border-r border-border" />
-                        <td className="p-1.5 border-r border-border" />
-                        <td className="p-1.5 border-r border-border text-center"><Bell className="h-3 w-3 text-amber-500 mx-auto" /></td>
-                        <td className="p-1.5 border-r border-border" />
-                        <td className="p-1.5 border-r border-border" />
                         <td className="p-1.5 border-r border-border text-[11px]">{visit.week ?? "Week 1"}</td>
-                        <td className="p-1.5 border-r border-border text-center text-[11px]">{visit.weekNum ?? 17}</td>
                         <td className="p-1.5 text-center"><Lock className="h-3 w-3 text-muted-foreground mx-auto" /></td>
                       </tr>
                       <tr className="border-b border-border bg-card">
-                        <td className="p-1.5 border-r border-border" />
-                        <td className="p-1.5 border-r border-border" />
-                        <td className="p-1.5 border-r border-border text-[11px] font-mono">
+                        <td className="p-1.5 border-r border-border" colSpan={11} />
+                        <td className="p-1.5 border-r border-border text-[11px] font-mono" colSpan={3}>
                           <div>{visit.duration}</div>
                           <div className="text-[10px] text-muted-foreground">Sched hrs</div>
                         </td>
-                        <td className="p-1.5 border-r border-border text-[11px] font-mono">
+                        <td className="p-1.5 border-r border-border text-[11px] font-mono" colSpan={3}>
                           <div>{visit.actualDuration || "00:00"}</div>
                           <div className="text-[10px] text-muted-foreground">Clock hrs</div>
                         </td>
-                        <td className="p-1.5 border-r border-border" colSpan={26} />
+                        <td className="p-1.5 border-r border-border" colSpan={3} />
                       </tr>
                     </tbody>
                   </table>
