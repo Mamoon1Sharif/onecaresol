@@ -23,6 +23,7 @@ import {
   GripVertical,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { EditRotaDialog, type EditRotaShift } from "@/components/EditRotaDialog";
 
 /* -------------------------------------------------------------------------- */
 /*  Data                                                                       */
@@ -286,6 +287,16 @@ function statusStyles(s: ShiftStatus) {
 
 const HOURS = Array.from({ length: 48 }, (_, i) => i / 2); // every 30 min, 00:00 → 23:30
 
+function statusLabel(s: ShiftStatus): string {
+  switch (s) {
+    case "complete": return "Complete";
+    case "in-progress": return "In Progress";
+    case "scheduled": return "Scheduled";
+    case "missed": return "Missed";
+    case "oncall": return "On Call";
+  }
+}
+
 export default function AdvancedRota() {
   const [date, setDate] = useState(() => new Date());
   // Overrides per day per shift id (stores edited start/end/staff after drag)
@@ -300,6 +311,9 @@ export default function AdvancedRota() {
     id: string;
     offsetHours: number;
     rowOffsetY: number;
+    originX: number;
+    originY: number;
+    moved: boolean;
   } | null>(null);
   const [hoverGhost, setHoverGhost] = useState<{
     id: string;
@@ -307,6 +321,7 @@ export default function AdvancedRota() {
     start: number;
     end: number;
   } | null>(null);
+  const [editing, setEditing] = useState<EditRotaShift | null>(null);
 
   const gridRef = useRef<HTMLDivElement>(null);
 
@@ -342,13 +357,29 @@ export default function AdvancedRota() {
     const rect = target.getBoundingClientRect();
     const offsetHours = (e.clientX - rect.left) / PX_PER_HOUR;
     const rowOffsetY = e.clientY - rect.top;
-    setDrag({ id: s.id, offsetHours, rowOffsetY });
+    setDrag({
+      id: s.id,
+      offsetHours,
+      rowOffsetY,
+      originX: e.clientX,
+      originY: e.clientY,
+      moved: false,
+    });
     setHoverGhost({ id: s.id, staff: s.staff, start: s.start, end: s.end });
     target.setPointerCapture(e.pointerId);
   }
 
   function onPointerMoveGrid(e: React.PointerEvent) {
     if (!drag || !gridRef.current) return;
+
+    // Detect actual drag (>4px movement) — anything less is treated as a click
+    if (!drag.moved) {
+      const dx = Math.abs(e.clientX - drag.originX);
+      const dy = Math.abs(e.clientY - drag.originY);
+      if (dx < 4 && dy < 4) return;
+      setDrag({ ...drag, moved: true });
+    }
+
     const grid = gridRef.current.getBoundingClientRect();
     const x = e.clientX - grid.left + gridRef.current.scrollLeft;
     const y = e.clientY - grid.top;
@@ -376,21 +407,58 @@ export default function AdvancedRota() {
   }
 
   function onPointerUpGrid() {
-    if (drag && hoverGhost) {
-      setOverrides((prev) => ({
-        ...prev,
-        [drag.id]: {
-          staff: hoverGhost.staff,
-          start: hoverGhost.start,
-          end: hoverGhost.end,
-        },
-      }));
+    if (drag) {
+      if (drag.moved && hoverGhost) {
+        setOverrides((prev) => ({
+          ...prev,
+          [drag.id]: {
+            staff: hoverGhost.staff,
+            start: hoverGhost.start,
+            end: hoverGhost.end,
+          },
+        }));
+      } else {
+        // Treat as a click — open the edit dialog
+        const s = shifts.find((x) => x.id === drag.id);
+        if (s) {
+          setEditing({
+            id: s.id,
+            ref: s.ref,
+            date: dateLabel,
+            status: statusLabel(s.status),
+            client: s.client,
+            start: s.start,
+            end: s.end,
+            staff: s.staff,
+            service: s.service,
+          });
+        }
+      }
     }
     setDrag(null);
     setHoverGhost(null);
   }
 
-  /* ------------------------------- Render ---------------------------------- */
+  function handleSaveEdit(updates: {
+    service: string;
+    startH: number;
+    startM: number;
+    endH: number;
+    endM: number;
+  }) {
+    if (!editing) return;
+    const newStart = updates.startH + updates.startM / 60;
+    const newEnd = updates.endH + updates.endM / 60;
+    setOverrides((prev) => ({
+      ...prev,
+      [editing.id]: {
+        ...(prev[editing.id] || {}),
+        start: newStart,
+        end: newEnd,
+        service: updates.service,
+      },
+    }));
+  }
 
   return (
     <AppLayout>
@@ -608,6 +676,13 @@ export default function AdvancedRota() {
           </span>
         </div>
       </div>
+
+      <EditRotaDialog
+        open={!!editing}
+        onOpenChange={(o) => !o && setEditing(null)}
+        shift={editing}
+        onSave={handleSaveEdit}
+      />
     </AppLayout>
   );
 }
