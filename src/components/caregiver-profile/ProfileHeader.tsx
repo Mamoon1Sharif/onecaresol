@@ -1,10 +1,17 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { getCareGiverAvatar } from "@/lib/avatars";
 import { AvatarUpload } from "@/components/AvatarUpload";
-import { ArrowLeft, CalendarDays, Phone, Mail } from "lucide-react";
+import { useDeleteCareGiver } from "@/hooks/use-care-data";
+import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft, CalendarDays, Phone, Mail, Trash2, Loader2 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 type CareGiver = Tables<"care_givers">;
@@ -15,6 +22,23 @@ interface Props {
 
 export function ProfileHeader({ cg }: Props) {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const deleteMutation = useDeleteCareGiver();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      await deleteMutation.mutateAsync(cg.id);
+      toast({ title: "Care giver deleted", description: `${cg.name} has been removed.` });
+      navigate("/caregivers");
+    } catch (e: any) {
+      toast({
+        title: "Delete failed",
+        description: e?.message ?? "Could not delete care giver.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <>
@@ -22,9 +46,18 @@ export function ProfileHeader({ cg }: Props) {
         <Button variant="ghost" onClick={() => navigate("/caregivers")} className="gap-2 text-muted-foreground">
           <ArrowLeft className="h-4 w-4" /> Back to Care Givers
         </Button>
-        <Button variant="outline" onClick={() => navigate(`/caregivers/${cg.id}/schedule`)} className="gap-2">
-          <CalendarDays className="h-4 w-4" /> View Schedule
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => navigate(`/caregivers/${cg.id}/schedule`)} className="gap-2">
+            <CalendarDays className="h-4 w-4" /> View Schedule
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setConfirmOpen(true)}
+            className="gap-2 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" /> Delete
+          </Button>
+        </div>
       </div>
 
       <Card className="border border-border overflow-hidden">
@@ -55,6 +88,32 @@ export function ProfileHeader({ cg }: Props) {
           </div>
         </div>
       </Card>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {cg.name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove this care giver and is not reversible.
+              Linked schedule entries, reminders, and other records may also be affected.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); handleDelete(); }}
+              disabled={deleteMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMutation.isPending ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Deleting…</>
+              ) : (
+                <><Trash2 className="h-4 w-4 mr-2" /> Delete</>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
