@@ -15,6 +15,17 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export function AppHeader() {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({ title: "Logged out", description: "You have been signed out." });
+      navigate("/login", { replace: true });
+    } catch (e: any) {
+      toast({ title: "Logout failed", description: e?.message ?? "Try again.", variant: "destructive" });
+    }
+  };
   return (
     <header className="h-16 border-b border-border bg-card flex items-center justify-between px-4 gap-4">
       <div className="flex items-center gap-3">
