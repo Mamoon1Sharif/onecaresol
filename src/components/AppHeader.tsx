@@ -1,5 +1,7 @@
 import { Search, Bell, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/use-auth";
+import { toast } from "@/hooks/use-toast";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,6 +15,17 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export function AppHeader() {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      toast({ title: "Logged out", description: "You have been signed out." });
+      navigate("/login", { replace: true });
+    } catch (e: any) {
+      toast({ title: "Logout failed", description: e?.message ?? "Try again.", variant: "destructive" });
+    }
+  };
   return (
     <header className="h-16 border-b border-border bg-card flex items-center justify-between px-4 gap-4">
       <div className="flex items-center gap-3">
@@ -49,7 +62,7 @@ export function AppHeader() {
             <DropdownMenuItem onClick={() => navigate("/profile")}>My Profile</DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/settings")}>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">Log Out</DropdownMenuItem>
+            <DropdownMenuItem className="text-destructive" onClick={handleLogout}>Log Out</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
