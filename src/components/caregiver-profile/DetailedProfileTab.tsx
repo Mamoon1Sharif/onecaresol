@@ -168,7 +168,7 @@ export function DetailedProfileTab({ cg }: Props) {
           <Separator className="mb-4" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-1">
             <EditableField icon={Shield} label="DBS/PVG Number" value={cg.dbs_ref} onSave={(v) => save("dbs_ref", v)} />
-            <EditableField icon={Shield} label="DBS Type" value={cg.dbs_type} onSave={(v) => save("dbs_type", v)} />
+            <EditableField icon={Shield} label="DBS Type" value={cg.dbs_type} onSave={(v) => save("dbs_type", v)} options={DBS_TYPE_OPTIONS} />
             <div className="flex items-center gap-3 py-2">
               <Shield className="h-4 w-4 text-muted-foreground" />
               <div>
