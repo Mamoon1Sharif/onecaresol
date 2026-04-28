@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pencil, Check, X } from "lucide-react";
 
 interface Props {
@@ -8,14 +9,15 @@ interface Props {
   icon?: React.ComponentType<{ className?: string }>;
   onSave: (value: string) => void;
   type?: string;
+  options?: string[];
 }
 
-export function EditableField({ label, value, icon: Icon, onSave, type = "text" }: Props) {
+export function EditableField({ label, value, icon: Icon, onSave, type = "text", options }: Props) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value ?? "");
 
-  const handleSave = () => {
-    onSave(draft);
+  const handleSave = (override?: string) => {
+    onSave(override ?? draft);
     setEditing(false);
   };
 
@@ -31,15 +33,29 @@ export function EditableField({ label, value, icon: Icon, onSave, type = "text" 
         <div className="flex-1 min-w-0">
           <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-0.5">{label}</p>
           <div className="flex items-center gap-1">
-            <Input
-              type={type}
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              className="h-7 text-sm"
-              autoFocus
-              onKeyDown={(e) => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") handleCancel(); }}
-            />
-            <button onClick={handleSave} className="p-1 rounded hover:bg-primary/10 text-primary"><Check className="h-3.5 w-3.5" /></button>
+            {options ? (
+              <Select
+                value={draft || undefined}
+                onValueChange={(v) => { setDraft(v); handleSave(v); }}
+                open
+                onOpenChange={(o) => { if (!o) handleCancel(); }}
+              >
+                <SelectTrigger className="h-7 text-sm"><SelectValue placeholder={`Select ${label.toLowerCase()}`} /></SelectTrigger>
+                <SelectContent className="bg-popover z-50 max-h-64">
+                  {options.map((o) => <SelectItem key={o} value={o}>{o}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input
+                type={type}
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                className="h-7 text-sm"
+                autoFocus
+                onKeyDown={(e) => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") handleCancel(); }}
+              />
+            )}
+            {!options && <button onClick={() => handleSave()} className="p-1 rounded hover:bg-primary/10 text-primary"><Check className="h-3.5 w-3.5" /></button>}
             <button onClick={handleCancel} className="p-1 rounded hover:bg-destructive/10 text-muted-foreground"><X className="h-3.5 w-3.5" /></button>
           </div>
         </div>
