@@ -46,7 +46,7 @@ export function AppHeader() {
             <ChevronDown className="h-4 w-4 text-muted-foreground hidden md:block" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onClick={() => navigate("/settings")}>My Profile</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate("/profile")}>My Profile</DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/settings")}>Settings</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-destructive">Log Out</DropdownMenuItem>
