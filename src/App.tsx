@@ -136,6 +136,7 @@ const App = () => (
             <Route path="/caregivers/:id/incidents" element={<ProtectedRoute><Incidents /></ProtectedRoute>} />
             <Route path="/caregivers/:id/files" element={<ProtectedRoute><Files /></ProtectedRoute>} />
             <Route path="/caregivers/:id/changelog" element={<ProtectedRoute><Changelog /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
