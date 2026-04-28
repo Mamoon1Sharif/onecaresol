@@ -148,13 +148,13 @@ export function DetailedProfileTab({ cg }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-1">
             <EditableField icon={Hash} label="Reference No" value={cg.reference_no} onSave={(v) => save("reference_no", v)} />
             <EditableField icon={UserCog} label="Manager" value={cg.manager} onSave={(v) => save("manager", v)} />
-            <EditableField icon={Briefcase} label="Role" value={cg.role_title} onSave={(v) => save("role_title", v)} />
+            <EditableField icon={Briefcase} label="Role" value={cg.role_title} onSave={(v) => save("role_title", v)} options={ROLE_TITLE_OPTIONS} />
             <EditableField icon={Hash} label="Salary" value={cg.salary} onSave={(v) => save("salary", v)} />
             <EditableField icon={Hash} label="Payroll No" value={cg.payroll_number} onSave={(v) => save("payroll_number", v)} />
             <EditableField icon={Hash} label="Sage No" value={cg.sage_num} onSave={(v) => save("sage_num", v)} />
-            <EditableField icon={UserCog} label="Permission" value={cg.permission} onSave={(v) => save("permission", v)} />
-            <EditableField icon={Briefcase} label="Employment Status" value={cg.employment_status} onSave={(v) => save("employment_status", v)} />
-            <EditableField icon={Briefcase} label="Employment Type" value={cg.employment_type} onSave={(v) => save("employment_type", v)} />
+            <EditableField icon={UserCog} label="Permission" value={cg.permission} onSave={(v) => save("permission", v)} options={PERMISSION_OPTIONS} />
+            <EditableField icon={Briefcase} label="Employment Status" value={cg.employment_status} onSave={(v) => save("employment_status", v)} options={EMPLOYMENT_STATUS_OPTIONS} />
+            <EditableField icon={Briefcase} label="Employment Type" value={cg.employment_type} onSave={(v) => save("employment_type", v)} options={EMPLOYMENT_TYPE_OPTIONS} />
             <EditableField icon={Calendar} label="Start Date" value={cg.start_date} onSave={(v) => save("start_date", v)} type="date" />
             <EditableField icon={KeyRound} label="Login Code" value={cg.login_code} onSave={(v) => save("login_code", v)} />
           </div>
