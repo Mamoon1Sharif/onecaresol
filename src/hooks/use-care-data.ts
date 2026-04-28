@@ -36,6 +36,17 @@ export function useUpdateCareGiver() {
   });
 }
 
+export function useDeleteCareGiver() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("care_givers").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["care_givers"] }),
+  });
+}
+
 export function useCareGiver(id: string | undefined) {
   return useQuery({
     queryKey: ["care_givers", id],

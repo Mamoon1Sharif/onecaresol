@@ -15,6 +15,12 @@ import {
   Briefcase, Hash, KeyRound, UserCog, Stethoscope, Home,
   Heart, PhoneCall, StickyNote, Clock,
 } from "lucide-react";
+import {
+  TITLE_OPTIONS, SUFFIX_OPTIONS, SEX_OPTIONS, GENDER_OPTIONS, SEXUAL_ORIENTATION_OPTIONS,
+  ETHNICITY_OPTIONS, MARITAL_STATUS_OPTIONS, RELIGION_OPTIONS, DBS_TYPE_OPTIONS,
+  EMPLOYMENT_STATUS_OPTIONS, EMPLOYMENT_TYPE_OPTIONS, PERMISSION_OPTIONS, ROLE_TITLE_OPTIONS,
+  RELATIONSHIP_OPTIONS,
+} from "@/lib/profile-options";
 import type { Tables } from "@/integrations/supabase/types";
 
 type CareGiver = Tables<"care_givers">;
@@ -76,18 +82,18 @@ export function DetailedProfileTab({ cg }: Props) {
           <h3 className="text-sm font-bold uppercase tracking-widest text-primary mb-1">Team Member Details</h3>
           <Separator className="mb-4" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-1">
-            <EditableField icon={User} label="Title" value={cg.title} onSave={(v) => save("title", v)} />
+            <EditableField icon={User} label="Title" value={cg.title} onSave={(v) => save("title", v)} options={TITLE_OPTIONS} />
             <EditableField icon={User} label="Forename" value={cg.forename} onSave={(v) => save("forename", v)} />
             <EditableField icon={User} label="Surname" value={cg.surname} onSave={(v) => save("surname", v)} />
             <EditableField icon={User} label="Preferred Name" value={cg.preferred_name} onSave={(v) => save("preferred_name", v)} />
             <EditableField icon={User} label="Alias" value={cg.alias} onSave={(v) => save("alias", v)} />
-            <EditableField icon={User} label="Suffix" value={cg.suffix} onSave={(v) => save("suffix", v)} />
-            <EditableField icon={User} label="Sex Assigned At Birth" value={cg.sex_assigned_at_birth} onSave={(v) => save("sex_assigned_at_birth", v)} />
-            <EditableField icon={User} label="Gender" value={cg.gender} onSave={(v) => save("gender", v)} />
-            <EditableField icon={User} label="Sexual Orientation" value={cg.sexual_orientation} onSave={(v) => save("sexual_orientation", v)} />
-            <EditableField icon={User} label="Ethnicity" value={cg.ethnicity} onSave={(v) => save("ethnicity", v)} />
-            <EditableField icon={User} label="Marital Status" value={cg.marital_status} onSave={(v) => save("marital_status", v)} />
-            <EditableField icon={User} label="Religion" value={cg.religion} onSave={(v) => save("religion", v)} />
+            <EditableField icon={User} label="Suffix" value={cg.suffix} onSave={(v) => save("suffix", v)} options={SUFFIX_OPTIONS} />
+            <EditableField icon={User} label="Sex Assigned At Birth" value={cg.sex_assigned_at_birth} onSave={(v) => save("sex_assigned_at_birth", v)} options={SEX_OPTIONS} />
+            <EditableField icon={User} label="Gender" value={cg.gender} onSave={(v) => save("gender", v)} options={GENDER_OPTIONS} />
+            <EditableField icon={User} label="Sexual Orientation" value={cg.sexual_orientation} onSave={(v) => save("sexual_orientation", v)} options={SEXUAL_ORIENTATION_OPTIONS} />
+            <EditableField icon={User} label="Ethnicity" value={cg.ethnicity} onSave={(v) => save("ethnicity", v)} options={ETHNICITY_OPTIONS} />
+            <EditableField icon={User} label="Marital Status" value={cg.marital_status} onSave={(v) => save("marital_status", v)} options={MARITAL_STATUS_OPTIONS} />
+            <EditableField icon={User} label="Religion" value={cg.religion} onSave={(v) => save("religion", v)} options={RELIGION_OPTIONS} />
             <EditableField icon={Calendar} label="DOB" value={cg.dob} onSave={(v) => save("dob", v)} type="date" />
             <EditableField icon={Hash} label="NI Number" value={cg.ni_number} onSave={(v) => save("ni_number", v)} />
             <div className="flex items-center gap-3 py-2">
@@ -142,13 +148,13 @@ export function DetailedProfileTab({ cg }: Props) {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-1">
             <EditableField icon={Hash} label="Reference No" value={cg.reference_no} onSave={(v) => save("reference_no", v)} />
             <EditableField icon={UserCog} label="Manager" value={cg.manager} onSave={(v) => save("manager", v)} />
-            <EditableField icon={Briefcase} label="Role" value={cg.role_title} onSave={(v) => save("role_title", v)} />
+            <EditableField icon={Briefcase} label="Role" value={cg.role_title} onSave={(v) => save("role_title", v)} options={ROLE_TITLE_OPTIONS} />
             <EditableField icon={Hash} label="Salary" value={cg.salary} onSave={(v) => save("salary", v)} />
             <EditableField icon={Hash} label="Payroll No" value={cg.payroll_number} onSave={(v) => save("payroll_number", v)} />
             <EditableField icon={Hash} label="Sage No" value={cg.sage_num} onSave={(v) => save("sage_num", v)} />
-            <EditableField icon={UserCog} label="Permission" value={cg.permission} onSave={(v) => save("permission", v)} />
-            <EditableField icon={Briefcase} label="Employment Status" value={cg.employment_status} onSave={(v) => save("employment_status", v)} />
-            <EditableField icon={Briefcase} label="Employment Type" value={cg.employment_type} onSave={(v) => save("employment_type", v)} />
+            <EditableField icon={UserCog} label="Permission" value={cg.permission} onSave={(v) => save("permission", v)} options={PERMISSION_OPTIONS} />
+            <EditableField icon={Briefcase} label="Employment Status" value={cg.employment_status} onSave={(v) => save("employment_status", v)} options={EMPLOYMENT_STATUS_OPTIONS} />
+            <EditableField icon={Briefcase} label="Employment Type" value={cg.employment_type} onSave={(v) => save("employment_type", v)} options={EMPLOYMENT_TYPE_OPTIONS} />
             <EditableField icon={Calendar} label="Start Date" value={cg.start_date} onSave={(v) => save("start_date", v)} type="date" />
             <EditableField icon={KeyRound} label="Login Code" value={cg.login_code} onSave={(v) => save("login_code", v)} />
           </div>
@@ -162,7 +168,7 @@ export function DetailedProfileTab({ cg }: Props) {
           <Separator className="mb-4" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-1">
             <EditableField icon={Shield} label="DBS/PVG Number" value={cg.dbs_ref} onSave={(v) => save("dbs_ref", v)} />
-            <EditableField icon={Shield} label="DBS Type" value={cg.dbs_type} onSave={(v) => save("dbs_type", v)} />
+            <EditableField icon={Shield} label="DBS Type" value={cg.dbs_type} onSave={(v) => save("dbs_type", v)} options={DBS_TYPE_OPTIONS} />
             <div className="flex items-center gap-3 py-2">
               <Shield className="h-4 w-4 text-muted-foreground" />
               <div>
@@ -186,7 +192,7 @@ export function DetailedProfileTab({ cg }: Props) {
           <Separator className="mb-4" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-1">
             <EditableField icon={User} label="Name" value={cg.next_of_kin_name} onSave={(v) => save("next_of_kin_name", v)} />
-            <EditableField icon={Heart} label="Relationship" value={cg.next_of_kin_relationship} onSave={(v) => save("next_of_kin_relationship", v)} />
+            <EditableField icon={Heart} label="Relationship" value={cg.next_of_kin_relationship} onSave={(v) => save("next_of_kin_relationship", v)} options={RELATIONSHIP_OPTIONS} />
             <EditableField icon={Home} label="Address" value={cg.next_of_kin_address} onSave={(v) => save("next_of_kin_address", v)} />
             <EditableField icon={Phone} label="Tel" value={cg.next_of_kin_phone} onSave={(v) => save("next_of_kin_phone", v)} type="tel" />
             <EditableField icon={PhoneCall} label="Tel 2" value={cg.next_of_kin_secondary_phone} onSave={(v) => save("next_of_kin_secondary_phone", v)} type="tel" />
