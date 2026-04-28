@@ -15,6 +15,12 @@ import {
   Briefcase, Hash, KeyRound, UserCog, Stethoscope, Home,
   Heart, PhoneCall, StickyNote, Clock,
 } from "lucide-react";
+import {
+  TITLE_OPTIONS, SUFFIX_OPTIONS, SEX_OPTIONS, GENDER_OPTIONS, SEXUAL_ORIENTATION_OPTIONS,
+  ETHNICITY_OPTIONS, MARITAL_STATUS_OPTIONS, RELIGION_OPTIONS, DBS_TYPE_OPTIONS,
+  EMPLOYMENT_STATUS_OPTIONS, EMPLOYMENT_TYPE_OPTIONS, PERMISSION_OPTIONS, ROLE_TITLE_OPTIONS,
+  RELATIONSHIP_OPTIONS,
+} from "@/lib/profile-options";
 import type { Tables } from "@/integrations/supabase/types";
 
 type CareGiver = Tables<"care_givers">;
