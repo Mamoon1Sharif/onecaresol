@@ -63,6 +63,7 @@ import Login from "./pages/Login.tsx";
 import Signup from "./pages/Signup.tsx";
 import SuperAdmin from "./pages/SuperAdmin.tsx";
 import CompanyUsers from "./pages/CompanyUsers.tsx";
+import Settings from "./pages/Settings.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
