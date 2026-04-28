@@ -82,18 +82,18 @@ export function DetailedProfileTab({ cg }: Props) {
           <h3 className="text-sm font-bold uppercase tracking-widest text-primary mb-1">Team Member Details</h3>
           <Separator className="mb-4" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-1">
-            <EditableField icon={User} label="Title" value={cg.title} onSave={(v) => save("title", v)} />
+            <EditableField icon={User} label="Title" value={cg.title} onSave={(v) => save("title", v)} options={TITLE_OPTIONS} />
             <EditableField icon={User} label="Forename" value={cg.forename} onSave={(v) => save("forename", v)} />
             <EditableField icon={User} label="Surname" value={cg.surname} onSave={(v) => save("surname", v)} />
             <EditableField icon={User} label="Preferred Name" value={cg.preferred_name} onSave={(v) => save("preferred_name", v)} />
             <EditableField icon={User} label="Alias" value={cg.alias} onSave={(v) => save("alias", v)} />
-            <EditableField icon={User} label="Suffix" value={cg.suffix} onSave={(v) => save("suffix", v)} />
-            <EditableField icon={User} label="Sex Assigned At Birth" value={cg.sex_assigned_at_birth} onSave={(v) => save("sex_assigned_at_birth", v)} />
-            <EditableField icon={User} label="Gender" value={cg.gender} onSave={(v) => save("gender", v)} />
-            <EditableField icon={User} label="Sexual Orientation" value={cg.sexual_orientation} onSave={(v) => save("sexual_orientation", v)} />
-            <EditableField icon={User} label="Ethnicity" value={cg.ethnicity} onSave={(v) => save("ethnicity", v)} />
-            <EditableField icon={User} label="Marital Status" value={cg.marital_status} onSave={(v) => save("marital_status", v)} />
-            <EditableField icon={User} label="Religion" value={cg.religion} onSave={(v) => save("religion", v)} />
+            <EditableField icon={User} label="Suffix" value={cg.suffix} onSave={(v) => save("suffix", v)} options={SUFFIX_OPTIONS} />
+            <EditableField icon={User} label="Sex Assigned At Birth" value={cg.sex_assigned_at_birth} onSave={(v) => save("sex_assigned_at_birth", v)} options={SEX_OPTIONS} />
+            <EditableField icon={User} label="Gender" value={cg.gender} onSave={(v) => save("gender", v)} options={GENDER_OPTIONS} />
+            <EditableField icon={User} label="Sexual Orientation" value={cg.sexual_orientation} onSave={(v) => save("sexual_orientation", v)} options={SEXUAL_ORIENTATION_OPTIONS} />
+            <EditableField icon={User} label="Ethnicity" value={cg.ethnicity} onSave={(v) => save("ethnicity", v)} options={ETHNICITY_OPTIONS} />
+            <EditableField icon={User} label="Marital Status" value={cg.marital_status} onSave={(v) => save("marital_status", v)} options={MARITAL_STATUS_OPTIONS} />
+            <EditableField icon={User} label="Religion" value={cg.religion} onSave={(v) => save("religion", v)} options={RELIGION_OPTIONS} />
             <EditableField icon={Calendar} label="DOB" value={cg.dob} onSave={(v) => save("dob", v)} type="date" />
             <EditableField icon={Hash} label="NI Number" value={cg.ni_number} onSave={(v) => save("ni_number", v)} />
             <div className="flex items-center gap-3 py-2">
