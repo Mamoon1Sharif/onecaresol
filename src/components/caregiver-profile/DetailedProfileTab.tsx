@@ -192,7 +192,7 @@ export function DetailedProfileTab({ cg }: Props) {
           <Separator className="mb-4" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-1">
             <EditableField icon={User} label="Name" value={cg.next_of_kin_name} onSave={(v) => save("next_of_kin_name", v)} />
-            <EditableField icon={Heart} label="Relationship" value={cg.next_of_kin_relationship} onSave={(v) => save("next_of_kin_relationship", v)} />
+            <EditableField icon={Heart} label="Relationship" value={cg.next_of_kin_relationship} onSave={(v) => save("next_of_kin_relationship", v)} options={RELATIONSHIP_OPTIONS} />
             <EditableField icon={Home} label="Address" value={cg.next_of_kin_address} onSave={(v) => save("next_of_kin_address", v)} />
             <EditableField icon={Phone} label="Tel" value={cg.next_of_kin_phone} onSave={(v) => save("next_of_kin_phone", v)} type="tel" />
             <EditableField icon={PhoneCall} label="Tel 2" value={cg.next_of_kin_secondary_phone} onSave={(v) => save("next_of_kin_secondary_phone", v)} type="tel" />
