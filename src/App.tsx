@@ -63,6 +63,7 @@ import Login from "./pages/Login.tsx";
 import Signup from "./pages/Signup.tsx";
 import SuperAdmin from "./pages/SuperAdmin.tsx";
 import CompanyUsers from "./pages/CompanyUsers.tsx";
+import Settings from "./pages/Settings.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -135,6 +136,7 @@ const App = () => (
             <Route path="/caregivers/:id/incidents" element={<ProtectedRoute><Incidents /></ProtectedRoute>} />
             <Route path="/caregivers/:id/files" element={<ProtectedRoute><Files /></ProtectedRoute>} />
             <Route path="/caregivers/:id/changelog" element={<ProtectedRoute><Changelog /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
