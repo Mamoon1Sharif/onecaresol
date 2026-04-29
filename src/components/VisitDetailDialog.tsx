@@ -257,16 +257,38 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                 <Activity className="h-3.5 w-3.5" /> Shift Timeline
               </h3>
               {(() => {
+                const currentStatus = (editStatus || visit.status || "").toLowerCase();
+                const isMissed = currentStatus === "missed";
                 const events: { time: string; label: string; icon: any; tone: string; sub?: string }[] = [];
+
                 events.push({ time: editStart || visit.scheduledStart, label: "Shift scheduled to start", icon: Calendar, tone: "text-blue-600", sub: "Built from rota template" });
-                if (clockIn || visit.actualStart) {
-                  events.push({ time: clockIn || visit.actualStart, label: `${visit.teamMember} clocked in`, icon: LogIn, tone: "text-success", sub: "GPS verified at service-user address" });
-                  events.push({ time: clockIn || visit.actualStart, label: "Shift in progress", icon: PlayCircle, tone: "text-success" });
+
+                if (isMissed) {
+                  // Missed shift: no clock-in/out, no "in progress". Show that no-one attended.
+                  events.push({
+                    time: editStart || visit.scheduledStart,
+                    label: `${visit.teamMember && visit.teamMember !== "—" ? visit.teamMember : "Caregiver"} did not clock in`,
+                    icon: XCircle,
+                    tone: "text-destructive",
+                    sub: "No GPS check-in recorded at scheduled start time",
+                  });
+                  events.push({
+                    time: editEnd || visit.scheduledEnd,
+                    label: "Shift marked as Missed",
+                    icon: AlertCircle,
+                    tone: "text-destructive",
+                    sub: "Office notified · added to incidents for follow-up",
+                  });
+                } else {
+                  if (clockIn || visit.actualStart) {
+                    events.push({ time: clockIn || visit.actualStart, label: `${visit.teamMember} clocked in`, icon: LogIn, tone: "text-success", sub: "GPS verified at service-user address" });
+                    events.push({ time: clockIn || visit.actualStart, label: "Shift in progress", icon: PlayCircle, tone: "text-success" });
+                  }
+                  if (clockOut || visit.actualEnd) {
+                    events.push({ time: clockOut || visit.actualEnd, label: `${visit.teamMember} clocked out`, icon: LogOut, tone: "text-rose-600", sub: `Total worked: ${duration !== "0 minutes" ? duration : visit.actualDuration || "—"}` });
+                  }
+                  events.push({ time: editEnd || visit.scheduledEnd, label: "Shift scheduled to end", icon: Calendar, tone: "text-blue-600" });
                 }
-                if (clockOut || visit.actualEnd) {
-                  events.push({ time: clockOut || visit.actualEnd, label: `${visit.teamMember} clocked out`, icon: LogOut, tone: "text-rose-600", sub: `Total worked: ${duration !== "0 minutes" ? duration : visit.actualDuration || "—"}` });
-                }
-                events.push({ time: editEnd || visit.scheduledEnd, label: "Shift scheduled to end", icon: Calendar, tone: "text-blue-600" });
 
                 return (
                   <ol className="relative border-l-2 border-border ml-3 space-y-4 py-1">
