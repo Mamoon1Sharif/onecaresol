@@ -640,13 +640,13 @@ function ShiftTasks({ shiftEnd, clockOut, isMissed = false }: { shiftEnd: string
             ({completed.length}/{tasks.length} complete · {pct}%)
           </span>
         </h3>
-        <span className="text-[11px] text-muted-foreground">
-          {clockOut ? "Shift ended" : `Pending until ${shiftEnd}`}
+        <span className={`text-[11px] ${isMissed ? "text-destructive font-medium" : "text-muted-foreground"}`}>
+          {isMissed ? "Shift missed — no tasks completed" : clockOut ? "Shift ended" : `Pending until ${shiftEnd}`}
         </span>
       </div>
 
       <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-3">
-        <div className="h-full bg-success transition-all" style={{ width: `${pct}%` }} />
+        <div className={`h-full transition-all ${isMissed ? "bg-destructive" : "bg-success"}`} style={{ width: `${isMissed ? 100 : pct}%` }} />
       </div>
 
       <div className="grid md:grid-cols-2 gap-3">
