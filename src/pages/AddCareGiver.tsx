@@ -193,7 +193,7 @@ export default function AddCareGiver() {
     setSubmitting(true);
     try {
       const name = `${form.forename.trim()} ${form.surname.trim()}`;
-      const { error } = await supabase.from("care_givers").insert({
+      const { data: inserted, error } = await supabase.from("care_givers").insert({
         name,
         title: form.title, forename: form.forename, surname: form.surname,
         preferred_name: form.preferred_name || null, alias: form.alias || null, suffix: form.suffix || null,
@@ -219,8 +219,27 @@ export default function AddCareGiver() {
         role_title: form.role_title || null, salary: form.salary || null,
         status: "Active",
         tags: tags,
-      } as any);
+      } as any).select("id").single();
       if (error) throw error;
+
+      // Upload avatar if provided
+      if (avatarFile && inserted?.id) {
+        try {
+          const ext = avatarFile.name.split(".").pop()?.toLowerCase() || "jpg";
+          const path = `care_givers/${inserted.id}-${Date.now()}.${ext}`;
+          const { error: upErr } = await supabase.storage
+            .from("profile-avatars")
+            .upload(path, avatarFile, { upsert: true, contentType: avatarFile.type });
+          if (!upErr) {
+            const { data: pub } = supabase.storage.from("profile-avatars").getPublicUrl(path);
+            await supabase.from("care_givers").update({ avatar_url: pub.publicUrl } as any).eq("id", inserted.id);
+          }
+        } catch (uploadErr) {
+          // Non-fatal — record was created
+          console.error("Avatar upload failed:", uploadErr);
+        }
+      }
+
       toast({ title: "Team Member Added", description: `${name} has been added successfully.` });
       navigate("/caregivers");
     } catch (e: any) {
