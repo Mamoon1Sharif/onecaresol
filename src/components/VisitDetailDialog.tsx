@@ -344,25 +344,39 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                   </div>
                   <div className="flex-1 min-w-[240px]">
                     <a className="text-primary hover:underline font-medium text-sm cursor-pointer">{visit.teamMember}</a>
-                    <div className="mt-3 space-y-1.5 text-xs">
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">- Clock In:</span>
-                        {clockIn ? (
-                          <span className="font-mono font-semibold text-success">{clockIn}</span>
-                        ) : (
-                          <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" onClick={handleClockIn}>Clock In</Button>
-                        )}
+                    {(editStatus || visit.status || "").toLowerCase() === "missed" ? (
+                      <div className="mt-3 space-y-1.5 text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground">- Clock In:</span>
+                          <span className="font-mono font-semibold text-destructive">No check-in</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground">- Clock Out:</span>
+                          <span className="font-mono font-semibold text-destructive">No check-out</span>
+                        </div>
+                        <div className="text-destructive font-medium">Shift was missed — caregiver did not attend.</div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">- Clock Out:</span>
-                        {clockOut ? (
-                          <span className="font-mono font-semibold text-success">{clockOut}</span>
-                        ) : (
-                          <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" disabled={!clockIn} onClick={handleClockOut}>Clock Out</Button>
-                        )}
+                    ) : (
+                      <div className="mt-3 space-y-1.5 text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground">- Clock In:</span>
+                          {clockIn ? (
+                            <span className="font-mono font-semibold text-success">{clockIn}</span>
+                          ) : (
+                            <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" onClick={handleClockIn}>Clock In</Button>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground">- Clock Out:</span>
+                          {clockOut ? (
+                            <span className="font-mono font-semibold text-success">{clockOut}</span>
+                          ) : (
+                            <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" disabled={!clockIn} onClick={handleClockOut}>Clock Out</Button>
+                          )}
+                        </div>
+                        <div className="text-orange-600">Duration: {duration}</div>
                       </div>
-                      <div className="text-orange-600">Duration: {duration}</div>
-                    </div>
+                    )}
                   </div>
                 </div>
               )}
