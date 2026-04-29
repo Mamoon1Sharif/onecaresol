@@ -28,6 +28,7 @@ const CareReceiverProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: cr, isLoading } = useCareReceiver(id);
+  const [tab, setTab] = useState("overview");
 
   if (isLoading) {
     return (
