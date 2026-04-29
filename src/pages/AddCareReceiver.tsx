@@ -63,6 +63,8 @@ const CARE_TYPE_OPTIONS = ["Domiciliary","Live-In","Respite","Supported Living",
 const RISK_RATING_OPTIONS = ["Low","Medium","High","None"];
 const PREFERENCE_OPTIONS = ["Either","Female","Male"];
 const LANGUAGE_OPTIONS = ["English","Welsh","Polish","Urdu","Punjabi","Bengali","Gujarati","Arabic","Other"];
+const TITLE_OPTIONS = ["Mr","Mrs","Miss","Ms","Mx","Dr","Prof","Rev","Sir","Dame","Lady","Lord"];
+const SUFFIX_OPTIONS = ["Jr","Sr","II","III","IV","PhD","MD","Esq","OBE","MBE","RN"];
 const TAG_OPTIONS = [
   "End of Life",
   "Falls Risk",
@@ -301,12 +303,12 @@ export default function AddCareReceiver() {
         <Card>
           <SectionHeader icon={Heart} title="Personal Detail" />
           <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <FieldRow label="Title" required>{inputField("title", "e.g. Mr, Mrs, Ms")}</FieldRow>
+            <FieldRow label="Title" required>{selectField("title", "Choose one...", TITLE_OPTIONS)}</FieldRow>
             <FieldRow label="Forename" required>{inputField("forename", "First name")}</FieldRow>
             <FieldRow label="Surname" required>{inputField("surname", "Last name")}</FieldRow>
             <FieldRow label="Preferred Name">{inputField("preferred_name", "Preferred name")}</FieldRow>
             <FieldRow label="Alias">{inputField("alias", "Alias")}</FieldRow>
-            <FieldRow label="Suffix">{inputField("suffix", "e.g. Jr, Sr")}</FieldRow>
+            <FieldRow label="Suffix">{selectField("suffix", "Choose one...", SUFFIX_OPTIONS)}</FieldRow>
             <FieldRow label="Sex Assigned At Birth" required>{selectField("sex_assigned_at_birth", "Choose one...", SEX_OPTIONS)}</FieldRow>
             <FieldRow label="Gender">{selectField("gender", "Choose one...", GENDER_OPTIONS)}</FieldRow>
             <FieldRow label="Sexual Orientation">{selectField("sexual_orientation", "Choose one...", SEXUAL_ORIENTATION_OPTIONS)}</FieldRow>
