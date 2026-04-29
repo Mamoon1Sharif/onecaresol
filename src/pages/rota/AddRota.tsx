@@ -598,11 +598,75 @@ const AddRota = () => {
                 value={form.medicationRequired}
                 onChange={(v) => setForm({ ...form, medicationRequired: v })}
               />
+              {form.medicationRequired === "Yes" && (
+                <div className="rounded-md border border-border bg-muted/30 p-3 space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <Pill className="h-4 w-4 text-primary" />
+                    Doctor-approved medications
+                  </div>
+                  {medications.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">
+                      No approved medications recorded for this service member.
+                    </p>
+                  ) : (
+                    <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+                      {medications.map((m: any) => (
+                        <label
+                          key={m.id}
+                          className="flex items-start gap-2 text-sm rounded p-1.5 hover:bg-background cursor-pointer"
+                        >
+                          <Checkbox
+                            checked={selectedMedIds.includes(m.id)}
+                            onCheckedChange={() => toggleMed(m.id)}
+                            className="mt-0.5"
+                          />
+                          <span className="flex-1">
+                            <span className="font-medium">{m.medication}</span>
+                            {m.dosage && <span className="text-muted-foreground"> · {m.dosage}</span>}
+                            {m.notes && (
+                              <span className="block text-xs text-muted-foreground">{m.notes}</span>
+                            )}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
               <YesNoRow
                 label="Tasks Required?"
                 value={form.tasksRequired}
                 onChange={(v) => setForm({ ...form, tasksRequired: v })}
               />
+              {form.tasksRequired === "Yes" && (
+                <div className="rounded-md border border-border bg-muted/30 p-3 space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <ClipboardList className="h-4 w-4 text-primary" />
+                    Pre-approved tasks
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Selected tasks will appear on the caregiver's timeline for this shift.
+                  </p>
+                  {((selected as any).approved_tasks ?? []).length === 0 ? (
+                    <p className="text-xs text-muted-foreground">No approved tasks set for this service member.</p>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-56 overflow-y-auto pr-1">
+                      {((selected as any).approved_tasks as string[]).map((t) => (
+                        <label
+                          key={t}
+                          className="flex items-center gap-2 text-sm rounded p-1.5 hover:bg-background cursor-pointer"
+                        >
+                          <Checkbox
+                            checked={selectedTasks.includes(t)}
+                            onCheckedChange={() => toggleTask(t)}
+                          />
+                          <span>{t}</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
               <YesNoRow label="Alert?" value={form.alert} onChange={(v) => setForm({ ...form, alert: v })} />
               <YesNoRow
                 label="Add as recurring shift?"
