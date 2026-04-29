@@ -1,0 +1,1 @@
+ALTER TABLE public.medications ADD COLUMN IF NOT EXISTS time_of_day text, ADD COLUMN IF NOT EXISTS scheduled_time text;
