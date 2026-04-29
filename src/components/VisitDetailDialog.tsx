@@ -236,7 +236,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                           <div className="text-[10px] text-muted-foreground">Sched hrs</div>
                         </td>
                         <td className="p-1.5 border-r border-border text-[11px] font-mono" colSpan={3}>
-                          <div>{visit.actualDuration || "00:00"}</div>
+                          <div>{(editStatus || visit.status) === "Missed" ? "00:00" : (duration !== "0 minutes" ? duration : (visit.actualDuration || "00:00"))}</div>
                           <div className="text-[10px] text-muted-foreground">Clock hrs</div>
                         </td>
                         <td className="p-1.5 border-r border-border" colSpan={3} />
