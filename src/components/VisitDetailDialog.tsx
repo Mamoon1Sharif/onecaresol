@@ -314,7 +314,11 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
 
             {/* ============== TASKS ============== */}
             <section>
-              <ShiftTasks shiftEnd={editEnd || visit.scheduledEnd} clockOut={clockOut || visit.actualEnd} />
+              <ShiftTasks
+                shiftEnd={editEnd || visit.scheduledEnd}
+                clockOut={clockOut || visit.actualEnd}
+                isMissed={(editStatus || visit.status || "").toLowerCase() === "missed"}
+              />
             </section>
 
             {/* ============== ASSIGNED TEAM MEMBERS ============== */}
