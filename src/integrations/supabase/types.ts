@@ -225,6 +225,7 @@ export type Database = {
           age: number | null
           alias: string | null
           allergies: string | null
+          approved_tasks: string[]
           area_name: string | null
           authority_ref: string | null
           avatar_url: string | null
@@ -304,6 +305,7 @@ export type Database = {
           age?: number | null
           alias?: string | null
           allergies?: string | null
+          approved_tasks?: string[]
           area_name?: string | null
           authority_ref?: string | null
           avatar_url?: string | null
@@ -383,6 +385,7 @@ export type Database = {
           age?: number | null
           alias?: string | null
           allergies?: string | null
+          approved_tasks?: string[]
           area_name?: string | null
           authority_ref?: string | null
           avatar_url?: string | null
