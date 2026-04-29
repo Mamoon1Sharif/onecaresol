@@ -65,6 +65,7 @@ const AddRota = () => {
 
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const { data: medications = [] } = useMedications(selectedId ?? undefined);
 
   const today = new Date().toISOString().slice(0, 10);
   const [form, setForm] = useState({
@@ -84,6 +85,13 @@ const AddRota = () => {
     recurring: "No",
     template: "No",
   });
+  const [selectedMedIds, setSelectedMedIds] = useState<string[]>([]);
+  const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
+
+  const toggleMed = (id: string) =>
+    setSelectedMedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  const toggleTask = (t: string) =>
+    setSelectedTasks((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
 
   const filtered = useMemo(
     () =>
