@@ -7,13 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Search, ArrowLeft, MapPin, Phone, User, Save, Loader2 } from "lucide-react";
 import { useCareReceivers, useCareGivers, useUpsertShift } from "@/hooks/use-care-data";
@@ -39,13 +33,13 @@ function pick<T>(seed: string, arr: T[]) {
   return arr[hashStr(seed) % arr.length];
 }
 function fallbackRef(id: string) {
-  return `1459${(hashStr(id) % 90000 + 10000).toString()}`;
+  return `1459${((hashStr(id) % 90000) + 10000).toString()}`;
 }
 function fallbackNfc(id: string) {
-  return `NFC-${(hashStr(id + "nfc") % 9000 + 1000).toString()}`;
+  return `NFC-${((hashStr(id + "nfc") % 9000) + 1000).toString()}`;
 }
 function fallbackPhone(id: string) {
-  return `07${(hashStr(id + "p") % 900 + 100)} ${(hashStr(id + "p2") % 900000 + 100000)}`;
+  return `07${(hashStr(id + "p") % 900) + 100} ${(hashStr(id + "p2") % 900000) + 100000}`;
 }
 function fallbackEmail(name: string) {
   return `${name.toLowerCase().replace(/[^a-z]+/g, ".")}@familycare.co.uk`;
@@ -95,13 +89,10 @@ const AddRota = () => {
       receivers
         .filter((r) => r.care_status !== "Discharged")
         .filter((r) => r.name.toLowerCase().includes(search.toLowerCase())),
-    [receivers, search]
+    [receivers, search],
   );
 
-  const selected = useMemo(
-    () => receivers.find((r) => r.id === selectedId) ?? null,
-    [receivers, selectedId]
-  );
+  const selected = useMemo(() => receivers.find((r) => r.id === selectedId) ?? null, [receivers, selectedId]);
 
   const duration = useMemo(() => {
     const s = parseInt(form.startH) * 60 + parseInt(form.startM);
@@ -188,9 +179,7 @@ const AddRota = () => {
         <div className="space-y-6">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Add Rota</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Select a service member to schedule a new shift.
-            </p>
+            <p className="text-sm text-muted-foreground mt-1">Select a service member to schedule a new shift.</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -212,9 +201,7 @@ const AddRota = () => {
           {isLoading ? (
             <div className="text-center py-12 text-muted-foreground">Loading…</div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              No service members found.
-            </div>
+            <div className="text-center py-12 text-muted-foreground">No service members found.</div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {filtered.map((r) => (
@@ -258,7 +245,7 @@ const AddRota = () => {
           <Button variant="ghost" size="sm" onClick={() => setSelectedId(null)} className="gap-2">
             <ArrowLeft className="h-4 w-4" /> Back
           </Button>
-          <h1 className="text-xl font-bold text-foreground">Rota — Add New Shift</h1>
+          <h1 className="text-xl font-bold text-foreground">Rota — Add New Rota</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -280,10 +267,14 @@ const AddRota = () => {
                     {selected.care_status || "Active"}
                   </Badge>
                   {selected.care_type && (
-                    <Badge variant="outline" className="text-[10px]">{selected.care_type}</Badge>
+                    <Badge variant="outline" className="text-[10px]">
+                      {selected.care_type}
+                    </Badge>
                   )}
                   {(selected.tags ?? []).slice(0, 3).map((t) => (
-                    <Badge key={t} variant="secondary" className="text-[10px]">{t}</Badge>
+                    <Badge key={t} variant="secondary" className="text-[10px]">
+                      {t}
+                    </Badge>
                   ))}
                 </div>
               </div>
@@ -298,28 +289,21 @@ const AddRota = () => {
                   label="DOB (AGE)"
                   value={
                     selected.dob
-                      ? `${new Date(selected.dob).toLocaleDateString("en-GB")}${
-                          age !== null ? ` (${age})` : ""
-                        }`
+                      ? `${new Date(selected.dob).toLocaleDateString("en-GB")}${age !== null ? ` (${age})` : ""}`
                       : selected.age != null
-                      ? `— (${selected.age})`
-                      : "—"
+                        ? `— (${selected.age})`
+                        : "—"
                   }
                 />
                 <Row
                   label="Sex Assigned At Birth"
                   value={
-                    selected.sex_assigned_at_birth ||
-                    selected.gender ||
-                    pick(selected.id + "sex", ["Female", "Male"])
+                    selected.sex_assigned_at_birth || selected.gender || pick(selected.id + "sex", ["Female", "Male"])
                   }
                 />
                 <Row label="Reference No" value={selected.reference_no || fallbackRef(selected.id)} />
                 <Row label="NFC number" value={selected.nfc_code || fallbackNfc(selected.id)} />
-                <Row
-                  label="Pref"
-                  value={selected.preference || selected.pref || selected.carer_pref || "Either"}
-                />
+                <Row label="Pref" value={selected.preference || selected.pref || selected.carer_pref || "Either"} />
                 <Row label="Language" value={selected.language || selected.preferred_language || "English"} />
                 {selected.religion && <Row label="Religion" value={selected.religion} />}
                 {selected.marital_status && <Row label="Marital Status" value={selected.marital_status} />}
@@ -328,7 +312,10 @@ const AddRota = () => {
               <Separator className="my-4" />
               <div className="text-sm">
                 <div className="text-xs font-semibold text-muted-foreground mb-1">Areas</div>
-                <div>{selected.area_name || pick(selected.id + "area", ["North Manchester", "South Manchester", "Salford", "Trafford"])}</div>
+                <div>
+                  {selected.area_name ||
+                    pick(selected.id + "area", ["North Manchester", "South Manchester", "Salford", "Trafford"])}
+                </div>
               </div>
 
               <Separator className="my-4" />
@@ -336,13 +323,19 @@ const AddRota = () => {
               <div className="divide-y text-sm">
                 <Row label="NI Number" value={selected.ni_number || fallbackNI(selected.id)} />
                 <Row label="NHS Number" value={selected.nhs_number || fallbackNHS(selected.id)} />
-                <Row label="Patient Number" value={selected.patient_number || `P-${(hashStr(selected.id + "pn") % 900000 + 100000)}`} />
-                <Row label="Health Care Number" value={selected.health_care_number || `HC-${(hashStr(selected.id + "hc") % 900000 + 100000)}`} />
+                <Row
+                  label="Patient Number"
+                  value={selected.patient_number || `P-${(hashStr(selected.id + "pn") % 900000) + 100000}`}
+                />
+                <Row
+                  label="Health Care Number"
+                  value={selected.health_care_number || `HC-${(hashStr(selected.id + "hc") % 900000) + 100000}`}
+                />
                 <Row
                   label="Community Health Index"
-                  value={selected.community_health_index || `${(hashStr(selected.id + "chi") % 9000000 + 1000000)}`}
+                  value={selected.community_health_index || `${(hashStr(selected.id + "chi") % 9000000) + 1000000}`}
                 />
-                <Row label="Keysafe" value={selected.keysafe || `C${(hashStr(selected.id + "ks") % 9000 + 1000)}`} />
+                <Row label="Keysafe" value={selected.keysafe || `C${(hashStr(selected.id + "ks") % 9000) + 1000}`} />
               </div>
 
               {(selected.allergies || selected.diagnoses) && (
@@ -353,13 +346,17 @@ const AddRota = () => {
                     {selected.allergies && (
                       <Row
                         label="Allergies"
-                        value={Array.isArray(selected.allergies) ? selected.allergies.join(", ") : String(selected.allergies)}
+                        value={
+                          Array.isArray(selected.allergies) ? selected.allergies.join(", ") : String(selected.allergies)
+                        }
                       />
                     )}
                     {selected.diagnoses && (
                       <Row
                         label="Diagnoses"
-                        value={Array.isArray(selected.diagnoses) ? selected.diagnoses.join(", ") : String(selected.diagnoses)}
+                        value={
+                          Array.isArray(selected.diagnoses) ? selected.diagnoses.join(", ") : String(selected.diagnoses)
+                        }
                       />
                     )}
                   </div>
@@ -420,21 +417,19 @@ const AddRota = () => {
           {/* RIGHT: Add shift form */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Add Shift</CardTitle>
+              <CardTitle className="text-base">Add Rota</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-xs text-destructive">
-                You have the setting turned on for locking Team Members by Service User pref.
-                This means if this Service User rates a Team Member less than 3, that team member
-                will not be allowed to be assigned to the visit.
+                You have the setting turned on for locking Team Members by Service User pref. This means if this Service
+                User rates a Team Member less than 3, that team member will not be allowed to be assigned to the visit.
               </p>
 
               <FormRow label="Service List" required>
-                <Select
-                  value={form.serviceList}
-                  onValueChange={(v) => setForm({ ...form, serviceList: v })}
-                >
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <Select value={form.serviceList} onValueChange={(v) => setForm({ ...form, serviceList: v })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="CHC - Evening Call">CHC - Evening Call</SelectItem>
                     <SelectItem value="CHC - Morning Call">CHC - Morning Call</SelectItem>
@@ -450,7 +445,9 @@ const AddRota = () => {
 
               <FormRow label="Rota Type" required highlight>
                 <Select value={form.rotaType} onValueChange={(v) => setForm({ ...form, rotaType: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Normal">Normal</SelectItem>
                     <SelectItem value="Alternative">Alternative</SelectItem>
@@ -459,23 +456,35 @@ const AddRota = () => {
               </FormRow>
 
               <FormRow label="Date" required>
-                <Input
-                  type="date"
-                  value={form.date}
-                  onChange={(e) => setForm({ ...form, date: e.target.value })}
-                />
+                <Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
               </FormRow>
 
               <FormRow label="Start Time" required>
                 <div className="flex items-center gap-2">
                   <Select value={form.startH} onValueChange={(v) => setForm({ ...form, startH: v })}>
-                    <SelectTrigger className="w-20"><SelectValue /></SelectTrigger>
-                    <SelectContent>{hours.map((h) => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
+                    <SelectTrigger className="w-20">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {hours.map((h) => (
+                        <SelectItem key={h} value={h}>
+                          {h}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                   <span>:</span>
                   <Select value={form.startM} onValueChange={(v) => setForm({ ...form, startM: v })}>
-                    <SelectTrigger className="w-20"><SelectValue /></SelectTrigger>
-                    <SelectContent>{minutes.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
+                    <SelectTrigger className="w-20">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {minutes.map((m) => (
+                        <SelectItem key={m} value={m}>
+                          {m}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                 </div>
               </FormRow>
@@ -497,23 +506,51 @@ const AddRota = () => {
               <FormRow label="End Time" required>
                 <div className="flex items-center gap-2">
                   <Select value={form.endH} onValueChange={(v) => setForm({ ...form, endH: v })}>
-                    <SelectTrigger className="w-20"><SelectValue /></SelectTrigger>
-                    <SelectContent>{hours.map((h) => <SelectItem key={h} value={h}>{h}</SelectItem>)}</SelectContent>
+                    <SelectTrigger className="w-20">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {hours.map((h) => (
+                        <SelectItem key={h} value={h}>
+                          {h}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                   <span>:</span>
                   <Select value={form.endM} onValueChange={(v) => setForm({ ...form, endM: v })}>
-                    <SelectTrigger className="w-20"><SelectValue /></SelectTrigger>
-                    <SelectContent>{minutes.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
+                    <SelectTrigger className="w-20">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {minutes.map((m) => (
+                        <SelectItem key={m} value={m}>
+                          {m}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                 </div>
               </FormRow>
 
-              <YesNoRow label="Add Time Lock?" value={form.addTimeLock} onChange={(v) => setForm({ ...form, addTimeLock: v })} />
-              <YesNoRow label="Link Up?" value={form.linkUp} onChange={(v) => setForm({ ...form, linkUp: v })} required highlight />
+              <YesNoRow
+                label="Add Time Lock?"
+                value={form.addTimeLock}
+                onChange={(v) => setForm({ ...form, addTimeLock: v })}
+              />
+              <YesNoRow
+                label="Link Up?"
+                value={form.linkUp}
+                onChange={(v) => setForm({ ...form, linkUp: v })}
+                required
+                highlight
+              />
 
               <FormRow label="Staff 1 (Optional)">
                 <Select value={form.staff1} onValueChange={(v) => setForm({ ...form, staff1: v })}>
-                  <SelectTrigger><SelectValue placeholder="choose one..." /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue placeholder="choose one..." />
+                  </SelectTrigger>
                   <SelectContent>
                     {caregivers.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
@@ -526,14 +563,34 @@ const AddRota = () => {
                 </Select>
               </FormRow>
 
-              <YesNoRow label="Medication Required?" value={form.medicationRequired} onChange={(v) => setForm({ ...form, medicationRequired: v })} />
-              <YesNoRow label="Tasks Required?" value={form.tasksRequired} onChange={(v) => setForm({ ...form, tasksRequired: v })} />
+              <YesNoRow
+                label="Medication Required?"
+                value={form.medicationRequired}
+                onChange={(v) => setForm({ ...form, medicationRequired: v })}
+              />
+              <YesNoRow
+                label="Tasks Required?"
+                value={form.tasksRequired}
+                onChange={(v) => setForm({ ...form, tasksRequired: v })}
+              />
               <YesNoRow label="Alert?" value={form.alert} onChange={(v) => setForm({ ...form, alert: v })} />
-              <YesNoRow label="Add as recurring shift?" value={form.recurring} onChange={(v) => setForm({ ...form, recurring: v })} />
-              <YesNoRow label="Add as new template shift?" value={form.template} onChange={(v) => setForm({ ...form, template: v })} />
+              <YesNoRow
+                label="Add as recurring shift?"
+                value={form.recurring}
+                onChange={(v) => setForm({ ...form, recurring: v })}
+              />
+              <YesNoRow
+                label="Add as new template shift?"
+                value={form.template}
+                onChange={(v) => setForm({ ...form, template: v })}
+              />
 
               <div className="pt-2">
-                <Button onClick={handleSave} disabled={upsertShift.isPending} className="bg-success hover:bg-success/90 text-success-foreground gap-2">
+                <Button
+                  onClick={handleSave}
+                  disabled={upsertShift.isPending}
+                  className="bg-success hover:bg-success/90 text-success-foreground gap-2"
+                >
                   {upsertShift.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                   Save
                 </Button>
@@ -564,7 +621,9 @@ const FormRow = ({
   required?: boolean;
   highlight?: boolean;
 }) => (
-  <div className={`grid grid-cols-[140px_1fr] items-center gap-3 ${highlight ? "bg-success/10 -mx-2 px-2 py-1.5 rounded" : ""}`}>
+  <div
+    className={`grid grid-cols-[140px_1fr] items-center gap-3 ${highlight ? "bg-success/10 -mx-2 px-2 py-1.5 rounded" : ""}`}
+  >
     <Label className="text-sm font-medium text-right">
       {required && <span className="text-destructive">* </span>}
       {label}
@@ -588,7 +647,9 @@ const YesNoRow = ({
 }) => (
   <FormRow label={label} required={required} highlight={highlight}>
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger><SelectValue /></SelectTrigger>
+      <SelectTrigger>
+        <SelectValue />
+      </SelectTrigger>
       <SelectContent>
         <SelectItem value="No">No</SelectItem>
         <SelectItem value="Yes">Yes</SelectItem>

@@ -6,12 +6,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { CalendarDays, ChevronLeft, ChevronRight, Plus, Edit2, Trash2, Clock, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -63,14 +76,22 @@ const Roster = () => {
   const weekLabel = `${weekDates[0].toLocaleDateString("en-GB", { day: "numeric", month: "short" })} – ${weekDates[6].toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`;
 
   const resetForm = () => {
-    setFormCgId(""); setFormCrId(""); setFormDay("0");
-    setFormStart("07:00"); setFormEnd("14:00"); setFormType("Morning"); setFormNotes("");
+    setFormCgId("");
+    setFormCrId("");
+    setFormDay("0");
+    setFormStart("07:00");
+    setFormEnd("14:00");
+    setFormType("Morning");
+    setFormNotes("");
     setEditingShiftId(null);
   };
 
-  const openCreate = () => { resetForm(); setDialogOpen(true); };
+  const openCreate = () => {
+    resetForm();
+    setDialogOpen(true);
+  };
 
-  const openEdit = (shift: typeof shiftsData[0]) => {
+  const openEdit = (shift: (typeof shiftsData)[0]) => {
     setEditingShiftId(shift.id);
     setFormCgId(shift.care_giver_id ?? "");
     setFormCrId(shift.care_receiver_id ?? "");
@@ -121,18 +142,33 @@ const Roster = () => {
           </div>
           <div className="flex items-center gap-3 flex-wrap">
             <RosterViewSwitcher />
+<<<<<<< HEAD
             <Button onClick={openCreate} className="gap-2"><Plus className="h-4 w-4" /> Create Rota</Button>
+=======
+            <Button onClick={openCreate} className="gap-2">
+              <Plus className="h-4 w-4" /> Create Rota
+            </Button>
+>>>>>>> 2f46e11e4f64adb0ff67cab2168c902654ff27a9
           </div>
         </div>
 
         <div className="flex items-center justify-between">
-          <Button variant="outline" size="icon" onClick={() => setWeekOffset((o) => o - 1)}><ChevronLeft className="h-4 w-4" /></Button>
+          <Button variant="outline" size="icon" onClick={() => setWeekOffset((o) => o - 1)}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
           <div className="flex items-center gap-2 text-sm font-medium text-foreground">
-            <CalendarDays className="h-4 w-4 text-primary" />{weekLabel}
+            <CalendarDays className="h-4 w-4 text-primary" />
+            {weekLabel}
           </div>
           <div className="flex gap-2">
-            {weekOffset !== 0 && <Button variant="ghost" size="sm" onClick={() => setWeekOffset(0)}>Today</Button>}
-            <Button variant="outline" size="icon" onClick={() => setWeekOffset((o) => o + 1)}><ChevronRight className="h-4 w-4" /></Button>
+            {weekOffset !== 0 && (
+              <Button variant="ghost" size="sm" onClick={() => setWeekOffset(0)}>
+                Today
+              </Button>
+            )}
+            <Button variant="outline" size="icon" onClick={() => setWeekOffset((o) => o + 1)}>
+              <ChevronRight className="h-4 w-4" />
+            </Button>
           </div>
         </div>
 
@@ -144,7 +180,9 @@ const Roster = () => {
                   {DAYS.map((day, i) => (
                     <TableHead key={day} className="text-center min-w-[140px] border-r last:border-r-0">
                       <div className="font-semibold">{day}</div>
-                      <div className="text-xs text-muted-foreground">{weekDates[i].toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {weekDates[i].toLocaleDateString("en-GB", { day: "numeric", month: "short" })}
+                      </div>
                     </TableHead>
                   ))}
                 </TableRow>
@@ -156,16 +194,39 @@ const Roster = () => {
                     return (
                       <TableCell key={dayIdx} className="align-top border-r last:border-r-0 p-2 min-h-[120px]">
                         <div className="space-y-2 min-h-[100px]">
-                          {dayShifts.length === 0 && <p className="text-xs text-muted-foreground/50 text-center pt-8">No shifts</p>}
+                          {dayShifts.length === 0 && (
+                            <p className="text-xs text-muted-foreground/50 text-center pt-8">No shifts</p>
+                          )}
                           {dayShifts.map((shift) => (
-                            <div key={shift.id} className={`rounded-lg border p-2 text-xs cursor-pointer hover:shadow-md transition-shadow ${shiftTypeColors[shift.shift_type] ?? ""}`} onClick={() => openEdit(shift)}>
+                            <div
+                              key={shift.id}
+                              className={`rounded-lg border p-2 text-xs cursor-pointer hover:shadow-md transition-shadow ${shiftTypeColors[shift.shift_type] ?? ""}`}
+                              onClick={() => openEdit(shift)}
+                            >
                               <div className="flex items-center justify-between mb-1">
-                                <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-current">{shift.shift_type}</Badge>
-                                <button className="opacity-50 hover:opacity-100" onClick={(e) => { e.stopPropagation(); setDeleteConfirm(shift.id); }}><Trash2 className="h-3 w-3" /></button>
+                                <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-current">
+                                  {shift.shift_type}
+                                </Badge>
+                                <button
+                                  className="opacity-50 hover:opacity-100"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setDeleteConfirm(shift.id);
+                                  }}
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </button>
                               </div>
-                              <div className="flex items-center gap-1 font-medium"><User className="h-3 w-3" /> {(shift.care_givers as any)?.name?.split(" ")[0] ?? "—"}</div>
-                              <div className="text-[10px] opacity-75 mt-0.5">→ {(shift.care_receivers as any)?.name?.split(" ")[0] ?? "—"}</div>
-                              <div className="flex items-center gap-1 mt-1 opacity-75"><Clock className="h-3 w-3" />{shift.start_time}–{shift.end_time}</div>
+                              <div className="flex items-center gap-1 font-medium">
+                                <User className="h-3 w-3" /> {(shift.care_givers as any)?.name?.split(" ")[0] ?? "—"}
+                              </div>
+                              <div className="text-[10px] opacity-75 mt-0.5">
+                                → {(shift.care_receivers as any)?.name?.split(" ")[0] ?? "—"}
+                              </div>
+                              <div className="flex items-center gap-1 mt-1 opacity-75">
+                                <Clock className="h-3 w-3" />
+                                {shift.start_time}–{shift.end_time}
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -179,30 +240,63 @@ const Roster = () => {
         </Card>
 
         <Card className="border border-border shadow-sm">
-          <CardHeader className="pb-3"><CardTitle className="text-base">This Week's Assignments</CardTitle></CardHeader>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">This Week's Assignments</CardTitle>
+          </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Caregiver</TableHead><TableHead>Skills</TableHead><TableHead>Service Member</TableHead>
-                  <TableHead>Day</TableHead><TableHead>Time</TableHead><TableHead>Type</TableHead><TableHead className="w-[60px]" />
+                  <TableHead>Caregiver</TableHead>
+                  <TableHead>Skills</TableHead>
+                  <TableHead>Service Member</TableHead>
+                  <TableHead>Day</TableHead>
+                  <TableHead>Time</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead className="w-[60px]" />
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {shiftsData.length === 0 && <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">{isLoading ? "Loading..." : "No shifts scheduled"}</TableCell></TableRow>}
+                {shiftsData.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                      {isLoading ? "Loading..." : "No shifts scheduled"}
+                    </TableCell>
+                  </TableRow>
+                )}
                 {shiftsData.map((s) => (
                   <TableRow key={s.id} className="cursor-pointer hover:bg-muted/50" onClick={() => openEdit(s)}>
                     <TableCell className="font-medium">{(s.care_givers as any)?.name ?? "—"}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {((s.care_givers as any)?.skills ?? []).slice(0, 2).map((sk: string) => <Badge key={sk} variant="secondary" className="text-[10px]">{sk}</Badge>)}
+                        {((s.care_givers as any)?.skills ?? []).slice(0, 2).map((sk: string) => (
+                          <Badge key={sk} variant="secondary" className="text-[10px]">
+                            {sk}
+                          </Badge>
+                        ))}
                       </div>
                     </TableCell>
                     <TableCell>{(s.care_receivers as any)?.name ?? "—"}</TableCell>
                     <TableCell>{DAYS[s.day]}</TableCell>
-                    <TableCell className="text-sm">{s.start_time}–{s.end_time}</TableCell>
-                    <TableCell><Badge className={`${shiftTypeColors[s.shift_type] ?? ""} border`}>{s.shift_type}</Badge></TableCell>
-                    <TableCell><Button variant="ghost" size="icon" className="h-7 w-7" onClick={(e) => { e.stopPropagation(); openEdit(s); }}><Edit2 className="h-3.5 w-3.5" /></Button></TableCell>
+                    <TableCell className="text-sm">
+                      {s.start_time}–{s.end_time}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={`${shiftTypeColors[s.shift_type] ?? ""} border`}>{s.shift_type}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEdit(s);
+                        }}
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -211,7 +305,13 @@ const Roster = () => {
         </Card>
       </div>
 
-      <Dialog open={dialogOpen} onOpenChange={(open) => { if (!open) resetForm(); setDialogOpen(open); }}>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          if (!open) resetForm();
+          setDialogOpen(open);
+        }}
+      >
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>{editingShiftId ? "Edit Shift" : "Create Shift"}</DialogTitle>
@@ -222,50 +322,101 @@ const Roster = () => {
               <div className="space-y-2">
                 <Label>Caregiver</Label>
                 <Select value={formCgId} onValueChange={setFormCgId}>
-                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                  <SelectContent>{careGivers.map((cg) => <SelectItem key={cg.id} value={cg.id}>{cg.name}</SelectItem>)}</SelectContent>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {careGivers.map((cg) => (
+                      <SelectItem key={cg.id} value={cg.id}>
+                        {cg.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label>Service Member</Label>
                 <Select value={formCrId} onValueChange={setFormCrId}>
-                  <SelectTrigger><SelectValue placeholder="Select..." /></SelectTrigger>
-                  <SelectContent>{careReceivers.map((cr) => <SelectItem key={cr.id} value={cr.id}>{cr.name}</SelectItem>)}</SelectContent>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {careReceivers.map((cr) => (
+                      <SelectItem key={cr.id} value={cr.id}>
+                        {cr.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
             </div>
             {selectedCg && (
               <div className="flex flex-wrap gap-1.5">
                 <span className="text-xs text-muted-foreground mr-1">Skills:</span>
-                {(selectedCg.skills ?? []).map((sk) => <Badge key={sk} variant="secondary" className="text-xs">{sk}</Badge>)}
+                {(selectedCg.skills ?? []).map((sk) => (
+                  <Badge key={sk} variant="secondary" className="text-xs">
+                    {sk}
+                  </Badge>
+                ))}
               </div>
             )}
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label>Day</Label>
                 <Select value={formDay} onValueChange={setFormDay}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>{DAYS.map((d, i) => <SelectItem key={d} value={String(i)}>{d}</SelectItem>)}</SelectContent>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DAYS.map((d, i) => (
+                      <SelectItem key={d} value={String(i)}>
+                        {d}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-2"><Label>Start Time</Label><Input type="time" value={formStart} onChange={(e) => setFormStart(e.target.value)} /></div>
-              <div className="space-y-2"><Label>End Time</Label><Input type="time" value={formEnd} onChange={(e) => setFormEnd(e.target.value)} /></div>
+              <div className="space-y-2">
+                <Label>Start Time</Label>
+                <Input type="time" value={formStart} onChange={(e) => setFormStart(e.target.value)} />
+              </div>
+              <div className="space-y-2">
+                <Label>End Time</Label>
+                <Input type="time" value={formEnd} onChange={(e) => setFormEnd(e.target.value)} />
+              </div>
             </div>
             <div className="space-y-2">
               <Label>Shift Type</Label>
               <Select value={formType} onValueChange={setFormType}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Morning">Morning</SelectItem><SelectItem value="Afternoon">Afternoon</SelectItem>
-                  <SelectItem value="Night">Night</SelectItem><SelectItem value="Live-in">Live-in</SelectItem>
+                  <SelectItem value="Morning">Morning</SelectItem>
+                  <SelectItem value="Afternoon">Afternoon</SelectItem>
+                  <SelectItem value="Night">Night</SelectItem>
+                  <SelectItem value="Live-in">Live-in</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2"><Label>Notes</Label><Textarea value={formNotes} onChange={(e) => setFormNotes(e.target.value)} /></div>
+            <div className="space-y-2">
+              <Label>Notes</Label>
+              <Textarea value={formNotes} onChange={(e) => setFormNotes(e.target.value)} />
+            </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => { setDialogOpen(false); resetForm(); }}>Cancel</Button>
-            <Button onClick={handleSave} disabled={upsertShift.isPending}>{upsertShift.isPending ? "Saving..." : "Save"}</Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDialogOpen(false);
+                resetForm();
+              }}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleSave} disabled={upsertShift.isPending}>
+              {upsertShift.isPending ? "Saving..." : "Save"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
