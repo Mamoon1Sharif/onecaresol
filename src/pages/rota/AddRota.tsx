@@ -162,18 +162,39 @@ const AddRota = () => {
       });
 
       // Also create the actual daily visit so it shows up in Daily Rota
-      const { error: dvErr } = await supabase.from("daily_visits").insert({
-        company_id: companyUser.company_id,
-        care_receiver_id: selected.id,
-        care_giver_id: staffId,
-        visit_date: form.date,
-        start_hour: parseInt(form.startH),
-        duration: durHours,
-        status: staffId ? "Confirmed" : "Pending",
-      });
+      const { data: dvRow, error: dvErr } = await supabase
+        .from("daily_visits")
+        .insert({
+          company_id: companyUser.company_id,
+          care_receiver_id: selected.id,
+          care_giver_id: staffId,
+          visit_date: form.date,
+          start_hour: parseInt(form.startH),
+          duration: durHours,
+          status: staffId ? "Confirmed" : "Pending",
+        })
+        .select("id")
+        .single();
       if (dvErr) throw dvErr;
 
+      // Insert pre-approved tasks (and chosen medications as tasks) into shift_tasks
+      const taskTitles: string[] = [];
+      if (form.tasksRequired === "Yes") taskTitles.push(...selectedTasks);
+      if (form.medicationRequired === "Yes") {
+        for (const mid of selectedMedIds) {
+          const m = medications.find((x: any) => x.id === mid);
+          if (m) taskTitles.push(`Administer ${m.medication}${m.dosage ? ` (${m.dosage})` : ""}`);
+        }
+      }
+      if (dvRow?.id && taskTitles.length > 0) {
+        const { error: stErr } = await supabase
+          .from("shift_tasks")
+          .insert(taskTitles.map((title) => ({ daily_visit_id: dvRow.id, title })));
+        if (stErr) throw stErr;
+      }
+
       await queryClient.invalidateQueries({ queryKey: ["daily_visits"] });
+      await queryClient.invalidateQueries({ queryKey: ["shift_tasks"] });
 
       toast.success("Shift saved");
     } catch (err: any) {
