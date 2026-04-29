@@ -247,6 +247,24 @@ export default function AddCareReceiver() {
       } as any).select().single();
 
       if (error) throw error;
+
+      // Upload avatar if provided
+      if (avatarFile && data?.id) {
+        try {
+          const ext = avatarFile.name.split(".").pop()?.toLowerCase() || "jpg";
+          const path = `care_receivers/${data.id}-${Date.now()}.${ext}`;
+          const { error: upErr } = await supabase.storage
+            .from("profile-avatars")
+            .upload(path, avatarFile, { upsert: true, contentType: avatarFile.type });
+          if (!upErr) {
+            const { data: pub } = supabase.storage.from("profile-avatars").getPublicUrl(path);
+            await supabase.from("care_receivers").update({ avatar_url: pub.publicUrl } as any).eq("id", data.id);
+          }
+        } catch (uploadErr) {
+          console.error("Avatar upload failed:", uploadErr);
+        }
+      }
+
       toast({ title: "Service Member Added", description: `${name} has been added successfully.` });
       navigate(data?.id ? `/carereceivers/${data.id}` : "/carereceivers");
     } catch (e: any) {
