@@ -257,16 +257,38 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                 <Activity className="h-3.5 w-3.5" /> Shift Timeline
               </h3>
               {(() => {
+                const currentStatus = (editStatus || visit.status || "").toLowerCase();
+                const isMissed = currentStatus === "missed";
                 const events: { time: string; label: string; icon: any; tone: string; sub?: string }[] = [];
+
                 events.push({ time: editStart || visit.scheduledStart, label: "Shift scheduled to start", icon: Calendar, tone: "text-blue-600", sub: "Built from rota template" });
-                if (clockIn || visit.actualStart) {
-                  events.push({ time: clockIn || visit.actualStart, label: `${visit.teamMember} clocked in`, icon: LogIn, tone: "text-success", sub: "GPS verified at service-user address" });
-                  events.push({ time: clockIn || visit.actualStart, label: "Shift in progress", icon: PlayCircle, tone: "text-success" });
+
+                if (isMissed) {
+                  // Missed shift: no clock-in/out, no "in progress". Show that no-one attended.
+                  events.push({
+                    time: editStart || visit.scheduledStart,
+                    label: `${visit.teamMember && visit.teamMember !== "—" ? visit.teamMember : "Caregiver"} did not clock in`,
+                    icon: XCircle,
+                    tone: "text-destructive",
+                    sub: "No GPS check-in recorded at scheduled start time",
+                  });
+                  events.push({
+                    time: editEnd || visit.scheduledEnd,
+                    label: "Shift marked as Missed",
+                    icon: AlertCircle,
+                    tone: "text-destructive",
+                    sub: "Office notified · added to incidents for follow-up",
+                  });
+                } else {
+                  if (clockIn || visit.actualStart) {
+                    events.push({ time: clockIn || visit.actualStart, label: `${visit.teamMember} clocked in`, icon: LogIn, tone: "text-success", sub: "GPS verified at service-user address" });
+                    events.push({ time: clockIn || visit.actualStart, label: "Shift in progress", icon: PlayCircle, tone: "text-success" });
+                  }
+                  if (clockOut || visit.actualEnd) {
+                    events.push({ time: clockOut || visit.actualEnd, label: `${visit.teamMember} clocked out`, icon: LogOut, tone: "text-rose-600", sub: `Total worked: ${duration !== "0 minutes" ? duration : visit.actualDuration || "—"}` });
+                  }
+                  events.push({ time: editEnd || visit.scheduledEnd, label: "Shift scheduled to end", icon: Calendar, tone: "text-blue-600" });
                 }
-                if (clockOut || visit.actualEnd) {
-                  events.push({ time: clockOut || visit.actualEnd, label: `${visit.teamMember} clocked out`, icon: LogOut, tone: "text-rose-600", sub: `Total worked: ${duration !== "0 minutes" ? duration : visit.actualDuration || "—"}` });
-                }
-                events.push({ time: editEnd || visit.scheduledEnd, label: "Shift scheduled to end", icon: Calendar, tone: "text-blue-600" });
 
                 return (
                   <ol className="relative border-l-2 border-border ml-3 space-y-4 py-1">
@@ -292,7 +314,11 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
 
             {/* ============== TASKS ============== */}
             <section>
-              <ShiftTasks shiftEnd={editEnd || visit.scheduledEnd} clockOut={clockOut || visit.actualEnd} />
+              <ShiftTasks
+                shiftEnd={editEnd || visit.scheduledEnd}
+                clockOut={clockOut || visit.actualEnd}
+                isMissed={(editStatus || visit.status || "").toLowerCase() === "missed"}
+              />
             </section>
 
             {/* ============== ASSIGNED TEAM MEMBERS ============== */}
@@ -318,25 +344,39 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                   </div>
                   <div className="flex-1 min-w-[240px]">
                     <a className="text-primary hover:underline font-medium text-sm cursor-pointer">{visit.teamMember}</a>
-                    <div className="mt-3 space-y-1.5 text-xs">
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">- Clock In:</span>
-                        {clockIn ? (
-                          <span className="font-mono font-semibold text-success">{clockIn}</span>
-                        ) : (
-                          <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" onClick={handleClockIn}>Clock In</Button>
-                        )}
+                    {(editStatus || visit.status || "").toLowerCase() === "missed" ? (
+                      <div className="mt-3 space-y-1.5 text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground">- Clock In:</span>
+                          <span className="font-mono font-semibold text-destructive">No check-in</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground">- Clock Out:</span>
+                          <span className="font-mono font-semibold text-destructive">No check-out</span>
+                        </div>
+                        <div className="text-destructive font-medium">Shift was missed — caregiver did not attend.</div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">- Clock Out:</span>
-                        {clockOut ? (
-                          <span className="font-mono font-semibold text-success">{clockOut}</span>
-                        ) : (
-                          <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" disabled={!clockIn} onClick={handleClockOut}>Clock Out</Button>
-                        )}
+                    ) : (
+                      <div className="mt-3 space-y-1.5 text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground">- Clock In:</span>
+                          {clockIn ? (
+                            <span className="font-mono font-semibold text-success">{clockIn}</span>
+                          ) : (
+                            <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" onClick={handleClockIn}>Clock In</Button>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground">- Clock Out:</span>
+                          {clockOut ? (
+                            <span className="font-mono font-semibold text-success">{clockOut}</span>
+                          ) : (
+                            <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" disabled={!clockIn} onClick={handleClockOut}>Clock Out</Button>
+                          )}
+                        </div>
+                        <div className="text-orange-600">Duration: {duration}</div>
                       </div>
-                      <div className="text-orange-600">Duration: {duration}</div>
-                    </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -574,11 +614,12 @@ interface TaskItem {
   completedAt?: string;
 }
 
-function ShiftTasks({ shiftEnd, clockOut }: { shiftEnd: string; clockOut: string | null }) {
+function ShiftTasks({ shiftEnd, clockOut, isMissed = false }: { shiftEnd: string; clockOut: string | null; isMissed?: boolean }) {
+  const initialDone = !isMissed;
   const [tasks, setTasks] = useState<TaskItem[]>([
-    { id: "t1", title: "Personal care — wash & dress", done: true, completedAt: "08:14" },
-    { id: "t2", title: "Administer morning medication", done: true, completedAt: "08:32" },
-    { id: "t3", title: "Prepare breakfast & assist with eating", done: true, completedAt: "09:05" },
+    { id: "t1", title: "Personal care — wash & dress", done: initialDone, completedAt: initialDone ? "08:14" : undefined },
+    { id: "t2", title: "Administer morning medication", done: initialDone, completedAt: initialDone ? "08:32" : undefined },
+    { id: "t3", title: "Prepare breakfast & assist with eating", done: initialDone, completedAt: initialDone ? "09:05" : undefined },
     { id: "t4", title: "Light housekeeping in kitchen", done: false },
     { id: "t5", title: "Lunchtime medication & meal", done: false },
     { id: "t6", title: "Record fluid & food intake", done: false },
@@ -613,13 +654,13 @@ function ShiftTasks({ shiftEnd, clockOut }: { shiftEnd: string; clockOut: string
             ({completed.length}/{tasks.length} complete · {pct}%)
           </span>
         </h3>
-        <span className="text-[11px] text-muted-foreground">
-          {clockOut ? "Shift ended" : `Pending until ${shiftEnd}`}
+        <span className={`text-[11px] ${isMissed ? "text-destructive font-medium" : "text-muted-foreground"}`}>
+          {isMissed ? "Shift missed — no tasks completed" : clockOut ? "Shift ended" : `Pending until ${shiftEnd}`}
         </span>
       </div>
 
       <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-3">
-        <div className="h-full bg-success transition-all" style={{ width: `${pct}%` }} />
+        <div className={`h-full transition-all ${isMissed ? "bg-destructive" : "bg-success"}`} style={{ width: `${isMissed ? 100 : pct}%` }} />
       </div>
 
       <div className="grid md:grid-cols-2 gap-3">
@@ -644,9 +685,9 @@ function ShiftTasks({ shiftEnd, clockOut }: { shiftEnd: string; clockOut: string
         </div>
 
         {/* Pending */}
-        <div className="rounded border border-border bg-amber-50 p-2">
-          <div className="text-[11px] font-semibold text-amber-700 uppercase tracking-wide mb-1.5 flex items-center gap-1">
-            <CircleDot className="h-3 w-3" /> Pending until end of shift ({pending.length})
+        <div className={`rounded border border-border p-2 ${isMissed ? "bg-destructive/5" : "bg-amber-50"}`}>
+          <div className={`text-[11px] font-semibold uppercase tracking-wide mb-1.5 flex items-center gap-1 ${isMissed ? "text-destructive" : "text-amber-700"}`}>
+            <CircleDot className="h-3 w-3" /> {isMissed ? `Not done — shift missed (${pending.length})` : `Pending until end of shift (${pending.length})`}
           </div>
           {pending.length === 0 ? (
             <p className="text-[11px] text-muted-foreground text-center py-2">All tasks done. 🎉</p>
