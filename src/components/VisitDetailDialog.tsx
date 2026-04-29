@@ -600,11 +600,12 @@ interface TaskItem {
   completedAt?: string;
 }
 
-function ShiftTasks({ shiftEnd, clockOut }: { shiftEnd: string; clockOut: string | null }) {
+function ShiftTasks({ shiftEnd, clockOut, isMissed = false }: { shiftEnd: string; clockOut: string | null; isMissed?: boolean }) {
+  const initialDone = !isMissed;
   const [tasks, setTasks] = useState<TaskItem[]>([
-    { id: "t1", title: "Personal care — wash & dress", done: true, completedAt: "08:14" },
-    { id: "t2", title: "Administer morning medication", done: true, completedAt: "08:32" },
-    { id: "t3", title: "Prepare breakfast & assist with eating", done: true, completedAt: "09:05" },
+    { id: "t1", title: "Personal care — wash & dress", done: initialDone, completedAt: initialDone ? "08:14" : undefined },
+    { id: "t2", title: "Administer morning medication", done: initialDone, completedAt: initialDone ? "08:32" : undefined },
+    { id: "t3", title: "Prepare breakfast & assist with eating", done: initialDone, completedAt: initialDone ? "09:05" : undefined },
     { id: "t4", title: "Light housekeeping in kitchen", done: false },
     { id: "t5", title: "Lunchtime medication & meal", done: false },
     { id: "t6", title: "Record fluid & food intake", done: false },
