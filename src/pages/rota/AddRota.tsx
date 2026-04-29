@@ -67,15 +67,45 @@ const AddRota = () => {
   const [selectedMedIds, setSelectedMedIds] = useState<string[]>([]);
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
 
-  // Dedup MAR medications by name+dosage so the same prescription isn't repeated per administration row.
+  // Dedup MAR medications by name+dosage+time so the same prescription isn't repeated.
   const uniqueMeds = useMemo(() => {
     const map = new Map<string, any>();
     for (const m of medications as any[]) {
-      const key = `${(m.medication || "").toLowerCase()}|${(m.dosage || "").toLowerCase()}`;
+      const key = `${(m.medication || "").toLowerCase()}|${(m.dosage || "").toLowerCase()}|${(m.time_of_day || "").toLowerCase()}`;
       if (!map.has(key)) map.set(key, m);
     }
     return Array.from(map.values());
   }, [medications]);
+
+  // Bucket the shift's start time into a time-of-day window.
+  const shiftWindow = useMemo(() => {
+    const h = parseInt(form.startH, 10);
+    if (h >= 6 && h < 11) return "Morning";
+    if (h >= 11 && h < 14) return "Lunch";
+    if (h >= 14 && h < 18) return "Tea";
+    if (h >= 18 && h < 21) return "Evening";
+    return "Night";
+  }, [form.startH]);
+
+  // Group medications by time-of-day for display.
+  const TOD_ORDER = ["Morning", "Lunch", "Tea", "Evening", "Night"] as const;
+  const medsByTod = useMemo(() => {
+    const groups: Record<string, any[]> = { Morning: [], Lunch: [], Tea: [], Evening: [], Night: [], Other: [] };
+    for (const m of uniqueMeds) {
+      const t = (m as any).time_of_day || "Other";
+      (groups[t] ??= []).push(m);
+    }
+    return groups;
+  }, [uniqueMeds]);
+
+  // Auto-select the meds that match the current shift window when medication is enabled.
+  useEffect(() => {
+    if (!form.medicationRequired) return;
+    const matching = uniqueMeds
+      .filter((m: any) => (m.time_of_day || "").toLowerCase() === shiftWindow.toLowerCase())
+      .map((m: any) => m.id);
+    setSelectedMedIds(matching);
+  }, [form.medicationRequired, shiftWindow, uniqueMeds]);
 
   const toggleMed = (id: string) =>
     setSelectedMedIds((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
