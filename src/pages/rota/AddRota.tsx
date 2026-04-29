@@ -417,7 +417,7 @@ const AddRota = () => {
           {/* RIGHT: Add shift form */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Add Shift</CardTitle>
+              <CardTitle className="text-base">Add Rota</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-xs text-destructive">
