@@ -1,20 +1,45 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { ArrowLeft, Heart, MapPin } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { ArrowLeft, Heart, MapPin, Pencil, Trash2, Loader2 } from "lucide-react";
 import { AvatarUpload } from "@/components/AvatarUpload";
 import { getCareReceiverAvatar } from "@/lib/avatars";
+import { useDeleteCareReceiver } from "@/hooks/use-care-data";
+import { useToast } from "@/hooks/use-toast";
 import type { Tables } from "@/integrations/supabase/types";
 
 type CareReceiver = Tables<"care_receivers">;
 
 interface Props {
   cr: CareReceiver;
+  onEdit?: () => void;
 }
 
-export function ReceiverProfileHeader({ cr }: Props) {
+export function ReceiverProfileHeader({ cr, onEdit }: Props) {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const deleteMutation = useDeleteCareReceiver();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      await deleteMutation.mutateAsync(cr.id);
+      toast({ title: "Service member deleted", description: `${cr.name} has been removed.` });
+      navigate("/carereceivers");
+    } catch (e: any) {
+      toast({
+        title: "Delete failed",
+        description: e?.message ?? "Could not delete service member.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <>
@@ -22,6 +47,18 @@ export function ReceiverProfileHeader({ cr }: Props) {
         <Button variant="ghost" onClick={() => navigate("/carereceivers")} className="gap-2 text-muted-foreground">
           <ArrowLeft className="h-4 w-4" /> Back to Service Members
         </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={onEdit} className="gap-2">
+            <Pencil className="h-4 w-4" /> Edit
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setConfirmOpen(true)}
+            className="gap-2 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+          >
+            <Trash2 className="h-4 w-4" /> Delete
+          </Button>
+        </div>
       </div>
 
       <Card className="border border-border overflow-hidden">
@@ -60,6 +97,32 @@ export function ReceiverProfileHeader({ cr }: Props) {
           </div>
         </div>
       </Card>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {cr.name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove this service member and is not reversible.
+              Linked rota entries, medications, reminders, and other records may also be affected.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteMutation.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); handleDelete(); }}
+              disabled={deleteMutation.isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMutation.isPending ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Deleting…</>
+              ) : (
+                <><Trash2 className="h-4 w-4 mr-2" /> Delete</>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
