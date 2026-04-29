@@ -420,6 +420,13 @@ const AddRota = () => {
                   <EmptyState text="No prescriptions on the MAR chart for this service member." />
                 ) : (
                   <>
+                    <div className="rounded-lg border border-primary/30 bg-primary/5 p-2.5 flex items-center gap-2 text-xs">
+                      <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
+                      <span>
+                        Shift starts at <strong>{form.startH}:{form.startM}</strong> ·
+                        auto-selected <strong>{shiftWindow}</strong> medications.
+                      </span>
+                    </div>
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
                       <span>{uniqueMeds.length} prescription{uniqueMeds.length !== 1 ? "s" : ""} from MAR · {selectedMedIds.length} selected</span>
                       <button
@@ -430,38 +437,61 @@ const AddRota = () => {
                         {selectedMedIds.length === uniqueMeds.length ? "Clear all" : "Select all"}
                       </button>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {uniqueMeds.map((m: any) => {
-                        const checked = selectedMedIds.includes(m.id);
+                    <div className="space-y-3">
+                      {TOD_ORDER.concat(["Other" as any]).map((tod) => {
+                        const items = medsByTod[tod] || [];
+                        if (items.length === 0) return null;
+                        const isCurrent = tod === shiftWindow;
                         return (
-                          <label
-                            key={m.id}
-                            className={cn(
-                              "flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-all",
-                              checked ? "border-primary bg-primary/5" : "border-border hover:border-primary/40 hover:bg-muted/40"
-                            )}
-                          >
-                            <Checkbox checked={checked} onCheckedChange={() => toggleMed(m.id)} className="mt-0.5" />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-start gap-2">
-                                <Pill className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
-                                <div className="min-w-0">
-                                  <div className="text-sm font-semibold truncate">{m.medication}</div>
-                                  {m.dosage && <div className="text-xs text-muted-foreground">{m.dosage}</div>}
-                                </div>
-                              </div>
-                              {m.notes && (
-                                <div className="text-[11px] text-muted-foreground mt-1.5 line-clamp-2">{m.notes}</div>
-                              )}
+                          <div key={tod} className="space-y-1.5">
+                            <div className="flex items-center gap-2">
+                              <Badge variant={isCurrent ? "default" : "outline"} className="text-[10px]">
+                                {tod}
+                              </Badge>
+                              <span className="text-[10px] text-muted-foreground">{items.length} med{items.length !== 1 ? "s" : ""}</span>
+                              {isCurrent && <span className="text-[10px] text-primary font-medium">· matches this shift</span>}
                             </div>
-                          </label>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              {items.map((m: any) => {
+                                const checked = selectedMedIds.includes(m.id);
+                                return (
+                                  <label
+                                    key={m.id}
+                                    className={cn(
+                                      "flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-all",
+                                      checked ? "border-primary bg-primary/5" : "border-border hover:border-primary/40 hover:bg-muted/40"
+                                    )}
+                                  >
+                                    <Checkbox checked={checked} onCheckedChange={() => toggleMed(m.id)} className="mt-0.5" />
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-start gap-2">
+                                        <Pill className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
+                                        <div className="min-w-0">
+                                          <div className="text-sm font-semibold truncate">{m.medication}</div>
+                                          {m.dosage && <div className="text-xs text-muted-foreground">{m.dosage}</div>}
+                                          {m.scheduled_time && (
+                                            <div className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-1">
+                                              <Clock className="h-2.5 w-2.5" /> {m.scheduled_time}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                      {m.notes && (
+                                        <div className="text-[11px] text-muted-foreground mt-1.5 line-clamp-2">{m.notes}</div>
+                                      )}
+                                    </div>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          </div>
                         );
                       })}
                     </div>
                   </>
                 )
               ) : (
-                <p className="text-xs text-muted-foreground">No medications will be administered during this shift.</p>
+                <p className="text-xs text-muted-foreground">Toggle on to auto-pull doctor-approved medications from the MAR chart for this time of day.</p>
               )}
             </Section>
 
