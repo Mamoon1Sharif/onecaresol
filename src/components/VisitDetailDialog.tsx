@@ -671,9 +671,9 @@ function ShiftTasks({ shiftEnd, clockOut, isMissed = false }: { shiftEnd: string
         </div>
 
         {/* Pending */}
-        <div className="rounded border border-border bg-amber-50 p-2">
-          <div className="text-[11px] font-semibold text-amber-700 uppercase tracking-wide mb-1.5 flex items-center gap-1">
-            <CircleDot className="h-3 w-3" /> Pending until end of shift ({pending.length})
+        <div className={`rounded border border-border p-2 ${isMissed ? "bg-destructive/5" : "bg-amber-50"}`}>
+          <div className={`text-[11px] font-semibold uppercase tracking-wide mb-1.5 flex items-center gap-1 ${isMissed ? "text-destructive" : "text-amber-700"}`}>
+            <CircleDot className="h-3 w-3" /> {isMissed ? `Not done — shift missed (${pending.length})` : `Pending until end of shift (${pending.length})`}
           </div>
           {pending.length === 0 ? (
             <p className="text-[11px] text-muted-foreground text-center py-2">All tasks done. 🎉</p>
