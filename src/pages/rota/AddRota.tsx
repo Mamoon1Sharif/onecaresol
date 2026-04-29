@@ -546,14 +546,14 @@ const AddRota = () => {
                 highlight
               />
 
-              <FormRow label="Staff 1 (Optional)">
+              <FormRow label="Care Giver">
                 <Select value={form.staff1} onValueChange={(v) => setForm({ ...form, staff1: v })}>
                   <SelectTrigger>
                     <SelectValue placeholder="choose one..." />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-blue-50">
                     {caregivers.map((c) => (
-                      <SelectItem key={c.id} value={c.id}>
+                      <SelectItem key={c.id} value={c.id} className="hover:bg-blue-100 focus:bg-blue-100">
                         <span className="flex items-center gap-2">
                           <User className="h-3 w-3" /> {c.name}
                         </span>
