@@ -140,6 +140,17 @@ export function useUpdateCareReceiver() {
   });
 }
 
+export function useDeleteCareReceiver() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("care_receivers").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["care_receivers"] }),
+  });
+}
+
 // ── Medications ──
 export function useMedications(careReceiverId: string | undefined) {
   return useQuery({

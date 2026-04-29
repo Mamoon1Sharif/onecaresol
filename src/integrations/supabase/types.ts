@@ -2259,11 +2259,13 @@ export type Database = {
       }
       shifts: {
         Row: {
+          arrived_at: string | null
           care_giver_id: string | null
           care_receiver_id: string | null
           company_id: string
           created_at: string
           day: number
+          departed_at: string | null
           end_time: string
           id: string
           notes: string | null
@@ -2272,11 +2274,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          arrived_at?: string | null
           care_giver_id?: string | null
           care_receiver_id?: string | null
           company_id?: string
           created_at?: string
           day?: number
+          departed_at?: string | null
           end_time?: string
           id?: string
           notes?: string | null
@@ -2285,11 +2289,13 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          arrived_at?: string | null
           care_giver_id?: string | null
           care_receiver_id?: string | null
           company_id?: string
           created_at?: string
           day?: number
+          departed_at?: string | null
           end_time?: string
           id?: string
           notes?: string | null
