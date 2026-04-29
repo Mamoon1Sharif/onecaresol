@@ -306,6 +306,60 @@ export default function AddCareGiver() {
           </div>
         </div>
 
+        {/* Profile Image */}
+        <Card>
+          <SectionHeader icon={ImageIcon} title="Profile Image" />
+          <CardContent>
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+              <div className="relative group shrink-0">
+                <div className="h-28 w-28 rounded-full border-2 border-primary/20 overflow-hidden bg-primary/10 flex items-center justify-center">
+                  {avatarPreview ? (
+                    <img src={avatarPreview} alt="Profile preview" className="h-full w-full object-cover" />
+                  ) : (
+                    <User className="h-12 w-12 text-primary/60" />
+                  )}
+                </div>
+                {avatarPreview && (
+                  <button
+                    type="button"
+                    onClick={removeAvatar}
+                    className="absolute -top-1 -right-1 h-7 w-7 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center shadow-md hover:scale-105 transition"
+                    aria-label="Remove image"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              <div className="flex-1 space-y-2 text-center sm:text-left">
+                <p className="text-sm font-medium text-foreground">Add a profile picture</p>
+                <p className="text-xs text-muted-foreground">
+                  Upload a clear photo to help identify this team member. JPG or PNG, up to 5MB.
+                </p>
+                <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+                  <Label htmlFor="caregiver-avatar-input" className="cursor-pointer">
+                    <div className="inline-flex items-center gap-2 h-9 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition">
+                      <Upload className="h-4 w-4" />
+                      {avatarPreview ? "Change Photo" : "Upload Photo"}
+                    </div>
+                    <input
+                      id="caregiver-avatar-input"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => onPickAvatar(e.target.files?.[0])}
+                    />
+                  </Label>
+                  {avatarPreview && (
+                    <Button type="button" variant="outline" size="sm" onClick={removeAvatar} className="gap-2">
+                      <X className="h-4 w-4" /> Remove
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Staff Detail */}
         <Card>
           <SectionHeader icon={User} title="Staff Detail" />
