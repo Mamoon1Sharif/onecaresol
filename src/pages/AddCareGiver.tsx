@@ -141,7 +141,7 @@ export default function AddCareGiver() {
   const [showDiscard, setShowDiscard] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const fileInputRef = useState<HTMLInputElement | null>(null as any)[0] as any;
+  
   const { toast } = useToast();
   const navigate = useNavigate();
 
