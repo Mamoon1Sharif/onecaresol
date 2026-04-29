@@ -55,9 +55,9 @@ const CareReceiverProfile = () => {
   return (
     <AppLayout>
       <div className="max-w-5xl mx-auto space-y-6">
-        <ReceiverProfileHeader cr={cr} />
+        <ReceiverProfileHeader cr={cr} onEdit={() => setTab("detailed")} />
 
-        <Tabs defaultValue="overview" className="w-full">
+        <Tabs value={tab} onValueChange={setTab} className="w-full">
           <TabsList className="w-full justify-start flex-wrap h-auto gap-1 bg-muted/50 p-1">
             <TabsTrigger value="overview" className="gap-1.5 text-xs">
               <LayoutDashboard className="h-3.5 w-3.5" /> Overview
