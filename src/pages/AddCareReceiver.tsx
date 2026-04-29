@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   ArrowLeft, UserPlus, Heart, MapPin, Phone, Stethoscope, Building, Users, Tags,
+  Upload, X, Image as ImageIcon,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -143,8 +144,31 @@ export default function AddCareReceiver() {
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
   const [submitting, setSubmitting] = useState(false);
   const [showDiscard, setShowDiscard] = useState(false);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const onPickAvatar = (file: File | undefined | null) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid file", description: "Please choose an image.", variant: "destructive" });
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Image too large", description: "Max 5MB.", variant: "destructive" });
+      return;
+    }
+    setAvatarFile(file);
+    const reader = new FileReader();
+    reader.onload = (e) => setAvatarPreview(e.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const removeAvatar = () => {
+    setAvatarFile(null);
+    setAvatarPreview(null);
+  };
 
   const set = (field: keyof FormData, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value as any }));
@@ -223,6 +247,24 @@ export default function AddCareReceiver() {
       } as any).select().single();
 
       if (error) throw error;
+
+      // Upload avatar if provided
+      if (avatarFile && data?.id) {
+        try {
+          const ext = avatarFile.name.split(".").pop()?.toLowerCase() || "jpg";
+          const path = `care_receivers/${data.id}-${Date.now()}.${ext}`;
+          const { error: upErr } = await supabase.storage
+            .from("profile-avatars")
+            .upload(path, avatarFile, { upsert: true, contentType: avatarFile.type });
+          if (!upErr) {
+            const { data: pub } = supabase.storage.from("profile-avatars").getPublicUrl(path);
+            await supabase.from("care_receivers").update({ avatar_url: pub.publicUrl } as any).eq("id", data.id);
+          }
+        } catch (uploadErr) {
+          console.error("Avatar upload failed:", uploadErr);
+        }
+      }
+
       toast({ title: "Service Member Added", description: `${name} has been added successfully.` });
       navigate(data?.id ? `/carereceivers/${data.id}` : "/carereceivers");
     } catch (e: any) {
@@ -298,6 +340,60 @@ export default function AddCareReceiver() {
             </Button>
           </div>
         </div>
+
+        {/* Profile Image */}
+        <Card>
+          <SectionHeader icon={ImageIcon} title="Profile Image" />
+          <CardContent>
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+              <div className="relative group shrink-0">
+                <div className="h-28 w-28 rounded-full border-2 border-primary/20 overflow-hidden bg-primary/10 flex items-center justify-center">
+                  {avatarPreview ? (
+                    <img src={avatarPreview} alt="Profile preview" className="h-full w-full object-cover" />
+                  ) : (
+                    <Heart className="h-12 w-12 text-primary/60" />
+                  )}
+                </div>
+                {avatarPreview && (
+                  <button
+                    type="button"
+                    onClick={removeAvatar}
+                    className="absolute -top-1 -right-1 h-7 w-7 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center shadow-md hover:scale-105 transition"
+                    aria-label="Remove image"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              <div className="flex-1 space-y-2 text-center sm:text-left">
+                <p className="text-sm font-medium text-foreground">Add a profile picture</p>
+                <p className="text-xs text-muted-foreground">
+                  Upload a clear photo to help identify this service member. JPG or PNG, up to 5MB.
+                </p>
+                <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+                  <Label htmlFor="receiver-avatar-input" className="cursor-pointer">
+                    <div className="inline-flex items-center gap-2 h-9 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition">
+                      <Upload className="h-4 w-4" />
+                      {avatarPreview ? "Change Photo" : "Upload Photo"}
+                    </div>
+                    <input
+                      id="receiver-avatar-input"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => onPickAvatar(e.target.files?.[0])}
+                    />
+                  </Label>
+                  {avatarPreview && (
+                    <Button type="button" variant="outline" size="sm" onClick={removeAvatar} className="gap-2">
+                      <X className="h-4 w-4" /> Remove
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Personal Detail */}
         <Card>
