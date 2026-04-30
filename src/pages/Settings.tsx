@@ -52,7 +52,9 @@ import {
   ChevronRight,
   ArrowLeft,
   Save,
+  ToggleLeft,
 } from "lucide-react";
+import { useFeatureToggles, FEATURE_LABELS, FeatureKey } from "@/hooks/use-feature-toggles";
 
 type TileKey =
   | "company"
@@ -74,7 +76,8 @@ type TileKey =
   | "billing"
   | "integrations"
   | "security"
-  | "backup";
+  | "backup"
+  | "features";
 
 interface Tile {
   key: TileKey;
@@ -85,6 +88,7 @@ interface Tile {
 }
 
 const TILES: Tile[] = [
+  { key: "features", title: "Feature Toggles", description: "Enable or disable Notifications, Insights, Bookings", icon: ToggleLeft, group: "Account" },
   { key: "company", title: "Company Settings", description: "Business profile, branding & address", icon: Building2, group: "Company" },
   { key: "oncall", title: "On Call", description: "Out-of-hours phone & escalation", icon: PhoneCall, group: "Company" },
   { key: "logged", title: "Logged In Users", description: "Active sessions & device sign-out", icon: PlayCircle, group: "Account" },
