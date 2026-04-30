@@ -59,6 +59,7 @@ const Roster = () => {
   const { data: careReceivers = [] } = useCareReceivers();
   const upsertShift = useUpsertShift();
   const delShift = useDeleteShift();
+  const { data: holidayEntries = [] } = useCaregiverHolidayEntries();
 
   const [weekOffset, setWeekOffset] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
