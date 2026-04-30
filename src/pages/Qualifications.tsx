@@ -20,8 +20,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  GraduationCap, Plus, ChevronLeft, ChevronRight, ArrowUpDown, Pencil, Trash2,
+  GraduationCap, Plus, ChevronLeft, ChevronRight, ArrowUpDown, Pencil, Trash2, Send, BookOpen,
 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
 
