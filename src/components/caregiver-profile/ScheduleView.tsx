@@ -412,31 +412,36 @@ export function ScheduleView({ cg, showHeader = true }: Props) {
                 <TableBody>
                   <TableRow>
                     {DAYS.map((_, dayIdx) => {
-                      const dayShifts = myShifts.filter((s) => s.day === dayIdx);
+                      const cellDateStr = weekDates[dayIdx].toISOString().split("T")[0];
+                      const dayVisits = myWeekVisits.filter((v) => v.visit_date === cellDateStr);
                       return (
                         <TableCell key={dayIdx} className="align-top border-r last:border-r-0 p-2 min-h-[120px]">
                           <div className="space-y-2 min-h-[100px]">
-                            {dayShifts.length === 0 && (
+                            {dayVisits.length === 0 && (
                               <p className="text-xs text-muted-foreground/50 text-center pt-8">No shifts</p>
                             )}
-                            {dayShifts.map((shift) => (
-                              <div
-                                key={shift.id}
-                                className={`rounded-lg border p-2 text-xs ${shiftTypeColors[shift.shift_type] ?? ""}`}
-                              >
-                                <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-current mb-1">
-                                  {shift.shift_type}
-                                </Badge>
-                                <div className="flex items-center gap-1 text-[11px]">
-                                  <User className="h-3 w-3" />
-                                  {(shift.care_receivers as any)?.name ?? "—"}
+                            {dayVisits.map((v) => {
+                              const shiftType = v.start_hour < 12 ? "Morning" : v.start_hour < 17 ? "Afternoon" : "Night";
+                              const endHour = v.start_hour + (v.duration ?? 0);
+                              return (
+                                <div
+                                  key={v.id}
+                                  className={`rounded-lg border p-2 text-xs ${shiftTypeColors[shiftType] ?? ""}`}
+                                >
+                                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-current mb-1">
+                                    {shiftType}
+                                  </Badge>
+                                  <div className="flex items-center gap-1 text-[11px]">
+                                    <User className="h-3 w-3" />
+                                    {(v.care_receivers as any)?.name ?? "—"}
+                                  </div>
+                                  <div className="flex items-center gap-1 mt-1 opacity-75">
+                                    <Clock className="h-3 w-3" />
+                                    {String(v.start_hour).padStart(2, "0")}:00–{String(endHour).padStart(2, "0")}:00
+                                  </div>
                                 </div>
-                                <div className="flex items-center gap-1 mt-1 opacity-75">
-                                  <Clock className="h-3 w-3" />
-                                  {shift.start_time}–{shift.end_time}
-                                </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         </TableCell>
                       );
