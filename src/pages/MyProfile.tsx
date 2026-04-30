@@ -35,7 +35,7 @@ interface Profile {
   address1: string;
   address2: string;
   city: string;
-  country: string;
+  county: string;
   postcode: string;
   country: string;
   email: string;
@@ -65,7 +65,7 @@ const INITIAL: Profile = {
   address1: "14 Curzon Street",
   address2: "Mayfair",
   city: "London",
-  country: "Greater London",
+  county: "Greater London",
   postcode: "W1J 5HN",
   country: "United Kingdom",
   email: "abdul@mayfaircare.co.uk",
@@ -242,8 +242,8 @@ export default function MyProfile() {
                     <FieldBlock label="City">
                       <Input value={p.city} onChange={(e) => update("city", e.target.value)} />
                     </FieldBlock>
-                    <FieldBlock label="country">
-                      <Input value={p.country} onChange={(e) => update("country", e.target.value)} />
+                    <FieldBlock label="County">
+                      <Input value={p.county} onChange={(e) => update("county", e.target.value)} />
                     </FieldBlock>
                     <FieldBlock label="Postcode">
                       <Input value={p.postcode} onChange={(e) => update("postcode", e.target.value)} />
