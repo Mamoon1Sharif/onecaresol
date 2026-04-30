@@ -105,7 +105,7 @@ export function DetailedProfileTab({ cg }: Props) {
       {/* Team Member Details */}
       <Card className="border border-border">
         <CardContent className="p-6">
-          <h3 className="text-sm font-bold uppercase tracking-widest text-primary mb-1">Team Member Details</h3>
+          <h3 className="text-sm font-bold uppercase tracking-widest text-primary mb-1">Team Member Details(Staff)</h3>
           <Separator className="mb-4" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-1">
             <EditableField
