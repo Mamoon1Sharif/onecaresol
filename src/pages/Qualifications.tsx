@@ -527,7 +527,47 @@ export default function Qualifications() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete confirm */}
+      {/* Send for Training dialog */}
+      <Dialog open={!!trainingFor} onOpenChange={(o) => !o && setTrainingFor(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Send for Training</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="text-xs text-muted-foreground">
+              Schedule training for <span className="font-medium text-foreground">{cg?.name}</span> on{" "}
+              <span className="font-medium text-foreground">{trainingFor?.qualification}</span>. The team
+              member will be marked as on training and cannot be assigned rotas during this period.
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Start Date *</Label>
+                <Input type="date" value={trainStart} onChange={(e) => setTrainStart(e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">End Date</Label>
+                <Input type="date" value={trainEnd} onChange={(e) => setTrainEnd(e.target.value)} />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Notes</Label>
+              <Textarea rows={2} value={trainNotes} onChange={(e) => setTrainNotes(e.target.value)} placeholder="Course details, location, trainer..." />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTrainingFor(null)}>Cancel</Button>
+            <Button
+              className="bg-amber-600 hover:bg-amber-700 text-white gap-1.5"
+              disabled={!trainStart || sendForTraining.isPending}
+              onClick={() => sendForTraining.mutate()}
+            >
+              <Send className="h-3.5 w-3.5" />
+              {sendForTraining.isPending ? "Sending..." : "Send for Training"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <AlertDialog open={!!deletingId} onOpenChange={(o) => !o && setDeletingId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
