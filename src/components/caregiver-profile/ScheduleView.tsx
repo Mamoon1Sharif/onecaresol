@@ -183,9 +183,9 @@ export function ScheduleView({ cg, showHeader = true }: Props) {
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <Input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="h-8 text-xs w-[130px]" />
+                  <Input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="h-8 text-xs w-[160px] pr-2" />
                   <span className="text-xs text-muted-foreground">to</span>
-                  <Input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className="h-8 text-xs w-[130px]" />
+                  <Input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className="h-8 text-xs w-[160px] pr-2" />
                   <Button size="sm" className="h-8 gap-1.5" onClick={handleDateUpdate}>
                     <CalendarDays className="h-3.5 w-3.5" /> Update
                   </Button>
