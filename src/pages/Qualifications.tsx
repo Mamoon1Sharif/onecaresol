@@ -322,7 +322,7 @@ export default function Qualifications() {
 
           {/* Table */}
           <div className="border-t border-b border-foreground/30">
-            <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1.2fr_60px] text-xs font-semibold py-2 px-2 border-b border-foreground/30">
+            <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1.2fr_110px] text-xs font-semibold py-2 px-2 border-b border-foreground/30">
               <SortHeader label="Qualification" col="qualification" sortBy={sortBy} sortAsc={sortAsc} onClick={toggleSort} />
               <SortHeader label="Start" col="start_date" sortBy={sortBy} sortAsc={sortAsc} onClick={toggleSort} />
               <SortHeader label="Exp" col="expiry_date" sortBy={sortBy} sortAsc={sortAsc} onClick={toggleSort} />
@@ -335,14 +335,23 @@ export default function Qualifications() {
                 No qualifications.
               </div>
             ) : (
-              pageItems.map((q, i) => (
+              pageItems.map((q, i) => {
+                const activeTraining = trainingByQual(q.qualification);
+                return (
                 <div
                   key={q.id}
-                  className={`grid grid-cols-[2fr_1fr_1fr_1fr_1.2fr_60px] text-xs py-2.5 px-2 items-center ${
+                  className={`grid grid-cols-[2fr_1fr_1fr_1fr_1.2fr_110px] text-xs py-2.5 px-2 items-center ${
                     i % 2 === 0 ? "bg-muted/30" : "bg-background"
                   }`}
                 >
-                  <div className="text-foreground">{q.qualification}</div>
+                  <div className="text-foreground flex items-center gap-2">
+                    {q.qualification}
+                    {activeTraining && (
+                      <Badge variant="outline" className="border-amber-500 text-amber-700 text-[9px] py-0 h-4">
+                        Training
+                      </Badge>
+                    )}
+                  </div>
                   <div className="text-muted-foreground">
                     {q.start_date ? format(parseISO(q.start_date), "dd/MM/yyyy") : "—"}
                   </div>
@@ -351,7 +360,21 @@ export default function Qualifications() {
                   </div>
                   <div><StatusBadge status={q.status} /></div>
                   <div className="text-muted-foreground">{q.sub_status}</div>
-                  <div className="flex items-center justify-end gap-1">
+                  <div className="flex items-center justify-end gap-0.5">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 w-7 p-0 text-amber-600 hover:text-amber-700"
+                      title="Send for Training"
+                      onClick={() => {
+                        setTrainingFor(q);
+                        setTrainStart(format(new Date(), "yyyy-MM-dd"));
+                        setTrainEnd("");
+                        setTrainNotes("");
+                      }}
+                    >
+                      <Send className="h-3 w-3" />
+                    </Button>
                     <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => openEdit(q)}>
                       <Pencil className="h-3 w-3" />
                     </Button>
@@ -365,7 +388,8 @@ export default function Qualifications() {
                     </Button>
                   </div>
                 </div>
-              ))
+                );
+              })
             )}
           </div>
 
