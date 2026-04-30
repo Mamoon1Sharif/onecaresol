@@ -310,6 +310,23 @@ export function useDailyVisits(dateStr?: string) {
   });
 }
 
+export function useDailyVisitsRange(fromDate?: string, toDate?: string) {
+  return useQuery({
+    queryKey: ["daily_visits_range", fromDate, toDate],
+    enabled: !!fromDate && !!toDate,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("daily_visits")
+        .select("*, care_receivers(*), care_givers(*)")
+        .gte("visit_date", fromDate!)
+        .lte("visit_date", toDate!)
+        .order("start_hour");
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
 export function useUpdateDailyVisit() {
   const qc = useQueryClient();
   return useMutation({
