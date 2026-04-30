@@ -11,9 +11,23 @@ import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import {
-  Search, ArrowLeft, MapPin, User, Save, Loader2, Pill, ClipboardList,
-  CalendarDays, Clock, Briefcase, AlertTriangle, Repeat, FileText, ShieldCheck,
-  ChevronRight, Info,
+  Search,
+  ArrowLeft,
+  MapPin,
+  User,
+  Save,
+  Loader2,
+  Pill,
+  ClipboardList,
+  CalendarDays,
+  Clock,
+  Briefcase,
+  AlertTriangle,
+  Repeat,
+  FileText,
+  ShieldCheck,
+  ChevronRight,
+  Info,
 } from "lucide-react";
 import { useCareReceivers, useCareGivers, useUpsertShift, useMedications } from "@/hooks/use-care-data";
 import { getCareReceiverAvatar } from "@/lib/avatars";
@@ -25,8 +39,15 @@ const hours = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
 const minutes = ["00", "15", "30", "45"];
 
 const SERVICE_OPTIONS = [
-  "CHC - Morning Call", "CHC - Lunch Call", "CHC - Tea Call", "CHC - Evening Call",
-  "Domiciliary", "Live-In", "Respite", "Waking Night", "Sleeping Night",
+  "CHC - Morning Call",
+  "CHC - Lunch Call",
+  "CHC - Tea Call",
+  "CHC - Evening Call",
+  "Domiciliary",
+  "Live-In",
+  "Respite",
+  "Waking Night",
+  "Sleeping Night",
 ];
 
 const calcAge = (dob?: string | null) => {
@@ -107,10 +128,8 @@ const AddRota = () => {
     setSelectedMedIds(matching);
   }, [form.medicationRequired, shiftWindow, uniqueMeds]);
 
-  const toggleMed = (id: string) =>
-    setSelectedMedIds((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
-  const toggleTask = (t: string) =>
-    setSelectedTasks((p) => (p.includes(t) ? p.filter((x) => x !== t) : [...p, t]));
+  const toggleMed = (id: string) => setSelectedMedIds((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
+  const toggleTask = (t: string) => setSelectedTasks((p) => (p.includes(t) ? p.filter((x) => x !== t) : [...p, t]));
 
   const filtered = useMemo(
     () =>
@@ -121,7 +140,10 @@ const AddRota = () => {
   );
 
   const selected = useMemo(() => receivers.find((r) => r.id === selectedId) ?? null, [receivers, selectedId]);
-  const selectedCaregiver = useMemo(() => caregivers.find((c) => c.id === form.staff1) ?? null, [caregivers, form.staff1]);
+  const selectedCaregiver = useMemo(
+    () => caregivers.find((c) => c.id === form.staff1) ?? null,
+    [caregivers, form.staff1],
+  );
 
   const startMins = parseInt(form.startH) * 60 + parseInt(form.startM);
   let endMinsAdj = parseInt(form.endH) * 60 + parseInt(form.endM);
@@ -146,7 +168,10 @@ const AddRota = () => {
       if (!userId) throw new Error("You must be signed in to save a rota.");
 
       const { data: companyUser, error: companyError } = await supabase
-        .from("company_users").select("company_id").eq("user_id", userId).maybeSingle();
+        .from("company_users")
+        .select("company_id")
+        .eq("user_id", userId)
+        .maybeSingle();
       if (companyError) throw companyError;
       if (!companyUser?.company_id) throw new Error("Your account is not linked to a company.");
 
@@ -175,7 +200,8 @@ const AddRota = () => {
           duration: durHours,
           status: staffId ? "Confirmed" : "Pending",
         })
-        .select("id").single();
+        .select("id")
+        .single();
       if (dvErr) throw dvErr;
 
       const taskTitles: string[] = [];
@@ -222,7 +248,9 @@ const AddRota = () => {
                 className="pl-9 bg-card border-border"
               />
             </div>
-            <Badge variant="outline" className="text-sm px-3 py-1.5">{filtered.length} results</Badge>
+            <Badge variant="outline" className="text-sm px-3 py-1.5">
+              {filtered.length} results
+            </Badge>
           </div>
 
           {isLoading ? (
@@ -239,7 +267,11 @@ const AddRota = () => {
                   className="group flex items-center gap-3 border border-border rounded-xl bg-card p-3 text-left hover:shadow-md hover:border-primary/40 transition-all"
                 >
                   <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-border shrink-0">
-                    <img src={getCareReceiverAvatar(r.id, r.avatar_url)} alt={r.name} className="h-full w-full object-cover" />
+                    <img
+                      src={getCareReceiverAvatar(r.id, r.avatar_url)}
+                      alt={r.name}
+                      className="h-full w-full object-cover"
+                    />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="font-semibold text-sm truncate">{r.name}</div>
@@ -277,12 +309,10 @@ const AddRota = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => setSelectedId(null)}>Cancel</Button>
-            <Button
-              onClick={handleSave}
-              disabled={upsertShift.isPending}
-              className="gap-2"
-            >
+            <Button variant="outline" size="sm" onClick={() => setSelectedId(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSave} disabled={upsertShift.isPending} className="gap-2">
               {upsertShift.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               Save Rota
             </Button>
@@ -293,14 +323,24 @@ const AddRota = () => {
         <Card className="overflow-hidden">
           <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-4 flex items-center gap-4">
             <div className="h-14 w-14 rounded-full overflow-hidden border-2 border-background shadow-sm shrink-0">
-              <img src={getCareReceiverAvatar(selected.id, selected.avatar_url)} alt={selected.name} className="h-full w-full object-cover" />
+              <img
+                src={getCareReceiverAvatar(selected.id, selected.avatar_url)}
+                alt={selected.name}
+                className="h-full w-full object-cover"
+              />
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-semibold text-foreground">{selected.name}</span>
                 {age !== null && <span className="text-xs text-muted-foreground">· Age {age}</span>}
-                <Badge variant="outline" className="text-[10px]">{selected.care_status || "Active"}</Badge>
-                {selected.care_type && <Badge variant="secondary" className="text-[10px]">{selected.care_type}</Badge>}
+                <Badge variant="outline" className="text-[10px]">
+                  {selected.care_status || "Active"}
+                </Badge>
+                {selected.care_type && (
+                  <Badge variant="secondary" className="text-[10px]">
+                    {selected.care_type}
+                  </Badge>
+                )}
               </div>
               {selected.address && (
                 <div className="text-xs text-muted-foreground truncate flex items-center gap-1 mt-1">
@@ -319,15 +359,23 @@ const AddRota = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Service" required>
                   <Select value={form.serviceList} onValueChange={(v) => setForm({ ...form, serviceList: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
-                      {SERVICE_OPTIONS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                      {SERVICE_OPTIONS.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {s}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </Field>
                 <Field label="Rota type" required>
                   <Select value={form.rotaType} onValueChange={(v) => setForm({ ...form, rotaType: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Normal">Normal</SelectItem>
                       <SelectItem value="Alternative">Alternative</SelectItem>
@@ -349,14 +397,16 @@ const AddRota = () => {
                 </Field>
                 <Field label="Start time" required>
                   <TimePicker
-                    h={form.startH} m={form.startM}
+                    h={form.startH}
+                    m={form.startM}
                     onH={(v) => setForm({ ...form, startH: v })}
                     onM={(v) => setForm({ ...form, startM: v })}
                   />
                 </Field>
                 <Field label="End time" required>
                   <TimePicker
-                    h={form.endH} m={form.endM}
+                    h={form.endH}
+                    m={form.endM}
                     onH={(v) => setForm({ ...form, endH: v })}
                     onM={(v) => setForm({ ...form, endM: v })}
                   />
@@ -371,12 +421,18 @@ const AddRota = () => {
                   <span className="text-primary font-semibold text-sm tabular-nums">{duration}</span>
                 </div>
                 <Slider
-                  min={15} max={24 * 60} step={15}
+                  min={15}
+                  max={24 * 60}
+                  step={15}
                   value={[Math.max(15, durationMinutes)]}
                   onValueChange={handleDurationSlider}
                 />
                 <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
-                  <span>15m</span><span>6h</span><span>12h</span><span>18h</span><span>24h</span>
+                  <span>15m</span>
+                  <span>6h</span>
+                  <span>12h</span>
+                  <span>18h</span>
+                  <span>24h</span>
                 </div>
               </div>
             </Section>
@@ -385,7 +441,9 @@ const AddRota = () => {
             <Section icon={User} title="Care giver" subtitle="Assign or leave open for later.">
               <Field label="Assign caregiver">
                 <Select value={form.staff1} onValueChange={(v) => setForm({ ...form, staff1: v })}>
-                  <SelectTrigger><SelectValue placeholder="Choose a caregiver…" /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a caregiver…" />
+                  </SelectTrigger>
                   <SelectContent>
                     {caregivers.map((c) => (
                       <SelectItem key={c.id} value={c.id}>
@@ -423,15 +481,25 @@ const AddRota = () => {
                     <div className="rounded-lg border border-primary/30 bg-primary/5 p-2.5 flex items-center gap-2 text-xs">
                       <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
                       <span>
-                        Shift starts at <strong>{form.startH}:{form.startM}</strong> ·
-                        auto-selected <strong>{shiftWindow}</strong> medications.
+                        Shift starts at{" "}
+                        <strong>
+                          {form.startH}:{form.startM}
+                        </strong>{" "}
+                        · auto-selected <strong>{shiftWindow}</strong> medications.
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>{uniqueMeds.length} prescription{uniqueMeds.length !== 1 ? "s" : ""} from MAR · {selectedMedIds.length} selected</span>
+                      <span>
+                        {uniqueMeds.length} prescription{uniqueMeds.length !== 1 ? "s" : ""} from MAR ·{" "}
+                        {selectedMedIds.length} selected
+                      </span>
                       <button
                         type="button"
-                        onClick={() => setSelectedMedIds(selectedMedIds.length === uniqueMeds.length ? [] : uniqueMeds.map((m: any) => m.id))}
+                        onClick={() =>
+                          setSelectedMedIds(
+                            selectedMedIds.length === uniqueMeds.length ? [] : uniqueMeds.map((m: any) => m.id),
+                          )
+                        }
                         className="text-primary hover:underline font-medium"
                       >
                         {selectedMedIds.length === uniqueMeds.length ? "Clear all" : "Select all"}
@@ -448,8 +516,12 @@ const AddRota = () => {
                               <Badge variant={isCurrent ? "default" : "outline"} className="text-[10px]">
                                 {tod}
                               </Badge>
-                              <span className="text-[10px] text-muted-foreground">{items.length} med{items.length !== 1 ? "s" : ""}</span>
-                              {isCurrent && <span className="text-[10px] text-primary font-medium">· matches this shift</span>}
+                              <span className="text-[10px] text-muted-foreground">
+                                {items.length} med{items.length !== 1 ? "s" : ""}
+                              </span>
+                              {isCurrent && (
+                                <span className="text-[10px] text-primary font-medium">· matches this shift</span>
+                              )}
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                               {items.map((m: any) => {
@@ -459,10 +531,16 @@ const AddRota = () => {
                                     key={m.id}
                                     className={cn(
                                       "flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-all",
-                                      checked ? "border-primary bg-primary/5" : "border-border hover:border-primary/40 hover:bg-muted/40"
+                                      checked
+                                        ? "border-primary bg-primary/5"
+                                        : "border-border hover:border-primary/40 hover:bg-muted/40",
                                     )}
                                   >
-                                    <Checkbox checked={checked} onCheckedChange={() => toggleMed(m.id)} className="mt-0.5" />
+                                    <Checkbox
+                                      checked={checked}
+                                      onCheckedChange={() => toggleMed(m.id)}
+                                      className="mt-0.5"
+                                    />
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-start gap-2">
                                         <Pill className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
@@ -477,7 +555,9 @@ const AddRota = () => {
                                         </div>
                                       </div>
                                       {m.notes && (
-                                        <div className="text-[11px] text-muted-foreground mt-1.5 line-clamp-2">{m.notes}</div>
+                                        <div className="text-[11px] text-muted-foreground mt-1.5 line-clamp-2">
+                                          {m.notes}
+                                        </div>
                                       )}
                                     </div>
                                   </label>
@@ -491,7 +571,9 @@ const AddRota = () => {
                   </>
                 )
               ) : (
-                <p className="text-xs text-muted-foreground">Toggle on to auto-pull doctor-approved medications from the MAR chart for this time of day.</p>
+                <p className="text-xs text-muted-foreground">
+                  Toggle on to auto-pull doctor-approved medications from the MAR chart for this time of day.
+                </p>
               )}
             </Section>
 
@@ -501,10 +583,7 @@ const AddRota = () => {
               title="Tasks"
               subtitle="Pre-approved by the service member."
               right={
-                <SwitchRow
-                  checked={form.tasksRequired}
-                  onChange={(v) => setForm({ ...form, tasksRequired: v })}
-                />
+                <SwitchRow checked={form.tasksRequired} onChange={(v) => setForm({ ...form, tasksRequired: v })} />
               }
             >
               {form.tasksRequired ? (
@@ -513,7 +592,10 @@ const AddRota = () => {
                 ) : (
                   <>
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>{((selected as any).approved_tasks as string[]).length} approved · {selectedTasks.length} selected</span>
+                      <span>
+                        {((selected as any).approved_tasks as string[]).length} approved · {selectedTasks.length}{" "}
+                        selected
+                      </span>
                       <button
                         type="button"
                         onClick={() => {
@@ -522,7 +604,9 @@ const AddRota = () => {
                         }}
                         className="text-primary hover:underline font-medium"
                       >
-                        {selectedTasks.length === ((selected as any).approved_tasks as string[]).length ? "Clear all" : "Select all"}
+                        {selectedTasks.length === ((selected as any).approved_tasks as string[]).length
+                          ? "Clear all"
+                          : "Select all"}
                       </button>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -533,7 +617,9 @@ const AddRota = () => {
                             key={t}
                             className={cn(
                               "flex items-center gap-3 rounded-lg border p-2.5 cursor-pointer transition-all",
-                              checked ? "border-primary bg-primary/5" : "border-border hover:border-primary/40 hover:bg-muted/40"
+                              checked
+                                ? "border-primary bg-primary/5"
+                                : "border-border hover:border-primary/40 hover:bg-muted/40",
                             )}
                           >
                             <Checkbox checked={checked} onCheckedChange={() => toggleTask(t)} />
@@ -552,11 +638,36 @@ const AddRota = () => {
             {/* 6. Options */}
             <Section icon={Repeat} title="Options" subtitle="Recurrence, alerts and templates.">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <ToggleCard icon={Clock} label="Add time lock" checked={form.addTimeLock} onChange={(v) => setForm({ ...form, addTimeLock: v })} />
-                <ToggleCard icon={Repeat} label="Link up shifts" checked={form.linkUp} onChange={(v) => setForm({ ...form, linkUp: v })} />
-                <ToggleCard icon={AlertTriangle} label="Mark as alert" checked={form.alert} onChange={(v) => setForm({ ...form, alert: v })} />
-                <ToggleCard icon={Repeat} label="Recurring shift" checked={form.recurring} onChange={(v) => setForm({ ...form, recurring: v })} />
-                <ToggleCard icon={FileText} label="Save as template" checked={form.template} onChange={(v) => setForm({ ...form, template: v })} />
+                <ToggleCard
+                  icon={Clock}
+                  label="Add time lock"
+                  checked={form.addTimeLock}
+                  onChange={(v) => setForm({ ...form, addTimeLock: v })}
+                />
+                <ToggleCard
+                  icon={Repeat}
+                  label="Link up shifts"
+                  checked={form.linkUp}
+                  onChange={(v) => setForm({ ...form, linkUp: v })}
+                />
+                <ToggleCard
+                  icon={AlertTriangle}
+                  label="Mark as alert"
+                  checked={form.alert}
+                  onChange={(v) => setForm({ ...form, alert: v })}
+                />
+                <ToggleCard
+                  icon={Repeat}
+                  label="Recurring shift"
+                  checked={form.recurring}
+                  onChange={(v) => setForm({ ...form, recurring: v })}
+                />
+                <ToggleCard
+                  icon={FileText}
+                  label="Save as template"
+                  checked={form.template}
+                  onChange={(v) => setForm({ ...form, template: v })}
+                />
               </div>
             </Section>
           </div>
@@ -567,13 +678,23 @@ const AddRota = () => {
               <Card>
                 <CardContent className="p-4 space-y-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold">Shift summary</h3>
-                    <Badge variant="outline" className="text-[10px]">Preview</Badge>
+                    <h3 className="text-sm font-semibold">Rota summary</h3>
+                    <Badge variant="outline" className="text-[10px]">
+                      Preview
+                    </Badge>
                   </div>
 
                   <SummaryRow label="Service" value={form.serviceList} />
                   <SummaryRow label="Rota type" value={form.rotaType} />
-                  <SummaryRow label="Date" value={new Date(form.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" })} />
+                  <SummaryRow
+                    label="Date"
+                    value={new Date(form.date).toLocaleDateString("en-GB", {
+                      weekday: "short",
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  />
                   <SummaryRow label="Time" value={`${form.startH}:${form.startM} → ${form.endH}:${form.endM}`} />
                   <SummaryRow label="Duration" value={duration} highlight />
                   <SummaryRow
@@ -583,14 +704,24 @@ const AddRota = () => {
 
                   <div className="border-t pt-3 space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground flex items-center gap-1.5"><Pill className="h-3 w-3" /> Medications</span>
-                      <Badge variant={form.medicationRequired && selectedMedIds.length > 0 ? "default" : "outline"} className="text-[10px]">
+                      <span className="text-muted-foreground flex items-center gap-1.5">
+                        <Pill className="h-3 w-3" /> Medications
+                      </span>
+                      <Badge
+                        variant={form.medicationRequired && selectedMedIds.length > 0 ? "default" : "outline"}
+                        className="text-[10px]"
+                      >
                         {form.medicationRequired ? `${selectedMedIds.length} selected` : "None"}
                       </Badge>
                     </div>
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground flex items-center gap-1.5"><ClipboardList className="h-3 w-3" /> Tasks</span>
-                      <Badge variant={form.tasksRequired && selectedTasks.length > 0 ? "default" : "outline"} className="text-[10px]">
+                      <span className="text-muted-foreground flex items-center gap-1.5">
+                        <ClipboardList className="h-3 w-3" /> Tasks
+                      </span>
+                      <Badge
+                        variant={form.tasksRequired && selectedTasks.length > 0 ? "default" : "outline"}
+                        className="text-[10px]"
+                      >
                         {form.tasksRequired ? `${selectedTasks.length} selected` : "None"}
                       </Badge>
                     </div>
@@ -606,12 +737,12 @@ const AddRota = () => {
                     )}
                   </div>
 
-                  <Button
-                    onClick={handleSave}
-                    disabled={upsertShift.isPending}
-                    className="w-full gap-2"
-                  >
-                    {upsertShift.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  <Button onClick={handleSave} disabled={upsertShift.isPending} className="w-full gap-2">
+                    {upsertShift.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4" />
+                    )}
                     Save Rota
                   </Button>
                 </CardContent>
@@ -620,7 +751,9 @@ const AddRota = () => {
               {form.medicationRequired && selectedMedIds.length > 0 && (
                 <Card>
                   <CardContent className="p-4 space-y-2">
-                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Medications on this shift</h3>
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                      Medications on this shift
+                    </h3>
                     {selectedMedIds.map((id) => {
                       const m: any = uniqueMeds.find((x: any) => x.id === id);
                       if (!m) return null;
@@ -647,9 +780,17 @@ const AddRota = () => {
 
 // ── small presentational helpers ──
 const Section = ({
-  icon: Icon, title, subtitle, right, children,
+  icon: Icon,
+  title,
+  subtitle,
+  right,
+  children,
 }: {
-  icon: any; title: string; subtitle?: string; right?: React.ReactNode; children: React.ReactNode;
+  icon: any;
+  title: string;
+  subtitle?: string;
+  right?: React.ReactNode;
+  children: React.ReactNode;
 }) => (
   <Card>
     <CardContent className="p-5 space-y-4">
@@ -673,25 +814,48 @@ const Section = ({
 const Field = ({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) => (
   <div className="space-y-1.5">
     <Label className="text-xs font-medium text-muted-foreground">
-      {label}{required && <span className="text-destructive ml-0.5">*</span>}
+      {label}
+      {required && <span className="text-destructive ml-0.5">*</span>}
     </Label>
     {children}
   </div>
 );
 
-const TimePicker = ({ h, m, onH, onM }: { h: string; m: string; onH: (v: string) => void; onM: (v: string) => void }) => (
+const TimePicker = ({
+  h,
+  m,
+  onH,
+  onM,
+}: {
+  h: string;
+  m: string;
+  onH: (v: string) => void;
+  onM: (v: string) => void;
+}) => (
   <div className="flex items-center gap-1.5">
     <Select value={h} onValueChange={onH}>
-      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+      <SelectTrigger className="w-full">
+        <SelectValue />
+      </SelectTrigger>
       <SelectContent className="max-h-60">
-        {hours.map((x) => <SelectItem key={x} value={x}>{x}</SelectItem>)}
+        {hours.map((x) => (
+          <SelectItem key={x} value={x}>
+            {x}
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
     <span className="text-muted-foreground font-medium">:</span>
     <Select value={m} onValueChange={onM}>
-      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+      <SelectTrigger className="w-full">
+        <SelectValue />
+      </SelectTrigger>
       <SelectContent>
-        {minutes.map((x) => <SelectItem key={x} value={x}>{x}</SelectItem>)}
+        {minutes.map((x) => (
+          <SelectItem key={x} value={x}>
+            {x}
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
   </div>
@@ -705,12 +869,20 @@ const SwitchRow = ({ checked, onChange }: { checked: boolean; onChange: (v: bool
 );
 
 const ToggleCard = ({
-  icon: Icon, label, checked, onChange,
-}: { icon: any; label: string; checked: boolean; onChange: (v: boolean) => void }) => (
+  icon: Icon,
+  label,
+  checked,
+  onChange,
+}: {
+  icon: any;
+  label: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) => (
   <label
     className={cn(
       "flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-all",
-      checked ? "border-primary bg-primary/5" : "border-border hover:border-primary/40 hover:bg-muted/40"
+      checked ? "border-primary bg-primary/5" : "border-border hover:border-primary/40 hover:bg-muted/40",
     )}
   >
     <Icon className={cn("h-4 w-4 shrink-0", checked ? "text-primary" : "text-muted-foreground")} />
