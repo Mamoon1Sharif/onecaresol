@@ -491,82 +491,82 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
 
           </div>
         </ScrollArea>
-
-        {/* ============== EDIT SHIFT DIALOG ============== */}
-        <Dialog open={editOpen} onOpenChange={setEditOpen}>
-          <DialogContent className="max-w-md">
-            <h3 className="font-semibold text-base mb-3">Edit Shift Details</h3>
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs font-medium">Status</label>
-                <Select value={editStatus || visit.status} onValueChange={setEditStatus}>
-                  <SelectTrigger className="h-9 mt-1"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Due">Due</SelectItem>
-                    <SelectItem value="In Progress">In Progress</SelectItem>
-                    <SelectItem value="Finished">Finished</SelectItem>
-                    <SelectItem value="Missed">Missed</SelectItem>
-                    <SelectItem value="Cancelled">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium">Scheduled Start</label>
-                  <Input value={editStart || visit.scheduledStart} onChange={(e) => setEditStart(e.target.value)} className="h-9 mt-1" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium">Scheduled End</label>
-                  <Input value={editEnd || visit.scheduledEnd} onChange={(e) => setEditEnd(e.target.value)} className="h-9 mt-1" />
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" size="sm" onClick={() => setEditOpen(false)}>Cancel</Button>
-              <Button size="sm" className="bg-primary text-primary-foreground" onClick={() => setEditOpen(false)}>Save</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* ============== ADD NOTE DIALOG ============== */}
-        <Dialog open={noteOpen} onOpenChange={setNoteOpen}>
-          <DialogContent className="max-w-md">
-            <h3 className="font-semibold text-base mb-3">Add Live Rota Note</h3>
-            <Textarea value={noteText} onChange={(e) => setNoteText(e.target.value)} rows={4} placeholder="Write your note..." />
-            <label className="flex items-center gap-2 text-xs mt-2">
-              <input type="checkbox" checked={noteHidden} onChange={(e) => setNoteHidden(e.target.checked)} />
-              Mark as hidden (won't appear on Care Portal)
-            </label>
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" size="sm" onClick={() => setNoteOpen(false)}>Cancel</Button>
-              <Button size="sm" className="bg-success text-success-foreground" onClick={handleAddNote}>Add Note</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* ============== ADD LOCK DIALOG ============== */}
-        <Dialog open={lockOpen} onOpenChange={setLockOpen}>
-          <DialogContent className="max-w-md">
-            <h3 className="font-semibold text-base mb-3">Add Rota Lock</h3>
-            <label className="text-xs font-medium">Reason</label>
-            <Input value={lockReason} onChange={(e) => setLockReason(e.target.value)} className="mt-1" placeholder="e.g. Confirmed by service user" />
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" size="sm" onClick={() => setLockOpen(false)}>Cancel</Button>
-              <Button size="sm" className="bg-success text-success-foreground" onClick={handleAddLock}>Add Lock</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* ============== ADD SHADOW SHIFT DIALOG ============== */}
-        <Dialog open={shadowOpen} onOpenChange={setShadowOpen}>
-          <DialogContent className="max-w-md">
-            <h3 className="font-semibold text-base mb-3">Add Shadow Shift</h3>
-            <ShadowForm onCancel={() => setShadowOpen(false)} onSave={(s) => { setShadow((arr) => [...arr, s]); setShadowOpen(false); }} visit={visit} />
-          </DialogContent>
-        </Dialog>
-
       </DialogContent>
     </Dialog>
+
+    {/* ============== EDIT SHIFT DIALOG ============== */}
+    <Dialog open={editOpen} onOpenChange={setEditOpen}>
+      <DialogContent className="max-w-md">
+        <h3 className="font-semibold text-base mb-3">Edit Shift Details</h3>
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs font-medium">Status</label>
+            <Select value={editStatus || visit.status} onValueChange={setEditStatus}>
+              <SelectTrigger className="h-9 mt-1"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Due">Due</SelectItem>
+                <SelectItem value="In Progress">In Progress</SelectItem>
+                <SelectItem value="Finished">Finished</SelectItem>
+                <SelectItem value="Missed">Missed</SelectItem>
+                <SelectItem value="Cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium">Scheduled Start</label>
+              <Input value={editStart || visit.scheduledStart} onChange={(e) => setEditStart(e.target.value)} className="h-9 mt-1" />
+            </div>
+            <div>
+              <label className="text-xs font-medium">Scheduled End</label>
+              <Input value={editEnd || visit.scheduledEnd} onChange={(e) => setEditEnd(e.target.value)} className="h-9 mt-1" />
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-end gap-2 mt-4">
+          <Button variant="outline" size="sm" onClick={() => setEditOpen(false)}>Cancel</Button>
+          <Button size="sm" className="bg-primary text-primary-foreground" onClick={() => setEditOpen(false)}>Save</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    {/* ============== ADD NOTE DIALOG ============== */}
+    <Dialog open={noteOpen} onOpenChange={setNoteOpen}>
+      <DialogContent className="max-w-md">
+        <h3 className="font-semibold text-base mb-3">Add Live Rota Note</h3>
+        <Textarea value={noteText} onChange={(e) => setNoteText(e.target.value)} rows={4} placeholder="Write your note..." />
+        <label className="flex items-center gap-2 text-xs mt-2">
+          <input type="checkbox" checked={noteHidden} onChange={(e) => setNoteHidden(e.target.checked)} />
+          Mark as hidden (won't appear on Care Portal)
+        </label>
+        <div className="flex justify-end gap-2 mt-4">
+          <Button variant="outline" size="sm" onClick={() => setNoteOpen(false)}>Cancel</Button>
+          <Button size="sm" className="bg-success text-success-foreground" onClick={handleAddNote}>Add Note</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    {/* ============== ADD LOCK DIALOG ============== */}
+    <Dialog open={lockOpen} onOpenChange={setLockOpen}>
+      <DialogContent className="max-w-md">
+        <h3 className="font-semibold text-base mb-3">Add Rota Lock</h3>
+        <label className="text-xs font-medium">Reason</label>
+        <Input value={lockReason} onChange={(e) => setLockReason(e.target.value)} className="mt-1" placeholder="e.g. Confirmed by service user" />
+        <div className="flex justify-end gap-2 mt-4">
+          <Button variant="outline" size="sm" onClick={() => setLockOpen(false)}>Cancel</Button>
+          <Button size="sm" className="bg-success text-success-foreground" onClick={handleAddLock}>Add Lock</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    {/* ============== ADD SHADOW SHIFT DIALOG ============== */}
+    <Dialog open={shadowOpen} onOpenChange={setShadowOpen}>
+      <DialogContent className="max-w-md">
+        <h3 className="font-semibold text-base mb-3">Add Shadow Shift</h3>
+        <ShadowForm onCancel={() => setShadowOpen(false)} onSave={(s) => { setShadow((arr) => [...arr, s]); setShadowOpen(false); }} visit={visit} />
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
 
