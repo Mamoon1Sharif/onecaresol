@@ -30,6 +30,7 @@ import { CalendarDays, ChevronLeft, ChevronRight, Plus, Edit2, Trash2, Clock, Us
 import { useToast } from "@/hooks/use-toast";
 import { useShifts, useUpsertShift, useDeleteShift, useCareGivers, useCareReceivers, useDailyVisitsRange } from "@/hooks/use-care-data";
 import { RosterViewSwitcher } from "@/components/RosterViewSwitcher";
+import { useCaregiverHolidayEntries, caregiverUnavailableReason } from "@/hooks/use-caregiver-availability";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
