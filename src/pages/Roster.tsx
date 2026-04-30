@@ -74,6 +74,9 @@ const Roster = () => {
 
   const weekDates = useMemo(() => getWeekDates(weekOffset), [weekOffset]);
   const weekLabel = `${weekDates[0].toLocaleDateString("en-GB", { day: "numeric", month: "short" })} – ${weekDates[6].toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`;
+  const weekFromStr = useMemo(() => weekDates[0].toISOString().split("T")[0], [weekDates]);
+  const weekToStr = useMemo(() => weekDates[6].toISOString().split("T")[0], [weekDates]);
+  const { data: weekVisits = [] } = useDailyVisitsRange(weekFromStr, weekToStr);
 
   const resetForm = () => {
     setFormCgId("");
