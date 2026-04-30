@@ -30,6 +30,7 @@ import { CalendarDays, ChevronLeft, ChevronRight, Plus, Edit2, Trash2, Clock, Us
 import { useToast } from "@/hooks/use-toast";
 import { useShifts, useUpsertShift, useDeleteShift, useCareGivers, useCareReceivers, useDailyVisitsRange } from "@/hooks/use-care-data";
 import { RosterViewSwitcher } from "@/components/RosterViewSwitcher";
+import { useCaregiverHolidayEntries, caregiverUnavailableReason } from "@/hooks/use-caregiver-availability";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -58,6 +59,7 @@ const Roster = () => {
   const { data: careReceivers = [] } = useCareReceivers();
   const upsertShift = useUpsertShift();
   const delShift = useDeleteShift();
+  const { data: holidayEntries = [] } = useCaregiverHolidayEntries();
 
   const [weekOffset, setWeekOffset] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -108,6 +110,17 @@ const Roster = () => {
 
   const handleSave = async () => {
     if (!formCgId || !formCrId) return;
+    const cg = careGivers.find((c) => c.id === formCgId);
+    const targetDate = weekDates[Number(formDay)].toISOString().split("T")[0];
+    const reason = caregiverUnavailableReason(cg as any, holidayEntries, targetDate);
+    if (reason) {
+      const detail =
+        reason.kind === "inactive"
+          ? `${cg?.name ?? "This caregiver"} is marked ${reason.label} and cannot be assigned to a rota.`
+          : `${cg?.name ?? "This caregiver"} is ${reason.label} on ${targetDate}${reason.to && reason.to !== reason.from ? ` (until ${reason.to})` : ""} and cannot be assigned.`;
+      toast({ title: "Cannot assign rota", description: detail, variant: "destructive" });
+      return;
+    }
     try {
       await upsertShift.mutateAsync({
         id: editingShiftId ?? undefined,

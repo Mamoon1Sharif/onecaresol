@@ -20,8 +20,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
-  GraduationCap, Plus, ChevronLeft, ChevronRight, ArrowUpDown, Pencil, Trash2,
+  GraduationCap, Plus, ChevronLeft, ChevronRight, ArrowUpDown, Pencil, Trash2, Send, BookOpen,
 } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
 
@@ -67,6 +69,71 @@ export default function Qualifications() {
   const [draft, setDraft] = useState({ ...emptyDraft });
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [subStatusOpen, setSubStatusOpen] = useState(false);
+  const [trainingFor, setTrainingFor] = useState<Qualification | null>(null);
+  const [trainStart, setTrainStart] = useState("");
+  const [trainEnd, setTrainEnd] = useState("");
+  const [trainNotes, setTrainNotes] = useState("");
+
+  // Active training entries for this caregiver (for status badges)
+  const { data: trainingEntries = [] } = useQuery({
+    queryKey: ["caregiver_training_entries", id],
+    enabled: !!id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("caregiver_holidays")
+        .select("id, start_date, end_date, status, entry_type, reason, notes")
+        .eq("care_giver_id", id!)
+        .eq("entry_type", "training");
+      if (error) throw error;
+      return data as Array<{ id: string; start_date: string; end_date: string | null; status: string; entry_type: string; reason: string | null; notes: string | null }>;
+    },
+  });
+
+  const today = format(new Date(), "yyyy-MM-dd");
+  const isOnTraining = trainingEntries.some(
+    (t) => t.status !== "rejected" && today >= t.start_date && today <= (t.end_date ?? t.start_date),
+  );
+  const trainingByQual = (qualName: string) =>
+    trainingEntries.find(
+      (t) =>
+        t.status !== "rejected" &&
+        today >= t.start_date &&
+        today <= (t.end_date ?? t.start_date) &&
+        (t.reason ?? "").toLowerCase() === qualName.toLowerCase(),
+    );
+
+  const sendForTraining = useMutation({
+    mutationFn: async () => {
+      if (!trainingFor || !trainStart) throw new Error("Start date required");
+      const { error } = await supabase.from("caregiver_holidays").insert({
+        care_giver_id: id!,
+        entry_type: "training",
+        start_date: trainStart,
+        end_date: trainEnd || trainStart,
+        hours: 0,
+        status: "approved",
+        reason: trainingFor.qualification,
+        notes: trainNotes || `Training scheduled for ${trainingFor.qualification}`,
+      });
+      if (error) throw error;
+      // Mark qualification as Mandatory Training while underway
+      await supabase
+        .from("caregiver_qualifications" as any)
+        .update({ sub_status: "Mandatory Training" } as any)
+        .eq("id", trainingFor.id);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["caregiver_training_entries", id] });
+      qc.invalidateQueries({ queryKey: ["caregiver_qualifications", id] });
+      qc.invalidateQueries({ queryKey: ["caregiver_holidays_all"] });
+      toast.success("Sent for training");
+      setTrainingFor(null);
+      setTrainStart("");
+      setTrainEnd("");
+      setTrainNotes("");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
 
   const { data: qualifications = [] } = useQuery({
     queryKey: ["caregiver_qualifications", id],
@@ -204,6 +271,11 @@ export default function Qualifications() {
             <h3 className="text-sm font-medium text-primary flex items-center gap-2">
               <GraduationCap className="h-4 w-4" />
               Team Member Qualifications
+              {isOnTraining && (
+                <Badge className="ml-2 bg-amber-500 hover:bg-amber-500 text-white border-0">
+                  <BookOpen className="h-3 w-3 mr-1" /> Currently On Training
+                </Badge>
+              )}
             </h3>
             <div className="flex items-center gap-2">
               <Button
@@ -250,7 +322,7 @@ export default function Qualifications() {
 
           {/* Table */}
           <div className="border-t border-b border-foreground/30">
-            <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1.2fr_60px] text-xs font-semibold py-2 px-2 border-b border-foreground/30">
+            <div className="grid grid-cols-[2fr_1fr_1fr_1fr_1.2fr_110px] text-xs font-semibold py-2 px-2 border-b border-foreground/30">
               <SortHeader label="Qualification" col="qualification" sortBy={sortBy} sortAsc={sortAsc} onClick={toggleSort} />
               <SortHeader label="Start" col="start_date" sortBy={sortBy} sortAsc={sortAsc} onClick={toggleSort} />
               <SortHeader label="Exp" col="expiry_date" sortBy={sortBy} sortAsc={sortAsc} onClick={toggleSort} />
@@ -263,14 +335,23 @@ export default function Qualifications() {
                 No qualifications.
               </div>
             ) : (
-              pageItems.map((q, i) => (
+              pageItems.map((q, i) => {
+                const activeTraining = trainingByQual(q.qualification);
+                return (
                 <div
                   key={q.id}
-                  className={`grid grid-cols-[2fr_1fr_1fr_1fr_1.2fr_60px] text-xs py-2.5 px-2 items-center ${
+                  className={`grid grid-cols-[2fr_1fr_1fr_1fr_1.2fr_110px] text-xs py-2.5 px-2 items-center ${
                     i % 2 === 0 ? "bg-muted/30" : "bg-background"
                   }`}
                 >
-                  <div className="text-foreground">{q.qualification}</div>
+                  <div className="text-foreground flex items-center gap-2">
+                    {q.qualification}
+                    {activeTraining && (
+                      <Badge variant="outline" className="border-amber-500 text-amber-700 text-[9px] py-0 h-4">
+                        Training
+                      </Badge>
+                    )}
+                  </div>
                   <div className="text-muted-foreground">
                     {q.start_date ? format(parseISO(q.start_date), "dd/MM/yyyy") : "—"}
                   </div>
@@ -279,7 +360,21 @@ export default function Qualifications() {
                   </div>
                   <div><StatusBadge status={q.status} /></div>
                   <div className="text-muted-foreground">{q.sub_status}</div>
-                  <div className="flex items-center justify-end gap-1">
+                  <div className="flex items-center justify-end gap-0.5">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 w-7 p-0 text-amber-600 hover:text-amber-700"
+                      title="Send for Training"
+                      onClick={() => {
+                        setTrainingFor(q);
+                        setTrainStart(format(new Date(), "yyyy-MM-dd"));
+                        setTrainEnd("");
+                        setTrainNotes("");
+                      }}
+                    >
+                      <Send className="h-3 w-3" />
+                    </Button>
                     <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => openEdit(q)}>
                       <Pencil className="h-3 w-3" />
                     </Button>
@@ -293,7 +388,8 @@ export default function Qualifications() {
                     </Button>
                   </div>
                 </div>
-              ))
+                );
+              })
             )}
           </div>
 
@@ -431,7 +527,47 @@ export default function Qualifications() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete confirm */}
+      {/* Send for Training dialog */}
+      <Dialog open={!!trainingFor} onOpenChange={(o) => !o && setTrainingFor(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Send for Training</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="text-xs text-muted-foreground">
+              Schedule training for <span className="font-medium text-foreground">{cg?.name}</span> on{" "}
+              <span className="font-medium text-foreground">{trainingFor?.qualification}</span>. The team
+              member will be marked as on training and cannot be assigned rotas during this period.
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label className="text-xs">Start Date *</Label>
+                <Input type="date" value={trainStart} onChange={(e) => setTrainStart(e.target.value)} />
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">End Date</Label>
+                <Input type="date" value={trainEnd} onChange={(e) => setTrainEnd(e.target.value)} />
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Notes</Label>
+              <Textarea rows={2} value={trainNotes} onChange={(e) => setTrainNotes(e.target.value)} placeholder="Course details, location, trainer..." />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTrainingFor(null)}>Cancel</Button>
+            <Button
+              className="bg-amber-600 hover:bg-amber-700 text-white gap-1.5"
+              disabled={!trainStart || sendForTraining.isPending}
+              onClick={() => sendForTraining.mutate()}
+            >
+              <Send className="h-3.5 w-3.5" />
+              {sendForTraining.isPending ? "Sending..." : "Send for Training"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <AlertDialog open={!!deletingId} onOpenChange={(o) => !o && setDeletingId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
