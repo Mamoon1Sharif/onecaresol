@@ -162,7 +162,7 @@ const Roster = () => {
           <div className="flex gap-2">
             {weekOffset !== 0 && (
               <Button variant="ghost" size="sm" onClick={() => setWeekOffset(0)}>
-                Today
+                This Week
               </Button>
             )}
             <Button variant="outline" size="icon" onClick={() => setWeekOffset((o) => o + 1)}>

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useShifts, useDailyVisits, useDailyVisitsRange } from "@/hooks/use-care-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -85,6 +85,11 @@ export function ScheduleView({ cg, showHeader = true }: Props) {
 
   const dateStr = useMemo(() => getDateStr(dayOffset), [dayOffset]);
   const { data: dailyVisits = [] } = useDailyVisits(dateStr);
+
+  useEffect(() => {
+    setFromDate(dateStr);
+    setToDate(dateStr);
+  }, [dateStr]);
 
   const currentDate = useMemo(() => {
     const d = new Date();
@@ -183,7 +188,7 @@ export function ScheduleView({ cg, showHeader = true }: Props) {
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                   {dayOffset !== 0 && (
-                    <Button variant="ghost" size="sm" className="text-xs" onClick={() => setDayOffset(0)}>Today</Button>
+                    <Button variant="ghost" size="sm" className="text-xs" onClick={() => setDayOffset(0)}>Back to Today</Button>
                   )}
                 </div>
                 <div className="flex items-center gap-2">
