@@ -263,7 +263,7 @@ export function DetailedProfileTab({ cg }: Props) {
             />
             <EditableField icon={MapPin} label="Town" value={cg.town} onSave={(v) => save("town", v)} />
             <EditableField icon={MapPin} label="country" value={cg.country} onSave={(v) => save("country", v)} />
-            <EditableField icon={MapPin} label="Country" value={cg.country} onSave={(v) => save("country", v)} />
+            <EditableField icon={MapPin} label="County" value={cg.county} onSave={(v) => save("county", v)} />
             <EditableField icon={MapPin} label="Postcode" value={cg.postcode} onSave={(v) => save("postcode", v)} />
           </div>
         </CardContent>
