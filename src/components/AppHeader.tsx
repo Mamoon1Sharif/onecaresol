@@ -1,6 +1,7 @@
 import { Search, Bell, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
+import { useFeatureToggles } from "@/hooks/use-feature-toggles";
 import { toast } from "@/hooks/use-toast";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 export function AppHeader() {
   const navigate = useNavigate();
   const { signOut } = useAuth();
+  const { isEnabled } = useFeatureToggles();
 
   const handleLogout = async () => {
     try {
@@ -40,10 +42,12 @@ export function AppHeader() {
       </div>
 
       <div className="flex items-center gap-3">
-        <button className="relative p-2 rounded-md hover:bg-muted transition-colors">
-          <Bell className="h-5 w-5 text-muted-foreground" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" />
-        </button>
+        {isEnabled("notifications") && (
+          <button className="relative p-2 rounded-md hover:bg-muted transition-colors">
+            <Bell className="h-5 w-5 text-muted-foreground" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-destructive rounded-full" />
+          </button>
+        )}
 
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-muted transition-colors outline-none">
