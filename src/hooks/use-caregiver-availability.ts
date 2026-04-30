@@ -2,7 +2,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export type AvailabilityReason =
-  | { kind: "available" }
   | { kind: "inactive"; label: string }
   | { kind: "holiday"; label: string; from: string; to: string | null }
   | { kind: "training"; label: string; from: string; to: string | null };
