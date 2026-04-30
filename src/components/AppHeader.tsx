@@ -1,4 +1,5 @@
-import { Search, Bell, ChevronDown } from "lucide-react";
+import { useState } from "react";
+import { Search, Bell, ChevronDown, ToggleLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { useFeatureToggles } from "@/hooks/use-feature-toggles";
@@ -13,11 +14,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { FeatureTogglesDialog } from "@/components/FeatureTogglesDialog";
 
 export function AppHeader() {
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const { isEnabled } = useFeatureToggles();
+  const [togglesOpen, setTogglesOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -62,14 +65,20 @@ export function AppHeader() {
             </div>
             <ChevronDown className="h-4 w-4 text-muted-foreground hidden md:block" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuContent align="end" className="w-52">
             <DropdownMenuItem onClick={() => navigate("/profile")}>My Profile</DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate("/settings")}>Settings</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setTogglesOpen(true)}>
+              <ToggleLeft className="h-4 w-4 mr-2" />
+              Feature Toggles
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem className="text-destructive" onClick={handleLogout}>Log Out</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      <FeatureTogglesDialog open={togglesOpen} onOpenChange={setTogglesOpen} />
     </header>
   );
 }
