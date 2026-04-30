@@ -271,6 +271,11 @@ export default function Qualifications() {
             <h3 className="text-sm font-medium text-primary flex items-center gap-2">
               <GraduationCap className="h-4 w-4" />
               Team Member Qualifications
+              {isOnTraining && (
+                <Badge className="ml-2 bg-amber-500 hover:bg-amber-500 text-white border-0">
+                  <BookOpen className="h-3 w-3 mr-1" /> Currently On Training
+                </Badge>
+              )}
             </h3>
             <div className="flex items-center gap-2">
               <Button
