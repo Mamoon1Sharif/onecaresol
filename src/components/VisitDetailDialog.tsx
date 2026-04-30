@@ -122,6 +122,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
   })();
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] w-[95vw] h-[92vh] p-0 gap-0 overflow-hidden">
         {/* ============== HEADER ============== */}
