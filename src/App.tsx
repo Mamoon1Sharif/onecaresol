@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/use-auth";
+import { FeatureTogglesProvider } from "@/hooks/use-feature-toggles";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index.tsx";
 import InsightsDashboard from "./pages/InsightsDashboard.tsx";
@@ -72,6 +73,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
+      <FeatureTogglesProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -143,6 +145,7 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
+      </FeatureTogglesProvider>
     </AuthProvider>
   </QueryClientProvider>
 );
