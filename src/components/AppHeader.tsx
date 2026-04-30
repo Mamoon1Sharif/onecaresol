@@ -1,11 +1,10 @@
 import { useState } from "react";
-import { Search, Bell, ChevronDown, ToggleLeft } from "lucide-react";
+import { Bell, ChevronDown, ToggleLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { useFeatureToggles } from "@/hooks/use-feature-toggles";
 import { toast } from "@/hooks/use-toast";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,13 +34,6 @@ export function AppHeader() {
     <header className="h-16 border-b border-border bg-card flex items-center justify-between px-4 gap-4">
       <div className="flex items-center gap-3">
         <SidebarTrigger />
-        <div className="relative hidden sm:block">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search patients, caregivers..."
-            className="pl-9 w-64 lg:w-80 bg-muted border-0 focus-visible:ring-1 focus-visible:ring-primary"
-          />
-        </div>
       </div>
 
       <div className="flex items-center gap-3">
