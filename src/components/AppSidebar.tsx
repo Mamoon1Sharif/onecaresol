@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { useCurrentCompany, useHasAppRole } from "@/hooks/use-company";
+import { useFeatureToggles } from "@/hooks/use-feature-toggles";
 import {
   Sidebar,
   SidebarContent,
@@ -27,10 +28,10 @@ import {
 
 const topItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Insights", url: "/insights", icon: Sparkles },
+  { title: "Insights", url: "/insights", icon: Sparkles, feature: "insights" as const },
   { title: "Care Givers", url: "/caregivers", icon: Users },
   { title: "Service Members", url: "/carereceivers", icon: HeartHandshake },
-  { title: "Bookings", url: "/bookings", icon: BookMarked },
+  { title: "Bookings", url: "/bookings", icon: BookMarked, feature: "bookings" as const },
   { title: "Location Tracking", url: "/location-tracking", icon: MapPin },
   { title: "Communication Log", url: "/communication-log", icon: MessageSquare },
   { title: "Timeline", url: "/timeline", icon: Activity },
