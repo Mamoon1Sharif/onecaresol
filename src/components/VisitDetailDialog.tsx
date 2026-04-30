@@ -671,7 +671,7 @@ function ShiftTasks({ shiftEnd, clockOut, isMissed = false }: { shiftEnd: string
             <ul className="space-y-1">
               {completed.map((t) => (
                 <li key={t.id} className="flex items-center gap-2 text-xs">
-                  <input type="checkbox" checked readOnly onClick={() => toggle(t.id)} className="rounded text-success" />
+                  <input type="checkbox" checked onChange={() => toggle(t.id)} className="rounded text-success" />
                   <span className="line-through text-muted-foreground flex-1">{t.title}</span>
                   <span className="font-mono text-[10px] text-success">{t.completedAt}</span>
                 </li>
