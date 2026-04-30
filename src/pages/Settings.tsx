@@ -52,9 +52,7 @@ import {
   ChevronRight,
   ArrowLeft,
   Save,
-  ToggleLeft,
 } from "lucide-react";
-import { useFeatureToggles, FEATURE_LABELS, FeatureKey } from "@/hooks/use-feature-toggles";
 
 type TileKey =
   | "company"
@@ -76,8 +74,7 @@ type TileKey =
   | "billing"
   | "integrations"
   | "security"
-  | "backup"
-  | "features";
+  | "backup";
 
 interface Tile {
   key: TileKey;
@@ -88,7 +85,6 @@ interface Tile {
 }
 
 const TILES: Tile[] = [
-  { key: "features", title: "Feature Toggles", description: "Enable or disable Notifications, Insights, Bookings", icon: ToggleLeft, group: "Account" },
   { key: "company", title: "Company Settings", description: "Business profile, branding & address", icon: Building2, group: "Company" },
   { key: "oncall", title: "On Call", description: "Out-of-hours phone & escalation", icon: PhoneCall, group: "Company" },
   { key: "logged", title: "Logged In Users", description: "Active sessions & device sign-out", icon: PlayCircle, group: "Account" },
@@ -324,38 +320,7 @@ function PanelBody({ tileKey }: { tileKey: TileKey }) {
       return <SecurityPanel />;
     case "backup":
       return <BackupPanel />;
-    case "features":
-      return <FeatureTogglesPanel />;
   }
-}
-
-function FeatureTogglesPanel() {
-  const { features, setFeature } = useFeatureToggles();
-  const keys = Object.keys(FEATURE_LABELS) as FeatureKey[];
-  return (
-    <div className="space-y-1">
-      <p className="text-xs text-muted-foreground mb-3">
-        Turn modules on or off across the app. Changes apply instantly.
-      </p>
-      {keys.map((k) => (
-        <div
-          key={k}
-          className="flex items-start justify-between gap-4 py-3 border-b last:border-0"
-        >
-          <div>
-            <p className="text-sm font-medium">{FEATURE_LABELS[k].label}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {FEATURE_LABELS[k].description}
-            </p>
-          </div>
-          <Switch
-            checked={features[k]}
-            onCheckedChange={(v) => setFeature(k, v)}
-          />
-        </div>
-      ))}
-    </div>
-  );
 }
 
 function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
