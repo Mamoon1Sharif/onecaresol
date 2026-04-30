@@ -110,6 +110,17 @@ const Roster = () => {
 
   const handleSave = async () => {
     if (!formCgId || !formCrId) return;
+    const cg = careGivers.find((c) => c.id === formCgId);
+    const targetDate = weekDates[Number(formDay)].toISOString().split("T")[0];
+    const reason = caregiverUnavailableReason(cg as any, holidayEntries, targetDate);
+    if (reason) {
+      const detail =
+        reason.kind === "inactive"
+          ? `${cg?.name ?? "This caregiver"} is marked ${reason.label} and cannot be assigned to a rota.`
+          : `${cg?.name ?? "This caregiver"} is ${reason.label} on ${targetDate}${reason.to && reason.to !== reason.from ? ` (until ${reason.to})` : ""} and cannot be assigned.`;
+      toast({ title: "Cannot assign rota", description: detail, variant: "destructive" });
+      return;
+    }
     try {
       await upsertShift.mutateAsync({
         id: editingShiftId ?? undefined,
