@@ -67,7 +67,12 @@ export function AppSidebar() {
   const location = useLocation();
   const { data: cu } = useCurrentCompany();
   const { data: isSuper } = useHasAppRole("super_admin");
+  const { features } = useFeatureToggles();
   const isCompanyAdmin = cu && (cu.role === "owner" || cu.role === "admin");
+
+  const visibleTopItems = topItems.filter(
+    (item) => !("feature" in item) || features[item.feature as "insights" | "bookings"],
+  );
 
   const isActive = (path: string) =>
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
