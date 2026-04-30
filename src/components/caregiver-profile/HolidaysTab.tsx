@@ -227,10 +227,23 @@ export const HolidaysTab = ({ careGiverId, careGiverName }: Props) => {
     <div className="space-y-4">
       {/* Top action bar */}
       <div className="flex flex-wrap items-center gap-2">
-        <Button variant="secondary" size="sm" className="gap-1.5">
+        <Button
+          variant="secondary"
+          size="sm"
+          className="gap-1.5"
+          onClick={() => window.location.assign("/caregivers")}
+        >
           <Users className="h-3.5 w-3.5" /> All Team Members
         </Button>
-        <Button size="sm" className="gap-1.5 bg-red-500 hover:bg-red-600 text-white">
+        <Button
+          size="sm"
+          className="gap-1.5 bg-red-500 hover:bg-red-600 text-white"
+          onClick={() => {
+            if (confirm(`Force-logout ${careGiverName} from their handset?`)) {
+              toast.success(`${careGiverName} has been logged out of the handset`);
+            }
+          }}
+        >
           <LogOut className="h-3.5 w-3.5" /> Logout of handset
         </Button>
       </div>
