@@ -162,10 +162,6 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                     </Select>
                     <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground h-8 px-4 text-xs">Go</Button>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold">Search:</span>
-                    <Input className="h-8 w-[180px] text-xs" />
-                  </div>
                 </div>
 
                 <div className="overflow-x-auto">
