@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useShifts, useDailyVisits } from "@/hooks/use-care-data";
+import { useShifts, useDailyVisits, useDailyVisitsRange } from "@/hooks/use-care-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
