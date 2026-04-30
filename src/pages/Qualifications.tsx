@@ -69,6 +69,71 @@ export default function Qualifications() {
   const [draft, setDraft] = useState({ ...emptyDraft });
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [subStatusOpen, setSubStatusOpen] = useState(false);
+  const [trainingFor, setTrainingFor] = useState<Qualification | null>(null);
+  const [trainStart, setTrainStart] = useState("");
+  const [trainEnd, setTrainEnd] = useState("");
+  const [trainNotes, setTrainNotes] = useState("");
+
+  // Active training entries for this caregiver (for status badges)
+  const { data: trainingEntries = [] } = useQuery({
+    queryKey: ["caregiver_training_entries", id],
+    enabled: !!id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("caregiver_holidays")
+        .select("id, start_date, end_date, status, entry_type, reason, notes")
+        .eq("care_giver_id", id!)
+        .eq("entry_type", "training");
+      if (error) throw error;
+      return data as Array<{ id: string; start_date: string; end_date: string | null; status: string; entry_type: string; reason: string | null; notes: string | null }>;
+    },
+  });
+
+  const today = format(new Date(), "yyyy-MM-dd");
+  const isOnTraining = trainingEntries.some(
+    (t) => t.status !== "rejected" && today >= t.start_date && today <= (t.end_date ?? t.start_date),
+  );
+  const trainingByQual = (qualName: string) =>
+    trainingEntries.find(
+      (t) =>
+        t.status !== "rejected" &&
+        today >= t.start_date &&
+        today <= (t.end_date ?? t.start_date) &&
+        (t.reason ?? "").toLowerCase() === qualName.toLowerCase(),
+    );
+
+  const sendForTraining = useMutation({
+    mutationFn: async () => {
+      if (!trainingFor || !trainStart) throw new Error("Start date required");
+      const { error } = await supabase.from("caregiver_holidays").insert({
+        care_giver_id: id!,
+        entry_type: "training",
+        start_date: trainStart,
+        end_date: trainEnd || trainStart,
+        hours: 0,
+        status: "approved",
+        reason: trainingFor.qualification,
+        notes: trainNotes || `Training scheduled for ${trainingFor.qualification}`,
+      });
+      if (error) throw error;
+      // Mark qualification as Mandatory Training while underway
+      await supabase
+        .from("caregiver_qualifications" as any)
+        .update({ sub_status: "Mandatory Training" } as any)
+        .eq("id", trainingFor.id);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["caregiver_training_entries", id] });
+      qc.invalidateQueries({ queryKey: ["caregiver_qualifications", id] });
+      qc.invalidateQueries({ queryKey: ["caregiver_holidays_all"] });
+      toast.success("Sent for training");
+      setTrainingFor(null);
+      setTrainStart("");
+      setTrainEnd("");
+      setTrainNotes("");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
 
   const { data: qualifications = [] } = useQuery({
     queryKey: ["caregiver_qualifications", id],
