@@ -320,38 +320,7 @@ function PanelBody({ tileKey }: { tileKey: TileKey }) {
       return <SecurityPanel />;
     case "backup":
       return <BackupPanel />;
-    case "features":
-      return <FeatureTogglesPanel />;
   }
-}
-
-function FeatureTogglesPanel() {
-  const { features, setFeature } = useFeatureToggles();
-  const keys = Object.keys(FEATURE_LABELS) as FeatureKey[];
-  return (
-    <div className="space-y-1">
-      <p className="text-xs text-muted-foreground mb-3">
-        Turn modules on or off across the app. Changes apply instantly.
-      </p>
-      {keys.map((k) => (
-        <div
-          key={k}
-          className="flex items-start justify-between gap-4 py-3 border-b last:border-0"
-        >
-          <div>
-            <p className="text-sm font-medium">{FEATURE_LABELS[k].label}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {FEATURE_LABELS[k].description}
-            </p>
-          </div>
-          <Switch
-            checked={features[k]}
-            onCheckedChange={(v) => setFeature(k, v)}
-          />
-        </div>
-      ))}
-    </div>
-  );
 }
 
 function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
