@@ -93,9 +93,13 @@ export function ScheduleView({ cg, showHeader = true }: Props) {
   }, [dayOffset]);
 
   const weekDates = useMemo(() => getWeekDates(weekOffset), [weekOffset]);
+  const weekFromStr = useMemo(() => weekDates[0].toISOString().split("T")[0], [weekDates]);
+  const weekToStr = useMemo(() => weekDates[6].toISOString().split("T")[0], [weekDates]);
+  const { data: weekVisits = [] } = useDailyVisitsRange(weekFromStr, weekToStr);
 
   const myShifts = useMemo(() => allShifts.filter((s) => s.care_giver_id === cg.id), [allShifts, cg.id]);
   const myVisits = useMemo(() => dailyVisits.filter((v) => v.care_giver_id === cg.id), [dailyVisits, cg.id]);
+  const myWeekVisits = useMemo(() => weekVisits.filter((v) => v.care_giver_id === cg.id), [weekVisits, cg.id]);
 
   const filteredVisits = useMemo(() => {
     if (!search) return myVisits;
