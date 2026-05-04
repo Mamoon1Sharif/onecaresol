@@ -15,6 +15,7 @@ import {
   ArrowRight, User, CalendarRange, Lock, CalendarDays,
 } from "lucide-react";
 import { useCareReceivers, useCareGivers } from "@/hooks/use-care-data";
+import { toast } from "sonner";
 
 function IconCell({
   icon: Icon, label, className = "h-3.5 w-3.5 text-muted-foreground/70",
@@ -126,7 +127,7 @@ const Conflicts = () => {
     });
   }, [allRows, filter, search]);
 
-  const totalMissing = 658;
+  const totalMissing = rows.filter((r) => r.teamMember === "Unallocated").length;
 
   const toggleSel = (id: string) => {
     setSelected((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
@@ -177,7 +178,25 @@ const Conflicts = () => {
                 {BULK_ACTIONS.map((a) => <SelectItem key={a} value={a} className="text-xs">{a}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground h-8 px-4 text-xs font-semibold">Go</Button>
+            <Button
+              size="sm"
+              className="bg-success hover:bg-success/90 text-success-foreground h-8 px-4 text-xs font-semibold"
+              onClick={() => {
+                if (bulk === "Bulk Actions...") {
+                  toast.error("Pick a bulk action first.");
+                  return;
+                }
+                if (selected.size === 0) {
+                  toast.error("Select at least one row.");
+                  return;
+                }
+                toast.success(`${bulk} applied to ${selected.size} visit(s).`);
+                setSelected(new Set());
+                setBulk("Bulk Actions...");
+              }}
+            >
+              Go
+            </Button>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold">Search:</span>
