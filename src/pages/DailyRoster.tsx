@@ -97,11 +97,14 @@ const BULK_ACTIONS = [
 ];
 
 const DailyRoster = () => {
+  const navigate = useNavigate();
+  const qc = useQueryClient();
   const [dayOffset, setDayOffset] = useState(0);
   const dateStr = getDateStr(dayOffset);
   const { data: rawVisits = [], refetch } = useDailyVisits(dateStr);
   const { data: careGivers = [] } = useCareGivers();
   const { data: careReceivers = [] } = useCareReceivers();
+  const [showDeleted, setShowDeleted] = useState(false);
 
   const [teamFilter, setTeamFilter] = useState<string>("");
   const [serviceFilter, setServiceFilter] = useState<string>("");
