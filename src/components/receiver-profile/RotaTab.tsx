@@ -11,9 +11,12 @@ import {
 import {
   ChevronLeft, ChevronRight, CalendarDays, Clock,
   CheckCircle2, XCircle, AlertCircle, Search, Timer,
-  ClipboardList, Hourglass, User,
+  ClipboardList, Hourglass, User, CalendarIcon,
 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 type CareReceiver = Tables<"care_receivers">;
 
@@ -26,10 +29,15 @@ const statusConfig: Record<string, { icon: typeof CheckCircle2; bg: string; text
   Due:           { icon: AlertCircle, bg: "bg-info/10", text: "text-info", label: "Due" },
 };
 
-function getDateStr(offset: number) {
-  const d = new Date();
-  d.setDate(d.getDate() + offset);
-  return d.toISOString().split("T")[0];
+function toDateStr(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function isSameDay(a: Date, b: Date) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
 function fmtTime(iso: string | null) {
@@ -44,16 +52,21 @@ const fmtMins = (m: number) => {
 };
 
 export function ReceiverRotaTab({ cr }: { cr: CareReceiver }) {
-  const [dayOffset, setDayOffset] = useState(0);
+  const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const dateStr = useMemo(() => getDateStr(dayOffset), [dayOffset]);
+  const dateStr = useMemo(() => toDateStr(selectedDate), [selectedDate]);
   const { data: dailyVisits = [] } = useDailyVisits(dateStr);
 
-  const currentDate = useMemo(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + dayOffset);
-    return d;
-  }, [dayOffset]);
+  const currentDate = selectedDate;
+  const today = new Date();
+  const isToday = isSameDay(currentDate, today);
+
+  const shiftDay = (delta: number) => {
+    const d = new Date(selectedDate);
+    d.setDate(d.getDate() + delta);
+    setSelectedDate(d);
+  };
 
   const myVisits = useMemo(
     () => dailyVisits.filter((v) => v.care_receiver_id === cr.id),
@@ -80,17 +93,39 @@ export function ReceiverRotaTab({ cr }: { cr: CareReceiver }) {
         <CardContent className="py-3 px-4">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setDayOffset((o) => o - 1)}>
+              <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => shiftDay(-1)}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <div className="text-sm font-semibold text-primary">
                 {currentDate.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
               </div>
-              <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setDayOffset((o) => o + 1)}>
+              <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => shiftDay(1)}>
                 <ChevronRight className="h-4 w-4" />
               </Button>
-              {dayOffset !== 0 && (
-                <Button variant="ghost" size="sm" className="text-xs" onClick={() => setDayOffset(0)}>Today</Button>
+              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
+                    <CalendarIcon className="h-3.5 w-3.5" />
+                    Pick date
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(d) => {
+                      if (d) {
+                        setSelectedDate(d);
+                        setCalendarOpen(false);
+                      }
+                    }}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+              {!isToday && (
+                <Button variant="ghost" size="sm" className="text-xs" onClick={() => setSelectedDate(new Date())}>Today</Button>
               )}
             </div>
           </div>
