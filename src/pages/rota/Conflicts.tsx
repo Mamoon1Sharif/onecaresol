@@ -127,7 +127,7 @@ const Conflicts = () => {
     });
   }, [allRows, filter, search]);
 
-  const totalMissing = 658;
+  const totalMissing = rows.filter((r) => r.teamMember === "Unallocated").length;
 
   const toggleSel = (id: string) => {
     setSelected((p) => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
