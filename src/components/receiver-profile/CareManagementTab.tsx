@@ -270,16 +270,16 @@ export function CareManagementTab({ careReceiverId, careReceiverName }: Props) {
   // ------- Tasks
   const openAddTask = () => { setEditingTask(null); setTaskDraft(blankTask); setTaskDlg(true); };
   const openEditTask = (t: Task) => { setEditingTask(t); setTaskDraft(t); setTaskDlg(true); };
-  const saveTask = () => {
+  const saveTask = async () => {
     if (!taskDraft.title.trim()) return toast.error("Title is required");
-    if (editingTask) {
-      setTasks((prev) => prev.map((t) => (t.id === editingTask.id ? { ...taskDraft, id: editingTask.id } : t)));
-      toast.success("Task updated");
-    } else {
-      setTasks((prev) => [{ ...taskDraft, id: uid() }, ...prev]);
-      toast.success("Task added");
+    if (!careReceiverId) return toast.error("Missing service member id");
+    try {
+      await upsertTaskMut.mutateAsync({ ...taskDraft, _editingId: editingTask?.id });
+      toast.success(editingTask ? "Task updated" : "Task added");
+      setTaskDlg(false);
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed to save task");
     }
-    setTaskDlg(false);
   };
 
   // ------- Visits
