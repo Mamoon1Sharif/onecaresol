@@ -276,7 +276,17 @@ const Conflicts = () => {
                           <input type="checkbox" className="rounded" checked={isSel} onChange={() => toggleSel(r.id)} />
                         </td>
                         <td className="p-1.5 border-r border-border text-center">
-                          <button type="button" className="text-primary hover:underline cursor-pointer font-mono text-[11px]">{r.ref}</button>
+                          <button
+                            type="button"
+                            className="text-primary hover:underline cursor-pointer font-mono text-[11px]"
+                            onClick={() => {
+                              if (isCancelled) {
+                                setCancelledDetail(r);
+                              } else {
+                                nav(`/rota/add?ref=${r.ref}&serviceUser=${encodeURIComponent(r.serviceUser)}&date=${r.date}&start=${r.start}&end=${r.end}`);
+                              }
+                            }}
+                          >{r.ref}</button>
                         </td>
                         <td className="p-1.5 border-r border-border font-mono text-[11px] text-center">{r.date}</td>
                         <td className={`p-1.5 border-r border-border text-[11px] ${isCancelled ? "text-foreground font-medium" : "text-foreground/80"}`}>{r.status}</td>
