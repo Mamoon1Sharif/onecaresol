@@ -313,10 +313,12 @@ export function CareManagementTab({ careReceiverId, careReceiverName }: Props) {
   };
 
   // ------- Delete
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleting) return;
     if (deleting.kind === "outcomes") setOutcomes((p) => p.filter((x) => x.id !== deleting.id));
-    if (deleting.kind === "tasks") setTasks((p) => p.filter((x) => x.id !== deleting.id));
+    if (deleting.kind === "tasks") {
+      try { await deleteTaskMut.mutateAsync(deleting.id); } catch (e: any) { toast.error(e.message ?? "Failed to delete"); setDeleting(null); return; }
+    }
     if (deleting.kind === "visits") setVisits((p) => p.filter((x) => x.id !== deleting.id));
     if (deleting.kind === "groups") setGroups((p) => p.filter((x) => x.id !== deleting.id));
     toast.success("Deleted");
