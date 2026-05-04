@@ -1,4 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { AppLayout } from "@/components/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -94,11 +97,14 @@ const BULK_ACTIONS = [
 ];
 
 const DailyRoster = () => {
+  const navigate = useNavigate();
+  const qc = useQueryClient();
   const [dayOffset, setDayOffset] = useState(0);
   const dateStr = getDateStr(dayOffset);
   const { data: rawVisits = [], refetch } = useDailyVisits(dateStr);
   const { data: careGivers = [] } = useCareGivers();
   const { data: careReceivers = [] } = useCareReceivers();
+  const [showDeleted, setShowDeleted] = useState(false);
 
   const [teamFilter, setTeamFilter] = useState<string>("");
   const [serviceFilter, setServiceFilter] = useState<string>("");
@@ -210,10 +216,79 @@ const DailyRoster = () => {
     setSelected(prev => prev.size === rows.length ? new Set() : new Set(rows.map(r => r.id)));
   };
 
-  const runBulk = () => {
-    if (bulkAction === "Bulk Actions..." || selected.size === 0) return;
-    // demo placeholder; real implementation would call mutations
-    console.log("Bulk:", bulkAction, "on", Array.from(selected));
+  const refreshVisits = async () => {
+    await qc.invalidateQueries({ queryKey: ["daily_visits"] });
+    await refetch();
+  };
+
+  const runBulk = async () => {
+    if (bulkAction === "Bulk Actions...") {
+      toast.error("Choose a bulk action first");
+      return;
+    }
+    if (selected.size === 0) {
+      toast.error("Select at least one visit");
+      return;
+    }
+    const ids = Array.from(selected);
+    try {
+      switch (bulkAction) {
+        case "Cancel Visits": {
+          const { error } = await supabase.from("daily_visits").update({ status: "Cancelled" }).in("id", ids);
+          if (error) throw error;
+          toast.success(`Cancelled ${ids.length} visit${ids.length > 1 ? "s" : ""}`);
+          break;
+        }
+        case "Activate Visits":
+        case "Reset Visits": {
+          const { error } = await supabase.from("daily_visits").update({ status: "Pending" }).in("id", ids);
+          if (error) throw error;
+          toast.success(`Reset ${ids.length} visit${ids.length > 1 ? "s" : ""}`);
+          break;
+        }
+        case "Complete Visits": {
+          const { error } = await supabase.from("daily_visits").update({ status: "Confirmed" }).in("id", ids);
+          if (error) throw error;
+          toast.success(`Completed ${ids.length} visit${ids.length > 1 ? "s" : ""}`);
+          break;
+        }
+        case "Unassign Visits": {
+          const { error } = await supabase.from("daily_visits").update({ care_giver_id: null }).in("id", ids);
+          if (error) throw error;
+          toast.success(`Unassigned ${ids.length} visit${ids.length > 1 ? "s" : ""}`);
+          break;
+        }
+        case "Delete Visits": {
+          if (!confirm(`Permanently delete ${ids.length} visit${ids.length > 1 ? "s" : ""}? This cannot be undone.`)) return;
+          const { error } = await supabase.from("daily_visits").delete().in("id", ids);
+          if (error) throw error;
+          toast.success(`Deleted ${ids.length} visit${ids.length > 1 ? "s" : ""}`);
+          break;
+        }
+        case "Export": {
+          const header = ["Ref", "Date", "Status", "Service User", "Sched Start", "Sched End", "Duration", "Team Member", "Service Call"];
+          const lines = [header.join(",")].concat(
+            rows.filter(r => selected.has(r.id)).map(r => [r.ref, r.date, r.status, r.serviceUser, r.scheduledStart, r.scheduledEnd, r.duration, r.teamMember, r.serviceCall].map(v => `"${String(v).replace(/"/g, '""')}"`).join(","))
+          );
+          const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `daily-rota-${dateStr}.csv`;
+          a.click();
+          URL.revokeObjectURL(url);
+          toast.success(`Exported ${ids.length} visit${ids.length > 1 ? "s" : ""}`);
+          break;
+        }
+        default:
+          toast.info(`"${bulkAction}" is not yet available`);
+          return;
+      }
+      setSelected(new Set());
+      await refreshVisits();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Bulk action failed");
+    }
   };
 
   return (
@@ -250,10 +325,18 @@ const DailyRoster = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52">
-                <DropdownMenuItem className="gap-2"><Plus className="h-4 w-4 text-primary" /> Add Visit</DropdownMenuItem>
-                <DropdownMenuItem className="gap-2"><Eye className="h-4 w-4 text-primary" /> View Deleted</DropdownMenuItem>
-                <DropdownMenuItem className="gap-2"><Plane className="h-4 w-4 text-primary" /> View Holidays (10)</DropdownMenuItem>
-                <DropdownMenuItem className="gap-2"><LayoutTemplate className="h-4 w-4 text-primary" /> To Templates</DropdownMenuItem>
+                <DropdownMenuItem className="gap-2" onClick={() => navigate("/rota/add")}>
+                  <Plus className="h-4 w-4 text-primary" /> Add Visit
+                </DropdownMenuItem>
+                <DropdownMenuItem className="gap-2" onClick={() => { setShowDeleted(v => !v); toast.info(showDeleted ? "Hiding deleted visits" : "Showing deleted visits"); }}>
+                  <Eye className="h-4 w-4 text-primary" /> {showDeleted ? "Hide Deleted" : "View Deleted"}
+                </DropdownMenuItem>
+                <DropdownMenuItem className="gap-2" onClick={() => navigate("/holidays-absence")}>
+                  <Plane className="h-4 w-4 text-primary" /> View Holidays
+                </DropdownMenuItem>
+                <DropdownMenuItem className="gap-2" onClick={() => navigate("/rota/build")}>
+                  <LayoutTemplate className="h-4 w-4 text-primary" /> To Templates
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
