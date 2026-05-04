@@ -331,7 +331,7 @@ const DailyRoster = () => {
                 <DropdownMenuItem className="gap-2" onClick={() => { setShowDeleted(v => !v); toast.info(showDeleted ? "Hiding deleted visits" : "Showing deleted visits"); }}>
                   <Eye className="h-4 w-4 text-primary" /> {showDeleted ? "Hide Deleted" : "View Deleted"}
                 </DropdownMenuItem>
-                <DropdownMenuItem className="gap-2" onClick={() => navigate("/holidays")}>
+                <DropdownMenuItem className="gap-2" onClick={() => navigate("/holidays-absence")}>
                   <Plane className="h-4 w-4 text-primary" /> View Holidays
                 </DropdownMenuItem>
                 <DropdownMenuItem className="gap-2" onClick={() => navigate("/rota/build")}>
