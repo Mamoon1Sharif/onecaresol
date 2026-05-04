@@ -7,7 +7,9 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
+import { Plus, Check } from "lucide-react";
 import {
   Home, Calendar, Clock, Info, XCircle, ThumbsUp, Link2, Map, Users,
   AlertCircle, TrendingUp, FileText, Bell, PoundSterling, Camera,
