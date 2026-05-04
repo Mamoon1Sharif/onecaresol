@@ -371,9 +371,9 @@ const AddRota = () => {
           </div>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="space-y-5">
           {/* MAIN: form sections */}
-          <div className="lg:col-span-2 space-y-5">
+          <div className="space-y-5">
             {/* 1. Service & Type */}
             <Section icon={Briefcase} title="Service & rota type" subtitle="What kind of visit is this?">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
