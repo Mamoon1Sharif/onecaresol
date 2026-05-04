@@ -725,11 +725,13 @@ export default function AdvancedRota() {
                     {/* shifts in this row */}
                     {shifts
                       .filter((s) => s.staff === staff && (!hoverGhost || s.id !== hoverGhost.id))
+                      .filter((s) => filterCancelled === "show" || !cancelledIds.has(s.id))
                       .map((s) => (
                         <ShiftBlock
                           key={s.id}
                           shift={s}
                           selected={selected.has(s.id)}
+                          cancelled={cancelledIds.has(s.id)}
                           onPointerDown={(e) => onPointerDownShift(e, s)}
                         />
                       ))}
