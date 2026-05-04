@@ -1,0 +1,1 @@
+ALTER TABLE public.care_givers ADD COLUMN IF NOT EXISTS handset_logged_out_at TIMESTAMPTZ;

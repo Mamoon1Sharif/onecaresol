@@ -37,6 +37,7 @@ export type Database = {
           ethnicity: string | null
           forename: string | null
           gender: string | null
+          handset_logged_out_at: string | null
           home_phone: string | null
           house_street: string | null
           id: string
@@ -104,6 +105,7 @@ export type Database = {
           ethnicity?: string | null
           forename?: string | null
           gender?: string | null
+          handset_logged_out_at?: string | null
           home_phone?: string | null
           house_street?: string | null
           id?: string
@@ -171,6 +173,7 @@ export type Database = {
           ethnicity?: string | null
           forename?: string | null
           gender?: string | null
+          handset_logged_out_at?: string | null
           home_phone?: string | null
           house_street?: string | null
           id?: string
