@@ -300,7 +300,9 @@ function statusLabel(s: ShiftStatus): string {
 }
 
 export default function AdvancedRota() {
+  const navigate = useNavigate();
   const [date, setDate] = useState(() => new Date());
+  const [cancelledIds, setCancelledIds] = useState<Set<string>>(new Set());
   // Overrides per day per shift id (stores edited start/end/staff after drag)
   const [overrides, setOverrides] = useState<Record<string, Partial<Shift>>>({});
   const [bulkSelect, setBulkSelect] = useState(false);
