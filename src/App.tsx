@@ -18,7 +18,7 @@ import AddCareReceiver from "./pages/AddCareReceiver.tsx";
 import CareReceiverProfile from "./pages/CareReceiverProfile.tsx";
 import ReceiverMessaging from "./pages/ReceiverMessaging.tsx";
 import ReceiverMedication from "./pages/ReceiverMedication.tsx";
-import ReceiverQualifications from "./pages/ReceiverQualifications.tsx";
+
 import ReceiverIncidents from "./pages/ReceiverIncidents.tsx";
 import ReceiverFiles from "./pages/ReceiverFiles.tsx";
 import ReceiverChangelog from "./pages/ReceiverChangelog.tsx";
