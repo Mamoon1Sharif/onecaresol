@@ -100,7 +100,7 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="pt-2 overflow-y-auto overflow-x-hidden">
+      <SidebarContent className="pt-2 overflow-y-auto overflow-x-hidden scrollbar-themed">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>

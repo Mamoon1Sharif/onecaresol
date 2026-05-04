@@ -66,3 +66,30 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  /* Slim, themed scrollbar that blends with the sidebar */
+  .scrollbar-themed {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--sidebar-foreground) / 0.18) transparent;
+  }
+  .scrollbar-themed::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-themed::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-themed::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--sidebar-foreground) / 0.18);
+    border-radius: 9999px;
+  }
+  .scrollbar-themed::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--sidebar-foreground) / 0.35);
+  }
+  .scrollbar-themed::-webkit-scrollbar-button {
+    display: none;
+    height: 0;
+    width: 0;
+  }
+}
