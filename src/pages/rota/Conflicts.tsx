@@ -377,6 +377,12 @@ const Conflicts = () => {
         {/* Clashing Rotas Section */}
         <ClashingRotasSection />
       </div>
+
+      <CancelledShiftDialog
+        shift={cancelledDetail}
+        open={!!cancelledDetail}
+        onClose={() => setCancelledDetail(null)}
+      />
     </AppLayout>
   );
 };
