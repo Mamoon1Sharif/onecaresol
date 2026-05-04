@@ -9,12 +9,11 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
-import { Plus, Check } from "lucide-react";
 import {
   Home, Calendar, Clock, Info, XCircle, ThumbsUp, Link2, Map, Users,
   AlertCircle, TrendingUp, FileText, Bell, PoundSterling, Camera,
   ListChecks, Tag, UserPlus, Briefcase, MessageSquare, Move,
-  ArrowRight, User, CalendarRange, Lock, CalendarDays,
+  ArrowRight, User, CalendarRange, Lock, CalendarDays, Plus, Check, Pencil,
 } from "lucide-react";
 import { useCareReceivers, useCareGivers } from "@/hooks/use-care-data";
 import { toast } from "sonner";
