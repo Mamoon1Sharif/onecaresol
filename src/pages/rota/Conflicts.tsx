@@ -110,6 +110,7 @@ const Conflicts = () => {
   const [search, setSearch] = useState("");
   const [bulk, setBulk] = useState("Bulk Actions...");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [cancelledDetail, setCancelledDetail] = useState<any | null>(null);
 
   const today = new Date();
   const future = new Date(today);
