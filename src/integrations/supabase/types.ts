@@ -2209,6 +2209,39 @@ export type Database = {
         }
         Relationships: []
       }
+      reminder_templates: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          reminder_name: string
+          scope: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          reminder_name: string
+          scope: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          reminder_name?: string
+          scope?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       risk_assessments: {
         Row: {
           care_receiver_id: string
