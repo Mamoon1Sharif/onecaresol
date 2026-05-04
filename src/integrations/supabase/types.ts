@@ -44,6 +44,7 @@ export type Database = {
           is_driver: boolean | null
           last_check_in: string | null
           login_code: string | null
+          login_password: string | null
           manager: string | null
           marital_status: string | null
           name: string
@@ -112,6 +113,7 @@ export type Database = {
           is_driver?: boolean | null
           last_check_in?: string | null
           login_code?: string | null
+          login_password?: string | null
           manager?: string | null
           marital_status?: string | null
           name: string
@@ -180,6 +182,7 @@ export type Database = {
           is_driver?: boolean | null
           last_check_in?: string | null
           login_code?: string | null
+          login_password?: string | null
           manager?: string | null
           marital_status?: string | null
           name?: string
