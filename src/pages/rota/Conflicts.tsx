@@ -178,7 +178,25 @@ const Conflicts = () => {
                 {BULK_ACTIONS.map((a) => <SelectItem key={a} value={a} className="text-xs">{a}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground h-8 px-4 text-xs font-semibold">Go</Button>
+            <Button
+              size="sm"
+              className="bg-success hover:bg-success/90 text-success-foreground h-8 px-4 text-xs font-semibold"
+              onClick={() => {
+                if (bulk === "Bulk Actions...") {
+                  toast.error("Pick a bulk action first.");
+                  return;
+                }
+                if (selected.size === 0) {
+                  toast.error("Select at least one row.");
+                  return;
+                }
+                toast.success(`${bulk} applied to ${selected.size} visit(s).`);
+                setSelected(new Set());
+                setBulk("Bulk Actions...");
+              }}
+            >
+              Go
+            </Button>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs font-semibold">Search:</span>
