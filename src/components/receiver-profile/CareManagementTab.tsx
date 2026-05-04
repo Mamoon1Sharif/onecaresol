@@ -133,14 +133,86 @@ interface Props {
   careReceiverName: string;
 }
 
-export function CareManagementTab({ careReceiverName }: Props) {
+export function CareManagementTab({ careReceiverId, careReceiverName }: Props) {
   const [sub, setSub] = useState<SubTab>("outcomes");
   const [hideInactive, setHideInactive] = useState(true);
+  const qc = useQueryClient();
 
   const [outcomes, setOutcomes] = useState<Outcome[]>(SEED_OUTCOMES);
-  const [tasks, setTasks] = useState<Task[]>(SEED_TASKS);
   const [visits, setVisits] = useState<Visit[]>(SEED_VISITS);
   const [groups, setGroups] = useState<CareGroup[]>(SEED_GROUPS);
+
+  // ── Tasks: load from Supabase (care_management_tasks) ──
+  const { data: dbTasks } = useQuery({
+    queryKey: ["care_management_tasks", careReceiverId],
+    enabled: !!careReceiverId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("care_management_tasks")
+        .select("*")
+        .eq("care_receiver_id", careReceiverId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const tasks: Task[] = useMemo(() => {
+    if (!dbTasks) return [];
+    return dbTasks.map((r: any) => ({
+      id: r.id,
+      title: r.title,
+      description: r.description ?? "",
+      startDate: r.start_date,
+      isOngoing: r.is_ongoing,
+      visits: r.visits ?? [],
+      isMedication: r.is_medication,
+      status: r.status as Task["status"],
+      outcome: r.outcome ?? "",
+    }));
+  }, [dbTasks]);
+
+  const upsertTaskMut = useMutation({
+    mutationFn: async (t: Task & { _editingId?: string }) => {
+      // Resolve current company
+      const { data: auth } = await supabase.auth.getUser();
+      const userId = auth.user?.id;
+      if (!userId) throw new Error("You must be signed in.");
+      const { data: cu, error: cuErr } = await supabase
+        .from("company_users").select("company_id").eq("user_id", userId).maybeSingle();
+      if (cuErr) throw cuErr;
+      if (!cu?.company_id) throw new Error("Account not linked to a company.");
+
+      const payload = {
+        care_receiver_id: careReceiverId,
+        company_id: cu.company_id,
+        title: t.title,
+        description: t.description || null,
+        start_date: t.startDate,
+        is_ongoing: t.isOngoing,
+        visits: t.visits,
+        is_medication: t.isMedication,
+        status: t.status,
+        outcome: t.outcome || null,
+      };
+      if (t._editingId) {
+        const { error } = await supabase.from("care_management_tasks").update(payload).eq("id", t._editingId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("care_management_tasks").insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["care_management_tasks", careReceiverId] }),
+  });
+
+  const deleteTaskMut = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("care_management_tasks").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["care_management_tasks", careReceiverId] }),
+  });
 
   const [historyOpen, setHistoryOpen] = useState(false);
   const [printOpen, setPrintOpen] = useState(false);
