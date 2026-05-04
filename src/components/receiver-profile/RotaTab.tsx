@@ -11,9 +11,12 @@ import {
 import {
   ChevronLeft, ChevronRight, CalendarDays, Clock,
   CheckCircle2, XCircle, AlertCircle, Search, Timer,
-  ClipboardList, Hourglass, User,
+  ClipboardList, Hourglass, User, CalendarIcon,
 } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 type CareReceiver = Tables<"care_receivers">;
 
