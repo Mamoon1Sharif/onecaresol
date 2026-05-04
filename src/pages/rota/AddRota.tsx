@@ -332,7 +332,7 @@ const AddRota = () => {
             <Button variant="outline" size="sm" onClick={() => setSelectedId(null)}>
               Cancel
             </Button>
-            <Button onClick={handleSave} disabled={upsertShift.isPending} className="gap-2">
+            <Button onClick={handleSaveClick} disabled={upsertShift.isPending} className="gap-2">
               {upsertShift.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               Save Rota
             </Button>
