@@ -29,10 +29,15 @@ const statusConfig: Record<string, { icon: typeof CheckCircle2; bg: string; text
   Due:           { icon: AlertCircle, bg: "bg-info/10", text: "text-info", label: "Due" },
 };
 
-function getDateStr(offset: number) {
-  const d = new Date();
-  d.setDate(d.getDate() + offset);
-  return d.toISOString().split("T")[0];
+function toDateStr(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function isSameDay(a: Date, b: Date) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
 function fmtTime(iso: string | null) {
@@ -47,16 +52,21 @@ const fmtMins = (m: number) => {
 };
 
 export function ReceiverRotaTab({ cr }: { cr: CareReceiver }) {
-  const [dayOffset, setDayOffset] = useState(0);
+  const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const dateStr = useMemo(() => getDateStr(dayOffset), [dayOffset]);
+  const dateStr = useMemo(() => toDateStr(selectedDate), [selectedDate]);
   const { data: dailyVisits = [] } = useDailyVisits(dateStr);
 
-  const currentDate = useMemo(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + dayOffset);
-    return d;
-  }, [dayOffset]);
+  const currentDate = selectedDate;
+  const today = new Date();
+  const isToday = isSameDay(currentDate, today);
+
+  const shiftDay = (delta: number) => {
+    const d = new Date(selectedDate);
+    d.setDate(d.getDate() + delta);
+    setSelectedDate(d);
+  };
 
   const myVisits = useMemo(
     () => dailyVisits.filter((v) => v.care_receiver_id === cr.id),
