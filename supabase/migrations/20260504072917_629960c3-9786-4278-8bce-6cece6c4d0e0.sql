@@ -1,0 +1,1 @@
+ALTER TABLE public.reminder_templates ENABLE ROW LEVEL SECURITY;
