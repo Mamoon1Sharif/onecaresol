@@ -173,7 +173,13 @@ const AddRota = () => {
     });
   };
 
+  const handleSaveClick = () => {
+    if (!selected) return;
+    setConfirmOpen(true);
+  };
+
   const handleSave = async () => {
+    setConfirmOpen(false);
     if (!selected) return;
     try {
       const { data: auth } = await supabase.auth.getUser();
