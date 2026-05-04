@@ -28,12 +28,23 @@ import {
   ShieldCheck,
   ChevronRight,
   Info,
+  CheckCircle2,
 } from "lucide-react";
 import { useCareReceivers, useCareGivers, useUpsertShift, useMedications } from "@/hooks/use-care-data";
 import { getCareReceiverAvatar } from "@/lib/avatars";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const hours = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
 const minutes = ["00", "15", "30", "45"];
