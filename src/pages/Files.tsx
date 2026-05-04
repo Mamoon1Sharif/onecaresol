@@ -89,17 +89,20 @@ export default function Files() {
   const [search, setSearch] = useState("");
   const [bulkAction, setBulkAction] = useState<"Remove" | "Move">("Remove");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   const filteredDocs = useMemo(() => {
     const q = search.toLowerCase().trim();
-    if (!q) return docs;
     return docs.filter((d) => {
+      if (categoryFilter === "uncategorised" && d.category_id) return false;
+      if (categoryFilter !== "all" && categoryFilter !== "uncategorised" && d.category_id !== categoryFilter) return false;
+      if (!q) return true;
       const cat = d.category_id ? categoryById[d.category_id]?.name ?? "" : "";
       return [d.file_name, cat, ...(d.tags ?? [])]
         .filter(Boolean)
         .some((v) => v.toLowerCase().includes(q));
     });
-  }, [docs, search, categoryById]);
+  }, [docs, search, categoryById, categoryFilter]);
 
   // Dialog state
   const [uploadOpen, setUploadOpen] = useState(false);
