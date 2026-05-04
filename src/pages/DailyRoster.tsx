@@ -325,10 +325,18 @@ const DailyRoster = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52">
-                <DropdownMenuItem className="gap-2"><Plus className="h-4 w-4 text-primary" /> Add Visit</DropdownMenuItem>
-                <DropdownMenuItem className="gap-2"><Eye className="h-4 w-4 text-primary" /> View Deleted</DropdownMenuItem>
-                <DropdownMenuItem className="gap-2"><Plane className="h-4 w-4 text-primary" /> View Holidays (10)</DropdownMenuItem>
-                <DropdownMenuItem className="gap-2"><LayoutTemplate className="h-4 w-4 text-primary" /> To Templates</DropdownMenuItem>
+                <DropdownMenuItem className="gap-2" onClick={() => navigate("/rota/add")}>
+                  <Plus className="h-4 w-4 text-primary" /> Add Visit
+                </DropdownMenuItem>
+                <DropdownMenuItem className="gap-2" onClick={() => { setShowDeleted(v => !v); toast.info(showDeleted ? "Hiding deleted visits" : "Showing deleted visits"); }}>
+                  <Eye className="h-4 w-4 text-primary" /> {showDeleted ? "Hide Deleted" : "View Deleted"}
+                </DropdownMenuItem>
+                <DropdownMenuItem className="gap-2" onClick={() => navigate("/holidays")}>
+                  <Plane className="h-4 w-4 text-primary" /> View Holidays
+                </DropdownMenuItem>
+                <DropdownMenuItem className="gap-2" onClick={() => navigate("/rota/build")}>
+                  <LayoutTemplate className="h-4 w-4 text-primary" /> To Templates
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
