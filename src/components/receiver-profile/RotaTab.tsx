@@ -93,17 +93,39 @@ export function ReceiverRotaTab({ cr }: { cr: CareReceiver }) {
         <CardContent className="py-3 px-4">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setDayOffset((o) => o - 1)}>
+              <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => shiftDay(-1)}>
                 <ChevronLeft className="h-4 w-4" />
               </Button>
               <div className="text-sm font-semibold text-primary">
                 {currentDate.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
               </div>
-              <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setDayOffset((o) => o + 1)}>
+              <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => shiftDay(1)}>
                 <ChevronRight className="h-4 w-4" />
               </Button>
-              {dayOffset !== 0 && (
-                <Button variant="ghost" size="sm" className="text-xs" onClick={() => setDayOffset(0)}>Today</Button>
+              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
+                    <CalendarIcon className="h-3.5 w-3.5" />
+                    Pick date
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(d) => {
+                      if (d) {
+                        setSelectedDate(d);
+                        setCalendarOpen(false);
+                      }
+                    }}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+              {!isToday && (
+                <Button variant="ghost" size="sm" className="text-xs" onClick={() => setSelectedDate(new Date())}>Today</Button>
               )}
             </div>
           </div>
