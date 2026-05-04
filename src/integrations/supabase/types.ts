@@ -218,6 +218,69 @@ export type Database = {
         }
         Relationships: []
       }
+      care_management_tasks: {
+        Row: {
+          care_receiver_id: string
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_medication: boolean
+          is_ongoing: boolean
+          outcome: string | null
+          start_date: string
+          status: string
+          title: string
+          updated_at: string
+          visits: string[]
+        }
+        Insert: {
+          care_receiver_id: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_medication?: boolean
+          is_ongoing?: boolean
+          outcome?: string | null
+          start_date?: string
+          status?: string
+          title: string
+          updated_at?: string
+          visits?: string[]
+        }
+        Update: {
+          care_receiver_id?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_medication?: boolean
+          is_ongoing?: boolean
+          outcome?: string | null
+          start_date?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          visits?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "care_management_tasks_care_receiver_id_fkey"
+            columns: ["care_receiver_id"]
+            isOneToOne: false
+            referencedRelation: "care_receivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "care_management_tasks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       care_receivers: {
         Row: {
           account_status: string | null
