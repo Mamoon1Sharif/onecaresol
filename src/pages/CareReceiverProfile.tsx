@@ -105,12 +105,6 @@ const CareReceiverProfile = () => {
               <Pill className="h-3.5 w-3.5" /> Medication
             </button>
             <button
-              onClick={() => navigate(`/carereceivers/${cr.id}/qualifications`)}
-              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-sm font-medium text-muted-foreground hover:bg-background hover:text-foreground transition-colors"
-            >
-              <GraduationCap className="h-3.5 w-3.5" /> Qualifications
-            </button>
-            <button
               onClick={() => navigate(`/carereceivers/${cr.id}/incidents`)}
               className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-sm font-medium text-muted-foreground hover:bg-background hover:text-foreground transition-colors"
             >
