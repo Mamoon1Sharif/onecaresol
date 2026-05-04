@@ -7,12 +7,13 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useNavigate } from "react-router-dom";
 import {
   Home, Calendar, Clock, Info, XCircle, ThumbsUp, Link2, Map, Users,
   AlertCircle, TrendingUp, FileText, Bell, PoundSterling, Camera,
   ListChecks, Tag, UserPlus, Briefcase, MessageSquare, Move,
-  ArrowRight, User, CalendarRange, Lock, CalendarDays,
+  ArrowRight, User, CalendarRange, Lock, CalendarDays, Plus, Check, Pencil,
 } from "lucide-react";
 import { useCareReceivers, useCareGivers } from "@/hooks/use-care-data";
 import { toast } from "sonner";
@@ -109,6 +110,7 @@ const Conflicts = () => {
   const [search, setSearch] = useState("");
   const [bulk, setBulk] = useState("Bulk Actions...");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [cancelledDetail, setCancelledDetail] = useState<any | null>(null);
 
   const today = new Date();
   const future = new Date(today);
@@ -274,7 +276,17 @@ const Conflicts = () => {
                           <input type="checkbox" className="rounded" checked={isSel} onChange={() => toggleSel(r.id)} />
                         </td>
                         <td className="p-1.5 border-r border-border text-center">
-                          <button type="button" className="text-primary hover:underline cursor-pointer font-mono text-[11px]">{r.ref}</button>
+                          <button
+                            type="button"
+                            className="text-primary hover:underline cursor-pointer font-mono text-[11px]"
+                            onClick={() => {
+                              if (isCancelled) {
+                                setCancelledDetail(r);
+                              } else {
+                                nav(`/rota/add?ref=${r.ref}&serviceUser=${encodeURIComponent(r.serviceUser)}&date=${r.date}&start=${r.start}&end=${r.end}`);
+                              }
+                            }}
+                          >{r.ref}</button>
                         </td>
                         <td className="p-1.5 border-r border-border font-mono text-[11px] text-center">{r.date}</td>
                         <td className={`p-1.5 border-r border-border text-[11px] ${isCancelled ? "text-foreground font-medium" : "text-foreground/80"}`}>{r.status}</td>
@@ -309,7 +321,18 @@ const Conflicts = () => {
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50/40">—</td>
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50/40">—</td>
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">—</td>
-                        <td className={`p-1.5 border-r border-border text-[11px] font-medium ${teamCellColor}`}>{r.teamMember}</td>
+                        <td className={`p-1.5 border-r border-border text-[11px] font-medium ${teamCellColor}`}>
+                          {r.teamMember === "Unallocated" && !isCancelled ? (
+                            <button
+                              type="button"
+                              className="hover:underline cursor-pointer"
+                              onClick={() => nav(`/rota/add?ref=${r.ref}&serviceUser=${encodeURIComponent(r.serviceUser)}&date=${r.date}&start=${r.start}&end=${r.end}`)}
+                              title="Click to allocate a team member"
+                            >
+                              {r.teamMember}
+                            </button>
+                          ) : r.teamMember}
+                        </td>
                         <td className="p-1.5 border-r border-border text-[11px] text-foreground/80">{r.serviceCall}</td>
                         <td className="p-1.5 border-r border-border text-center"></td>
                         <td className="p-1.5 border-r border-border text-center"></td>
@@ -354,6 +377,12 @@ const Conflicts = () => {
         {/* Clashing Rotas Section */}
         <ClashingRotasSection />
       </div>
+
+      <CancelledShiftDialog
+        shift={cancelledDetail}
+        open={!!cancelledDetail}
+        onClose={() => setCancelledDetail(null)}
+      />
     </AppLayout>
   );
 };
@@ -429,5 +458,205 @@ function ClashingRotasSection() {
     </Card>
   );
 };
+
+type CancelledShift = {
+  id: string;
+  ref: string;
+  date: string;
+  serviceUser: string;
+  start: string;
+  end: string;
+  serviceCall: string;
+};
+
+function CancelledShiftDialog({
+  shift, open, onClose,
+}: { shift: CancelledShift | null; open: boolean; onClose: () => void }) {
+  const [noteSearch, setNoteSearch] = useState("");
+  const [taskSearch, setTaskSearch] = useState("");
+  const [taskBulk, setTaskBulk] = useState("Task Bulk Actions...");
+
+  if (!shift) return null;
+
+  const notes = [
+    { ref: "139988439", tags: "", created: "21/04/2026 12:06", note: "Cancelled Call. Evening call not required.", createdBy: "Maya Sawich", visible: "Yes" },
+  ];
+  const tasks = [
+    { order: 1, task: "Personal Care", status: "Cancelled", description: "Assist with washing and dressing.", required: "Desirable", assignedTo: "Unassigned", date: shift.date, audited: false },
+    { order: 2, task: "Domestic duties", status: "Cancelled", description: "Any domestic duties like washing up.", required: "Desirable", assignedTo: "Unassigned", date: shift.date, audited: false },
+    { order: 3, task: "Close curtains", status: "Cancelled", description: "", required: "Desirable", assignedTo: "Unassigned", date: shift.date, audited: false },
+    { order: 4, task: "Lock door", status: "Cancelled", description: "", required: "Desirable", assignedTo: "Unassigned", date: shift.date, audited: false },
+  ];
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-[95vw] w-[1400px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-base">
+            Cancelled Shift — Ref {shift.ref} · {shift.serviceUser} · {shift.date} · {shift.start}–{shift.end}
+          </DialogTitle>
+        </DialogHeader>
+
+        {/* Live Rota Notes */}
+        <Card className="border border-border overflow-hidden mt-2">
+          <div className="border-t-2 border-t-primary/70 px-4 pt-3 pb-2 flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <h3 className="text-sm font-semibold text-primary">Live Rota Notes</h3>
+              <p className="text-[11px] text-warning mt-1 max-w-3xl">
+                Notes marked as hidden will only appear on a single rota, service user and team member note area or some of the reports. Notes marked as hidden will also not appear on the Care Portal section.
+              </p>
+            </div>
+            <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground h-8 gap-1">
+              <Plus className="h-3.5 w-3.5" /> Add New
+            </Button>
+          </div>
+          <div className="px-4 pb-3">
+            <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
+              <div className="flex items-center gap-1.5">
+                {["Excel", "CSV", "Add Tag(s)", "Remove Tag(s)", "Toggle Note Visibility"].map((b) => (
+                  <Button
+                    key={b}
+                    size="sm"
+                    variant="outline"
+                    className="h-7 text-[11px] bg-primary/10 border-primary/30 text-primary hover:bg-primary/20"
+                    onClick={() => toast.success(`${b} clicked`)}
+                  >
+                    {b}
+                  </Button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold">Search:</span>
+                <Input value={noteSearch} onChange={(e) => setNoteSearch(e.target.value)} className="h-7 w-[180px] text-xs" />
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs border-collapse">
+                <thead>
+                  <tr className="bg-muted/60 border-y border-border">
+                    <th className="p-2 border-r border-border w-8"><input type="checkbox" /></th>
+                    <th className="p-2 border-r border-border text-left w-12">Edit</th>
+                    <th className="p-2 border-r border-border text-left">Ref</th>
+                    <th className="p-2 border-r border-border text-left">Tags</th>
+                    <th className="p-2 border-r border-border text-left">Created</th>
+                    <th className="p-2 border-r border-border text-left">Note</th>
+                    <th className="p-2 border-r border-border text-left">Created By</th>
+                    <th className="p-2 text-left">Visible On Device</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {notes
+                    .filter((n) => !noteSearch || n.note.toLowerCase().includes(noteSearch.toLowerCase()))
+                    .map((n) => (
+                      <tr key={n.ref} className="border-b border-border hover:bg-muted/30">
+                        <td className="p-2 border-r border-border text-center"><input type="checkbox" /></td>
+                        <td className="p-2 border-r border-border">
+                          <button className="text-warning hover:text-warning/80" onClick={() => toast.info("Edit note")}>
+                            <Pencil className="h-3.5 w-3.5" />
+                          </button>
+                        </td>
+                        <td className="p-2 border-r border-border font-mono text-[11px]">{n.ref}</td>
+                        <td className="p-2 border-r border-border">{n.tags}</td>
+                        <td className="p-2 border-r border-border font-mono text-[11px]">{n.created}</td>
+                        <td className="p-2 border-r border-border text-destructive">{n.note}</td>
+                        <td className="p-2 border-r border-border text-primary">{n.createdBy}</td>
+                        <td className="p-2">{n.visible}</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </Card>
+
+        {/* Tasks Required */}
+        <Card className="border border-border overflow-hidden mt-3">
+          <div className="border-t-2 border-t-primary/70 px-4 pt-3 pb-2 flex items-center justify-between gap-3 flex-wrap">
+            <h3 className="text-sm font-semibold text-primary">Tasks Required</h3>
+            <div className="flex items-center gap-3">
+              <span className="text-xs"><span className="text-muted-foreground">Group:</span> <span className="text-primary font-semibold">Evening Tasks</span></span>
+              <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground h-8 gap-1" onClick={() => toast.success("Tasks completed")}>
+                <Check className="h-3.5 w-3.5" /> Complete Tasks
+              </Button>
+            </div>
+          </div>
+          <div className="px-4 pb-3">
+            <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Select value={taskBulk} onValueChange={setTaskBulk}>
+                  <SelectTrigger className="w-[260px] h-8 text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {["Task Bulk Actions...", "Mark Complete", "Mark Cancelled", "Reassign", "Delete"].map((a) => (
+                      <SelectItem key={a} value={a} className="text-xs">{a}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  size="sm"
+                  className="bg-success hover:bg-success/90 text-success-foreground h-8 px-4 text-xs"
+                  onClick={() => {
+                    if (taskBulk === "Task Bulk Actions...") { toast.error("Pick a task action first."); return; }
+                    toast.success(`${taskBulk} applied.`);
+                    setTaskBulk("Task Bulk Actions...");
+                  }}
+                >
+                  Go
+                </Button>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold">Search:</span>
+                <Input value={taskSearch} onChange={(e) => setTaskSearch(e.target.value)} className="h-7 w-[180px] text-xs" />
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs border-collapse">
+                <thead>
+                  <tr className="bg-muted/60 border-y border-border">
+                    <th className="p-2 border-r border-border w-8"><input type="checkbox" /></th>
+                    <th className="p-2 border-r border-border text-left w-14">Order</th>
+                    <th className="p-2 border-r border-border text-left">Task</th>
+                    <th className="p-2 border-r border-border text-left">Status</th>
+                    <th className="p-2 border-r border-border text-left">Task Description</th>
+                    <th className="p-2 border-r border-border text-left">Required</th>
+                    <th className="p-2 border-r border-border text-left">Assigned To</th>
+                    <th className="p-2 border-r border-border text-left">Date</th>
+                    <th className="p-2 border-r border-border text-center">Outcome</th>
+                    <th className="p-2 border-r border-border text-left">Task Notes</th>
+                    <th className="p-2 border-r border-border text-center">Audited</th>
+                    <th className="p-2 text-left">Audit Notes</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {tasks
+                    .filter((t) => !taskSearch || t.task.toLowerCase().includes(taskSearch.toLowerCase()))
+                    .map((t) => (
+                      <tr key={t.order} className="border-b border-border hover:bg-muted/30">
+                        <td className="p-2 border-r border-border text-center"><input type="checkbox" /></td>
+                        <td className="p-2 border-r border-border">{t.order}</td>
+                        <td className="p-2 border-r border-border">{t.task}</td>
+                        <td className="p-2 border-r border-border text-primary">{t.status}</td>
+                        <td className="p-2 border-r border-border text-foreground/80">{t.description}</td>
+                        <td className="p-2 border-r border-border text-primary">{t.required}</td>
+                        <td className="p-2 border-r border-border">{t.assignedTo}</td>
+                        <td className="p-2 border-r border-border font-mono text-[11px]">{t.date}</td>
+                        <td className="p-2 border-r border-border text-center">
+                          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-success text-success-foreground text-[11px]">☺</span>
+                        </td>
+                        <td className="p-2 border-r border-border"></td>
+                        <td className="p-2 border-r border-border text-center text-destructive">✕</td>
+                        <td className="p-2"></td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+              <div className="text-[11px] text-muted-foreground mt-2">Showing 1 to {tasks.length} of {tasks.length}</div>
+              <div className="text-[11px] text-primary mt-1">To edit Tasks in this list please go to the settings</div>
+            </div>
+          </div>
+        </Card>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 export default Conflicts;
