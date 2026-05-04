@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EditRotaDialog, type EditRotaShift } from "@/components/EditRotaDialog";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 /* -------------------------------------------------------------------------- */
 /*  Data                                                                       */
@@ -298,7 +300,9 @@ function statusLabel(s: ShiftStatus): string {
 }
 
 export default function AdvancedRota() {
+  const navigate = useNavigate();
   const [date, setDate] = useState(() => new Date());
+  const [cancelledIds, setCancelledIds] = useState<Set<string>>(new Set());
   // Overrides per day per shift id (stores edited start/end/staff after drag)
   const [overrides, setOverrides] = useState<Record<string, Partial<Shift>>>({});
   const [bulkSelect, setBulkSelect] = useState(false);
@@ -460,6 +464,92 @@ export default function AdvancedRota() {
     }));
   }
 
+  /* ----------------------------- Actions ---------------------------------- */
+
+  function requireSelection(): string[] | null {
+    if (selected.size === 0) {
+      toast.error("No shifts selected. Enable Bulk Select and pick some.");
+      return null;
+    }
+    return Array.from(selected);
+  }
+
+  function handleAddShift() {
+    navigate("/rota/add");
+  }
+
+  function handleBulkReassign() {
+    const ids = requireSelection();
+    if (!ids) return;
+    const name = window.prompt(
+      `Reassign ${ids.length} shift(s) to which team member?\n\n${STAFF.join(", ")}`
+    );
+    if (!name) return;
+    const match = STAFF.find((s) => s.toLowerCase() === name.trim().toLowerCase());
+    if (!match) {
+      toast.error("Unknown team member.");
+      return;
+    }
+    setOverrides((prev) => {
+      const next = { ...prev };
+      ids.forEach((id) => {
+        next[id] = { ...(next[id] || {}), staff: match };
+      });
+      return next;
+    });
+    setSelected(new Set());
+    toast.success(`Reassigned ${ids.length} shift(s) to ${match}.`);
+  }
+
+  function handleCancelSelected() {
+    const ids = requireSelection();
+    if (!ids) return;
+    setCancelledIds((prev) => {
+      const next = new Set(prev);
+      ids.forEach((id) => next.add(id));
+      return next;
+    });
+    setSelected(new Set());
+    toast.success(`Cancelled ${ids.length} shift(s).`);
+  }
+
+  function handleActivateSelected() {
+    const ids = requireSelection();
+    if (!ids) return;
+    setCancelledIds((prev) => {
+      const next = new Set(prev);
+      ids.forEach((id) => next.delete(id));
+      return next;
+    });
+    setSelected(new Set());
+    toast.success(`Activated ${ids.length} shift(s).`);
+  }
+
+  function handleExportCsv() {
+    const rows = shifts.filter((s) => !cancelledIds.has(s.id));
+    const header = ["Date", "Staff", "Client", "Reference", "Service", "Start", "End", "Status"];
+    const lines = [header.join(",")];
+    rows.forEach((s) => {
+      lines.push(
+        [dateLabel, s.staff, s.client, s.ref, s.service, fmtTime(s.start), fmtTime(s.end), statusLabel(s.status)]
+          .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+          .join(",")
+      );
+    });
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `rota-${dateLabel.replace(/\//g, "-")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("CSV exported.");
+  }
+
+  function handlePrintRota() {
+    window.print();
+  }
+
   return (
     <AppLayout>
       <div className="space-y-4">
@@ -548,13 +638,13 @@ export default function AdvancedRota() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-popover">
-                <DropdownMenuItem>Add Shift</DropdownMenuItem>
-                <DropdownMenuItem>Bulk Reassign</DropdownMenuItem>
-                <DropdownMenuItem>Cancel Selected</DropdownMenuItem>
-                <DropdownMenuItem>Activate Selected</DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleAddShift}>Add Shift</DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleBulkReassign}>Bulk Reassign</DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleCancelSelected}>Cancel Selected</DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleActivateSelected}>Activate Selected</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Export CSV</DropdownMenuItem>
-                <DropdownMenuItem>Print Rota</DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleExportCsv}>Export CSV</DropdownMenuItem>
+                <DropdownMenuItem onSelect={handlePrintRota}>Print Rota</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -635,11 +725,13 @@ export default function AdvancedRota() {
                     {/* shifts in this row */}
                     {shifts
                       .filter((s) => s.staff === staff && (!hoverGhost || s.id !== hoverGhost.id))
+                      .filter((s) => filterCancelled === "show" || !cancelledIds.has(s.id))
                       .map((s) => (
                         <ShiftBlock
                           key={s.id}
                           shift={s}
                           selected={selected.has(s.id)}
+                          cancelled={cancelledIds.has(s.id)}
                           onPointerDown={(e) => onPointerDownShift(e, s)}
                         />
                       ))}
@@ -704,11 +796,13 @@ function ShiftBlock({
   shift,
   selected,
   ghost,
+  cancelled,
   onPointerDown,
 }: {
   shift: Shift;
   selected: boolean;
   ghost?: boolean;
+  cancelled?: boolean;
   onPointerDown?: (e: React.PointerEvent) => void;
 }) {
   const left = shift.start * PX_PER_HOUR;
@@ -720,7 +814,8 @@ function ShiftBlock({
         "absolute top-1 bottom-1 rounded-sm border px-1.5 py-0.5 cursor-grab active:cursor-grabbing overflow-hidden text-[10px] leading-tight shadow-sm",
         statusStyles(shift.status),
         selected && "ring-2 ring-primary ring-offset-1",
-        ghost && "opacity-60 ring-2 ring-primary"
+        ghost && "opacity-60 ring-2 ring-primary",
+        cancelled && "opacity-50 line-through"
       )}
       style={{ left, width }}
       title={`${shift.client} • ${fmtTime(shift.start)}–${fmtTime(shift.end)} • ${shift.service}`}
