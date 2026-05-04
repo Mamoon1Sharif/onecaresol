@@ -464,6 +464,92 @@ export default function AdvancedRota() {
     }));
   }
 
+  /* ----------------------------- Actions ---------------------------------- */
+
+  function requireSelection(): string[] | null {
+    if (selected.size === 0) {
+      toast.error("No shifts selected. Enable Bulk Select and pick some.");
+      return null;
+    }
+    return Array.from(selected);
+  }
+
+  function handleAddShift() {
+    navigate("/rota/add");
+  }
+
+  function handleBulkReassign() {
+    const ids = requireSelection();
+    if (!ids) return;
+    const name = window.prompt(
+      `Reassign ${ids.length} shift(s) to which team member?\n\n${STAFF.join(", ")}`
+    );
+    if (!name) return;
+    const match = STAFF.find((s) => s.toLowerCase() === name.trim().toLowerCase());
+    if (!match) {
+      toast.error("Unknown team member.");
+      return;
+    }
+    setOverrides((prev) => {
+      const next = { ...prev };
+      ids.forEach((id) => {
+        next[id] = { ...(next[id] || {}), staff: match };
+      });
+      return next;
+    });
+    setSelected(new Set());
+    toast.success(`Reassigned ${ids.length} shift(s) to ${match}.`);
+  }
+
+  function handleCancelSelected() {
+    const ids = requireSelection();
+    if (!ids) return;
+    setCancelledIds((prev) => {
+      const next = new Set(prev);
+      ids.forEach((id) => next.add(id));
+      return next;
+    });
+    setSelected(new Set());
+    toast.success(`Cancelled ${ids.length} shift(s).`);
+  }
+
+  function handleActivateSelected() {
+    const ids = requireSelection();
+    if (!ids) return;
+    setCancelledIds((prev) => {
+      const next = new Set(prev);
+      ids.forEach((id) => next.delete(id));
+      return next;
+    });
+    setSelected(new Set());
+    toast.success(`Activated ${ids.length} shift(s).`);
+  }
+
+  function handleExportCsv() {
+    const rows = shifts.filter((s) => !cancelledIds.has(s.id));
+    const header = ["Date", "Staff", "Client", "Reference", "Service", "Start", "End", "Status"];
+    const lines = [header.join(",")];
+    rows.forEach((s) => {
+      lines.push(
+        [dateLabel, s.staff, s.client, s.ref, s.service, fmtTime(s.start), fmtTime(s.end), statusLabel(s.status)]
+          .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+          .join(",")
+      );
+    });
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `rota-${dateLabel.replace(/\//g, "-")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("CSV exported.");
+  }
+
+  function handlePrintRota() {
+    window.print();
+  }
+
   return (
     <AppLayout>
       <div className="space-y-4">
