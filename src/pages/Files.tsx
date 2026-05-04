@@ -306,8 +306,21 @@ export default function Files() {
                 Go
               </Button>
             </div>
-            <div className="flex items-center gap-2 text-xs">
-              <span className="font-semibold">Search:</span>
+            <div className="flex items-center gap-2 text-xs flex-wrap">
+              <span className="font-semibold">Category:</span>
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="h-8 w-44 text-xs">
+                  <SelectValue placeholder="All categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All categories</SelectItem>
+                  <SelectItem value="uncategorised">Uncategorised</SelectItem>
+                  {categories.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <span className="font-semibold ml-2">Search:</span>
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
