@@ -794,6 +794,61 @@ const AddRota = () => {
           </div>
         </div>
       </div>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Save this rota?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <div>Please confirm the details below before saving.</div>
+                <div className="rounded-md border border-border bg-muted/40 p-3 space-y-1 text-xs">
+                  <div><span className="text-muted-foreground">Service member:</span> <span className="font-medium text-foreground">{selected.name}</span></div>
+                  <div><span className="text-muted-foreground">Service:</span> <span className="font-medium text-foreground">{form.serviceList}</span></div>
+                  <div><span className="text-muted-foreground">Date:</span> <span className="font-medium text-foreground">{new Date(form.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}</span></div>
+                  <div><span className="text-muted-foreground">Time:</span> <span className="font-medium text-foreground">{form.startH}:{form.startM} → {form.endH}:{form.endM} ({duration})</span></div>
+                  <div><span className="text-muted-foreground">Caregiver:</span> <span className="font-medium text-foreground">{selectedCaregiver?.name || "Unassigned"}</span></div>
+                  {form.medicationRequired && <div><span className="text-muted-foreground">Medications:</span> <span className="font-medium text-foreground">{selectedMedIds.length} selected</span></div>}
+                  {form.tasksRequired && <div><span className="text-muted-foreground">Tasks:</span> <span className="font-medium text-foreground">{selectedTasks.length} selected</span></div>}
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSave} disabled={upsertShift.isPending}>
+              {upsertShift.isPending ? "Saving…" : "Confirm & Save"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={savedOpen} onOpenChange={setSavedOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-success" />
+              Rota saved
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              The shift for {selected.name} on{" "}
+              {new Date(form.date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short" })}{" "}
+              has been saved successfully.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setSavedOpen(false)}>Close</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setSavedOpen(false);
+                setSelectedId(null);
+              }}
+            >
+              Done
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 };
