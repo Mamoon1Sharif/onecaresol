@@ -20,7 +20,7 @@ import { MarChartTab } from "@/components/receiver-profile/MarChartTab";
 import {
   LayoutDashboard, UserCog, CalendarDays, LayoutTemplate,
   Users, Bell, StickyNote, CalendarCheck, Plane,
-  MessageSquare, Pill, GraduationCap, AlertTriangle, FileText, History,
+  MessageSquare, Pill, AlertTriangle, FileText, History,
   HeartPulse, ClipboardList,
 } from "lucide-react";
 
