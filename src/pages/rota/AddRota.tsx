@@ -692,9 +692,9 @@ const AddRota = () => {
             </Section>
           </div>
 
-          {/* SIDEBAR: live summary */}
-          <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-4 space-y-4">
+          {/* BOTTOM: rota summary */}
+          <div>
+            <div className="space-y-4">
               <Card>
                 <CardContent className="p-4 space-y-4">
                   <div className="flex items-center justify-between">
