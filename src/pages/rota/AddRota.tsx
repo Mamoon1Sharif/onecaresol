@@ -757,7 +757,7 @@ const AddRota = () => {
                     )}
                   </div>
 
-                  <Button onClick={handleSave} disabled={upsertShift.isPending} className="w-full gap-2">
+                  <Button onClick={handleSaveClick} disabled={upsertShift.isPending} className="w-full gap-2">
                     {upsertShift.isPending ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
