@@ -28,12 +28,23 @@ import {
   ShieldCheck,
   ChevronRight,
   Info,
+  CheckCircle2,
 } from "lucide-react";
 import { useCareReceivers, useCareGivers, useUpsertShift, useMedications } from "@/hooks/use-care-data";
 import { getCareReceiverAvatar } from "@/lib/avatars";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const hours = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
 const minutes = ["00", "15", "30", "45"];
@@ -87,6 +98,8 @@ const AddRota = () => {
   });
   const [selectedMedIds, setSelectedMedIds] = useState<string[]>([]);
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [savedOpen, setSavedOpen] = useState(false);
 
   // Dedup MAR medications by name+dosage+time so the same prescription isn't repeated.
   const uniqueMeds = useMemo(() => {
@@ -160,7 +173,13 @@ const AddRota = () => {
     });
   };
 
+  const handleSaveClick = () => {
+    if (!selected) return;
+    setConfirmOpen(true);
+  };
+
   const handleSave = async () => {
+    setConfirmOpen(false);
     if (!selected) return;
     try {
       const { data: auth } = await supabase.auth.getUser();
@@ -222,6 +241,7 @@ const AddRota = () => {
       await queryClient.invalidateQueries({ queryKey: ["daily_visits"] });
       await queryClient.invalidateQueries({ queryKey: ["shift_tasks"] });
       toast.success("Shift saved successfully");
+      setSavedOpen(true);
     } catch (err: any) {
       toast.error(err?.message ?? "Failed to save shift");
     }
@@ -312,7 +332,7 @@ const AddRota = () => {
             <Button variant="outline" size="sm" onClick={() => setSelectedId(null)}>
               Cancel
             </Button>
-            <Button onClick={handleSave} disabled={upsertShift.isPending} className="gap-2">
+            <Button onClick={handleSaveClick} disabled={upsertShift.isPending} className="gap-2">
               {upsertShift.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               Save Rota
             </Button>
@@ -351,9 +371,9 @@ const AddRota = () => {
           </div>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="space-y-5">
           {/* MAIN: form sections */}
-          <div className="lg:col-span-2 space-y-5">
+          <div className="space-y-5">
             {/* 1. Service & Type */}
             <Section icon={Briefcase} title="Service & rota type" subtitle="What kind of visit is this?">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -672,9 +692,9 @@ const AddRota = () => {
             </Section>
           </div>
 
-          {/* SIDEBAR: live summary */}
-          <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-4 space-y-4">
+          {/* BOTTOM: rota summary */}
+          <div>
+            <div className="space-y-4">
               <Card>
                 <CardContent className="p-4 space-y-4">
                   <div className="flex items-center justify-between">
@@ -737,7 +757,7 @@ const AddRota = () => {
                     )}
                   </div>
 
-                  <Button onClick={handleSave} disabled={upsertShift.isPending} className="w-full gap-2">
+                  <Button onClick={handleSaveClick} disabled={upsertShift.isPending} className="w-full gap-2">
                     {upsertShift.isPending ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
@@ -774,6 +794,61 @@ const AddRota = () => {
           </div>
         </div>
       </div>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Save this rota?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <div>Please confirm the details below before saving.</div>
+                <div className="rounded-md border border-border bg-muted/40 p-3 space-y-1 text-xs">
+                  <div><span className="text-muted-foreground">Service member:</span> <span className="font-medium text-foreground">{selected.name}</span></div>
+                  <div><span className="text-muted-foreground">Service:</span> <span className="font-medium text-foreground">{form.serviceList}</span></div>
+                  <div><span className="text-muted-foreground">Date:</span> <span className="font-medium text-foreground">{new Date(form.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}</span></div>
+                  <div><span className="text-muted-foreground">Time:</span> <span className="font-medium text-foreground">{form.startH}:{form.startM} → {form.endH}:{form.endM} ({duration})</span></div>
+                  <div><span className="text-muted-foreground">Caregiver:</span> <span className="font-medium text-foreground">{selectedCaregiver?.name || "Unassigned"}</span></div>
+                  {form.medicationRequired && <div><span className="text-muted-foreground">Medications:</span> <span className="font-medium text-foreground">{selectedMedIds.length} selected</span></div>}
+                  {form.tasksRequired && <div><span className="text-muted-foreground">Tasks:</span> <span className="font-medium text-foreground">{selectedTasks.length} selected</span></div>}
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSave} disabled={upsertShift.isPending}>
+              {upsertShift.isPending ? "Saving…" : "Confirm & Save"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={savedOpen} onOpenChange={setSavedOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-success" />
+              Rota saved
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              The shift for {selected.name} on{" "}
+              {new Date(form.date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short" })}{" "}
+              has been saved successfully.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setSavedOpen(false)}>Close</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setSavedOpen(false);
+                setSelectedId(null);
+              }}
+            >
+              Done
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 };
