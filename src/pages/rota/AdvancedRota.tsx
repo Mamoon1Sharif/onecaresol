@@ -638,13 +638,13 @@ export default function AdvancedRota() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-popover">
-                <DropdownMenuItem>Add Shift</DropdownMenuItem>
-                <DropdownMenuItem>Bulk Reassign</DropdownMenuItem>
-                <DropdownMenuItem>Cancel Selected</DropdownMenuItem>
-                <DropdownMenuItem>Activate Selected</DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleAddShift}>Add Shift</DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleBulkReassign}>Bulk Reassign</DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleCancelSelected}>Cancel Selected</DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleActivateSelected}>Activate Selected</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Export CSV</DropdownMenuItem>
-                <DropdownMenuItem>Print Rota</DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleExportCsv}>Export CSV</DropdownMenuItem>
+                <DropdownMenuItem onSelect={handlePrintRota}>Print Rota</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
