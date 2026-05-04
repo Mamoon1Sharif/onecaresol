@@ -796,11 +796,13 @@ function ShiftBlock({
   shift,
   selected,
   ghost,
+  cancelled,
   onPointerDown,
 }: {
   shift: Shift;
   selected: boolean;
   ghost?: boolean;
+  cancelled?: boolean;
   onPointerDown?: (e: React.PointerEvent) => void;
 }) {
   const left = shift.start * PX_PER_HOUR;
@@ -812,7 +814,8 @@ function ShiftBlock({
         "absolute top-1 bottom-1 rounded-sm border px-1.5 py-0.5 cursor-grab active:cursor-grabbing overflow-hidden text-[10px] leading-tight shadow-sm",
         statusStyles(shift.status),
         selected && "ring-2 ring-primary ring-offset-1",
-        ghost && "opacity-60 ring-2 ring-primary"
+        ghost && "opacity-60 ring-2 ring-primary",
+        cancelled && "opacity-50 line-through"
       )}
       style={{ left, width }}
       title={`${shift.client} • ${fmtTime(shift.start)}–${fmtTime(shift.end)} • ${shift.service}`}
