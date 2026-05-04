@@ -98,6 +98,8 @@ const AddRota = () => {
   });
   const [selectedMedIds, setSelectedMedIds] = useState<string[]>([]);
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [savedOpen, setSavedOpen] = useState(false);
 
   // Dedup MAR medications by name+dosage+time so the same prescription isn't repeated.
   const uniqueMeds = useMemo(() => {
