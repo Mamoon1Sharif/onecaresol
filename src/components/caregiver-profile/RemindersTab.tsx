@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { ReminderSettingsDialog } from "@/components/ReminderSettingsDialog";
 
 interface Reminder {
   id: string;
@@ -50,6 +51,7 @@ export const RemindersTab = ({ careGiverId, careGiverName }: Props) => {
   const [bulkAction, setBulkAction] = useState<string>("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [editing, setEditing] = useState<Reminder | null>(null);
 
   const { data: reminders = [], isLoading } = useQuery({
@@ -176,10 +178,11 @@ export const RemindersTab = ({ careGiverId, careGiverName }: Props) => {
         <Button variant="secondary" size="sm" className="gap-1.5">
           <Users className="h-3.5 w-3.5" /> All Team Members
         </Button>
-        <Button variant="outline" size="sm" className="gap-1.5 bg-amber-500 text-white border-amber-500 hover:bg-amber-600 hover:text-white">
+        <Button variant="outline" size="sm" className="gap-1.5 bg-amber-500 text-white border-amber-500 hover:bg-amber-600 hover:text-white" onClick={() => setSettingsOpen(true)}>
           <Settings className="h-3.5 w-3.5" /> Reminder Settings
         </Button>
       </div>
+      <ReminderSettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Reminders main panel */}
