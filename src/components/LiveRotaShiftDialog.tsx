@@ -136,23 +136,30 @@ export function LiveRotaShiftDialog({
               </div>
               <div className="p-3 space-y-2">
                 <div className="flex items-center gap-2">
-                  <Select defaultValue="bulk">
+                  <Select value={shiftBulk} onValueChange={setShiftBulk}>
                     <SelectTrigger className="h-8 w-[200px] text-xs"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="bulk">Bulk Actions...</SelectItem>
+                      <SelectItem value="Reassign">Reassign</SelectItem>
+                      <SelectItem value="Cancel">Cancel Visit</SelectItem>
+                      <SelectItem value="Activate">Activate Visit</SelectItem>
+                      <SelectItem value="Reset">Reset Visit</SelectItem>
+                      <SelectItem value="Send Push">Send Push Message</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button size="sm" className="h-8 bg-success hover:bg-success/90 text-success-foreground">Go</Button>
+                  <Button size="sm" className="h-8 bg-success hover:bg-success/90 text-success-foreground" onClick={runShiftBulk}>Go</Button>
                   <div className="ml-auto flex items-center gap-2">
                     <Label className="text-xs">Search:</Label>
-                    <Input className="h-8 w-48 text-xs" />
+                    <Input value={shiftSearch} onChange={(e) => setShiftSearch(e.target.value)} className="h-8 w-48 text-xs" />
                   </div>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-[12px] border-collapse">
                     <thead>
                       <tr className="bg-muted/40">
-                        <th className="p-2 border border-border w-8"><Checkbox /></th>
+                        <th className="p-2 border border-border w-8">
+                          <Checkbox checked={shiftRowChecked} onCheckedChange={(v) => setShiftRowChecked(!!v)} />
+                        </th>
                         <th className="p-2 border border-border text-left">Ref</th>
                         <th className="p-2 border border-border text-left">Date</th>
                         <th className="p-2 border border-border text-left">Status</th>
@@ -166,26 +173,27 @@ export function LiveRotaShiftDialog({
                       </tr>
                     </thead>
                     <tbody>
-                      <tr>
-                        <td className="p-2 border border-border"><Checkbox /></td>
-                        <td className="p-2 border border-border font-mono text-primary underline cursor-pointer">{current.ref}</td>
-                        <td className="p-2 border border-border">{current.date}</td>
-                        <td className="p-2 border border-border">Due</td>
-                        <td className="p-2 border border-border text-primary underline cursor-pointer">{current.client}</td>
-                        <td className="p-2 border border-border">{current.start}</td>
-                        <td className="p-2 border border-border">{current.end}</td>
-                        <td className="p-2 border border-border">{current.schedHrs ?? "00:30"}</td>
-                        <td className="p-2 border border-border text-primary underline cursor-pointer">{current.staff}</td>
-                        <td className="p-2 border border-border">{current.serviceCall ?? "Private Eve..."}</td>
-                        <td className="p-2 border border-border">Week 1</td>
-                      </tr>
-                      <tr>
-                        <td className="p-2 border border-border" colSpan={7}>
-                          <span className="font-semibold mr-2">{current.schedHrs ?? "00:30"}</span>Sched hrs
-                          <span className="font-semibold mx-2 ml-6">{current.clockHrs ?? "00:00"}</span>Clock hrs
-                        </td>
-                        <td className="p-2 border border-border" colSpan={4}></td>
-                      </tr>
+                      {showShiftRow ? (
+                        <tr>
+                          <td className="p-2 border border-border">
+                            <Checkbox checked={shiftRowChecked} onCheckedChange={(v) => setShiftRowChecked(!!v)} />
+                          </td>
+                          <td className="p-2 border border-border font-mono text-primary underline cursor-pointer">{current.ref}</td>
+                          <td className="p-2 border border-border">{current.date}</td>
+                          <td className="p-2 border border-border">Due</td>
+                          <td className="p-2 border border-border text-primary underline cursor-pointer">{current.client}</td>
+                          <td className="p-2 border border-border">{current.start}</td>
+                          <td className="p-2 border border-border">{current.end}</td>
+                          <td className="p-2 border border-border">{current.schedHrs ?? "00:30"}</td>
+                          <td className="p-2 border border-border text-primary underline cursor-pointer">
+                            {removed ? <span className="text-muted-foreground italic">Unassigned</span> : current.staff}
+                          </td>
+                          <td className="p-2 border border-border">{current.serviceCall ?? "Private Eve..."}</td>
+                          <td className="p-2 border border-border">Week 1</td>
+                        </tr>
+                      ) : (
+                        <tr><td colSpan={11} className="p-3 text-center text-xs text-muted-foreground border border-border">No matches.</td></tr>
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -201,34 +209,47 @@ export function LiveRotaShiftDialog({
                 <h3 className="text-sm font-semibold text-foreground">Assigned Team Members</h3>
               </div>
               <div className="p-4 flex gap-6">
-                <div className="flex flex-col items-center gap-2">
-                  <div className="w-[140px] h-[140px] rounded-sm border border-border bg-muted flex items-center justify-center text-muted-foreground text-xs">
-                    {current.staff}
-                  </div>
-                  <Button size="sm" className="bg-destructive hover:bg-destructive/90 text-destructive-foreground h-8 w-[140px]">
-                    ↑ Remove Team Member
-                  </Button>
-                </div>
-                <div className="flex-1">
-                  <div className="text-primary font-medium mb-2">{current.staff}</div>
-                  <div className="space-y-1 text-sm">
-                    <button
-                      onClick={() => setClockEdit("in")}
-                      className="text-success hover:underline block"
-                    >
-                      - Clock In
-                    </button>
-                    <button
-                      onClick={() => setClockEdit("out")}
-                      className="text-success hover:underline block"
-                    >
-                      - Clock Out
-                    </button>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-6 text-center">
-                    If clock in or out distances are not showing, it means your team member has location services off on their mobile phone.
-                  </p>
-                </div>
+                {removed ? (
+                  <p className="text-sm text-muted-foreground italic">No team member assigned.</p>
+                ) : (
+                  <>
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="w-[140px] h-[140px] rounded-sm border border-border bg-muted flex items-center justify-center text-muted-foreground text-xs">
+                        {current.staff}
+                      </div>
+                      <Button
+                        size="sm"
+                        className="bg-destructive hover:bg-destructive/90 text-destructive-foreground h-8 w-[140px]"
+                        onClick={() => {
+                          setRemoved(true);
+                          toast.success(`${current.staff} removed from shift`);
+                        }}
+                      >
+                        ↑ Remove Team Member
+                      </Button>
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-primary font-medium mb-2">{current.staff}</div>
+                      <div className="space-y-1 text-sm">
+                        <button
+                          onClick={() => setClockEdit("in")}
+                          className="text-success hover:underline block"
+                        >
+                          - Clock In
+                        </button>
+                        <button
+                          onClick={() => setClockEdit("out")}
+                          className="text-success hover:underline block"
+                        >
+                          - Clock Out
+                        </button>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-6 text-center">
+                        If clock in or out distances are not showing, it means your team member has location services off on their mobile phone.
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
             </section>
 
@@ -238,18 +259,59 @@ export function LiveRotaShiftDialog({
                 <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
                   <Lock className="h-3.5 w-3.5" /> Rota Locks
                 </h3>
-                <Button size="sm" className="h-7 gap-1 bg-success hover:bg-success/90 text-success-foreground">
+                <Button
+                  size="sm"
+                  className="h-7 gap-1 bg-success hover:bg-success/90 text-success-foreground"
+                  onClick={() => { setLockReason(""); setShowLockPrompt(true); }}
+                >
                   <Plus className="h-3 w-3" /> Add Lock
                 </Button>
               </div>
-              <div className="p-3 text-xs text-muted-foreground">No locks set.</div>
+              <div className="p-3 space-y-2">
+                {locks.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">No locks set.</p>
+                ) : (
+                  <table className="w-full text-[12px] border-collapse">
+                    <thead>
+                      <tr className="bg-muted/40">
+                        <th className="p-2 border border-border text-left">Reason</th>
+                        <th className="p-2 border border-border text-left">Created By</th>
+                        <th className="p-2 border border-border text-left">Created</th>
+                        <th className="p-2 border border-border w-16"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {locks.map((l) => (
+                        <tr key={l.id} className="border-b border-border">
+                          <td className="p-2 border border-border">{l.reason}</td>
+                          <td className="p-2 border border-border">{l.by}</td>
+                          <td className="p-2 border border-border">{l.created}</td>
+                          <td className="p-2 border border-border text-center">
+                            <button
+                              className="text-destructive hover:underline text-xs"
+                              onClick={() => {
+                                setLocks((p) => p.filter((x) => x.id !== l.id));
+                                toast.success("Lock removed");
+                              }}
+                            >Remove</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
             </section>
 
             {/* Live Rota Notes */}
             <section className="border border-border rounded-sm overflow-hidden">
               <div className="border-t-2 border-t-primary/70 flex items-center justify-between px-3 py-2 bg-card">
                 <h3 className="text-sm font-semibold text-foreground">Live Rota Notes</h3>
-                <Button size="sm" className="h-7 gap-1 bg-success hover:bg-success/90 text-success-foreground">
+                <Button
+                  size="sm"
+                  className="h-7 gap-1 bg-success hover:bg-success/90 text-success-foreground"
+                  onClick={() => { setNewNote(""); setNewNoteVisible("Yes"); setShowNotePrompt(true); }}
+                >
                   <Plus className="h-3 w-3" /> Add New
                 </Button>
               </div>
@@ -266,20 +328,26 @@ export function LiveRotaShiftDialog({
                         <th className="p-2 border border-border text-left">Note</th>
                         <th className="p-2 border border-border text-left">Created By</th>
                         <th className="p-2 border border-border text-left">Visible</th>
+                        <th className="p-2 border border-border w-16"></th>
                       </tr>
                     </thead>
                     <tbody>
-                      {[
-                        { ref: "139988439", created: "21/04/2026 12:06", note: "Service user prefers door bell to be rung twice on arrival.", by: "Maya Sawich", visible: "Yes" },
-                        { ref: "139988512", created: "22/04/2026 09:14", note: "Key safe code refreshed — collect from office before visit.", by: "Anna Pereira", visible: "Yes" },
-                        { ref: "139988577", created: "23/04/2026 16:42", note: "Family will be present during evening call. Hand over notes.", by: "Maria Khalil", visible: "No" },
-                      ].map((n) => (
+                      {notes.map((n) => (
                         <tr key={n.ref} className="border-b border-border hover:bg-muted/30">
                           <td className="p-2 border border-border font-mono text-[11px]">{n.ref}</td>
                           <td className="p-2 border border-border">{n.created}</td>
                           <td className="p-2 border border-border">{n.note}</td>
                           <td className="p-2 border border-border text-primary underline cursor-pointer">{n.by}</td>
                           <td className="p-2 border border-border">{n.visible}</td>
+                          <td className="p-2 border border-border text-center">
+                            <button
+                              className="text-destructive hover:underline text-xs"
+                              onClick={() => {
+                                setNotes((p) => p.filter((x) => x.ref !== n.ref));
+                                toast.success("Note removed");
+                              }}
+                            >Delete</button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -295,16 +363,19 @@ export function LiveRotaShiftDialog({
               </div>
               <div className="p-3 space-y-2">
                 <div className="flex items-center gap-2">
-                  <Select defaultValue="please">
-                    <SelectTrigger className="h-8 w-[220px] text-xs"><SelectValue /></SelectTrigger>
+                  <Select value={medFilter} onValueChange={setMedFilter}>
+                    <SelectTrigger className="h-8 w-[220px] text-xs"><SelectValue placeholder="Please Select Meds..." /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="please">Please Select Meds...</SelectItem>
+                      <SelectItem value="all">All Medications</SelectItem>
+                      {INITIAL_MEDS.map((m) => (
+                        <SelectItem key={m.name} value={m.name}>{m.name}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
-                  <Button size="sm" className="h-8 bg-success hover:bg-success/90 text-success-foreground">Go</Button>
+                  <Button size="sm" className="h-8 bg-success hover:bg-success/90 text-success-foreground" onClick={runMedAction}>Go</Button>
                   <div className="ml-auto flex items-center gap-2">
                     <Label className="text-xs">Search:</Label>
-                    <Input className="h-8 w-48 text-xs" />
+                    <Input value={medSearch} onChange={(e) => setMedSearch(e.target.value)} className="h-8 w-48 text-xs" placeholder="Search meds..." />
                   </div>
                 </div>
                 <div className="overflow-x-auto">
@@ -325,17 +396,17 @@ export function LiveRotaShiftDialog({
                       </tr>
                     </thead>
                     <tbody>
-                      {[
-                        { name: "Atorvastatin", period: "Evening: 16:00 - 22:00", planned: ["Administer", "1", "40mg", "ONE to be taken at NIGHT"] },
-                        { name: "Carbamazepine", period: "Evening: 16:00 - 22:00", planned: ["Administer", "1", "100mg", "ONE to be taken in the MORNING and NIGHT"] },
-                        { name: "Dermol 500 Lotion", period: "", planned: ["Applied", "Use as a soap substitute."] },
-                        { name: "E45 Cream", period: "", planned: ["Applied", "Apply as required"] },
-                        { name: "Epimax Excetra Cream", period: "", planned: ["Applied", "Apply to arms and back daily"] },
-                        { name: "Medi-Derma S Barrier Cream", period: "", planned: ["Applied", "Apply to groin and bottom when required. Use a pea size amount."] },
-                        { name: "Ramipril", period: "Evening: 16:00 - 22:00", planned: ["Administer", "1", "5mg", "ONE to be taken in the MORNING and at NIGHT."] },
-                      ].map((m) => (
+                      {filteredMeds.length === 0 && (
+                        <tr><td colSpan={11} className="p-3 text-center text-xs text-muted-foreground border border-border">No medications match.</td></tr>
+                      )}
+                      {filteredMeds.map((m) => (
                         <tr key={m.name} className="border-b border-border hover:bg-muted/30">
-                          <td className="p-2 border border-border"><Checkbox /></td>
+                          <td className="p-2 border border-border">
+                            <Checkbox
+                              checked={!!medChecked[m.name]}
+                              onCheckedChange={(v) => setMedChecked((p) => ({ ...p, [m.name]: !!v }))}
+                            />
+                          </td>
                           <td className="p-2 border border-border">{m.name}</td>
                           <td className="p-2 border border-border">Due</td>
                           <td className="p-2 border border-border text-center text-destructive">✕</td>
@@ -350,10 +421,77 @@ export function LiveRotaShiftDialog({
                       ))}
                     </tbody>
                   </table>
-                  <p className="text-xs text-muted-foreground pt-2">Showing 1 to 7 of 7</p>
+                  <p className="text-xs text-muted-foreground pt-2">Showing {filteredMeds.length} of {INITIAL_MEDS.length}</p>
                 </div>
               </div>
             </section>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Lock prompt */}
+      <Dialog open={showLockPrompt} onOpenChange={setShowLockPrompt}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Add Rota Lock</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <Label className="text-sm">Reason</Label>
+            <Textarea value={lockReason} onChange={(e) => setLockReason(e.target.value)} placeholder="Why is this shift being locked?" />
+            <div className="flex justify-end gap-2">
+              <Button variant="secondary" size="sm" onClick={() => setShowLockPrompt(false)}>Cancel</Button>
+              <Button
+                size="sm"
+                className="bg-success hover:bg-success/90 text-success-foreground"
+                onClick={() => {
+                  if (!lockReason.trim()) { toast.error("Reason required"); return; }
+                  setLocks((p) => [...p, {
+                    id: crypto.randomUUID(),
+                    reason: lockReason.trim(),
+                    by: "Current User",
+                    created: new Date().toLocaleString("en-GB"),
+                  }]);
+                  setShowLockPrompt(false);
+                  toast.success("Lock added");
+                }}
+              >Add Lock</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Note prompt */}
+      <Dialog open={showNotePrompt} onOpenChange={setShowNotePrompt}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Add Live Rota Note</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <Label className="text-sm">Note</Label>
+            <Textarea value={newNote} onChange={(e) => setNewNote(e.target.value)} placeholder="Type your note..." />
+            <Label className="text-sm">Visible</Label>
+            <Select value={newNoteVisible} onValueChange={setNewNoteVisible}>
+              <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Yes">Yes</SelectItem>
+                <SelectItem value="No">No (hidden)</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="flex justify-end gap-2">
+              <Button variant="secondary" size="sm" onClick={() => setShowNotePrompt(false)}>Cancel</Button>
+              <Button
+                size="sm"
+                className="bg-success hover:bg-success/90 text-success-foreground"
+                onClick={() => {
+                  if (!newNote.trim()) { toast.error("Note required"); return; }
+                  setNotes((p) => [{
+                    ref: String(Date.now()).slice(-9),
+                    created: new Date().toLocaleString("en-GB"),
+                    note: newNote.trim(),
+                    by: "Current User",
+                    visible: newNoteVisible,
+                  }, ...p]);
+                  setShowNotePrompt(false);
+                  toast.success("Note added");
+                }}
+              >Add Note</Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
