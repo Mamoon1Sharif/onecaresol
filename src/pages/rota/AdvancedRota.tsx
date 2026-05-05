@@ -835,6 +835,47 @@ export default function AdvancedRota() {
         shift={editing}
         onSave={handleSaveEdit}
       />
+
+      <AlertDialog open={!!pendingMove} onOpenChange={(o) => !o && setPendingMove(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {pendingMove?.fromStaff === "Unassigned Shifts" ? "Assign shift?" : "Move shift?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <div className="rounded-md border border-border bg-muted/40 p-3 space-y-1">
+                  <div><span className="text-muted-foreground">Client:</span> <span className="font-medium text-foreground">{pendingMove?.client}</span></div>
+                  <div><span className="text-muted-foreground">Reference:</span> <span className="font-mono text-foreground">{pendingMove?.ref}</span></div>
+                  <div><span className="text-muted-foreground">Service:</span> <span className="text-foreground">{pendingMove?.service}</span></div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="rounded-md border border-border p-2">
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">From</div>
+                    <div className="font-medium text-foreground">{pendingMove?.fromStaff}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {pendingMove && `${fmtTime(pendingMove.fromStart)}–${fmtTime(pendingMove.fromEnd)}`}
+                    </div>
+                  </div>
+                  <div className="rounded-md border border-primary/40 bg-primary/5 p-2">
+                    <div className="text-[10px] uppercase tracking-wider text-primary">To</div>
+                    <div className="font-medium text-foreground">{pendingMove?.toStaff}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {pendingMove && `${fmtTime(pendingMove.toStart)}–${fmtTime(pendingMove.toEnd)}`}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmPendingMove}>
+              {pendingMove?.fromStaff === "Unassigned Shifts" ? "Assign" : "Confirm move"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }
