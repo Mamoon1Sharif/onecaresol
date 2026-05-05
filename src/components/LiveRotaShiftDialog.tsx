@@ -546,8 +546,10 @@ export function LiveRotaShiftDialog({
             <AlertDialogAction
               className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
               onClick={() => {
+                removePendingClashesForStaff(current.staff);
+                removePendingClashesForRef(current.ref);
                 setRemoved(true);
-                toast.success(`${current.staff} removed from shift`);
+                toast.success(`${current.staff} removed from shift. Related clashes cleared.`);
               }}
             >
               Remove
