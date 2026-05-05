@@ -94,21 +94,21 @@ export function LiveRotaShiftDialog({
                     <tbody>
                       <tr>
                         <td className="p-2 border border-border"><Checkbox /></td>
-                        <td className="p-2 border border-border font-mono text-primary underline cursor-pointer">{shift.ref}</td>
-                        <td className="p-2 border border-border">{shift.date}</td>
+                        <td className="p-2 border border-border font-mono text-primary underline cursor-pointer">{current.ref}</td>
+                        <td className="p-2 border border-border">{current.date}</td>
                         <td className="p-2 border border-border">Due</td>
-                        <td className="p-2 border border-border text-primary underline cursor-pointer">{shift.client}</td>
-                        <td className="p-2 border border-border">{shift.start}</td>
-                        <td className="p-2 border border-border">{shift.end}</td>
-                        <td className="p-2 border border-border">{shift.schedHrs ?? "00:30"}</td>
-                        <td className="p-2 border border-border text-primary underline cursor-pointer">{shift.staff}</td>
-                        <td className="p-2 border border-border">{shift.serviceCall ?? "Private Eve..."}</td>
+                        <td className="p-2 border border-border text-primary underline cursor-pointer">{current.client}</td>
+                        <td className="p-2 border border-border">{current.start}</td>
+                        <td className="p-2 border border-border">{current.end}</td>
+                        <td className="p-2 border border-border">{current.schedHrs ?? "00:30"}</td>
+                        <td className="p-2 border border-border text-primary underline cursor-pointer">{current.staff}</td>
+                        <td className="p-2 border border-border">{current.serviceCall ?? "Private Eve..."}</td>
                         <td className="p-2 border border-border">Week 1</td>
                       </tr>
                       <tr>
                         <td className="p-2 border border-border" colSpan={7}>
-                          <span className="font-semibold mr-2">{shift.schedHrs ?? "00:30"}</span>Sched hrs
-                          <span className="font-semibold mx-2 ml-6">{shift.clockHrs ?? "00:00"}</span>Clock hrs
+                          <span className="font-semibold mr-2">{current.schedHrs ?? "00:30"}</span>Sched hrs
+                          <span className="font-semibold mx-2 ml-6">{current.clockHrs ?? "00:00"}</span>Clock hrs
                         </td>
                         <td className="p-2 border border-border" colSpan={4}></td>
                       </tr>
@@ -129,14 +129,14 @@ export function LiveRotaShiftDialog({
               <div className="p-4 flex gap-6">
                 <div className="flex flex-col items-center gap-2">
                   <div className="w-[140px] h-[140px] rounded-sm border border-border bg-muted flex items-center justify-center text-muted-foreground text-xs">
-                    {shift.staff}
+                    {current.staff}
                   </div>
                   <Button size="sm" className="bg-destructive hover:bg-destructive/90 text-destructive-foreground h-8 w-[140px]">
                     ↑ Remove Team Member
                   </Button>
                 </div>
                 <div className="flex-1">
-                  <div className="text-primary font-medium mb-2">{shift.staff}</div>
+                  <div className="text-primary font-medium mb-2">{current.staff}</div>
                   <div className="space-y-1 text-sm">
                     <button
                       onClick={() => setClockEdit("in")}
@@ -286,8 +286,8 @@ export function LiveRotaShiftDialog({
 
       <ClockEditDialog
         mode={clockEdit}
-        staff={shift.staff}
-        date={shift.date}
+        staff={current.staff}
+        date={current.date}
         defaultTime={clockEdit === "in" ? shift.start : shift.end}
         onClose={() => setClockEdit(null)}
       />
