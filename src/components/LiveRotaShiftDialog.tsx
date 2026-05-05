@@ -167,8 +167,105 @@ export function LiveRotaShiftDialog({
                   <Plus className="h-3 w-3" /> Add New
                 </Button>
               </div>
-              <div className="p-3 text-xs text-muted-foreground">
-                Notes marked as hidden will only appear on a single rota, service user and team member note area or some of the reports. Notes marked as hidden will also not appear on the Care Portal section.
+              <div className="p-3 space-y-2">
+                <p className="text-xs text-muted-foreground">
+                  Notes marked as hidden will only appear on a single rota, service user and team member note area or some of the reports. Notes marked as hidden will also not appear on the Care Portal section.
+                </p>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-[12px] border-collapse">
+                    <thead>
+                      <tr className="bg-muted/40">
+                        <th className="p-2 border border-border text-left">Ref</th>
+                        <th className="p-2 border border-border text-left">Created</th>
+                        <th className="p-2 border border-border text-left">Note</th>
+                        <th className="p-2 border border-border text-left">Created By</th>
+                        <th className="p-2 border border-border text-left">Visible</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[
+                        { ref: "139988439", created: "21/04/2026 12:06", note: "Service user prefers door bell to be rung twice on arrival.", by: "Maya Sawich", visible: "Yes" },
+                        { ref: "139988512", created: "22/04/2026 09:14", note: "Key safe code refreshed — collect from office before visit.", by: "Anna Pereira", visible: "Yes" },
+                        { ref: "139988577", created: "23/04/2026 16:42", note: "Family will be present during evening call. Hand over notes.", by: "Maria Khalil", visible: "No" },
+                      ].map((n) => (
+                        <tr key={n.ref} className="border-b border-border hover:bg-muted/30">
+                          <td className="p-2 border border-border font-mono text-[11px]">{n.ref}</td>
+                          <td className="p-2 border border-border">{n.created}</td>
+                          <td className="p-2 border border-border">{n.note}</td>
+                          <td className="p-2 border border-border text-primary underline cursor-pointer">{n.by}</td>
+                          <td className="p-2 border border-border">{n.visible}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+
+            {/* Medication */}
+            <section className="border border-border rounded-sm overflow-hidden">
+              <div className="border-t-2 border-t-primary/70 flex items-center justify-between px-3 py-2 bg-card">
+                <h3 className="text-sm font-semibold text-primary">Medication (Evening Medication)</h3>
+              </div>
+              <div className="p-3 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Select defaultValue="please">
+                    <SelectTrigger className="h-8 w-[220px] text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="please">Please Select Meds...</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button size="sm" className="h-8 bg-success hover:bg-success/90 text-success-foreground">Go</Button>
+                  <div className="ml-auto flex items-center gap-2">
+                    <Label className="text-xs">Search:</Label>
+                    <Input className="h-8 w-48 text-xs" />
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-[12px] border-collapse">
+                    <thead>
+                      <tr className="bg-muted/40">
+                        <th className="p-2 border border-border w-8"><Checkbox /></th>
+                        <th className="p-2 border border-border text-left">Med Name</th>
+                        <th className="p-2 border border-border text-left">Status</th>
+                        <th className="p-2 border border-border text-center">Audited</th>
+                        <th className="p-2 border border-border text-left">Audit Notes</th>
+                        <th className="p-2 border border-border text-left">Admin Details</th>
+                        <th className="p-2 border border-border text-left">Linked Areas</th>
+                        <th className="p-2 border border-border text-left">Med Group</th>
+                        <th className="p-2 border border-border text-left">Period</th>
+                        <th className="p-2 border border-border text-left">Planned</th>
+                        <th className="p-2 border border-border text-left">Body Map</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[
+                        { name: "Atorvastatin", period: "Evening: 16:00 - 22:00", planned: ["Administer", "1", "40mg", "ONE to be taken at NIGHT"] },
+                        { name: "Carbamazepine", period: "Evening: 16:00 - 22:00", planned: ["Administer", "1", "100mg", "ONE to be taken in the MORNING and NIGHT"] },
+                        { name: "Dermol 500 Lotion", period: "", planned: ["Applied", "Use as a soap substitute."] },
+                        { name: "E45 Cream", period: "", planned: ["Applied", "Apply as required"] },
+                        { name: "Epimax Excetra Cream", period: "", planned: ["Applied", "Apply to arms and back daily"] },
+                        { name: "Medi-Derma S Barrier Cream", period: "", planned: ["Applied", "Apply to groin and bottom when required. Use a pea size amount."] },
+                        { name: "Ramipril", period: "Evening: 16:00 - 22:00", planned: ["Administer", "1", "5mg", "ONE to be taken in the MORNING and at NIGHT."] },
+                      ].map((m) => (
+                        <tr key={m.name} className="border-b border-border hover:bg-muted/30">
+                          <td className="p-2 border border-border"><Checkbox /></td>
+                          <td className="p-2 border border-border">{m.name}</td>
+                          <td className="p-2 border border-border">Due</td>
+                          <td className="p-2 border border-border text-center text-destructive">✕</td>
+                          <td className="p-2 border border-border"></td>
+                          <td className="p-2 border border-border">Medication Not Administered Through The System</td>
+                          <td className="p-2 border border-border"></td>
+                          <td className="p-2 border border-border">Evening Medication</td>
+                          <td className="p-2 border border-border">{m.period}</td>
+                          <td className="p-2 border border-border whitespace-pre-line">{m.planned.join("\n")}</td>
+                          <td className="p-2 border border-border">-</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <p className="text-xs text-muted-foreground pt-2">Showing 1 to 7 of 7</p>
+                </div>
               </div>
             </section>
           </div>
