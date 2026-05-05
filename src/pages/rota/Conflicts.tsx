@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,7 +15,7 @@ import {
   ListChecks, Tag, UserPlus, Briefcase, MessageSquare, Move,
   ArrowRight, User, CalendarRange, Lock, CalendarDays, Plus, Check, Pencil,
 } from "lucide-react";
-import { useCareReceivers, useCareGivers } from "@/hooks/use-care-data";
+import { useCareReceivers, useCareGivers, useDailyVisitsRange } from "@/hooks/use-care-data";
 import { toast } from "sonner";
 import { LiveRotaShiftDialog } from "@/components/LiveRotaShiftDialog";
 
@@ -393,7 +393,7 @@ const Conflicts = () => {
         </div>
 
         {/* Clashing Rotas Section */}
-        <ClashingRotasSection />
+        <ClashingRotasSection fromDate={fromDate} toDate={toDate} />
       </div>
 
       <CancelledShiftDialog
@@ -456,80 +456,164 @@ const Conflicts = () => {
   );
 };
 
-const CLASHING_PAIRS = [
-  {
-    a: { staff: "Sumayyah Shafiq", ref: "147844258", date: "06/05/2026", start: "19:30", end: "20:00", client: "Thomas Henderson" },
-    b: { ref: "147844276", date: "06/05/2026", start: "19:45", end: "20:00", client: "Edna Morris" },
-  },
-  {
-    a: { staff: "Lisa Archer", ref: "147844660", date: "07/05/2026", start: "09:35", end: "10:20", client: "Michael Taylor" },
-    b: { ref: "147844618", date: "07/05/2026", start: "10:00", end: "10:30", client: "Craig Murray" },
-  },
-];
+type ClashRow = {
+  staff: string;
+  aRef: string; aDate: string; aStart: string; aEnd: string; aClient: string;
+  bRef: string; bDate: string; bStart: string; bEnd: string; bClient: string;
+};
 
-function ClashingRotasSection() {
+const PENDING_CLASH_KEY = "pending_clashes_v1";
+function loadPendingClashes(): ClashRow[] {
+  try { return JSON.parse(localStorage.getItem(PENDING_CLASH_KEY) || "[]"); } catch { return []; }
+}
+export function savePendingClash(c: ClashRow) {
+  const list = loadPendingClashes();
+  const key = (x: ClashRow) => `${x.staff}|${x.aRef}|${x.bRef}`;
+  if (!list.some((x) => key(x) === key(c))) {
+    list.push(c);
+    localStorage.setItem(PENDING_CLASH_KEY, JSON.stringify(list));
+  }
+}
+
+function fmtVisitDate(s: string) {
+  const d = new Date(s); return d.toLocaleDateString("en-GB");
+}
+function visitTimes(v: any): { start: string; end: string } {
+  const s = Number(v.start_hour ?? 0);
+  const dur = Number(v.duration ?? 1);
+  const fmt = (h: number) => `${String(Math.floor(h)).padStart(2, "0")}:${String(Math.round((h % 1) * 60)).padStart(2, "0")}`;
+  return { start: fmt(s), end: fmt(s + dur) };
+}
+
+function ClashingRotasSection({ fromDate, toDate }: { fromDate: string; toDate: string }) {
   const [openShift, setOpenShift] = useState<any>(null);
+  const { data: visits = [] } = useDailyVisitsRange(fromDate, toDate);
+
+  // Detect overlapping shifts assigned to the same caregiver
+  const detected = useMemo<ClashRow[]>(() => {
+    const byCg: Record<string, any[]> = {};
+    for (const v of visits as any[]) {
+      if (!v.care_giver_id) continue;
+      (byCg[v.care_giver_id] ??= []).push(v);
+    }
+    const out: ClashRow[] = [];
+    for (const cgId of Object.keys(byCg)) {
+      const list = byCg[cgId];
+      const byDate: Record<string, any[]> = {};
+      for (const v of list) (byDate[v.visit_date] ??= []).push(v);
+      for (const date of Object.keys(byDate)) {
+        const day = byDate[date].sort((x, y) => (x.start_hour ?? 0) - (y.start_hour ?? 0));
+        for (let i = 0; i < day.length; i++) {
+          for (let j = i + 1; j < day.length; j++) {
+            const a = day[i], b = day[j];
+            const aEnd = (a.start_hour ?? 0) + (a.duration ?? 0);
+            const bStart = b.start_hour ?? 0;
+            if (bStart < aEnd) {
+              const at = visitTimes(a), bt = visitTimes(b);
+              const staff = a.care_givers?.name ?? "Unknown";
+              out.push({
+                staff,
+                aRef: a.id.slice(0, 9), aDate: fmtVisitDate(a.visit_date),
+                aStart: at.start, aEnd: at.end,
+                aClient: a.care_receivers?.name ?? "—",
+                bRef: b.id.slice(0, 9), bDate: fmtVisitDate(b.visit_date),
+                bStart: bt.start, bEnd: bt.end,
+                bClient: b.care_receivers?.name ?? "—",
+              });
+            }
+          }
+        }
+      }
+    }
+    return out;
+  }, [visits]);
+
+  const [pending, setPending] = useState<ClashRow[]>(loadPendingClashes());
+  useEffect(() => {
+    const onStorage = () => setPending(loadPendingClashes());
+    window.addEventListener("storage", onStorage);
+    const t = setInterval(() => setPending(loadPendingClashes()), 1500);
+    return () => { window.removeEventListener("storage", onStorage); clearInterval(t); };
+  }, []);
+
+  const all = useMemo(() => {
+    const k = (c: ClashRow) => `${c.staff}|${c.aRef}|${c.bRef}`;
+    const seen = new Set<string>();
+    return [...detected, ...pending].filter((c) => {
+      const key = k(c);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [detected, pending]);
+
   return (
     <Card className="rounded-sm border border-border overflow-hidden">
       <div className="border-t-2 border-t-destructive/80 px-4 pt-3 pb-2">
-        <h3 className="text-sm font-semibold text-foreground">({CLASHING_PAIRS.length}) clashing rotas</h3>
+        <h3 className="text-sm font-semibold text-foreground">({all.length}) clashing rotas</h3>
       </div>
       <div className="px-4 pb-4">
         <p className="text-xs text-muted-foreground mb-3">
           These shifts <span className="text-warning font-medium">clash</span> with each other
         </p>
+        {all.length === 0 ? (
+          <div className="text-xs text-muted-foreground py-6 text-center border border-dashed border-border rounded">
+            No clashing rotas in this date range.
+          </div>
+        ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-[12px] border-collapse">
             <thead>
               <tr>
-                <th className="bg-[hsl(245_60%_92%)] text-left p-2 font-semibold text-foreground border border-border">Staff</th>
+                <th className="bg-[hsl(245_60%_92%)] text-left p-2 font-semibold text-foreground border border-border">Care Giver</th>
                 <th className="bg-[hsl(200_70%_94%)] text-left p-2 font-semibold text-foreground border border-border">Ref</th>
                 <th className="bg-[hsl(200_70%_94%)] text-left p-2 font-semibold text-foreground border border-border">Date</th>
                 <th className="bg-[hsl(200_70%_94%)] text-left p-2 font-semibold text-foreground border border-border">Start</th>
                 <th className="bg-[hsl(200_70%_94%)] text-left p-2 font-semibold text-foreground border border-border">End</th>
-                <th className="bg-[hsl(200_70%_94%)] text-left p-2 font-semibold text-foreground border border-border">Client</th>
+                <th className="bg-[hsl(200_70%_94%)] text-left p-2 font-semibold text-foreground border border-border">Service Member</th>
                 <th className="bg-[hsl(0_70%_94%)] text-left p-2 font-semibold text-foreground border border-border">Ref</th>
                 <th className="bg-[hsl(0_70%_94%)] text-left p-2 font-semibold text-foreground border border-border">Date</th>
                 <th className="bg-[hsl(0_70%_94%)] text-left p-2 font-semibold text-foreground border border-border">Start</th>
                 <th className="bg-[hsl(0_70%_94%)] text-left p-2 font-semibold text-foreground border border-border">End</th>
-                <th className="bg-[hsl(0_70%_94%)] text-left p-2 font-semibold text-foreground border border-border">Client</th>
+                <th className="bg-[hsl(0_70%_94%)] text-left p-2 font-semibold text-foreground border border-border">Service Member</th>
               </tr>
             </thead>
             <tbody>
-              {CLASHING_PAIRS.map((p, i) => (
-                <tr key={i}>
+              {all.map((p, i) => (
+                <tr key={`${p.staff}-${p.aRef}-${p.bRef}-${i}`}>
                   <td className="bg-[hsl(245_60%_96%)] p-2 border border-border">
-                    <button className="text-primary hover:underline font-medium">{p.a.staff}</button>
+                    <span className="text-primary font-medium">{p.staff}</span>
                   </td>
                   <td className="bg-[hsl(200_70%_97%)] p-2 border border-border">
                     <button
                       className="text-destructive hover:underline font-mono"
-                      onClick={() => setOpenShift({ ...p.a, staff: p.a.staff, client: p.a.client })}
-                    >{p.a.ref}</button>
+                      onClick={() => setOpenShift({ ref: p.aRef, date: p.aDate, start: p.aStart, end: p.aEnd, client: p.aClient, staff: p.staff })}
+                    >{p.aRef}</button>
                   </td>
-                  <td className="bg-[hsl(200_70%_97%)] p-2 border border-border text-foreground">{p.a.date}</td>
-                  <td className="bg-[hsl(200_70%_97%)] p-2 border border-border text-foreground">{p.a.start}</td>
-                  <td className="bg-[hsl(200_70%_97%)] p-2 border border-border text-foreground">{p.a.end}</td>
+                  <td className="bg-[hsl(200_70%_97%)] p-2 border border-border text-foreground">{p.aDate}</td>
+                  <td className="bg-[hsl(200_70%_97%)] p-2 border border-border text-foreground">{p.aStart}</td>
+                  <td className="bg-[hsl(200_70%_97%)] p-2 border border-border text-foreground">{p.aEnd}</td>
                   <td className="bg-[hsl(200_70%_97%)] p-2 border border-border">
-                    <button className="text-primary hover:underline">{p.a.client}</button>
+                    <span className="text-primary">{p.aClient}</span>
                   </td>
                   <td className="bg-[hsl(0_70%_97%)] p-2 border border-border">
                     <button
                       className="text-destructive hover:underline font-mono"
-                      onClick={() => setOpenShift({ ...p.b, staff: p.a.staff, client: p.b.client })}
-                    >{p.b.ref}</button>
+                      onClick={() => setOpenShift({ ref: p.bRef, date: p.bDate, start: p.bStart, end: p.bEnd, client: p.bClient, staff: p.staff })}
+                    >{p.bRef}</button>
                   </td>
-                  <td className="bg-[hsl(0_70%_97%)] p-2 border border-border text-foreground">{p.b.date}</td>
-                  <td className="bg-[hsl(0_70%_97%)] p-2 border border-border text-foreground">{p.b.start}</td>
-                  <td className="bg-[hsl(0_70%_97%)] p-2 border border-border text-foreground">{p.b.end}</td>
+                  <td className="bg-[hsl(0_70%_97%)] p-2 border border-border text-foreground">{p.bDate}</td>
+                  <td className="bg-[hsl(0_70%_97%)] p-2 border border-border text-foreground">{p.bStart}</td>
+                  <td className="bg-[hsl(0_70%_97%)] p-2 border border-border text-foreground">{p.bEnd}</td>
                   <td className="bg-[hsl(0_70%_97%)] p-2 border border-border">
-                    <button className="text-primary hover:underline">{p.b.client}</button>
+                    <span className="text-primary">{p.bClient}</span>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+        )}
       </div>
       <LiveRotaShiftDialog
         shift={openShift}

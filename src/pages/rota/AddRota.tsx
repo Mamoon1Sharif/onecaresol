@@ -31,6 +31,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useCareReceivers, useCareGivers, useUpsertShift, useMedications } from "@/hooks/use-care-data";
+import { savePendingClash } from "./Conflicts";
 import { getCareReceiverAvatar } from "@/lib/avatars";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -101,6 +102,7 @@ const AddRota = () => {
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [savedOpen, setSavedOpen] = useState(false);
+  const [clashInfo, setClashInfo] = useState<null | { other: any; staffName: string; otherClient: string }>(null);
 
   // Dedup MAR medications by name+dosage+time so the same prescription isn't repeated.
   const uniqueMeds = useMemo(() => {
@@ -198,6 +200,23 @@ const AddRota = () => {
       const day = new Date(form.date).getDay();
       const staffId = form.staff1 || null;
       const durHours = Math.max(1, Math.round(durationMinutes / 60));
+      const newStart = parseInt(form.startH);
+      const newEnd = newStart + durHours;
+
+      // Detect overlapping shift for the same caregiver on the same date
+      let clashOther: any = null;
+      if (staffId) {
+        const { data: existing } = await supabase
+          .from("daily_visits")
+          .select("id, start_hour, duration, care_receivers(name)")
+          .eq("care_giver_id", staffId)
+          .eq("visit_date", form.date);
+        for (const v of existing ?? []) {
+          const s = Number(v.start_hour ?? 0);
+          const e = s + Number(v.duration ?? 0);
+          if (newStart < e && s < newEnd) { clashOther = v; break; }
+        }
+      }
 
       await upsertShift.mutateAsync({
         care_giver_id: staffId as any,
@@ -242,7 +261,17 @@ const AddRota = () => {
       await queryClient.invalidateQueries({ queryKey: ["daily_visits"] });
       await queryClient.invalidateQueries({ queryKey: ["shift_tasks"] });
       toast.success("Shift saved successfully");
-      setSavedOpen(true);
+
+      if (clashOther && staffId && dvRow?.id) {
+        const staffName = selectedCaregiver?.name ?? "Care giver";
+        setClashInfo({
+          other: { ...clashOther, _newId: dvRow.id, _newStartH: newStart, _newDur: durHours },
+          staffName,
+          otherClient: (clashOther as any).care_receivers?.name ?? "—",
+        });
+      } else {
+        setSavedOpen(true);
+      }
     } catch (err: any) {
       toast.error(err?.message ?? "Failed to save shift");
     }
@@ -846,6 +875,63 @@ const AddRota = () => {
               }}
             >
               Done
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!clashInfo} onOpenChange={(v) => !v && setClashInfo(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              Rota Conflict Detected
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <div>
+                  <span className="font-medium text-foreground">{clashInfo?.staffName}</span> already has an
+                  overlapping shift on this date with{" "}
+                  <span className="font-medium text-foreground">{clashInfo?.otherClient}</span>.
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  You can resolve this now (reassign or change times) or fix it later from the Conflicts page.
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                if (clashInfo && selected) {
+                  savePendingClash({
+                    staff: clashInfo.staffName,
+                    aRef: String(clashInfo.other.id ?? "").slice(0, 9),
+                    aDate: new Date(form.date).toLocaleDateString("en-GB"),
+                    aStart: `${String(clashInfo.other.start_hour).padStart(2, "0")}:00`,
+                    aEnd: `${String(Number(clashInfo.other.start_hour) + Number(clashInfo.other.duration)).padStart(2, "0")}:00`,
+                    aClient: clashInfo.otherClient,
+                    bRef: String(clashInfo.other._newId ?? "").slice(0, 9),
+                    bDate: new Date(form.date).toLocaleDateString("en-GB"),
+                    bStart: `${String(clashInfo.other._newStartH).padStart(2, "0")}:00`,
+                    bEnd: `${String(clashInfo.other._newStartH + clashInfo.other._newDur).padStart(2, "0")}:00`,
+                    bClient: selected.name,
+                  });
+                  toast.warning("Conflict saved to Clashing Rotas. Fix it later.");
+                }
+                setClashInfo(null);
+                setSavedOpen(true);
+              }}
+            >
+              Fix Later
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setClashInfo(null);
+                setSavedOpen(true);
+              }}
+            >
+              Resolve Now
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
