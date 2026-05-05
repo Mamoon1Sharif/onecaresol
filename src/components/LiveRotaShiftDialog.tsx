@@ -20,6 +20,7 @@ import { removePendingClashesForStaff, removePendingClashesForRef } from "@/page
 import { useQueryClient } from "@tanstack/react-query";
 
 export type LiveRotaShift = {
+  visitId?: string;
   ref: string;
   date: string;
   start: string;
@@ -549,21 +550,19 @@ export function LiveRotaShiftDialog({
               className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
               onClick={async () => {
                 try {
-                  // Find and unassign caregiver on the underlying daily_visit so the
-                  // overlap detection no longer picks it up.
-                  const { data: rows } = await supabase
-                    .from("daily_visits")
-                    .select("id, care_givers(name)")
-                    .like("id", `${current.ref}%`);
-                  const target = (rows ?? []).find((r: any) => r.care_givers?.name === current.staff) ?? rows?.[0];
-                  if (target?.id) {
-                    await supabase
-                      .from("daily_visits")
-                      .update({ care_giver_id: null, status: "Pending" })
-                      .eq("id", target.id);
+                  if (!current.visitId) {
+                    throw new Error("Missing visit id for this shift");
                   }
+
+                  const { error } = await supabase
+                    .from("daily_visits")
+                    .update({ care_giver_id: null, status: "Pending" })
+                    .eq("id", current.visitId);
+
+                  if (error) throw error;
                 } catch (e) {
-                  // non-fatal: still clear local pending clashes
+                  toast.error("Could not remove care giver from this shift.");
+                  return;
                 }
                 removePendingClashesForStaff(current.staff);
                 removePendingClashesForRef(current.ref);
