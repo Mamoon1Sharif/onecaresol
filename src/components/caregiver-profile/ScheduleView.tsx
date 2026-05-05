@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { useShifts, useDailyVisits, useDailyVisitsRange } from "@/hooks/use-care-data";
+import { useShifts } from "@/hooks/use-care-data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -69,6 +69,23 @@ const fmtMins = (m: number) => {
   return `${String(h).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
 };
 
+// Shifts table: day = 0..6 (Mon..Sun), start_time/end_time as "HH:MM" text
+function shiftMinutes(start: string | null, end: string | null) {
+  if (!start || !end) return 0;
+  const [sh, sm] = start.split(":").map(Number);
+  const [eh, em] = end.split(":").map(Number);
+  return (eh * 60 + em) - (sh * 60 + sm);
+}
+function shiftStartHour(start: string | null) {
+  if (!start) return 0;
+  return Number(start.split(":")[0] ?? 0);
+}
+// JS getDay: Sun=0..Sat=6 -> Mon=0..Sun=6
+function weekdayIdx(d: Date) {
+  return (d.getDay() + 6) % 7;
+}
+
+
 interface Props {
   cg: CareGiver;
   showHeader?: boolean;
@@ -84,7 +101,6 @@ export function ScheduleView({ cg, showHeader = true }: Props) {
   const [toDate, setToDate] = useState(() => getDateStr(0));
 
   const dateStr = useMemo(() => getDateStr(dayOffset), [dayOffset]);
-  const { data: dailyVisits = [] } = useDailyVisits(dateStr);
 
   useEffect(() => {
     setFromDate(dateStr);
@@ -98,34 +114,39 @@ export function ScheduleView({ cg, showHeader = true }: Props) {
   }, [dayOffset]);
 
   const weekDates = useMemo(() => getWeekDates(weekOffset), [weekOffset]);
-  const weekFromStr = useMemo(() => weekDates[0].toISOString().split("T")[0], [weekDates]);
-  const weekToStr = useMemo(() => weekDates[6].toISOString().split("T")[0], [weekDates]);
-  const { data: weekVisits = [] } = useDailyVisitsRange(weekFromStr, weekToStr);
 
-  const myShifts = useMemo(() => allShifts.filter((s) => s.care_giver_id === cg.id), [allShifts, cg.id]);
-  const myVisits = useMemo(() => dailyVisits.filter((v) => v.care_giver_id === cg.id), [dailyVisits, cg.id]);
-  const myWeekVisits = useMemo(() => weekVisits.filter((v) => v.care_giver_id === cg.id), [weekVisits, cg.id]);
+  const myShifts = useMemo(() => allShifts.filter((s: any) => s.care_giver_id === cg.id), [allShifts, cg.id]);
+
+  // Daily view: filter shifts by weekday matching the selected date
+  const dayIdx = weekdayIdx(currentDate);
+  const myVisits = useMemo(
+    () => myShifts.filter((s: any) => s.day === dayIdx),
+    [myShifts, dayIdx]
+  );
 
   const filteredVisits = useMemo(() => {
     if (!search) return myVisits;
     const q = search.toLowerCase();
-    return myVisits.filter((v) =>
+    return myVisits.filter((v: any) =>
       (v.care_receivers as any)?.name?.toLowerCase().includes(q) ||
-      v.status?.toLowerCase().includes(q)
+      (v.shift_type ?? "").toLowerCase().includes(q)
     );
   }, [myVisits, search]);
 
-  const scheduledMinutes = myVisits.reduce((sum, v) => sum + (v.duration ?? 0) * 60, 0);
-  const clockedMinutes = myVisits.reduce((sum, v) => {
-    if (v.check_in_time && v.check_out_time) {
-      return sum + (new Date(v.check_out_time).getTime() - new Date(v.check_in_time).getTime()) / 60000;
+  const scheduledMinutes = myVisits.reduce(
+    (sum: number, v: any) => sum + shiftMinutes(v.start_time, v.end_time),
+    0
+  );
+  const clockedMinutes = myVisits.reduce((sum: number, v: any) => {
+    if (v.arrived_at && v.departed_at) {
+      return sum + (new Date(v.departed_at).getTime() - new Date(v.arrived_at).getTime()) / 60000;
     }
     return sum;
   }, 0);
 
-  const completedCount = myVisits.filter((v) => v.status === "Completed" || v.status === "Complete").length;
-  const inProgressCount = myVisits.filter((v) => v.status === "In Progress").length;
-  const dueCount = myVisits.filter((v) => v.status === "Due" || v.status === "Pending").length;
+  const completedCount = myVisits.filter((v: any) => v.arrived_at && v.departed_at).length;
+  const inProgressCount = myVisits.filter((v: any) => v.arrived_at && !v.departed_at).length;
+  const dueCount = myVisits.filter((v: any) => !v.arrived_at).length;
 
   const handleDateUpdate = () => {
     const today = new Date();
@@ -309,13 +330,18 @@ export function ScheduleView({ cg, showHeader = true }: Props) {
                       </TableCell>
                     </TableRow>
                   )}
-                  {filteredVisits.map((v) => {
-                    const st = statusConfig[v.status] ?? statusConfig.Pending;
+                  {filteredVisits.map((v: any) => {
+                    const status = v.arrived_at && v.departed_at
+                      ? "Completed"
+                      : v.arrived_at
+                        ? "In Progress"
+                        : "Pending";
+                    const st = statusConfig[status] ?? statusConfig.Pending;
                     const StIcon = st.icon;
-                    const schedEnd = `${String(v.start_hour + v.duration).padStart(2, "0")}:00`;
-                    const isCancelled = v.status === "Cancelled";
+                    const sh = shiftStartHour(v.start_time);
+                    const mins = shiftMinutes(v.start_time, v.end_time);
                     return (
-                      <TableRow key={v.id} className={isCancelled ? "bg-destructive/5" : "hover:bg-muted/30"}>
+                      <TableRow key={v.id} className="hover:bg-muted/30">
                         <TableCell>
                           <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${st.bg} ${st.text}`}>
                             <StIcon className="h-3.5 w-3.5" />
@@ -325,30 +351,18 @@ export function ScheduleView({ cg, showHeader = true }: Props) {
                         <TableCell>
                           <div className="flex items-center gap-2 font-medium">
                             <User className="h-4 w-4 text-muted-foreground shrink-0" />
-                            <span className={isCancelled ? "line-through text-muted-foreground" : ""}>
-                              {(v.care_receivers as any)?.name ?? "—"}
-                            </span>
+                            <span>{(v.care_receivers as any)?.name ?? "—"}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-center font-mono text-sm">
-                          {String(v.start_hour).padStart(2, "0")}:00
-                        </TableCell>
-                        <TableCell className="text-center font-mono text-sm">{schedEnd}</TableCell>
-                        <TableCell className="text-center font-mono text-sm">
-                          {String(v.duration).padStart(2, "0")}:00
-                        </TableCell>
-                        <TableCell className="text-center font-mono text-sm">
-                          {fmtTime(v.check_in_time)}
-                        </TableCell>
-                        <TableCell className="text-center font-mono text-sm">
-                          {fmtTime(v.check_out_time)}
-                        </TableCell>
-                        <TableCell className="text-center font-mono text-sm">
-                          {diffDisplay(v.check_in_time, v.check_out_time)}
-                        </TableCell>
+                        <TableCell className="text-center font-mono text-sm">{v.start_time ?? "—"}</TableCell>
+                        <TableCell className="text-center font-mono text-sm">{v.end_time ?? "—"}</TableCell>
+                        <TableCell className="text-center font-mono text-sm">{fmtMins(mins)}</TableCell>
+                        <TableCell className="text-center font-mono text-sm">{fmtTime(v.arrived_at)}</TableCell>
+                        <TableCell className="text-center font-mono text-sm">{fmtTime(v.departed_at)}</TableCell>
+                        <TableCell className="text-center font-mono text-sm">{diffDisplay(v.arrived_at, v.departed_at)}</TableCell>
                         <TableCell>
                           <Badge variant="outline" className="text-[10px]">
-                            {v.start_hour < 12 ? "Morning" : v.start_hour < 17 ? "Afternoon" : "Night"}
+                            {v.shift_type ?? (sh < 12 ? "Morning" : sh < 17 ? "Afternoon" : "Night")}
                           </Badge>
                         </TableCell>
                       </TableRow>
@@ -416,18 +430,17 @@ export function ScheduleView({ cg, showHeader = true }: Props) {
                 </TableHeader>
                 <TableBody>
                   <TableRow>
-                    {DAYS.map((_, dayIdx) => {
-                      const cellDateStr = weekDates[dayIdx].toISOString().split("T")[0];
-                      const dayVisits = myWeekVisits.filter((v) => v.visit_date === cellDateStr);
+                    {DAYS.map((_, di) => {
+                      const dayVisits = myShifts.filter((s: any) => s.day === di);
                       return (
-                        <TableCell key={dayIdx} className="align-top border-r last:border-r-0 p-2 min-h-[120px]">
+                        <TableCell key={di} className="align-top border-r last:border-r-0 p-2 min-h-[120px]">
                           <div className="space-y-2 min-h-[100px]">
                             {dayVisits.length === 0 && (
                               <p className="text-xs text-muted-foreground/50 text-center pt-8">No shifts</p>
                             )}
-                            {dayVisits.map((v) => {
-                              const shiftType = v.start_hour < 12 ? "Morning" : v.start_hour < 17 ? "Afternoon" : "Night";
-                              const endHour = v.start_hour + (v.duration ?? 0);
+                            {dayVisits.map((v: any) => {
+                              const sh = shiftStartHour(v.start_time);
+                              const shiftType = v.shift_type ?? (sh < 12 ? "Morning" : sh < 17 ? "Afternoon" : "Night");
                               return (
                                 <div
                                   key={v.id}
@@ -442,7 +455,7 @@ export function ScheduleView({ cg, showHeader = true }: Props) {
                                   </div>
                                   <div className="flex items-center gap-1 mt-1 opacity-75">
                                     <Clock className="h-3 w-3" />
-                                    {String(v.start_hour).padStart(2, "0")}:00–{String(endHour).padStart(2, "0")}:00
+                                    {v.start_time}–{v.end_time}
                                   </div>
                                 </div>
                               );
