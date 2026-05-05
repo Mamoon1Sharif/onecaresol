@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCareGivers } from "@/hooks/use-care-data";
 import { removePendingClashesForStaff, removePendingClashesForRef } from "@/pages/rota/Conflicts";
+import { useQueryClient } from "@tanstack/react-query";
 
 export type LiveRotaShift = {
   ref: string;
@@ -58,6 +59,7 @@ export function LiveRotaShiftDialog({
   const [assignOpen, setAssignOpen] = useState(false);
   const [assignSelected, setAssignSelected] = useState<string>("");
   const { data: caregivers = [] } = useCareGivers();
+  const qc = useQueryClient();
   const [locks, setLocks] = useState<{ id: string; reason: string; by: string; created: string }[]>([]);
   const [showLockPrompt, setShowLockPrompt] = useState(false);
   const [lockReason, setLockReason] = useState("");
@@ -545,11 +547,30 @@ export function LiveRotaShiftDialog({
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-              onClick={() => {
+              onClick={async () => {
+                try {
+                  // Find and unassign caregiver on the underlying daily_visit so the
+                  // overlap detection no longer picks it up.
+                  const { data: rows } = await supabase
+                    .from("daily_visits")
+                    .select("id, care_givers(name)")
+                    .like("id", `${current.ref}%`);
+                  const target = (rows ?? []).find((r: any) => r.care_givers?.name === current.staff) ?? rows?.[0];
+                  if (target?.id) {
+                    await supabase
+                      .from("daily_visits")
+                      .update({ care_giver_id: null, status: "Pending" })
+                      .eq("id", target.id);
+                  }
+                } catch (e) {
+                  // non-fatal: still clear local pending clashes
+                }
                 removePendingClashesForStaff(current.staff);
                 removePendingClashesForRef(current.ref);
+                await qc.invalidateQueries({ queryKey: ["daily_visits_range"] });
+                await qc.invalidateQueries({ queryKey: ["daily_visits"] });
                 setRemoved(true);
-                toast.success(`${current.staff} removed from shift. Related clashes cleared.`);
+                toast.success(`${current.staff} removed from shift. Clash cleared.`);
               }}
             >
               Remove
