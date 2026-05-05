@@ -401,6 +401,7 @@ const CLASHING_PAIRS = [
 ];
 
 function ClashingRotasSection() {
+  const [openShift, setOpenShift] = useState<any>(null);
   return (
     <Card className="rounded-sm border border-border overflow-hidden">
       <div className="border-t-2 border-t-destructive/80 px-4 pt-3 pb-2">
