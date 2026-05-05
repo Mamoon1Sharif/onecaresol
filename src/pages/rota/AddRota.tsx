@@ -260,7 +260,17 @@ const AddRota = () => {
       await queryClient.invalidateQueries({ queryKey: ["daily_visits"] });
       await queryClient.invalidateQueries({ queryKey: ["shift_tasks"] });
       toast.success("Shift saved successfully");
-      setSavedOpen(true);
+
+      if (clashOther && staffId && dvRow?.id) {
+        const staffName = selectedCaregiver?.name ?? "Care giver";
+        setClashInfo({
+          other: { ...clashOther, _newId: dvRow.id, _newStartH: newStart, _newDur: durHours },
+          staffName,
+          otherClient: (clashOther as any).care_receivers?.name ?? "—",
+        });
+      } else {
+        setSavedOpen(true);
+      }
     } catch (err: any) {
       toast.error(err?.message ?? "Failed to save shift");
     }
