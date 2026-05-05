@@ -112,6 +112,9 @@ const Conflicts = () => {
   const [bulk, setBulk] = useState("Bulk Actions...");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [cancelledDetail, setCancelledDetail] = useState<any | null>(null);
+  const [assignFor, setAssignFor] = useState<any | null>(null);
+  const [assignSelected, setAssignSelected] = useState<string>("");
+  const [assignments, setAssignments] = useState<Record<string, string>>({});
 
   const today = new Date();
   const future = new Date(today);
@@ -119,7 +122,11 @@ const Conflicts = () => {
   const [fromDate, setFromDate] = useState<string>(today.toISOString().slice(0, 10));
   const [toDate, setToDate] = useState<string>(future.toISOString().slice(0, 10));
 
-  const allRows = useMemo(() => makeRows(careReceivers), [careReceivers]);
+  const baseRows = useMemo(() => makeRows(careReceivers), [careReceivers]);
+  const allRows = useMemo(
+    () => baseRows.map((r) => assignments[r.id] ? { ...r, teamMember: assignments[r.id], status: "Allocated" } : r),
+    [baseRows, assignments]
+  );
 
   const rows = useMemo(() => {
     return allRows.filter((r) => {
@@ -324,12 +331,12 @@ const Conflicts = () => {
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50/40">—</td>
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50/40">—</td>
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">—</td>
-                        <td className={`p-1.5 border-r border-border text-[11px] font-medium ${teamCellColor}`}>
+                        <td className={`p-1.5 border-r border-border text-[11px] font-medium ${r.teamMember === "Unallocated" ? teamCellColor : "text-foreground"}`}>
                           {r.teamMember === "Unallocated" && !isCancelled ? (
                             <button
                               type="button"
                               className="hover:underline cursor-pointer"
-                              onClick={() => nav(`/rota/add?ref=${r.ref}&serviceUser=${encodeURIComponent(r.serviceUser)}&date=${r.date}&start=${r.start}&end=${r.end}`)}
+                              onClick={() => { setAssignFor(r); setAssignSelected(""); }}
                               title="Click to allocate a care giver"
                             >
                               {r.teamMember}
@@ -386,6 +393,51 @@ const Conflicts = () => {
         open={!!cancelledDetail}
         onClose={() => setCancelledDetail(null)}
       />
+
+      <Dialog open={!!assignFor} onOpenChange={(v) => !v && setAssignFor(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-base">Assign Care Giver</DialogTitle>
+          </DialogHeader>
+          {assignFor && (
+            <div className="space-y-3 text-xs">
+              <div className="rounded border border-border bg-muted/30 p-3 space-y-1">
+                <div><span className="text-muted-foreground">Ref:</span> <span className="font-mono">{assignFor.ref}</span></div>
+                <div><span className="text-muted-foreground">Service Member:</span> {assignFor.serviceUser}</div>
+                <div><span className="text-muted-foreground">When:</span> {assignFor.date} · {assignFor.start}–{assignFor.end}</div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold">Select care giver</label>
+                <Select value={assignSelected} onValueChange={setAssignSelected}>
+                  <SelectTrigger className="h-9 text-xs"><SelectValue placeholder="Choose…" /></SelectTrigger>
+                  <SelectContent>
+                    {careGivers
+                      .filter((c: any) => c.status === "Active")
+                      .map((c: any) => (
+                        <SelectItem key={c.id} value={c.name} className="text-xs">{c.name}</SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setAssignFor(null)}>Cancel</Button>
+                <Button
+                  size="sm"
+                  className="h-8 text-xs bg-success hover:bg-success/90 text-success-foreground"
+                  onClick={() => {
+                    if (!assignSelected) { toast.error("Pick a care giver."); return; }
+                    setAssignments((p) => ({ ...p, [assignFor.id]: assignSelected }));
+                    toast.success(`${assignSelected} assigned to ${assignFor.ref}. Conflict resolved.`);
+                    setAssignFor(null);
+                  }}
+                >
+                  Assign & Resolve
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 };
