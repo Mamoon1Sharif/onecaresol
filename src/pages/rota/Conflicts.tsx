@@ -112,6 +112,7 @@ const Conflicts = () => {
   const [assignFor, setAssignFor] = useState<any | null>(null);
   const [assignSelected, setAssignSelected] = useState<string>("");
   const [assignments, setAssignments] = useState<Record<string, string>>({});
+  const [openShift, setOpenShift] = useState<any>(null);
 
   const today = new Date();
   const future = new Date(today);
