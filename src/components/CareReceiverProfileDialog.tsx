@@ -130,11 +130,11 @@ function HoursGrid({ hours, editing, form, setForm }: {
 
 const consentLabels: Record<string, string> = {
   contract_received: "Care Service Contract Received",
-  user_pack_issued: "Service User Pack Issued",
+  user_pack_issued: "Service Member Pack Issued",
   consent_form_done: "Consent Form Done",
   poa_in_place: "Power of Attorney in Place",
   privacy_notice: "Privacy Notice",
-  user_guide: "Service User Guide",
+  user_guide: "Service Member Guide",
 };
 
 const riskColors: Record<string, string> = {

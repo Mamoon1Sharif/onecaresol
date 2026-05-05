@@ -248,7 +248,7 @@ export default function Files() {
             </Select>
             <Select onValueChange={() => {}}>
               <SelectTrigger className="h-9 bg-muted/30 text-muted-foreground">
-                <SelectValue placeholder="Select Service User..." />
+                <SelectValue placeholder="Select Service Member..." />
               </SelectTrigger>
               <SelectContent>
                 {careReceivers.map((r) => (

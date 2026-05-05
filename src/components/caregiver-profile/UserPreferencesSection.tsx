@@ -24,16 +24,16 @@ export function UserPreferencesSection() {
               <Switch checked={lockEnabled} onCheckedChange={setLockEnabled} />
             </div>
             <p>
-              When enabled, if a service user scores this care giver less than 3 stars, they will not be allowed to be assigned
+              When enabled, if a service member scores this care giver less than 3 stars, they will not be allowed to be assigned
               to the call. Be mindful when using bulk actions — there will be no warning if the care giver has not been assigned
-              in some instances. If no preference is set between a service user and care giver, the care giver will be allowed
+              in some instances. If no preference is set between a service member and care giver, the care giver will be allowed
               to be assigned and a default rating will be created at the minimum star level set in settings.
             </p>
           </div>
         </div>
 
         <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
-          Preferences show the care giver → service user / service user → care giver preference for the corresponding user to aid
+          Preferences show the care giver → service member / service member → care giver preference for the corresponding user to aid
           judgement when assigning care givers to rotas. Click on a name to edit. Hover over the stars to see the description.
         </p>
 
@@ -53,7 +53,7 @@ export function UserPreferencesSection() {
               <TableRow className="bg-muted/40">
                 <TableHead className="text-xs uppercase tracking-wider">Care Giver Name</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider">Preference</TableHead>
-                <TableHead className="text-xs uppercase tracking-wider">Service User Name</TableHead>
+                <TableHead className="text-xs uppercase tracking-wider">Service Member Name</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider">Preference</TableHead>
               </TableRow>
             </TableHeader>

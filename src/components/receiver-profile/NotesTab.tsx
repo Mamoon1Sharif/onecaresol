@@ -329,7 +329,7 @@ export function ReceiverNotesTab({ careReceiverId }: { careReceiverId: string })
         </div>
         <CardContent className="p-4 space-y-3">
           <p className="text-sm text-info">
-            Live rota notes from care givers involved in this service user's care
+            Live rota notes from care givers involved in this service member's care
           </p>
 
           <div className="border rounded-md overflow-hidden">

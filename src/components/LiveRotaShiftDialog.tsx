@@ -168,7 +168,7 @@ export function LiveRotaShiftDialog({
                         <th className="p-2 border border-border text-left">Ref</th>
                         <th className="p-2 border border-border text-left">Date</th>
                         <th className="p-2 border border-border text-left">Status</th>
-                        <th className="p-2 border border-border text-left">Service User</th>
+                        <th className="p-2 border border-border text-left">Service Member</th>
                         <th className="p-2 border border-border text-left">Start</th>
                         <th className="p-2 border border-border text-left">End</th>
                         <th className="p-2 border border-border text-left">Duration</th>
@@ -328,7 +328,7 @@ export function LiveRotaShiftDialog({
               </div>
               <div className="p-3 space-y-2">
                 <p className="text-xs text-muted-foreground">
-                  Notes marked as hidden will only appear on a single rota, service user and care giver note area or some of the reports. Notes marked as hidden will also not appear on the Care Portal section.
+                  Notes marked as hidden will only appear on a single rota, service member and care giver note area or some of the reports. Notes marked as hidden will also not appear on the Care Portal section.
                 </p>
                 <div className="overflow-x-auto">
                   <table className="w-full text-[12px] border-collapse">

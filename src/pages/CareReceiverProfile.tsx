@@ -140,7 +140,7 @@ const CareReceiverProfile = () => {
             <ReceiverRotaTab cr={cr} />
           </TabsContent>
           <TabsContent value="templates" className="mt-4">
-            <ReceiverPlaceholderTab title="Templates" description="Manage care plan templates and recurring schedule patterns for this service user." />
+            <ReceiverPlaceholderTab title="Templates" description="Manage care plan templates and recurring schedule patterns for this service member." />
           </TabsContent>
           <TabsContent value="contacts" className="mt-4">
             <ReceiverKeyContactsTab careReceiverId={cr.id} />

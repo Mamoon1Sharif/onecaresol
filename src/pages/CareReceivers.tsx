@@ -28,11 +28,11 @@ const CareReceivers = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Service Users</h1>
-            <p className="text-sm text-muted-foreground mt-1">Manage service users · {careReceivers.length} total</p>
+            <h1 className="text-2xl font-bold text-foreground">Service Members</h1>
+            <p className="text-sm text-muted-foreground mt-1">Manage service members · {careReceivers.length} total</p>
           </div>
           <Button className="gap-2" onClick={() => navigate("/carereceivers/new")}>
-            <Plus className="h-4 w-4" /> Add Service User
+            <Plus className="h-4 w-4" /> Add Service Member
           </Button>
         </div>
 
@@ -49,7 +49,7 @@ const CareReceivers = () => {
         {isLoading ? (
           <div className="text-center py-12 text-muted-foreground">Loading...</div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">No service users found.</div>
+          <div className="text-center py-12 text-muted-foreground">No service members found.</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map((cr) => (

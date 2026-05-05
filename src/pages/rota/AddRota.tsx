@@ -254,7 +254,7 @@ const AddRota = () => {
         <div className="space-y-6">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Add Rota</h1>
-            <p className="text-sm text-muted-foreground mt-1">Select a service user to schedule a new shift.</p>
+            <p className="text-sm text-muted-foreground mt-1">Select a service member to schedule a new shift.</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -262,7 +262,7 @@ const AddRota = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 autoFocus
-                placeholder="Search service users..."
+                placeholder="Search service members..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-9 bg-card border-border"
@@ -276,7 +276,7 @@ const AddRota = () => {
           {isLoading ? (
             <div className="text-center py-12 text-muted-foreground">Loading…</div>
           ) : filtered.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">No service users found.</div>
+            <div className="text-center py-12 text-muted-foreground">No service members found.</div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {filtered.map((r) => (
@@ -495,7 +495,7 @@ const AddRota = () => {
             >
               {form.medicationRequired ? (
                 uniqueMeds.length === 0 ? (
-                  <EmptyState text="No prescriptions on the MAR chart for this service user." />
+                  <EmptyState text="No prescriptions on the MAR chart for this service member." />
                 ) : (
                   <>
                     <div className="rounded-lg border border-primary/30 bg-primary/5 p-2.5 flex items-center gap-2 text-xs">
@@ -601,14 +601,14 @@ const AddRota = () => {
             <Section
               icon={ClipboardList}
               title="Tasks"
-              subtitle="Pre-approved by the service user."
+              subtitle="Pre-approved by the service member."
               right={
                 <SwitchRow checked={form.tasksRequired} onChange={(v) => setForm({ ...form, tasksRequired: v })} />
               }
             >
               {form.tasksRequired ? (
                 ((selected as any).approved_tasks ?? []).length === 0 ? (
-                  <EmptyState text="No approved tasks set for this service user." />
+                  <EmptyState text="No approved tasks set for this service member." />
                 ) : (
                   <>
                     <div className="flex items-center justify-between text-xs text-muted-foreground">

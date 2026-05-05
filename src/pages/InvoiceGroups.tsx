@@ -277,15 +277,15 @@ export default function InvoiceGroups() {
           <GroupTable rows={authorityRows} search={authSearch} pageSize={Number(authPageSize)} />
         </Card>
 
-        {/* Service User Invoice Group */}
+        {/* Service Member Invoice Group */}
         <Card className="p-5 space-y-4">
           <div className="flex items-start justify-between gap-3 flex-wrap">
             <div>
-              <h2 className="font-semibold">Service User Invoice Group</h2>
-              <p className="text-xs text-muted-foreground mt-1">Bill the service user for an invoice.</p>
+              <h2 className="font-semibold">Service Member Invoice Group</h2>
+              <p className="text-xs text-muted-foreground mt-1">Bill the service member for an invoice.</p>
             </div>
             <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">
-              <Plus className="h-4 w-4 mr-1.5" /> Create Service User Invoice
+              <Plus className="h-4 w-4 mr-1.5" /> Create Service Member Invoice
             </Button>
           </div>
 

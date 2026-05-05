@@ -388,7 +388,7 @@ export default function HolidayReport() {
                   <SelectTrigger className="text-primary"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Care Giver">Care Giver</SelectItem>
-                    <SelectItem value="Service User">Service User</SelectItem>
+                    <SelectItem value="Service Member">Service Member</SelectItem>
                     <SelectItem value="Manager">Manager</SelectItem>
                   </SelectContent>
                 </Select>

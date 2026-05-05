@@ -152,7 +152,7 @@ export default function LocationTracking() {
       <div className="space-y-4">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Location Tracking</h1>
-          <p className="text-sm text-muted-foreground">Live positions of care givers and service users.</p>
+          <p className="text-sm text-muted-foreground">Live positions of care givers and service members.</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4 h-[calc(100vh-220px)] min-h-[560px]">
@@ -186,7 +186,7 @@ export default function LocationTracking() {
 
             <div className="px-3 py-2 border-b border-border">
               <h3 className="text-xs font-semibold text-primary uppercase tracking-wide">
-                {tab === "team" ? "Service Users" : "Care Giver Homes"}
+                {tab === "team" ? "Service Members" : "Care Giver Homes"}
               </h3>
             </div>
 
@@ -251,7 +251,7 @@ export default function LocationTracking() {
                   checked={showService}
                   onCheckedChange={(v) => setShowService(Boolean(v))}
                 />
-                Show Service Users
+                Show Service Members
               </label>
               <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
                 <Checkbox
@@ -287,7 +287,7 @@ export default function LocationTracking() {
                       <div className="text-xs">
                         <div className="font-semibold">{p.name}</div>
                         <div className="text-muted-foreground capitalize">
-                          {p.kind === "team" ? "Care Giver" : "Service User"}
+                          {p.kind === "team" ? "Care Giver" : "Service Member"}
                         </div>
                       </div>
                     </Popup>

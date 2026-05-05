@@ -19,7 +19,7 @@ interface Props {
   cg: CareGiver | undefined;
   /** Path used when switching care givers from the dropdown, e.g. "messaging" or "medication". */
   basePath: "messaging" | "medication" | "qualifications" | "incidents" | "files" | "changelog";
-  /** Whether to show the "Select Service User..." secondary dropdown. */
+  /** Whether to show the "Select Service Member..." secondary dropdown. */
   showServiceUserSelect?: boolean;
 }
 
@@ -52,7 +52,7 @@ export function MemberSidebar({ cg, basePath, showServiceUserSelect }: Props) {
         {showServiceUserSelect && (
           <Select onValueChange={() => {}}>
             <SelectTrigger className="h-9 bg-muted/30 border-border text-muted-foreground">
-              <SelectValue placeholder="Select Service User..." />
+              <SelectValue placeholder="Select Service Member..." />
             </SelectTrigger>
             <SelectContent>
               {careReceivers.map((r) => (

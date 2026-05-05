@@ -74,7 +74,7 @@ const initialInvoice: InvoiceSettings = {
   includeTerms: true,
   includeBankingInfo: true,
   includeNotes: false,
-  showFullServiceUserName: "Show Full Service User Name",
+  showFullServiceUserName: "Show Full Service Member Name",
   showInvoiceBreakdown: true,
   showBreakdownTableOnInvoice: true,
   showBreakdownWeekDayLayout: true,
@@ -95,7 +95,7 @@ const initialWage: WageSettings = {
   showAmountRateBreakdown: true,
   showGrossPayBreakdown: true,
   showIndividualShiftBreakdown: true,
-  showFullServiceUserName: "Show Full Service User Name",
+  showFullServiceUserName: "Show Full Service Member Name",
   enableSageExport: false,
   hoursFormat: "Decimal",
   minimumWageTopUp: false,
@@ -263,7 +263,7 @@ export default function InvoiceWagesSettings() {
                 <Row label="Include Terms" value={yesNo(invoice.includeTerms)} />
                 <Row label="Include Banking Info" value={yesNo(invoice.includeBankingInfo)} />
                 <Row label="Include Notes" value={yesNo(invoice.includeNotes)} />
-                <Row label="Show Full Service User Name" value={invoice.showFullServiceUserName} />
+                <Row label="Show Full Service Member Name" value={invoice.showFullServiceUserName} />
                 <Row label="Show Invoice Breakdown" value={yesNo(invoice.showInvoiceBreakdown)} />
                 <Row label="Show Breakdown Table on Invoice" value={yesNo(invoice.showBreakdownTableOnInvoice)} />
                 <Row label="Show Breakdown Table on Week/Day Layout" value={yesNo(invoice.showBreakdownWeekDayLayout)} />
@@ -287,7 +287,7 @@ export default function InvoiceWagesSettings() {
                 />
                 <Row label="Show Email" value={yesNo(invoice.showEmail)} />
                 <Row label="Show Icons" value={yesNo(invoice.showIcons)} />
-                <Row label="Show Service User Address (Authority Invoices)" value={yesNo(invoice.showServiceUserAddress)} />
+                <Row label="Show Service Member Address (Authority Invoices)" value={yesNo(invoice.showServiceUserAddress)} />
               </div>
             </CardContent>
           </Card>
@@ -320,7 +320,7 @@ export default function InvoiceWagesSettings() {
                 <Row label="Show Amount/Rate Breakdown" value={yesNo(wage.showAmountRateBreakdown)} />
                 <Row label="Show Gross Pay Breakdown" value={yesNo(wage.showGrossPayBreakdown)} />
                 <Row label="Show Individual Shift Breakdown" value={yesNo(wage.showIndividualShiftBreakdown)} />
-                <Row label="Show Full Service User Name" value={wage.showFullServiceUserName} />
+                <Row label="Show Full Service Member Name" value={wage.showFullServiceUserName} />
                 <Row label="Enable Sage Export" value={yesNo(wage.enableSageExport)} />
                 <Row label="Hours Format" value={wage.hoursFormat} />
                 <Row label="Minimum Wage Top Up" value={yesNo(wage.minimumWageTopUp)} />
@@ -483,16 +483,16 @@ export default function InvoiceWagesSettings() {
               </Select>
             </div>
             <div className="space-y-1">
-              <Label>Show Full Service User Name</Label>
+              <Label>Show Full Service Member Name</Label>
               <Select
                 value={draftInvoice.showFullServiceUserName}
                 onValueChange={(v) => setDraftInvoice({ ...draftInvoice, showFullServiceUserName: v })}
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Show Full Service User Name">Show Full Service User Name</SelectItem>
+                  <SelectItem value="Show Full Service Member Name">Show Full Service Member Name</SelectItem>
                   <SelectItem value="Show Initials Only">Show Initials Only</SelectItem>
-                  <SelectItem value="Hide Service User Name">Hide Service User Name</SelectItem>
+                  <SelectItem value="Hide Service Member Name">Hide Service Member Name</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -526,7 +526,7 @@ export default function InvoiceWagesSettings() {
               ["roundDownIf5", "Round down if 5?"],
               ["showEmail", "Show Email"],
               ["showIcons", "Show Icons"],
-              ["showServiceUserAddress", "Show Service User Address (Authority Invoices)"],
+              ["showServiceUserAddress", "Show Service Member Address (Authority Invoices)"],
             ].map(([key, label]) => (
               <div key={key} className="flex items-center justify-between rounded border p-2">
                 <Label className="text-xs">{label}</Label>
@@ -590,16 +590,16 @@ export default function InvoiceWagesSettings() {
               </Select>
             </div>
             <div className="space-y-1">
-              <Label>Show Full Service User Name</Label>
+              <Label>Show Full Service Member Name</Label>
               <Select
                 value={draftWage.showFullServiceUserName}
                 onValueChange={(v) => setDraftWage({ ...draftWage, showFullServiceUserName: v })}
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Show Full Service User Name">Show Full Service User Name</SelectItem>
+                  <SelectItem value="Show Full Service Member Name">Show Full Service Member Name</SelectItem>
                   <SelectItem value="Show Initials Only">Show Initials Only</SelectItem>
-                  <SelectItem value="Hide Service User Name">Hide Service User Name</SelectItem>
+                  <SelectItem value="Hide Service Member Name">Hide Service Member Name</SelectItem>
                 </SelectContent>
               </Select>
             </div>

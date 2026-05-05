@@ -249,7 +249,7 @@ const Timeline = () => {
               Timeline
             </h1>
             <p className="text-sm text-muted-foreground">
-              Unified feed of care visits and medication events across all service users.
+              Unified feed of care visits and medication events across all service members.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -292,7 +292,7 @@ const Timeline = () => {
             <Select value={memberFilter} onValueChange={setMemberFilter}>
               <SelectTrigger className="h-9"><User className="h-3.5 w-3.5 mr-1" /><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All service users</SelectItem>
+                <SelectItem value="all">All service members</SelectItem>
                 {MEMBERS.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
               </SelectContent>
             </Select>

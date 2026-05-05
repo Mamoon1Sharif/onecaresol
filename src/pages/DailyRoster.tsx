@@ -266,7 +266,7 @@ const DailyRoster = () => {
           break;
         }
         case "Export": {
-          const header = ["Ref", "Date", "Status", "Service User", "Sched Start", "Sched End", "Duration", "Care Giver", "Service Call"];
+          const header = ["Ref", "Date", "Status", "Service Member", "Sched Start", "Sched End", "Duration", "Care Giver", "Service Call"];
           const lines = [header.join(",")].concat(
             rows.filter(r => selected.has(r.id)).map(r => [r.ref, r.date, r.status, r.serviceUser, r.scheduledStart, r.scheduledEnd, r.duration, r.teamMember, r.serviceCall].map(v => `"${String(v).replace(/"/g, '""')}"`).join(","))
           );
@@ -311,9 +311,9 @@ const DailyRoster = () => {
                 </SelectContent>
               </Select>
               <Select value={serviceFilter || "all"} onValueChange={(v) => setServiceFilter(v === "all" ? "" : v)}>
-                <SelectTrigger className="w-[240px] h-9 bg-background"><SelectValue placeholder="Select Service User..." /></SelectTrigger>
+                <SelectTrigger className="w-[240px] h-9 bg-background"><SelectValue placeholder="Select Service Member..." /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All service users</SelectItem>
+                  <SelectItem value="all">All service members</SelectItem>
                   {careReceivers.map((c) => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -393,7 +393,7 @@ const DailyRoster = () => {
                   <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Map} label="Run route assigned" /></th>
                   <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Users} label="Care team color tag" /></th>
                   <th className="p-2 border-r border-border text-center w-8"><IconCell icon={AlertCircle} label="Visit alert / flag" /></th>
-                  <th className="p-2 border-r border-border text-left">Service User</th>
+                  <th className="p-2 border-r border-border text-left">Service Member</th>
                   <th className="p-2 border-r border-border text-center w-16 bg-emerald-100">
                     <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Calendar className="h-3.5 w-3.5 text-emerald-700" /></span></TooltipTrigger><TooltipContent className="text-xs">Scheduled start time</TooltipContent></Tooltip>
                   </th>
