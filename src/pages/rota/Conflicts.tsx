@@ -157,11 +157,11 @@ const Conflicts = () => {
             </Select>
             <Input
               type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)}
-              className="h-8 w-[130px] text-xs bg-emerald-100 border-emerald-200"
+              className="h-8 w-[170px] pr-2 text-xs bg-emerald-100 border-emerald-200"
             />
             <Input
               type="date" value={toDate} onChange={(e) => setToDate(e.target.value)}
-              className="h-8 w-[130px] text-xs bg-rose-100 border-rose-200"
+              className="h-8 w-[170px] pr-2 text-xs bg-rose-100 border-rose-200"
             />
           </div>
         </div>
