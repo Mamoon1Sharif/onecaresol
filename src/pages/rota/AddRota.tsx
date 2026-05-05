@@ -199,6 +199,23 @@ const AddRota = () => {
       const day = new Date(form.date).getDay();
       const staffId = form.staff1 || null;
       const durHours = Math.max(1, Math.round(durationMinutes / 60));
+      const newStart = parseInt(form.startH);
+      const newEnd = newStart + durHours;
+
+      // Detect overlapping shift for the same caregiver on the same date
+      let clashOther: any = null;
+      if (staffId) {
+        const { data: existing } = await supabase
+          .from("daily_visits")
+          .select("id, start_hour, duration, care_receivers(name)")
+          .eq("care_giver_id", staffId)
+          .eq("visit_date", form.date);
+        for (const v of existing ?? []) {
+          const s = Number(v.start_hour ?? 0);
+          const e = s + Number(v.duration ?? 0);
+          if (newStart < e && s < newEnd) { clashOther = v; break; }
+        }
+      }
 
       await upsertShift.mutateAsync({
         care_giver_id: staffId as any,
