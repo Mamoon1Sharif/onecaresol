@@ -545,11 +545,28 @@ export function LiveRotaShiftDialog({
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-              onClick={() => {
+              onClick={async () => {
+                try {
+                  // Find and unassign caregiver on the underlying daily_visit so the
+                  // overlap detection no longer picks it up.
+                  const { data: rows } = await supabase
+                    .from("daily_visits")
+                    .select("id, care_givers(name)")
+                    .like("id", `${current.ref}%`);
+                  const target = (rows ?? []).find((r: any) => r.care_givers?.name === current.staff) ?? rows?.[0];
+                  if (target?.id) {
+                    await supabase
+                      .from("daily_visits")
+                      .update({ care_giver_id: null, status: "Pending" })
+                      .eq("id", target.id);
+                  }
+                } catch (e) {
+                  // non-fatal: still clear local pending clashes
+                }
                 removePendingClashesForStaff(current.staff);
                 removePendingClashesForRef(current.ref);
                 setRemoved(true);
-                toast.success(`${current.staff} removed from shift. Related clashes cleared.`);
+                toast.success(`${current.staff} removed from shift. Clash cleared.`);
               }}
             >
               Remove
