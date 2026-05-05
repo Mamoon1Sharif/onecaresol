@@ -446,6 +446,12 @@ const Conflicts = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      <LiveRotaShiftDialog
+        shift={openShift}
+        open={!!openShift}
+        onClose={() => setOpenShift(null)}
+      />
     </AppLayout>
   );
 };
