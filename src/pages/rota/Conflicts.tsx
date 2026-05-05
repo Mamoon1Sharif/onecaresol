@@ -112,6 +112,7 @@ const Conflicts = () => {
   const [assignFor, setAssignFor] = useState<any | null>(null);
   const [assignSelected, setAssignSelected] = useState<string>("");
   const [assignments, setAssignments] = useState<Record<string, string>>({});
+  const [openShift, setOpenShift] = useState<any>(null);
 
   const today = new Date();
   const future = new Date(today);
@@ -290,7 +291,17 @@ const Conflicts = () => {
                               if (isCancelled) {
                                 setCancelledDetail(r);
                               } else {
-                                nav(`/rota/add?ref=${r.ref}&serviceUser=${encodeURIComponent(r.serviceUser)}&date=${r.date}&start=${r.start}&end=${r.end}`);
+                                setOpenShift({
+                                  ref: r.ref,
+                                  date: r.date,
+                                  start: r.start,
+                                  end: r.end,
+                                  client: r.serviceUser,
+                                  staff: r.teamMember,
+                                  serviceCall: r.serviceCall,
+                                  schedHrs: r.duration,
+                                  clockHrs: "00:00",
+                                });
                               }
                             }}
                           >{r.ref}</button>
@@ -435,6 +446,12 @@ const Conflicts = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      <LiveRotaShiftDialog
+        shift={openShift}
+        open={!!openShift}
+        onClose={() => setOpenShift(null)}
+      />
     </AppLayout>
   );
 };
