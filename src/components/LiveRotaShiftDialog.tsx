@@ -219,7 +219,12 @@ export function LiveRotaShiftDialog({
               </div>
               <div className="p-4 flex gap-6">
                 {removed ? (
-                  <p className="text-sm text-muted-foreground italic">No team member assigned.</p>
+                  <div className="flex items-center gap-3">
+                    <p className="text-sm text-muted-foreground italic">No team member assigned.</p>
+                    <Button size="sm" onClick={() => setAssignOpen(true)}>
+                      <Plus className="w-3 h-3 mr-1" /> Assign Caregiver
+                    </Button>
+                  </div>
                 ) : (
                   <>
                     <div className="flex flex-col items-center gap-2">
@@ -229,10 +234,7 @@ export function LiveRotaShiftDialog({
                       <Button
                         size="sm"
                         className="bg-destructive hover:bg-destructive/90 text-destructive-foreground h-8 w-[140px]"
-                        onClick={() => {
-                          setRemoved(true);
-                          toast.success(`${current.staff} removed from shift`);
-                        }}
+                        onClick={() => setConfirmRemove(true)}
                       >
                         ↑ Remove Team Member
                       </Button>
