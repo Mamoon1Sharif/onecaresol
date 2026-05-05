@@ -490,6 +490,7 @@ export default function AdvancedRota() {
       toast.error("Unknown team member.");
       return;
     }
+    if (!window.confirm(`Reassign ${ids.length} shift(s) to ${match}?`)) return;
     setOverrides((prev) => {
       const next = { ...prev };
       ids.forEach((id) => {
