@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useCareGivers } from "@/hooks/use-care-data";
 
 export type LiveRotaShift = {
   ref: string;
