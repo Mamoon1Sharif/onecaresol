@@ -878,6 +878,63 @@ const AddRota = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={!!clashInfo} onOpenChange={(v) => !v && setClashInfo(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              Rota Conflict Detected
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <div>
+                  <span className="font-medium text-foreground">{clashInfo?.staffName}</span> already has an
+                  overlapping shift on this date with{" "}
+                  <span className="font-medium text-foreground">{clashInfo?.otherClient}</span>.
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  You can resolve this now (reassign or change times) or fix it later from the Conflicts page.
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                if (clashInfo && selected) {
+                  savePendingClash({
+                    staff: clashInfo.staffName,
+                    aRef: String(clashInfo.other.id ?? "").slice(0, 9),
+                    aDate: new Date(form.date).toLocaleDateString("en-GB"),
+                    aStart: `${String(clashInfo.other.start_hour).padStart(2, "0")}:00`,
+                    aEnd: `${String(Number(clashInfo.other.start_hour) + Number(clashInfo.other.duration)).padStart(2, "0")}:00`,
+                    aClient: clashInfo.otherClient,
+                    bRef: String(clashInfo.other._newId ?? "").slice(0, 9),
+                    bDate: new Date(form.date).toLocaleDateString("en-GB"),
+                    bStart: `${String(clashInfo.other._newStartH).padStart(2, "0")}:00`,
+                    bEnd: `${String(clashInfo.other._newStartH + clashInfo.other._newDur).padStart(2, "0")}:00`,
+                    bClient: selected.name,
+                  });
+                  toast.warning("Conflict saved to Clashing Rotas. Fix it later.");
+                }
+                setClashInfo(null);
+                setSavedOpen(true);
+              }}
+            >
+              Fix Later
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setClashInfo(null);
+                setSavedOpen(true);
+              }}
+            >
+              Resolve Now
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 };
