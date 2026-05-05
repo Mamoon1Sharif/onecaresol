@@ -128,12 +128,15 @@ const Conflicts = () => {
 
   const rows = useMemo(() => {
     return allRows.filter((r) => {
+      // Once a care giver has been assigned, the shift is resolved and should
+      // no longer appear in the conflicts list at all.
+      if (assignments[r.id]) return false;
       if (filter === "cancelled" && !r.isCancelled) return false;
       if (filter === "unallocated" && r.teamMember !== "Unallocated") return false;
       if (search && !r.serviceUser.toLowerCase().includes(search.toLowerCase()) && !r.ref.includes(search)) return false;
       return true;
     });
-  }, [allRows, filter, search]);
+  }, [allRows, filter, search, assignments]);
 
   const totalMissing = rows.filter((r) => r.teamMember === "Unallocated").length;
 
