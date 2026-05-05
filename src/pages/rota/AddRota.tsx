@@ -75,7 +75,8 @@ const AddRota = () => {
   const queryClient = useQueryClient();
 
   const [search, setSearch] = useState("");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const initialId = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("receiverId") : null;
+  const [selectedId, setSelectedId] = useState<string | null>(initialId);
   const { data: medications = [] } = useMedications(selectedId ?? undefined);
 
   const today = new Date().toISOString().slice(0, 10);
