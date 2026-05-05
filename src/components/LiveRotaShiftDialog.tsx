@@ -291,6 +291,22 @@ export function LiveRotaShiftDialog({
         defaultTime={clockEdit === "in" ? current.start : current.end}
         onClose={() => setClockEdit(null)}
       />
+
+      <AmendShiftDialog
+        open={amendOpen}
+        shift={current}
+        onClose={() => setAmendOpen(false)}
+        onSaved={(updated) => {
+          setConfirmation({ before: current, after: updated });
+          setCurrent(updated);
+          setAmendOpen(false);
+        }}
+      />
+
+      <ShiftChangeConfirmation
+        data={confirmation}
+        onClose={() => setConfirmation(null)}
+      />
     </>
   );
 }
