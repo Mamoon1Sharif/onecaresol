@@ -53,6 +53,10 @@ export function LiveRotaShiftDialog({
   const [current, setCurrent] = useState<LiveRotaShift | null>(shift);
   const [confirmation, setConfirmation] = useState<{ before: LiveRotaShift; after: LiveRotaShift } | null>(null);
   const [removed, setRemoved] = useState(false);
+  const [confirmRemove, setConfirmRemove] = useState(false);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [assignSelected, setAssignSelected] = useState<string>("");
+  const { data: caregivers = [] } = useCareGivers();
   const [locks, setLocks] = useState<{ id: string; reason: string; by: string; created: string }[]>([]);
   const [showLockPrompt, setShowLockPrompt] = useState(false);
   const [lockReason, setLockReason] = useState("");
