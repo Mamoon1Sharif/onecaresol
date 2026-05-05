@@ -20,21 +20,21 @@ export function UserPreferencesSection() {
           <Info className="h-4 w-4 text-primary mt-0.5 shrink-0" />
           <div className="flex-1 text-xs text-muted-foreground leading-relaxed">
             <div className="flex items-center gap-3 mb-2">
-              <span className="font-semibold text-foreground">Lock team member preferences</span>
+              <span className="font-semibold text-foreground">Lock care giver preferences</span>
               <Switch checked={lockEnabled} onCheckedChange={setLockEnabled} />
             </div>
             <p>
-              When enabled, if a service user scores this team member less than 3 stars, they will not be allowed to be assigned
-              to the call. Be mindful when using bulk actions — there will be no warning if the team member has not been assigned
-              in some instances. If no preference is set between a service user and team member, the team member will be allowed
+              When enabled, if a service user scores this care giver less than 3 stars, they will not be allowed to be assigned
+              to the call. Be mindful when using bulk actions — there will be no warning if the care giver has not been assigned
+              in some instances. If no preference is set between a service user and care giver, the care giver will be allowed
               to be assigned and a default rating will be created at the minimum star level set in settings.
             </p>
           </div>
         </div>
 
         <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
-          Preferences show the team member → service user / service user → team member preference for the corresponding user to aid
-          judgement when assigning team members to rotas. Click on a name to edit. Hover over the stars to see the description.
+          Preferences show the care giver → service user / service user → care giver preference for the corresponding user to aid
+          judgement when assigning care givers to rotas. Click on a name to edit. Hover over the stars to see the description.
         </p>
 
         <div className="flex items-center gap-2 mb-3">
@@ -51,7 +51,7 @@ export function UserPreferencesSection() {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/40">
-                <TableHead className="text-xs uppercase tracking-wider">Team Member Name</TableHead>
+                <TableHead className="text-xs uppercase tracking-wider">Care Giver Name</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider">Preference</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider">Service User Name</TableHead>
                 <TableHead className="text-xs uppercase tracking-wider">Preference</TableHead>

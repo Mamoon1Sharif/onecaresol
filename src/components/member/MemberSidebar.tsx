@@ -17,7 +17,7 @@ type CareGiver = Tables<"care_givers">;
 
 interface Props {
   cg: CareGiver | undefined;
-  /** Path used when switching team members from the dropdown, e.g. "messaging" or "medication". */
+  /** Path used when switching care givers from the dropdown, e.g. "messaging" or "medication". */
   basePath: "messaging" | "medication" | "qualifications" | "incidents" | "files" | "changelog";
   /** Whether to show the "Select Service User..." secondary dropdown. */
   showServiceUserSelect?: boolean;
@@ -40,7 +40,7 @@ export function MemberSidebar({ cg, basePath, showServiceUserSelect }: Props) {
           onValueChange={(val) => navigate(`/caregivers/${val}/${basePath}`)}
         >
           <SelectTrigger className="h-9 bg-muted/50 border-border">
-            <SelectValue placeholder="Select team member" />
+            <SelectValue placeholder="Select care giver" />
           </SelectTrigger>
           <SelectContent>
             {careGivers.map((m) => (
@@ -191,7 +191,7 @@ export function MemberTopBar({ title, backTo }: { title: string; backTo?: string
             className="h-8 px-3 text-xs rounded bg-primary hover:bg-primary/90 text-primary-foreground"
             onClick={() => navigate("/caregivers")}
           >
-            All Team Members
+            All Care Givers
           </button>
           <button
             className="h-8 px-3 text-xs rounded bg-destructive hover:bg-destructive/90 text-destructive-foreground"

@@ -226,7 +226,7 @@ const HolidaysAbsence = () => {
             <Badge className="bg-sky-500 hover:bg-sky-500 text-white text-base px-3 py-1.5">
               Holidays & Absence
             </Badge>
-            <span className="text-sm text-muted-foreground">- Team Member</span>
+            <span className="text-sm text-muted-foreground">- Care Giver</span>
           </div>
 
           <div className="flex items-center gap-4 flex-wrap">
@@ -328,7 +328,7 @@ const HolidaysAbsence = () => {
               onValueChange={(v) => setSelectedCgId(v)}
             >
               <SelectTrigger className="w-full h-9 bg-orange-50">
-                <SelectValue placeholder="Select team member" />
+                <SelectValue placeholder="Select care giver" />
               </SelectTrigger>
               <SelectContent>
                 {caregivers.map((c) => (
@@ -338,7 +338,7 @@ const HolidaysAbsence = () => {
             </Select>
 
             <div className="border-t pt-2">
-              <h3 className="text-sm font-semibold mb-2">Team Member Statistics</h3>
+              <h3 className="text-sm font-semibold mb-2">Care Giver Statistics</h3>
               <div className="relative mb-2">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                 <Input

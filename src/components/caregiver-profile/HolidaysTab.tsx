@@ -233,7 +233,7 @@ export const HolidaysTab = ({ careGiverId, careGiverName }: Props) => {
           className="gap-1.5"
           onClick={() => window.location.assign("/caregivers")}
         >
-          <Users className="h-3.5 w-3.5" /> All Team Members
+          <Users className="h-3.5 w-3.5" /> All Care Givers
         </Button>
         <Button
           size="sm"

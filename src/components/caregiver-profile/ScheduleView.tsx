@@ -177,7 +177,7 @@ export function ScheduleView({ cg, showHeader = true }: Props) {
                   <User className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Team Member</p>
+                  <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Care Giver</p>
                   <h2 className="text-xl font-bold text-foreground">{cg.name}</h2>
                   <p className="text-sm text-muted-foreground">{cg.role_title ?? "Homecare Assistant"}</p>
                 </div>

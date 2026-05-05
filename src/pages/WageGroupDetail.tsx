@@ -235,7 +235,7 @@ export default function WageGroupDetail() {
 
   const handleRun = () => {
     if (teamSelected.size === 0) {
-      toast.error("Select at least one team member");
+      toast.error("Select at least one care giver");
       return;
     }
     setRunOpen(true);
@@ -426,10 +426,10 @@ export default function WageGroupDetail() {
           </div>
         </Card>
 
-        {/* All Team Member section */}
+        {/* All Care Giver section */}
         <Card className="p-5 space-y-4">
           <div className="flex items-center justify-between gap-3 flex-wrap">
-            <h2 className="font-semibold">All Team Member</h2>
+            <h2 className="font-semibold">All Care Giver</h2>
             <Button
               size="sm"
               className="bg-sky-600 hover:bg-sky-700 text-white"
@@ -441,7 +441,7 @@ export default function WageGroupDetail() {
 
           <div className="space-y-1 text-xs">
             <p className="text-rose-600">
-              Any shifts/team member that have not been linked to their corresponding tariffs will not be run.
+              Any shifts/care giver that have not been linked to their corresponding tariffs will not be run.
             </p>
             <p className="text-muted-foreground">
               Below you will see a forecast of scheduled and clocked based on a copy of shifts in the live rota that are
@@ -500,7 +500,7 @@ export default function WageGroupDetail() {
                 {filteredTeam.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={9} className="text-center text-sm text-muted-foreground py-8">
-                      No team members found.
+                      No care givers found.
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -657,7 +657,7 @@ export default function WageGroupDetail() {
           <DialogHeader>
             <DialogTitle>Run wages now?</DialogTitle>
             <DialogDescription>
-              This will generate wages for {teamSelected.size} selected team member(s) in
+              This will generate wages for {teamSelected.size} selected care giver(s) in
               this group.
             </DialogDescription>
           </DialogHeader>

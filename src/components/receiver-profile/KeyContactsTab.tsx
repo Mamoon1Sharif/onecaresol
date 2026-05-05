@@ -166,7 +166,7 @@ export function ReceiverKeyContactsTab({ careReceiverId }: { careReceiverId: str
 
       <CardContent className="p-4 space-y-3">
         <p className="text-sm text-muted-foreground">
-          Add key contacts for this service member: family, friends, GP, district nurse, social worker, or any emergency contact.
+          Add key contacts for this service user: family, friends, GP, district nurse, social worker, or any emergency contact.
         </p>
         <p className="text-sm text-destructive">Tel 1 will be the contact number shown in the app.</p>
 

@@ -14,7 +14,7 @@ type ReportSection = {
 
 const sections: ReportSection[] = [
   {
-    title: "Team Member Reports",
+    title: "Care Giver Reports",
     color: "purple",
     items: [
       { name: "Availability Report", icon: Calendar },
@@ -32,7 +32,7 @@ const sections: ReportSection[] = [
       { name: "Shadow Shift Report", icon: User },
       { name: "Short Visit Report", icon: Search },
       { name: "Task List", icon: ListChecks },
-      { name: "Team Member DBS Report", icon: User },
+      { name: "Care Giver DBS Report", icon: User },
     ],
   },
   {

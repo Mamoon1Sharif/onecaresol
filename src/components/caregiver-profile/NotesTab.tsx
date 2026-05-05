@@ -372,11 +372,11 @@ export function NotesTab({ careGiverId }: Props) {
       <Card className="border border-border shadow-sm overflow-hidden">
         <div className="flex items-center gap-2 px-4 py-3 bg-muted/30 border-b">
           <CalendarDays className="h-4 w-4 text-primary" />
-          <span className="text-sm font-semibold text-foreground">Team Member Notes (Rota)</span>
+          <span className="text-sm font-semibold text-foreground">Care Giver Notes (Rota)</span>
         </div>
         <CardContent className="p-4 space-y-3">
           <p className="text-sm text-info">
-            Live rota notes from services involving this team member
+            Live rota notes from services involving this care giver
           </p>
 
           <div className="border rounded-md overflow-hidden">

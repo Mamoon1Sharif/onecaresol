@@ -592,7 +592,7 @@ function AddLogDialog({
                 <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Please select" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="Service User">Service User</SelectItem>
-                  <SelectItem value="Team Member">Team Member</SelectItem>
+                  <SelectItem value="Care Giver">Care Giver</SelectItem>
                   <SelectItem value="Family / NOK">Family / NOK</SelectItem>
                   <SelectItem value="Healthcare Pro">Healthcare Pro</SelectItem>
                   <SelectItem value="Other">Other</SelectItem>
@@ -655,7 +655,7 @@ function AddLogDialog({
                 <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Please select" /></SelectTrigger>
                 <SelectContent>
                   {assignees.length === 0 ? (
-                    <SelectItem value="__none" disabled>No active team members</SelectItem>
+                    <SelectItem value="__none" disabled>No active care givers</SelectItem>
                   ) : (
                     assignees.map((u) => <SelectItem key={u.id} value={u.name}>{u.name}</SelectItem>)
                   )}

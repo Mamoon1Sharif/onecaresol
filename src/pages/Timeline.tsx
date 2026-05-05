@@ -151,7 +151,7 @@ function buildSeed(): TimelineEvent[] {
         notes: status === "given"
           ? "Administered as prescribed."
           : status === "refused"
-          ? "Service member declined the dose. Will retry next visit."
+          ? "Service user declined the dose. Will retry next visit."
           : status === "missed_med"
           ? "Missed dose — added to handover."
           : "Half dose accepted; remainder noted in care notes.",
@@ -249,7 +249,7 @@ const Timeline = () => {
               Timeline
             </h1>
             <p className="text-sm text-muted-foreground">
-              Unified feed of care visits and medication events across all service members.
+              Unified feed of care visits and medication events across all service users.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -292,7 +292,7 @@ const Timeline = () => {
             <Select value={memberFilter} onValueChange={setMemberFilter}>
               <SelectTrigger className="h-9"><User className="h-3.5 w-3.5 mr-1" /><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All service members</SelectItem>
+                <SelectItem value="all">All service users</SelectItem>
                 {MEMBERS.map((m) => <SelectItem key={m.id} value={m.id}>{m.name}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -490,7 +490,7 @@ function EventDetail({ e }: { e: TimelineEvent }) {
             {end && <> — {format(end, "HH:mm")}</>}
             {dur && <span className="text-muted-foreground"> · {dur} min</span>}
           </Row>
-          <Row label="Service member">{e.member}</Row>
+          <Row label="Service user">{e.member}</Row>
           {e.caregiver && <Row label="Caregiver">{e.caregiver}</Row>}
           {e.category === "visit" && (
             <>

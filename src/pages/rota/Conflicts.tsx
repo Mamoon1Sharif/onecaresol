@@ -45,7 +45,7 @@ const FILTERS = [
 
 const BULK_ACTIONS = [
   "Bulk Actions...",
-  "Assign Team Member", "Reassign Visits", "Cancel Visits", "Activate Visits",
+  "Assign Care Giver", "Reassign Visits", "Cancel Visits", "Activate Visits",
   "Reset Visits", "Delete Visits", "Add Rota Lock(s)", "Remove Rota Lock(s)",
   "Send Push Message", "Add Alerts", "Remove Alerts", "Edit Times",
   "Edit Duration", "Convert To Double Up", "Export",
@@ -169,7 +169,7 @@ const Conflicts = () => {
 
         {/* Conflict count */}
         <div className="text-sm font-semibold text-foreground px-1">
-          ({totalMissing}) shifts missing team member
+          ({totalMissing}) shifts missing care giver
         </div>
 
         {/* Bulk actions + search */}
@@ -243,7 +243,7 @@ const Conflicts = () => {
                       <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Clock className="h-3.5 w-3.5 text-rose-700" /></span></TooltipTrigger><TooltipContent className="text-xs">Actual clock-out</TooltipContent></Tooltip>
                     </th>
                     <th className="p-2 border-r border-border text-center w-16"><IconCell icon={TrendingUp} label="Actual duration" /></th>
-                    <th className="p-2 border-r border-border text-left">Team Member</th>
+                    <th className="p-2 border-r border-border text-left">Care Giver</th>
                     <th className="p-2 border-r border-border text-left">Service Call</th>
                     <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Tag} label="Service tag" /></th>
                     <th className="p-2 border-r border-border text-center w-8"><IconCell icon={UserPlus} label="Double-up" /></th>
@@ -330,7 +330,7 @@ const Conflicts = () => {
                               type="button"
                               className="hover:underline cursor-pointer"
                               onClick={() => nav(`/rota/add?ref=${r.ref}&serviceUser=${encodeURIComponent(r.serviceUser)}&date=${r.date}&start=${r.start}&end=${r.end}`)}
-                              title="Click to allocate a team member"
+                              title="Click to allocate a care giver"
                             >
                               {r.teamMember}
                             </button>
@@ -518,7 +518,7 @@ function CancelledShiftDialog({
             <div>
               <h3 className="text-sm font-semibold text-primary">Live Rota Notes</h3>
               <p className="text-[11px] text-warning mt-1 max-w-3xl">
-                Notes marked as hidden will only appear on a single rota, service user and team member note area or some of the reports. Notes marked as hidden will also not appear on the Care Portal section.
+                Notes marked as hidden will only appear on a single rota, service user and care giver note area or some of the reports. Notes marked as hidden will also not appear on the Care Portal section.
               </p>
             </div>
             <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground h-8 gap-1">

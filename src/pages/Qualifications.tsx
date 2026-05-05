@@ -260,7 +260,7 @@ export default function Qualifications() {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <MemberTopBar title="Team Member - All Qualifications" backTo={`/caregivers/${id}`} />
+      <MemberTopBar title="Care Giver - All Qualifications" backTo={`/caregivers/${id}`} />
 
       <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-4 p-4">
         <MemberSidebar cg={cg} basePath="qualifications" />
@@ -270,7 +270,7 @@ export default function Qualifications() {
           <div className="flex items-center justify-between pb-3 border-b border-border">
             <h3 className="text-sm font-medium text-primary flex items-center gap-2">
               <GraduationCap className="h-4 w-4" />
-              Team Member Qualifications
+              Care Giver Qualifications
               {isOnTraining && (
                 <Badge className="ml-2 bg-amber-500 hover:bg-amber-500 text-white border-0">
                   <BookOpen className="h-3 w-3 mr-1" /> Currently On Training

@@ -153,7 +153,7 @@ export default function Incidents() {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <MemberTopBar title="Team Member Incidents" backTo={`/caregivers/${id}`} />
+      <MemberTopBar title="Care Giver Incidents" backTo={`/caregivers/${id}`} />
 
       <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-4 p-4">
         <MemberSidebar cg={cg} basePath="incidents" />
