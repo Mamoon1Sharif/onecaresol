@@ -101,7 +101,6 @@ export function ScheduleView({ cg, showHeader = true }: Props) {
   const [toDate, setToDate] = useState(() => getDateStr(0));
 
   const dateStr = useMemo(() => getDateStr(dayOffset), [dayOffset]);
-  const { data: dailyVisits = [] } = useDailyVisits(dateStr);
 
   useEffect(() => {
     setFromDate(dateStr);
@@ -115,34 +114,39 @@ export function ScheduleView({ cg, showHeader = true }: Props) {
   }, [dayOffset]);
 
   const weekDates = useMemo(() => getWeekDates(weekOffset), [weekOffset]);
-  const weekFromStr = useMemo(() => weekDates[0].toISOString().split("T")[0], [weekDates]);
-  const weekToStr = useMemo(() => weekDates[6].toISOString().split("T")[0], [weekDates]);
-  const { data: weekVisits = [] } = useDailyVisitsRange(weekFromStr, weekToStr);
 
-  const myShifts = useMemo(() => allShifts.filter((s) => s.care_giver_id === cg.id), [allShifts, cg.id]);
-  const myVisits = useMemo(() => dailyVisits.filter((v) => v.care_giver_id === cg.id), [dailyVisits, cg.id]);
-  const myWeekVisits = useMemo(() => weekVisits.filter((v) => v.care_giver_id === cg.id), [weekVisits, cg.id]);
+  const myShifts = useMemo(() => allShifts.filter((s: any) => s.care_giver_id === cg.id), [allShifts, cg.id]);
+
+  // Daily view: filter shifts by weekday matching the selected date
+  const dayIdx = weekdayIdx(currentDate);
+  const myVisits = useMemo(
+    () => myShifts.filter((s: any) => s.day === dayIdx),
+    [myShifts, dayIdx]
+  );
 
   const filteredVisits = useMemo(() => {
     if (!search) return myVisits;
     const q = search.toLowerCase();
-    return myVisits.filter((v) =>
+    return myVisits.filter((v: any) =>
       (v.care_receivers as any)?.name?.toLowerCase().includes(q) ||
-      v.status?.toLowerCase().includes(q)
+      (v.shift_type ?? "").toLowerCase().includes(q)
     );
   }, [myVisits, search]);
 
-  const scheduledMinutes = myVisits.reduce((sum, v) => sum + (v.duration ?? 0) * 60, 0);
-  const clockedMinutes = myVisits.reduce((sum, v) => {
-    if (v.check_in_time && v.check_out_time) {
-      return sum + (new Date(v.check_out_time).getTime() - new Date(v.check_in_time).getTime()) / 60000;
+  const scheduledMinutes = myVisits.reduce(
+    (sum: number, v: any) => sum + shiftMinutes(v.start_time, v.end_time),
+    0
+  );
+  const clockedMinutes = myVisits.reduce((sum: number, v: any) => {
+    if (v.arrived_at && v.departed_at) {
+      return sum + (new Date(v.departed_at).getTime() - new Date(v.arrived_at).getTime()) / 60000;
     }
     return sum;
   }, 0);
 
-  const completedCount = myVisits.filter((v) => v.status === "Completed" || v.status === "Complete").length;
-  const inProgressCount = myVisits.filter((v) => v.status === "In Progress").length;
-  const dueCount = myVisits.filter((v) => v.status === "Due" || v.status === "Pending").length;
+  const completedCount = myVisits.filter((v: any) => v.arrived_at && v.departed_at).length;
+  const inProgressCount = myVisits.filter((v: any) => v.arrived_at && !v.departed_at).length;
+  const dueCount = myVisits.filter((v: any) => !v.arrived_at).length;
 
   const handleDateUpdate = () => {
     const today = new Date();
