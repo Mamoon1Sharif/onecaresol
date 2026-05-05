@@ -28,6 +28,22 @@ export type LiveRotaShift = {
   clockHrs?: string;
 };
 
+const INITIAL_NOTES = [
+  { ref: "139988439", created: "21/04/2026 12:06", note: "Service user prefers door bell to be rung twice on arrival.", by: "Maya Sawich", visible: "Yes" },
+  { ref: "139988512", created: "22/04/2026 09:14", note: "Key safe code refreshed — collect from office before visit.", by: "Anna Pereira", visible: "Yes" },
+  { ref: "139988577", created: "23/04/2026 16:42", note: "Family will be present during evening call. Hand over notes.", by: "Maria Khalil", visible: "No" },
+];
+
+const INITIAL_MEDS = [
+  { name: "Atorvastatin", period: "Evening: 16:00 - 22:00", planned: ["Administer", "1", "40mg", "ONE to be taken at NIGHT"] },
+  { name: "Carbamazepine", period: "Evening: 16:00 - 22:00", planned: ["Administer", "1", "100mg", "ONE to be taken in the MORNING and NIGHT"] },
+  { name: "Dermol 500 Lotion", period: "", planned: ["Applied", "Use as a soap substitute."] },
+  { name: "E45 Cream", period: "", planned: ["Applied", "Apply as required"] },
+  { name: "Epimax Excetra Cream", period: "", planned: ["Applied", "Apply to arms and back daily"] },
+  { name: "Medi-Derma S Barrier Cream", period: "", planned: ["Applied", "Apply to groin and bottom when required. Use a pea size amount."] },
+  { name: "Ramipril", period: "Evening: 16:00 - 22:00", planned: ["Administer", "1", "5mg", "ONE to be taken in the MORNING and at NIGHT."] },
+];
+
 export function LiveRotaShiftDialog({
   shift, open, onClose,
 }: { shift: LiveRotaShift | null; open: boolean; onClose: () => void }) {
@@ -35,12 +51,65 @@ export function LiveRotaShiftDialog({
   const [amendOpen, setAmendOpen] = useState(false);
   const [current, setCurrent] = useState<LiveRotaShift | null>(shift);
   const [confirmation, setConfirmation] = useState<{ before: LiveRotaShift; after: LiveRotaShift } | null>(null);
+  const [removed, setRemoved] = useState(false);
+  const [locks, setLocks] = useState<{ id: string; reason: string; by: string; created: string }[]>([]);
+  const [showLockPrompt, setShowLockPrompt] = useState(false);
+  const [lockReason, setLockReason] = useState("");
+  const [notes, setNotes] = useState(INITIAL_NOTES);
+  const [showNotePrompt, setShowNotePrompt] = useState(false);
+  const [newNote, setNewNote] = useState("");
+  const [newNoteVisible, setNewNoteVisible] = useState("Yes");
+  const [shiftBulk, setShiftBulk] = useState("bulk");
+  const [shiftSearch, setShiftSearch] = useState("");
+  const [shiftRowChecked, setShiftRowChecked] = useState(false);
+  const [medFilter, setMedFilter] = useState("all");
+  const [medSearch, setMedSearch] = useState("");
+  const [medChecked, setMedChecked] = useState<Record<string, boolean>>({});
 
   // sync incoming shift
   if (shift && (!current || current.ref !== shift.ref)) {
     setCurrent(shift);
+    setRemoved(false);
   }
   if (!shift || !current) return null;
+
+  const matchesShiftSearch = (val: string) =>
+    !shiftSearch || val.toLowerCase().includes(shiftSearch.toLowerCase());
+  const shiftRowText = `${current.ref} ${current.client} ${current.staff} ${current.serviceCall ?? ""}`;
+  const showShiftRow = matchesShiftSearch(shiftRowText);
+
+  const filteredMeds = INITIAL_MEDS.filter((m) => {
+    const inFilter = medFilter === "all" || m.name === medFilter;
+    const inSearch = !medSearch || m.name.toLowerCase().includes(medSearch.toLowerCase());
+    return inFilter && inSearch;
+  });
+
+  const runShiftBulk = () => {
+    if (shiftBulk === "bulk") {
+      toast.info("Select a bulk action first");
+      return;
+    }
+    if (!shiftRowChecked) {
+      toast.error("Select at least one shift row");
+      return;
+    }
+    toast.success(`${shiftBulk} applied to selected shift`);
+    setShiftBulk("bulk");
+    setShiftRowChecked(false);
+  };
+
+  const runMedAction = () => {
+    const selected = Object.entries(medChecked).filter(([, v]) => v).map(([k]) => k);
+    if (medFilter === "all" && selected.length === 0) {
+      toast.error("Select medications or pick an action");
+      return;
+    }
+    const target = medFilter !== "all" ? [medFilter] : selected;
+    toast.success(`Action applied to ${target.length} med(s)`);
+    setMedChecked({});
+    setMedFilter("all");
+  };
+
 
   return (
     <>
