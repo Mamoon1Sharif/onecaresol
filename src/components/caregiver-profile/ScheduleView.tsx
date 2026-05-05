@@ -330,13 +330,18 @@ export function ScheduleView({ cg, showHeader = true }: Props) {
                       </TableCell>
                     </TableRow>
                   )}
-                  {filteredVisits.map((v) => {
-                    const st = statusConfig[v.status] ?? statusConfig.Pending;
+                  {filteredVisits.map((v: any) => {
+                    const status = v.arrived_at && v.departed_at
+                      ? "Completed"
+                      : v.arrived_at
+                        ? "In Progress"
+                        : "Pending";
+                    const st = statusConfig[status] ?? statusConfig.Pending;
                     const StIcon = st.icon;
-                    const schedEnd = `${String(v.start_hour + v.duration).padStart(2, "0")}:00`;
-                    const isCancelled = v.status === "Cancelled";
+                    const sh = shiftStartHour(v.start_time);
+                    const mins = shiftMinutes(v.start_time, v.end_time);
                     return (
-                      <TableRow key={v.id} className={isCancelled ? "bg-destructive/5" : "hover:bg-muted/30"}>
+                      <TableRow key={v.id} className="hover:bg-muted/30">
                         <TableCell>
                           <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${st.bg} ${st.text}`}>
                             <StIcon className="h-3.5 w-3.5" />
@@ -346,30 +351,18 @@ export function ScheduleView({ cg, showHeader = true }: Props) {
                         <TableCell>
                           <div className="flex items-center gap-2 font-medium">
                             <User className="h-4 w-4 text-muted-foreground shrink-0" />
-                            <span className={isCancelled ? "line-through text-muted-foreground" : ""}>
-                              {(v.care_receivers as any)?.name ?? "—"}
-                            </span>
+                            <span>{(v.care_receivers as any)?.name ?? "—"}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-center font-mono text-sm">
-                          {String(v.start_hour).padStart(2, "0")}:00
-                        </TableCell>
-                        <TableCell className="text-center font-mono text-sm">{schedEnd}</TableCell>
-                        <TableCell className="text-center font-mono text-sm">
-                          {String(v.duration).padStart(2, "0")}:00
-                        </TableCell>
-                        <TableCell className="text-center font-mono text-sm">
-                          {fmtTime(v.check_in_time)}
-                        </TableCell>
-                        <TableCell className="text-center font-mono text-sm">
-                          {fmtTime(v.check_out_time)}
-                        </TableCell>
-                        <TableCell className="text-center font-mono text-sm">
-                          {diffDisplay(v.check_in_time, v.check_out_time)}
-                        </TableCell>
+                        <TableCell className="text-center font-mono text-sm">{v.start_time ?? "—"}</TableCell>
+                        <TableCell className="text-center font-mono text-sm">{v.end_time ?? "—"}</TableCell>
+                        <TableCell className="text-center font-mono text-sm">{fmtMins(mins)}</TableCell>
+                        <TableCell className="text-center font-mono text-sm">{fmtTime(v.arrived_at)}</TableCell>
+                        <TableCell className="text-center font-mono text-sm">{fmtTime(v.departed_at)}</TableCell>
+                        <TableCell className="text-center font-mono text-sm">{diffDisplay(v.arrived_at, v.departed_at)}</TableCell>
                         <TableCell>
                           <Badge variant="outline" className="text-[10px]">
-                            {v.start_hour < 12 ? "Morning" : v.start_hour < 17 ? "Afternoon" : "Night"}
+                            {v.shift_type ?? (sh < 12 ? "Morning" : sh < 17 ? "Afternoon" : "Night")}
                           </Badge>
                         </TableCell>
                       </TableRow>
