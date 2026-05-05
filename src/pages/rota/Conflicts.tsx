@@ -112,6 +112,9 @@ const Conflicts = () => {
   const [bulk, setBulk] = useState("Bulk Actions...");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [cancelledDetail, setCancelledDetail] = useState<any | null>(null);
+  const [assignFor, setAssignFor] = useState<any | null>(null);
+  const [assignSelected, setAssignSelected] = useState<string>("");
+  const [assignments, setAssignments] = useState<Record<string, string>>({});
 
   const today = new Date();
   const future = new Date(today);
@@ -119,7 +122,11 @@ const Conflicts = () => {
   const [fromDate, setFromDate] = useState<string>(today.toISOString().slice(0, 10));
   const [toDate, setToDate] = useState<string>(future.toISOString().slice(0, 10));
 
-  const allRows = useMemo(() => makeRows(careReceivers), [careReceivers]);
+  const baseRows = useMemo(() => makeRows(careReceivers), [careReceivers]);
+  const allRows = useMemo(
+    () => baseRows.map((r) => assignments[r.id] ? { ...r, teamMember: assignments[r.id], status: "Allocated" } : r),
+    [baseRows, assignments]
+  );
 
   const rows = useMemo(() => {
     return allRows.filter((r) => {
