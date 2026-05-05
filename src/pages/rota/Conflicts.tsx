@@ -435,7 +435,10 @@ function ClashingRotasSection() {
                     <button className="text-primary hover:underline font-medium">{p.a.staff}</button>
                   </td>
                   <td className="bg-[hsl(200_70%_97%)] p-2 border border-border">
-                    <button className="text-destructive hover:underline font-mono">{p.a.ref}</button>
+                    <button
+                      className="text-destructive hover:underline font-mono"
+                      onClick={() => setOpenShift({ ...p.a, staff: p.a.staff, client: p.a.client })}
+                    >{p.a.ref}</button>
                   </td>
                   <td className="bg-[hsl(200_70%_97%)] p-2 border border-border text-foreground">{p.a.date}</td>
                   <td className="bg-[hsl(200_70%_97%)] p-2 border border-border text-foreground">{p.a.start}</td>
@@ -444,7 +447,10 @@ function ClashingRotasSection() {
                     <button className="text-primary hover:underline">{p.a.client}</button>
                   </td>
                   <td className="bg-[hsl(0_70%_97%)] p-2 border border-border">
-                    <button className="text-destructive hover:underline font-mono">{p.b.ref}</button>
+                    <button
+                      className="text-destructive hover:underline font-mono"
+                      onClick={() => setOpenShift({ ...p.b, staff: p.a.staff, client: p.b.client })}
+                    >{p.b.ref}</button>
                   </td>
                   <td className="bg-[hsl(0_70%_97%)] p-2 border border-border text-foreground">{p.b.date}</td>
                   <td className="bg-[hsl(0_70%_97%)] p-2 border border-border text-foreground">{p.b.start}</td>
