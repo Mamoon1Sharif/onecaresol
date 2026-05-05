@@ -430,18 +430,17 @@ export function ScheduleView({ cg, showHeader = true }: Props) {
                 </TableHeader>
                 <TableBody>
                   <TableRow>
-                    {DAYS.map((_, dayIdx) => {
-                      const cellDateStr = weekDates[dayIdx].toISOString().split("T")[0];
-                      const dayVisits = myWeekVisits.filter((v) => v.visit_date === cellDateStr);
+                    {DAYS.map((_, di) => {
+                      const dayVisits = myShifts.filter((s: any) => s.day === di);
                       return (
-                        <TableCell key={dayIdx} className="align-top border-r last:border-r-0 p-2 min-h-[120px]">
+                        <TableCell key={di} className="align-top border-r last:border-r-0 p-2 min-h-[120px]">
                           <div className="space-y-2 min-h-[100px]">
                             {dayVisits.length === 0 && (
                               <p className="text-xs text-muted-foreground/50 text-center pt-8">No shifts</p>
                             )}
-                            {dayVisits.map((v) => {
-                              const shiftType = v.start_hour < 12 ? "Morning" : v.start_hour < 17 ? "Afternoon" : "Night";
-                              const endHour = v.start_hour + (v.duration ?? 0);
+                            {dayVisits.map((v: any) => {
+                              const sh = shiftStartHour(v.start_time);
+                              const shiftType = v.shift_type ?? (sh < 12 ? "Morning" : sh < 17 ? "Afternoon" : "Night");
                               return (
                                 <div
                                   key={v.id}
@@ -456,7 +455,7 @@ export function ScheduleView({ cg, showHeader = true }: Props) {
                                   </div>
                                   <div className="flex items-center gap-1 mt-1 opacity-75">
                                     <Clock className="h-3 w-3" />
-                                    {String(v.start_hour).padStart(2, "0")}:00–{String(endHour).padStart(2, "0")}:00
+                                    {v.start_time}–{v.end_time}
                                   </div>
                                 </div>
                               );
