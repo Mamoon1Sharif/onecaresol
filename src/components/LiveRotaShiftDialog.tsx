@@ -302,32 +302,32 @@ function ClockEditDialog({
 
   return (
     <Dialog open={!!mode} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-md p-0 overflow-hidden border-0 bg-warning text-warning-foreground">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-warning-foreground/20">
-          <h3 className="text-sm font-semibold">
+      <DialogContent className="max-w-md p-0 overflow-hidden">
+        <div className="flex items-center justify-between px-4 py-3 border-t-2 border-t-primary/70 bg-card">
+          <h3 className="text-sm font-semibold text-foreground">
             Edit Clock {mode === "in" ? "In" : "Out"} Hours Manually
           </h3>
-          <button onClick={onClose} className="hover:opacity-80">
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
             <X className="h-4 w-4" />
           </button>
         </div>
         <div className="p-4 space-y-4">
-          <div className="font-medium text-base border-b border-warning-foreground/30 pb-2">{staff}</div>
+          <div className="text-primary font-medium border-b border-border pb-2">{staff}</div>
 
-          <div className="grid grid-cols-[120px_1fr] items-center gap-3">
-            <Label className="text-sm">Time {mode}</Label>
+          <div className="grid grid-cols-[140px_1fr] items-center gap-3">
+            <Label className="text-sm text-foreground">Time {mode}</Label>
             <div className="flex items-center gap-2">
               <Select value={hh} onValueChange={setHh}>
-                <SelectTrigger className="h-8 w-20 bg-card text-foreground"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-8 w-20"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {Array.from({ length: 24 }).map((_, i) => (
                     <SelectItem key={i} value={String(i).padStart(2, "0")}>{String(i).padStart(2, "0")}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-              <span>:</span>
+              <span className="text-foreground">:</span>
               <Select value={mm} onValueChange={setMm}>
-                <SelectTrigger className="h-8 w-20 bg-card text-foreground"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="h-8 w-20"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {["00", "15", "30", "45"].map((v) => (
                     <SelectItem key={v} value={v}>{v}</SelectItem>
@@ -336,19 +336,19 @@ function ClockEditDialog({
               </Select>
             </div>
 
-            <Label className="text-sm">Date {mode}</Label>
-            <Input value={date} readOnly className="h-8 bg-muted text-foreground" />
+            <Label className="text-sm text-foreground">Date {mode}</Label>
+            <Input value={date} readOnly className="h-8 bg-muted" />
 
-            <Label className="text-sm">Send Push</Label>
-            <Checkbox checked={push} onCheckedChange={(v) => setPush(!!v)} className="bg-card" />
+            <Label className="text-sm text-foreground">Send Push</Label>
+            <Checkbox checked={push} onCheckedChange={(v) => setPush(!!v)} />
 
-            <Label className="text-sm self-start pt-1">Reason For Manual Clock {mode === "in" ? "In" : "Out"}</Label>
-            <Textarea value={reason} onChange={(e) => setReason(e.target.value)} className="bg-card text-foreground min-h-[100px]" />
+            <Label className="text-sm self-start pt-1 text-foreground">Reason For Manual Clock {mode === "in" ? "In" : "Out"}</Label>
+            <Textarea value={reason} onChange={(e) => setReason(e.target.value)} className="min-h-[100px]" />
           </div>
 
           <Button
             size="sm"
-            className="bg-warning-foreground/90 text-warning hover:bg-warning-foreground gap-1"
+            className="bg-success hover:bg-success/90 text-success-foreground gap-1 h-8"
             onClick={() => {
               toast.success(`Clock ${mode} updated for ${staff}`);
               onClose();
@@ -357,7 +357,7 @@ function ClockEditDialog({
             <Save className="h-3.5 w-3.5" /> Save
           </Button>
         </div>
-        <div className="flex justify-end px-4 py-3 border-t border-warning-foreground/20">
+        <div className="flex justify-end px-4 py-3 border-t border-border bg-muted/30">
           <Button size="sm" variant="secondary" onClick={onClose} className="h-8">Close</Button>
         </div>
       </DialogContent>
