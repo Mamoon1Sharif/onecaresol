@@ -27,7 +27,15 @@ export function LiveRotaShiftDialog({
   shift, open, onClose,
 }: { shift: LiveRotaShift | null; open: boolean; onClose: () => void }) {
   const [clockEdit, setClockEdit] = useState<null | "in" | "out">(null);
-  if (!shift) return null;
+  const [amendOpen, setAmendOpen] = useState(false);
+  const [current, setCurrent] = useState<LiveRotaShift | null>(shift);
+  const [confirmation, setConfirmation] = useState<{ before: LiveRotaShift; after: LiveRotaShift } | null>(null);
+
+  // sync incoming shift
+  if (shift && (!current || current.ref !== shift.ref)) {
+    setCurrent(shift);
+  }
+  if (!shift || !current) return null;
 
   return (
     <>
@@ -35,7 +43,7 @@ export function LiveRotaShiftDialog({
         <DialogContent className="max-w-[95vw] w-[1400px] max-h-[90vh] overflow-y-auto p-0">
           <DialogHeader className="px-4 pt-4 pb-3 border-b border-border">
             <DialogTitle className="text-base">
-              Live Rota Shift — Ref {shift.ref} · {shift.client} · {shift.date} · {shift.start}–{shift.end}
+              Live Rota Shift — Ref {current.ref} · {current.client} · {current.date} · {current.start}–{current.end}
             </DialogTitle>
           </DialogHeader>
 
@@ -44,7 +52,11 @@ export function LiveRotaShiftDialog({
             <section className="border border-border rounded-sm overflow-hidden">
               <div className="border-t-2 border-t-primary/70 flex items-center justify-between px-3 py-2 bg-card">
                 <h3 className="text-sm font-semibold text-foreground">Live Rota Shift(s)</h3>
-                <Button size="sm" className="h-7 gap-1 bg-warning hover:bg-warning/90 text-warning-foreground">
+                <Button
+                  size="sm"
+                  className="h-7 gap-1 bg-warning hover:bg-warning/90 text-warning-foreground"
+                  onClick={() => setAmendOpen(true)}
+                >
                   <Plus className="h-3 w-3" /> Edit Shift Details
                 </Button>
               </div>
