@@ -56,22 +56,15 @@ const CALL_TYPES = [
   "WCC - Morning Call (...", "Private Morning Call",
 ];
 
-const SERVICE_USERS = [
-  "Thomas Henderson - WR12 7BL", "Pamela Davis - WR9 8AB", "Wendy Rawlins - WR12 7QH",
-  "Norman Heeks - WR8 9AD", "Roger Peberdy - WR9 8DE", "James Hamilton - CV37 8XH",
-  "Winifred Griffiths - WR10 1AW", "Colin Evans - WR11 3JP", "Michael Taylor - WR12 7HT",
-  "Joan Marchant - WR8 0HG", "Helen Heeks - WR8 9AD", "Peter Booth - WR11 2AA",
-  "Edna Morris - WR12 7TT", "Lily Halpin - WR4 0PS", "Marion Poulter - WR11 2BB",
-  "Dulcie Badham - WR1 1PP", "Carol Stevens - WR1 1QQ", "Patricia Barrett - WR9 8FG",
-];
-
 function fmtDate(d: Date) {
   return d.toLocaleDateString("en-GB");
 }
 
 function makeRows(careReceivers: any[]) {
-  // Build dummy conflicts list resembling the screenshot
   const today = new Date();
+  const pool = careReceivers.length > 0
+    ? careReceivers
+    : [{ id: "", name: "—", address: "" }];
   const mk = (i: number) => {
     const d = new Date(today);
     d.setDate(today.getDate() + (i % 14) + 1);
@@ -83,13 +76,16 @@ function makeRows(careReceivers: any[]) {
     const endH = Math.floor(endTotal / 60);
     const endM = endTotal % 60;
     const fmt = (h: number, m: number) => `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+    const cr = pool[i % pool.length];
+    const label = cr.address ? `${cr.name} - ${cr.address}` : cr.name;
     return {
       id: `cf-${i}`,
       ref: String(147039184 + i * 137),
       date: fmtDate(d),
       status: isCancelled ? "Cancelled" : "Due",
       isCancelled,
-      serviceUser: SERVICE_USERS[i % SERVICE_USERS.length],
+      serviceUser: label,
+      receiverId: cr.id,
       start: fmt(startH, startM),
       end: fmt(endH, endM),
       duration: fmt(Math.floor(durMin / 60), durMin % 60),
@@ -99,7 +95,8 @@ function makeRows(careReceivers: any[]) {
       weekNum: 18,
     };
   };
-  return Array.from({ length: 26 }, (_, i) => mk(i));
+  const count = Math.max(26, pool.length);
+  return Array.from({ length: count }, (_, i) => mk(i));
 }
 
 const Conflicts = () => {
@@ -336,7 +333,7 @@ const Conflicts = () => {
                             <button
                               type="button"
                               className="hover:underline cursor-pointer"
-                              onClick={() => { setAssignFor(r); setAssignSelected(""); }}
+                              onClick={() => nav(`/rota/add?receiverId=${r.receiverId}&ref=${r.ref}&date=${r.date}&start=${r.start}&end=${r.end}`)}
                               title="Click to allocate a care giver"
                             >
                               {r.teamMember}
