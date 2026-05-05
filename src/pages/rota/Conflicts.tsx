@@ -393,7 +393,7 @@ const Conflicts = () => {
         </div>
 
         {/* Clashing Rotas Section */}
-        <ClashingRotasSection />
+        <ClashingRotasSection fromDate={fromDate} toDate={toDate} />
       </div>
 
       <CancelledShiftDialog
