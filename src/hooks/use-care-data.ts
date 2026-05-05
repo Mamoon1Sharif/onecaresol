@@ -85,7 +85,7 @@ export function useAddCareReceiver() {
       // Resolve the current user's company so we satisfy tenant RLS.
       const { data: auth } = await supabase.auth.getUser();
       const userId = auth.user?.id;
-      if (!userId) throw new Error("You must be signed in to add a service member.");
+      if (!userId) throw new Error("You must be signed in to add a service user.");
       const { data: cu, error: cuErr } = await supabase
         .from("company_users")
         .select("company_id")

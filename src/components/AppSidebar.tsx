@@ -30,7 +30,7 @@ const topItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Insights", url: "/insights", icon: Sparkles, feature: "insights" as const },
   { title: "Care Givers", url: "/caregivers", icon: Users },
-  { title: "Service Members", url: "/carereceivers", icon: HeartHandshake },
+  { title: "Service Users", url: "/carereceivers", icon: HeartHandshake },
   { title: "Bookings", url: "/bookings", icon: BookMarked, feature: "bookings" as const },
   { title: "Location Tracking", url: "/location-tracking", icon: MapPin },
   { title: "Communication Log", url: "/communication-log", icon: MessageSquare },

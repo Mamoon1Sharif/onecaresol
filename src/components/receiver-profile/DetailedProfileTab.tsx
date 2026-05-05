@@ -648,8 +648,8 @@ function UserPreferencesCard({ careReceiverId, careReceiverName }: { careReceive
         </Button>
       </div>
       <div className="px-4 py-3 text-[12px] text-amber-700 dark:text-amber-500 space-y-1">
-        <p>You have the setting turned on for locking team member pref. This means if this service user access a team member less than 3, that team member will not be allowed to be assigned to the call. This is something to be mindful of when using the bulk actions as there will be no warning the team member has not been assigned in some instances, you need to double check. If there is no preference set between the service user and the team member, the team member will be allowed to be assigned and a default rating will be created between the two accounts at the min star level set in settings.</p>
-        <p className="pt-2">Preferences show the team member→service user/service user→team member preference for the corresponding user to aid judgment when assigning team member to rotas. To edit a users preference click on their name in the table. Hovering over the stars will display the description for that users preference.</p>
+        <p>You have the setting turned on for locking care giver pref. This means if this service user access a care giver less than 3, that care giver will not be allowed to be assigned to the call. This is something to be mindful of when using the bulk actions as there will be no warning the care giver has not been assigned in some instances, you need to double check. If there is no preference set between the service user and the care giver, the care giver will be allowed to be assigned and a default rating will be created between the two accounts at the min star level set in settings.</p>
+        <p className="pt-2">Preferences show the care giver→service user/service user→care giver preference for the corresponding user to aid judgment when assigning care giver to rotas. To edit a users preference click on their name in the table. Hovering over the stars will display the description for that users preference.</p>
       </div>
 
       <div className="px-4 pb-2 flex items-center justify-end gap-2">
@@ -665,7 +665,7 @@ function UserPreferencesCard({ careReceiverId, careReceiverName }: { careReceive
               <th className="text-left px-3 py-2 font-semibold">Service User Name</th>
               <th className="text-center px-3 py-2 font-semibold">→</th>
               <th className="text-left px-3 py-2 font-semibold bg-violet-400">Preference</th>
-              <th className="text-left px-3 py-2 font-semibold bg-violet-400">Team Member Name</th>
+              <th className="text-left px-3 py-2 font-semibold bg-violet-400">Care Giver Name</th>
               <th className="text-center px-3 py-2 font-semibold bg-violet-400">→</th>
               <th className="text-left px-3 py-2 font-semibold bg-violet-400">Preference</th>
               <th className="w-12 px-2 py-2 bg-violet-400"></th>
@@ -693,12 +693,12 @@ function UserPreferencesCard({ careReceiverId, careReceiverName }: { careReceive
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Add Team Member Preference</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Add Care Giver Preference</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1">
-              <Label className="text-xs">Team Member</Label>
+              <Label className="text-xs">Care Giver</Label>
               <Select value={draft.care_giver_id} onValueChange={(v) => setDraft({ ...draft, care_giver_id: v })}>
-                <SelectTrigger><SelectValue placeholder="Select team member" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Select care giver" /></SelectTrigger>
                 <SelectContent>{caregivers.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
@@ -714,7 +714,7 @@ function UserPreferencesCard({ careReceiverId, careReceiverName }: { careReceive
 
       <AlertDialog open={!!delId} onOpenChange={(o) => !o && setDelId(null)}>
         <AlertDialogContent>
-          <AlertDialogHeader><AlertDialogTitle>Remove preference?</AlertDialogTitle><AlertDialogDescription>This will remove the rating between this team member and service user.</AlertDialogDescription></AlertDialogHeader>
+          <AlertDialogHeader><AlertDialogTitle>Remove preference?</AlertDialogTitle><AlertDialogDescription>This will remove the rating between this care giver and service user.</AlertDialogDescription></AlertDialogHeader>
           <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction className="bg-destructive hover:bg-destructive/90" onClick={() => delId && del.mutate(delId)}>Delete</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

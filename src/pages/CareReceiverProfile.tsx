@@ -45,7 +45,7 @@ const CareReceiverProfile = () => {
     return (
       <AppLayout>
         <div className="text-center py-20">
-          <p className="text-muted-foreground">Service member not found.</p>
+          <p className="text-muted-foreground">Service user not found.</p>
           <Button variant="link" onClick={() => navigate("/carereceivers")}>Back to list</Button>
         </div>
       </AppLayout>
@@ -140,7 +140,7 @@ const CareReceiverProfile = () => {
             <ReceiverRotaTab cr={cr} />
           </TabsContent>
           <TabsContent value="templates" className="mt-4">
-            <ReceiverPlaceholderTab title="Templates" description="Manage care plan templates and recurring schedule patterns for this service member." />
+            <ReceiverPlaceholderTab title="Templates" description="Manage care plan templates and recurring schedule patterns for this service user." />
           </TabsContent>
           <TabsContent value="contacts" className="mt-4">
             <ReceiverKeyContactsTab careReceiverId={cr.id} />

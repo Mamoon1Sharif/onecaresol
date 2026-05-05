@@ -238,7 +238,7 @@ export default function Files() {
               onValueChange={(val) => navigate(`/caregivers/${val}/files`)}
             >
               <SelectTrigger className="h-9 bg-muted/50">
-                <SelectValue placeholder="Select team member" />
+                <SelectValue placeholder="Select care giver" />
               </SelectTrigger>
               <SelectContent>
                 {careGivers.map((m) => (

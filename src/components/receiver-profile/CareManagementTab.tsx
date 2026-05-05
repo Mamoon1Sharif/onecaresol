@@ -272,7 +272,7 @@ export function CareManagementTab({ careReceiverId, careReceiverName }: Props) {
   const openEditTask = (t: Task) => { setEditingTask(t); setTaskDraft(t); setTaskDlg(true); };
   const saveTask = async () => {
     if (!taskDraft.title.trim()) return toast.error("Title is required");
-    if (!careReceiverId) return toast.error("Missing service member id");
+    if (!careReceiverId) return toast.error("Missing service user id");
     try {
       await upsertTaskMut.mutateAsync({ ...taskDraft, _editingId: editingTask?.id });
       toast.success(editingTask ? "Task updated" : "Task added");

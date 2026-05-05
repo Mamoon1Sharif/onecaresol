@@ -197,7 +197,7 @@ export default function AddCareReceiver() {
     try {
       const { data: auth } = await supabase.auth.getUser();
       const userId = auth.user?.id;
-      if (!userId) throw new Error("You must be signed in to add a service member.");
+      if (!userId) throw new Error("You must be signed in to add a service user.");
       const { data: cu, error: cuErr } = await supabase
         .from("company_users")
         .select("company_id")
@@ -265,10 +265,10 @@ export default function AddCareReceiver() {
         }
       }
 
-      toast({ title: "Service Member Added", description: `${name} has been added successfully.` });
+      toast({ title: "Service User Added", description: `${name} has been added successfully.` });
       navigate(data?.id ? `/carereceivers/${data.id}` : "/carereceivers");
     } catch (e: any) {
-      toast({ title: "Error", description: e.message || "Failed to add service member.", variant: "destructive" });
+      toast({ title: "Error", description: e.message || "Failed to add service user.", variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -328,7 +328,7 @@ export default function AddCareReceiver() {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Add Service Member</h1>
+              <h1 className="text-2xl font-bold text-foreground">Add Service User</h1>
               <p className="text-sm text-muted-foreground">Fill in all required fields marked with *</p>
             </div>
           </div>
@@ -336,7 +336,7 @@ export default function AddCareReceiver() {
             <Button variant="outline" onClick={handleDiscard}>Discard</Button>
             <Button onClick={handleSubmit} disabled={submitting} className="gap-2">
               <UserPlus className="h-4 w-4" />
-              {submitting ? "Saving..." : "Save Service Member"}
+              {submitting ? "Saving..." : "Save Service User"}
             </Button>
           </div>
         </div>
@@ -368,7 +368,7 @@ export default function AddCareReceiver() {
               <div className="flex-1 space-y-2 text-center sm:text-left">
                 <p className="text-sm font-medium text-foreground">Add a profile picture</p>
                 <p className="text-xs text-muted-foreground">
-                  Upload a clear photo to help identify this service member. JPG or PNG, up to 5MB.
+                  Upload a clear photo to help identify this service user. JPG or PNG, up to 5MB.
                 </p>
                 <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
                   <Label htmlFor="receiver-avatar-input" className="cursor-pointer">
@@ -511,7 +511,7 @@ export default function AddCareReceiver() {
         <Card>
           <SectionHeader icon={Tags} title="Tags" />
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-3">Select applicable tags for this service member</p>
+            <p className="text-sm text-muted-foreground mb-3">Select applicable tags for this service user</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {TAG_OPTIONS.map((tag) => (
                 <label key={tag} className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border bg-card hover:bg-muted/50 cursor-pointer transition-colors">
@@ -532,7 +532,7 @@ export default function AddCareReceiver() {
           <Button variant="outline" onClick={handleDiscard}>Discard</Button>
           <Button onClick={handleSubmit} disabled={submitting} className="gap-2">
             <UserPlus className="h-4 w-4" />
-            {submitting ? "Saving..." : "Save Service Member"}
+            {submitting ? "Saving..." : "Save Service User"}
           </Button>
         </div>
       </div>
@@ -543,7 +543,7 @@ export default function AddCareReceiver() {
           <AlertDialogHeader>
             <AlertDialogTitle>Discard addition?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to discard this new service member? All entered data will be lost.
+              Are you sure you want to discard this new service user? All entered data will be lost.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

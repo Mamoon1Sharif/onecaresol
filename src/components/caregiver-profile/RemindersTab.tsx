@@ -176,7 +176,7 @@ export const RemindersTab = ({ careGiverId, careGiverName }: Props) => {
       {/* Top action bar */}
       <div className="flex flex-wrap items-center gap-2">
         <Button variant="secondary" size="sm" className="gap-1.5">
-          <Users className="h-3.5 w-3.5" /> All Team Members
+          <Users className="h-3.5 w-3.5" /> All Care Givers
         </Button>
         <Button variant="outline" size="sm" className="gap-1.5 bg-amber-500 text-white border-amber-500 hover:bg-amber-600 hover:text-white" onClick={() => setSettingsOpen(true)}>
           <Settings className="h-3.5 w-3.5" /> Reminder Settings

@@ -172,7 +172,7 @@ export function LiveRotaShiftDialog({
                         <th className="p-2 border border-border text-left">Start</th>
                         <th className="p-2 border border-border text-left">End</th>
                         <th className="p-2 border border-border text-left">Duration</th>
-                        <th className="p-2 border border-border text-left">Team Member</th>
+                        <th className="p-2 border border-border text-left">Care Giver</th>
                         <th className="p-2 border border-border text-left">Service Call</th>
                         <th className="p-2 border border-border text-left">Week</th>
                       </tr>
@@ -212,15 +212,15 @@ export function LiveRotaShiftDialog({
               </div>
             </section>
 
-            {/* Assigned Team Members */}
+            {/* Assigned Care Givers */}
             <section className="border border-border rounded-sm overflow-hidden">
               <div className="border-t-2 border-t-primary/70 px-3 py-2 bg-card">
-                <h3 className="text-sm font-semibold text-foreground">Assigned Team Members</h3>
+                <h3 className="text-sm font-semibold text-foreground">Assigned Care Givers</h3>
               </div>
               <div className="p-4 flex gap-6">
                 {removed ? (
                   <div className="flex items-center gap-3">
-                    <p className="text-sm text-muted-foreground italic">No team member assigned.</p>
+                    <p className="text-sm text-muted-foreground italic">No care giver assigned.</p>
                     <Button size="sm" onClick={() => setAssignOpen(true)}>
                       <Plus className="w-3 h-3 mr-1" /> Assign Caregiver
                     </Button>
@@ -236,7 +236,7 @@ export function LiveRotaShiftDialog({
                         className="bg-destructive hover:bg-destructive/90 text-destructive-foreground h-8 w-[140px]"
                         onClick={() => setConfirmRemove(true)}
                       >
-                        ↑ Remove Team Member
+                        ↑ Remove Care Giver
                       </Button>
                     </div>
                     <div className="flex-1">
@@ -256,7 +256,7 @@ export function LiveRotaShiftDialog({
                         </button>
                       </div>
                       <p className="text-xs text-muted-foreground mt-6 text-center">
-                        If clock in or out distances are not showing, it means your team member has location services off on their mobile phone.
+                        If clock in or out distances are not showing, it means your care giver has location services off on their mobile phone.
                       </p>
                     </div>
                   </>
@@ -328,7 +328,7 @@ export function LiveRotaShiftDialog({
               </div>
               <div className="p-3 space-y-2">
                 <p className="text-xs text-muted-foreground">
-                  Notes marked as hidden will only appear on a single rota, service user and team member note area or some of the reports. Notes marked as hidden will also not appear on the Care Portal section.
+                  Notes marked as hidden will only appear on a single rota, service user and care giver note area or some of the reports. Notes marked as hidden will also not appear on the Care Portal section.
                 </p>
                 <div className="overflow-x-auto">
                   <table className="w-full text-[12px] border-collapse">
@@ -531,11 +531,11 @@ export function LiveRotaShiftDialog({
         onClose={() => setConfirmation(null)}
       />
 
-      {/* Confirm remove team member */}
+      {/* Confirm remove care giver */}
       <AlertDialog open={confirmRemove} onOpenChange={setConfirmRemove}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove team member?</AlertDialogTitle>
+            <AlertDialogTitle>Remove care giver?</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to remove <span className="font-medium text-foreground">{current.staff}</span> from this shift ({current.ref})? The shift will become unassigned.
             </AlertDialogDescription>

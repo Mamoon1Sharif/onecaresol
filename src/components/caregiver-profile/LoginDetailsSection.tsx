@@ -19,7 +19,7 @@ export function LoginDetailsSection({ cg, save }: Props) {
         <Separator className="mb-4" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-1">
           <EditableField icon={Building2} label="Company Number" value={cg.reference_no} onSave={(v) => save("reference_no", v)} />
-          <EditableField icon={Hash} label="Team Member Number" value={cg.payroll_number} onSave={(v) => save("payroll_number", v)} />
+          <EditableField icon={Hash} label="Care Giver Number" value={cg.payroll_number} onSave={(v) => save("payroll_number", v)} />
           <EditableField icon={KeyRound} label="Login Code" value={cg.login_code} onSave={(v) => save("login_code", v)} />
         </div>
       </CardContent>

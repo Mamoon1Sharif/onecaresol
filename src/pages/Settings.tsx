@@ -97,7 +97,7 @@ const TILES: Tile[] = [
   { key: "permissions", title: "Permissions", description: "Role-based access control", icon: Wrench, group: "Account" },
   { key: "forms", title: "Forms", description: "Custom forms and assessments", icon: FileText, group: "Operations" },
   { key: "general", title: "General Settings", description: "Locale, currency and date format", icon: SettingsIcon, group: "System" },
-  { key: "team", title: "Team Member Portal", description: "Caregiver app permissions", icon: Stethoscope, group: "Care" },
+  { key: "team", title: "Care Giver Portal", description: "Caregiver app permissions", icon: Stethoscope, group: "Care" },
   { key: "medtypes", title: "Medication Admin Types", description: "Routes, methods & PRN rules", icon: Pill, group: "Care" },
   { key: "medranges", title: "Medication Time Ranges", description: "Morning, lunch, tea & bed windows", icon: Clock, group: "Care" },
   { key: "notifications", title: "Notifications", description: "Email & in-app alert preferences", icon: Bell, group: "Account" },

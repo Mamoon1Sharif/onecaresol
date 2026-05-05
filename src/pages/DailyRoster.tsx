@@ -266,7 +266,7 @@ const DailyRoster = () => {
           break;
         }
         case "Export": {
-          const header = ["Ref", "Date", "Status", "Service User", "Sched Start", "Sched End", "Duration", "Team Member", "Service Call"];
+          const header = ["Ref", "Date", "Status", "Service User", "Sched Start", "Sched End", "Duration", "Care Giver", "Service Call"];
           const lines = [header.join(",")].concat(
             rows.filter(r => selected.has(r.id)).map(r => [r.ref, r.date, r.status, r.serviceUser, r.scheduledStart, r.scheduledEnd, r.duration, r.teamMember, r.serviceCall].map(v => `"${String(v).replace(/"/g, '""')}"`).join(","))
           );
@@ -304,9 +304,9 @@ const DailyRoster = () => {
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-2 flex-wrap">
               <Select value={teamFilter || "all"} onValueChange={(v) => setTeamFilter(v === "all" ? "" : v)}>
-                <SelectTrigger className="w-[240px] h-9 bg-background"><SelectValue placeholder="Select Team Member..." /></SelectTrigger>
+                <SelectTrigger className="w-[240px] h-9 bg-background"><SelectValue placeholder="Select Care Giver..." /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All team members</SelectItem>
+                  <SelectItem value="all">All care givers</SelectItem>
                   {careGivers.map((c) => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -408,7 +408,7 @@ const DailyRoster = () => {
                     <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Clock className="h-3.5 w-3.5 text-rose-700" /></span></TooltipTrigger><TooltipContent className="text-xs">Actual clock-out time</TooltipContent></Tooltip>
                   </th>
                   <th className="p-2 border-r border-border text-center w-16"><IconCell icon={TrendingUp} label="Actual duration worked" /></th>
-                  <th className="p-2 border-r border-border text-left">Team Member</th>
+                  <th className="p-2 border-r border-border text-left">Care Giver</th>
                   <th className="p-2 border-r border-border text-left">Service Call</th>
                   <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Tag} label="Service tag" /></th>
                   <th className="p-2 border-r border-border text-center w-8"><IconCell icon={UserPlus} label="Double-up / shadow" /></th>

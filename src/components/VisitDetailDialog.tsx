@@ -80,7 +80,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
   // Lock draft
   const [lockReason, setLockReason] = useState("");
 
-  // Clock state per team member (single member here)
+  // Clock state per care giver (single member here)
   const [clockIn, setClockIn] = useState<string | null>(null);
   const [clockOut, setClockOut] = useState<string | null>(null);
   const [memberRemoved, setMemberRemoved] = useState(false);
@@ -185,7 +185,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                         <th className="p-2 border-r border-border text-center w-16 bg-emerald-100" title="Clocked In"><Clock className="h-3.5 w-3.5 text-emerald-700 mx-auto" /></th>
                         <th className="p-2 border-r border-border text-center w-16 bg-rose-100" title="Clocked Out"><Clock className="h-3.5 w-3.5 text-rose-700 mx-auto" /></th>
                         <th className="p-2 border-r border-border text-center w-16" title="Worked"><TrendingUp className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-left">Team Member</th>
+                        <th className="p-2 border-r border-border text-left">Care Giver</th>
                         <th className="p-2 border-r border-border text-left w-20">Week</th>
                         <th className="p-2 text-center w-10"><Lock className={COL_ICON} /></th>
                       </tr>
@@ -320,9 +320,9 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
 
             {/* ============== ASSIGNED TEAM MEMBERS ============== */}
             <section>
-              <h3 className="text-sm font-semibold text-foreground border-b pb-1 mb-3">Assigned Team Members</h3>
+              <h3 className="text-sm font-semibold text-foreground border-b pb-1 mb-3">Assigned Care Givers</h3>
               {memberRemoved || visit.teamMember === "—" ? (
-                <p className="text-xs text-muted-foreground text-center py-6">No team member assigned.</p>
+                <p className="text-xs text-muted-foreground text-center py-6">No care giver assigned.</p>
               ) : (
                 <div className="flex items-start gap-6 flex-wrap">
                   <div className="flex flex-col items-center gap-2">
@@ -336,7 +336,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                       className="bg-orange-500 hover:bg-orange-600 text-white h-8 text-xs w-full gap-1.5"
                       onClick={() => setMemberRemoved(true)}
                     >
-                      ↑ Remove Team Member
+                      ↑ Remove Care Giver
                     </Button>
                   </div>
                   <div className="flex-1 min-w-[240px]">
@@ -378,7 +378,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                 </div>
               )}
               <p className="text-[11px] text-center text-primary mt-4">
-                If clock in or out distances are not showing, it means your team member has location services off on their mobile phone.
+                If clock in or out distances are not showing, it means your care giver has location services off on their mobile phone.
               </p>
             </section>
 
@@ -418,7 +418,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                 </Button>
               </div>
               <p className="text-[11px] text-muted-foreground mb-2">
-                Notes marked as hidden will only appear on a single rota, service user and team member note area or some of the reports. Notes marked as hidden will also not appear on the Care Portal section.
+                Notes marked as hidden will only appear on a single rota, service user and care giver note area or some of the reports. Notes marked as hidden will also not appear on the Care Portal section.
               </p>
               {notes.length === 0 ? (
                 <p className="text-xs text-muted-foreground text-center py-3">No notes added.</p>
@@ -462,7 +462,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                         <th className="p-2 border-r border-border text-center w-16"><Info className={COL_ICON} /></th>
                         <th className="p-2 border-r border-border text-left w-20">Status</th>
                         <th className="p-2 border-r border-border text-left">Service User</th>
-                        <th className="p-2 border-r border-border text-left">Team Member</th>
+                        <th className="p-2 border-r border-border text-left">Care Giver</th>
                         
                         <th className="p-2 text-left w-20">Week</th>
                       </tr>
@@ -576,8 +576,8 @@ function ShadowForm({ visit, onCancel, onSave }: { visit: VisitRow; onCancel: ()
     <>
       <div className="space-y-3">
         <div>
-          <label className="text-xs font-medium">Shadowing Team Member</label>
-          <Input value={team} onChange={(e) => setTeam(e.target.value)} className="mt-1" placeholder="Team member name" />
+          <label className="text-xs font-medium">Shadowing Care Giver</label>
+          <Input value={team} onChange={(e) => setTeam(e.target.value)} className="mt-1" placeholder="Care giver name" />
         </div>
         <div className="text-[11px] text-muted-foreground">
           Will shadow {visit.teamMember} on shift {visit.ref}

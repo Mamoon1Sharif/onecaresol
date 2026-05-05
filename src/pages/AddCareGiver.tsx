@@ -243,10 +243,10 @@ export default function AddCareGiver() {
         }
       }
 
-      toast({ title: "Team Member Added", description: `${name} has been added successfully.` });
+      toast({ title: "Care Giver Added", description: `${name} has been added successfully.` });
       navigate("/caregivers");
     } catch (e: any) {
-      toast({ title: "Error", description: e.message || "Failed to add team member.", variant: "destructive" });
+      toast({ title: "Error", description: e.message || "Failed to add care giver.", variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
@@ -296,7 +296,7 @@ export default function AddCareGiver() {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">Add Team Member</h1>
+              <h1 className="text-2xl font-bold text-foreground">Add Care Giver</h1>
               <p className="text-sm text-muted-foreground">Fill in all required fields marked with *</p>
             </div>
           </div>
@@ -304,7 +304,7 @@ export default function AddCareGiver() {
             <Button variant="outline" onClick={handleDiscard}>Discard</Button>
             <Button onClick={handleSubmit} disabled={submitting} className="gap-2">
               <UserPlus className="h-4 w-4" />
-              {submitting ? "Saving..." : "Save Team Member"}
+              {submitting ? "Saving..." : "Save Care Giver"}
             </Button>
           </div>
         </div>
@@ -336,7 +336,7 @@ export default function AddCareGiver() {
               <div className="flex-1 space-y-2 text-center sm:text-left">
                 <p className="text-sm font-medium text-foreground">Add a profile picture</p>
                 <p className="text-xs text-muted-foreground">
-                  Upload a clear photo to help identify this team member. JPG or PNG, up to 5MB.
+                  Upload a clear photo to help identify this care giver. JPG or PNG, up to 5MB.
                 </p>
                 <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
                   <Label htmlFor="caregiver-avatar-input" className="cursor-pointer">
@@ -441,7 +441,7 @@ export default function AddCareGiver() {
         <Card>
           <SectionHeader icon={Tags} title="Tags" />
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-3">Select applicable tags for this team member</p>
+            <p className="text-sm text-muted-foreground mb-3">Select applicable tags for this care giver</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {TAG_OPTIONS.map((tag) => (
                 <label key={tag} className="flex items-center gap-2.5 p-2.5 rounded-lg border border-border bg-card hover:bg-muted/50 cursor-pointer transition-colors">
@@ -462,7 +462,7 @@ export default function AddCareGiver() {
           <Button variant="outline" onClick={handleDiscard}>Discard</Button>
           <Button onClick={handleSubmit} disabled={submitting} className="gap-2">
             <UserPlus className="h-4 w-4" />
-            {submitting ? "Saving..." : "Save Team Member"}
+            {submitting ? "Saving..." : "Save Care Giver"}
           </Button>
         </div>
       </div>
@@ -473,7 +473,7 @@ export default function AddCareGiver() {
           <AlertDialogHeader>
             <AlertDialogTitle>Discard addition?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to discard this new team member? All entered data will be lost.
+              Are you sure you want to discard this new care giver? All entered data will be lost.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

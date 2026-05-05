@@ -22,7 +22,7 @@ const sections = [
   },
   {
     title: "Wages",
-    description: "Process and review team member wages, payslips and exports.",
+    description: "Process and review care giver wages, payslips and exports.",
     icon: Wallet,
     href: "/invoicing/wages",
     accent: "text-amber-600",

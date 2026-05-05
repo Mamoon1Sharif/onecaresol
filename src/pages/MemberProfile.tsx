@@ -130,7 +130,7 @@ const MemberProfile = () => {
       <AppLayout>
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <p className="text-lg font-medium text-foreground">Member not found</p>
-          <Button variant="outline" className="mt-4" onClick={() => navigate("/carereceivers")}><ArrowLeft className="h-4 w-4 mr-2" /> Back to Service Members</Button>
+          <Button variant="outline" className="mt-4" onClick={() => navigate("/carereceivers")}><ArrowLeft className="h-4 w-4 mr-2" /> Back to Service Users</Button>
         </div>
       </AppLayout>
     );
@@ -141,7 +141,7 @@ const MemberProfile = () => {
       <div className="space-y-6">
         <div>
           <Button variant="ghost" size="sm" className="gap-1.5 mb-4 -ml-2 text-muted-foreground hover:text-foreground" onClick={() => navigate("/carereceivers")}>
-            <ArrowLeft className="h-4 w-4" /> Back to Service Members
+            <ArrowLeft className="h-4 w-4" /> Back to Service Users
           </Button>
 
           <Card className="border border-border shadow-sm">

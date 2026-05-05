@@ -539,12 +539,12 @@ export default function AdvancedRota() {
     const ids = requireSelection();
     if (!ids) return;
     const name = window.prompt(
-      `Reassign ${ids.length} shift(s) to which team member?\n\n${STAFF.join(", ")}`
+      `Reassign ${ids.length} shift(s) to which care giver?\n\n${STAFF.join(", ")}`
     );
     if (!name) return;
     const match = STAFF.find((s) => s.toLowerCase() === name.trim().toLowerCase());
     if (!match) {
-      toast.error("Unknown team member.");
+      toast.error("Unknown care giver.");
       return;
     }
     if (!window.confirm(`Reassign ${ids.length} shift(s) to ${match}?`)) return;
@@ -624,8 +624,8 @@ export default function AdvancedRota() {
             <Select value={filterTeam} onValueChange={setFilterTeam}>
               <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="today">Team Members Today...</SelectItem>
-                <SelectItem value="all">All Team Members</SelectItem>
+                <SelectItem value="today">Care Givers Today...</SelectItem>
+                <SelectItem value="all">All Care Givers</SelectItem>
                 <SelectItem value="active">Active Only</SelectItem>
               </SelectContent>
             </Select>

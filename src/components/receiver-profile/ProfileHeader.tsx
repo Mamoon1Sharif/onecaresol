@@ -30,12 +30,12 @@ export function ReceiverProfileHeader({ cr, onEdit }: Props) {
   const handleDelete = async () => {
     try {
       await deleteMutation.mutateAsync(cr.id);
-      toast({ title: "Service member deleted", description: `${cr.name} has been removed.` });
+      toast({ title: "Service user deleted", description: `${cr.name} has been removed.` });
       navigate("/carereceivers");
     } catch (e: any) {
       toast({
         title: "Delete failed",
-        description: e?.message ?? "Could not delete service member.",
+        description: e?.message ?? "Could not delete service user.",
         variant: "destructive",
       });
     }
@@ -45,7 +45,7 @@ export function ReceiverProfileHeader({ cr, onEdit }: Props) {
     <>
       <div className="flex items-center justify-between">
         <Button variant="ghost" onClick={() => navigate("/carereceivers")} className="gap-2 text-muted-foreground">
-          <ArrowLeft className="h-4 w-4" /> Back to Service Members
+          <ArrowLeft className="h-4 w-4" /> Back to Service Users
         </Button>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={onEdit} className="gap-2">
@@ -103,7 +103,7 @@ export function ReceiverProfileHeader({ cr, onEdit }: Props) {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {cr.name}?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will permanently remove this service member and is not reversible.
+              This will permanently remove this service user and is not reversible.
               Linked rota entries, medications, reminders, and other records may also be affected.
             </AlertDialogDescription>
           </AlertDialogHeader>

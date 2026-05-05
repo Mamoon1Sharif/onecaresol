@@ -171,7 +171,7 @@ export const AvailabilityTab = ({ cg }: Props) => {
       {/* Top action bar */}
       <div className="flex flex-wrap items-center gap-2">
         <Button variant="secondary" size="sm" className="gap-1.5">
-          <Users className="h-3.5 w-3.5" /> All Team Members
+          <Users className="h-3.5 w-3.5" /> All Care Givers
         </Button>
         <Button
           size="sm"

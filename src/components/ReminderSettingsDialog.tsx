@@ -188,7 +188,7 @@ export const ReminderSettingsDialog = ({ open, onOpenChange }: Props) => {
           </DialogHeader>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {renderTable("Client Reminders", client, "client", clientSearch, setClientSearch)}
-            {renderTable("Team Member Reminders", team, "team", teamSearch, setTeamSearch)}
+            {renderTable("Care Giver Reminders", team, "team", teamSearch, setTeamSearch)}
           </div>
         </DialogContent>
       </Dialog>
