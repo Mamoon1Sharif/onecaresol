@@ -435,14 +435,27 @@ export default function AdvancedRota() {
   function onPointerUpGrid() {
     if (drag) {
       if (drag.moved && hoverGhost) {
-        setOverrides((prev) => ({
-          ...prev,
-          [drag.id]: {
-            staff: hoverGhost.staff,
-            start: hoverGhost.start,
-            end: hoverGhost.end,
-          },
-        }));
+        const s = shifts.find((x) => x.id === drag.id);
+        if (s) {
+          const changed =
+            hoverGhost.staff !== s.staff ||
+            hoverGhost.start !== s.start ||
+            hoverGhost.end !== s.end;
+          if (changed) {
+            setPendingMove({
+              id: s.id,
+              fromStaff: s.staff,
+              toStaff: hoverGhost.staff,
+              fromStart: s.start,
+              fromEnd: s.end,
+              toStart: hoverGhost.start,
+              toEnd: hoverGhost.end,
+              client: s.client,
+              ref: s.ref,
+              service: s.service,
+            });
+          }
+        }
       } else {
         // Treat as a click — open the edit dialog
         const s = shifts.find((x) => x.id === drag.id);
@@ -463,6 +476,28 @@ export default function AdvancedRota() {
     }
     setDrag(null);
     setHoverGhost(null);
+  }
+
+  function confirmPendingMove() {
+    if (!pendingMove) return;
+    setOverrides((prev) => ({
+      ...prev,
+      [pendingMove.id]: {
+        staff: pendingMove.toStaff,
+        start: pendingMove.toStart,
+        end: pendingMove.toEnd,
+      },
+    }));
+    const wasUnassigned = pendingMove.fromStaff === "Unassigned Shifts";
+    toast.success(
+      wasUnassigned
+        ? `Shift assigned to ${pendingMove.toStaff}`
+        : `Shift moved to ${pendingMove.toStaff}`,
+      {
+        description: `${pendingMove.client} • ${fmtTime(pendingMove.toStart)}–${fmtTime(pendingMove.toEnd)} • Ref ${pendingMove.ref}`,
+      }
+    );
+    setPendingMove(null);
   }
 
   function handleSaveEdit(updates: {
