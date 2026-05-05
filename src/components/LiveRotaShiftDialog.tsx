@@ -288,7 +288,7 @@ export function LiveRotaShiftDialog({
         mode={clockEdit}
         staff={current.staff}
         date={current.date}
-        defaultTime={clockEdit === "in" ? shift.start : shift.end}
+        defaultTime={clockEdit === "in" ? current.start : current.end}
         onClose={() => setClockEdit(null)}
       />
     </>
