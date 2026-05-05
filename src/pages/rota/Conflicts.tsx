@@ -15,7 +15,7 @@ import {
   ListChecks, Tag, UserPlus, Briefcase, MessageSquare, Move,
   ArrowRight, User, CalendarRange, Lock, CalendarDays, Plus, Check, Pencil,
 } from "lucide-react";
-import { useCareReceivers, useCareGivers } from "@/hooks/use-care-data";
+import { useCareReceivers, useCareGivers, useDailyVisitsRange } from "@/hooks/use-care-data";
 import { toast } from "sonner";
 import { LiveRotaShiftDialog } from "@/components/LiveRotaShiftDialog";
 
