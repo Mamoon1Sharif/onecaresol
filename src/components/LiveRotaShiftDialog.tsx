@@ -530,6 +530,72 @@ export function LiveRotaShiftDialog({
         data={confirmation}
         onClose={() => setConfirmation(null)}
       />
+
+      {/* Confirm remove team member */}
+      <AlertDialog open={confirmRemove} onOpenChange={setConfirmRemove}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove team member?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove <span className="font-medium text-foreground">{current.staff}</span> from this shift ({current.ref})? The shift will become unassigned.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              onClick={() => {
+                setRemoved(true);
+                toast.success(`${current.staff} removed from shift`);
+              }}
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Assign caregiver */}
+      <Dialog open={assignOpen} onOpenChange={(o) => { setAssignOpen(o); if (!o) setAssignSelected(""); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Assign Caregiver</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <Label className="text-xs">Select from available caregivers</Label>
+            <Select value={assignSelected} onValueChange={setAssignSelected}>
+              <SelectTrigger><SelectValue placeholder="Choose a caregiver..." /></SelectTrigger>
+              <SelectContent className="max-h-[260px]">
+                {caregivers
+                  .filter((c: any) => c.status === "Active" && c.name !== current.staff)
+                  .map((c: any) => (
+                    <SelectItem key={c.id} value={c.name}>
+                      {c.name} {c.email ? `— ${c.email}` : ""}
+                    </SelectItem>
+                  ))}
+                {caregivers.length === 0 && (
+                  <div className="px-3 py-2 text-xs text-muted-foreground">No caregivers available</div>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setAssignOpen(false)}>Cancel</Button>
+            <Button
+              disabled={!assignSelected}
+              onClick={() => {
+                setCurrent({ ...current, staff: assignSelected });
+                setRemoved(false);
+                setAssignOpen(false);
+                toast.success(`${assignSelected} assigned to shift`);
+                setAssignSelected("");
+              }}
+            >
+              Assign
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
