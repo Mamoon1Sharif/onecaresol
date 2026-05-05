@@ -464,6 +464,11 @@ function ClashingRotasSection() {
           </table>
         </div>
       </div>
+      <LiveRotaShiftDialog
+        shift={openShift}
+        open={!!openShift}
+        onClose={() => setOpenShift(null)}
+      />
     </Card>
   );
 };
