@@ -26,6 +26,16 @@ import { cn } from "@/lib/utils";
 import { EditRotaDialog, type EditRotaShift } from "@/components/EditRotaDialog";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 /* -------------------------------------------------------------------------- */
 /*  Data                                                                       */
@@ -326,6 +336,18 @@ export default function AdvancedRota() {
     end: number;
   } | null>(null);
   const [editing, setEditing] = useState<EditRotaShift | null>(null);
+  const [pendingMove, setPendingMove] = useState<{
+    id: string;
+    fromStaff: string;
+    toStaff: string;
+    fromStart: number;
+    fromEnd: number;
+    toStart: number;
+    toEnd: number;
+    client: string;
+    ref: string;
+    service: string;
+  } | null>(null);
 
   const gridRef = useRef<HTMLDivElement>(null);
 
@@ -413,14 +435,27 @@ export default function AdvancedRota() {
   function onPointerUpGrid() {
     if (drag) {
       if (drag.moved && hoverGhost) {
-        setOverrides((prev) => ({
-          ...prev,
-          [drag.id]: {
-            staff: hoverGhost.staff,
-            start: hoverGhost.start,
-            end: hoverGhost.end,
-          },
-        }));
+        const s = shifts.find((x) => x.id === drag.id);
+        if (s) {
+          const changed =
+            hoverGhost.staff !== s.staff ||
+            hoverGhost.start !== s.start ||
+            hoverGhost.end !== s.end;
+          if (changed) {
+            setPendingMove({
+              id: s.id,
+              fromStaff: s.staff,
+              toStaff: hoverGhost.staff,
+              fromStart: s.start,
+              fromEnd: s.end,
+              toStart: hoverGhost.start,
+              toEnd: hoverGhost.end,
+              client: s.client,
+              ref: s.ref,
+              service: s.service,
+            });
+          }
+        }
       } else {
         // Treat as a click — open the edit dialog
         const s = shifts.find((x) => x.id === drag.id);
@@ -441,6 +476,28 @@ export default function AdvancedRota() {
     }
     setDrag(null);
     setHoverGhost(null);
+  }
+
+  function confirmPendingMove() {
+    if (!pendingMove) return;
+    setOverrides((prev) => ({
+      ...prev,
+      [pendingMove.id]: {
+        staff: pendingMove.toStaff,
+        start: pendingMove.toStart,
+        end: pendingMove.toEnd,
+      },
+    }));
+    const wasUnassigned = pendingMove.fromStaff === "Unassigned Shifts";
+    toast.success(
+      wasUnassigned
+        ? `Shift assigned to ${pendingMove.toStaff}`
+        : `Shift moved to ${pendingMove.toStaff}`,
+      {
+        description: `${pendingMove.client} • ${fmtTime(pendingMove.toStart)}–${fmtTime(pendingMove.toEnd)} • Ref ${pendingMove.ref}`,
+      }
+    );
+    setPendingMove(null);
   }
 
   function handleSaveEdit(updates: {
@@ -778,6 +835,47 @@ export default function AdvancedRota() {
         shift={editing}
         onSave={handleSaveEdit}
       />
+
+      <AlertDialog open={!!pendingMove} onOpenChange={(o) => !o && setPendingMove(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {pendingMove?.fromStaff === "Unassigned Shifts" ? "Assign shift?" : "Move shift?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <div className="rounded-md border border-border bg-muted/40 p-3 space-y-1">
+                  <div><span className="text-muted-foreground">Client:</span> <span className="font-medium text-foreground">{pendingMove?.client}</span></div>
+                  <div><span className="text-muted-foreground">Reference:</span> <span className="font-mono text-foreground">{pendingMove?.ref}</span></div>
+                  <div><span className="text-muted-foreground">Service:</span> <span className="text-foreground">{pendingMove?.service}</span></div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="rounded-md border border-border p-2">
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">From</div>
+                    <div className="font-medium text-foreground">{pendingMove?.fromStaff}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {pendingMove && `${fmtTime(pendingMove.fromStart)}–${fmtTime(pendingMove.fromEnd)}`}
+                    </div>
+                  </div>
+                  <div className="rounded-md border border-primary/40 bg-primary/5 p-2">
+                    <div className="text-[10px] uppercase tracking-wider text-primary">To</div>
+                    <div className="font-medium text-foreground">{pendingMove?.toStaff}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {pendingMove && `${fmtTime(pendingMove.toStart)}–${fmtTime(pendingMove.toEnd)}`}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmPendingMove}>
+              {pendingMove?.fromStaff === "Unassigned Shifts" ? "Assign" : "Confirm move"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }
