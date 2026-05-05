@@ -331,7 +331,7 @@ const Conflicts = () => {
                           )}
                         </td>
                         <td className="p-1.5 border-r border-border">
-                          <a onClick={() => nav(`/carereceivers/${r.receiverId}`)} className="text-primary hover:underline cursor-pointer text-[11px]">{r.serviceUser}</a>
+                          <a onClick={() => nav(`/carereceivers/${r.receiverId}?from=conflicts`)} className="text-primary hover:underline cursor-pointer text-[11px]">{r.serviceUser}</a>
                         </td>
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{r.start}</td>
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{r.end}</td>
