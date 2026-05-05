@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useCareGivers } from "@/hooks/use-care-data";
 
 export type LiveRotaShift = {
   ref: string;
@@ -52,6 +53,10 @@ export function LiveRotaShiftDialog({
   const [current, setCurrent] = useState<LiveRotaShift | null>(shift);
   const [confirmation, setConfirmation] = useState<{ before: LiveRotaShift; after: LiveRotaShift } | null>(null);
   const [removed, setRemoved] = useState(false);
+  const [confirmRemove, setConfirmRemove] = useState(false);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [assignSelected, setAssignSelected] = useState<string>("");
+  const { data: caregivers = [] } = useCareGivers();
   const [locks, setLocks] = useState<{ id: string; reason: string; by: string; created: string }[]>([]);
   const [showLockPrompt, setShowLockPrompt] = useState(false);
   const [lockReason, setLockReason] = useState("");
@@ -186,7 +191,11 @@ export function LiveRotaShiftDialog({
                           <td className="p-2 border border-border">{current.end}</td>
                           <td className="p-2 border border-border">{current.schedHrs ?? "00:30"}</td>
                           <td className="p-2 border border-border text-primary underline cursor-pointer">
-                            {removed ? <span className="text-muted-foreground italic">Unassigned</span> : current.staff}
+                            {removed ? (
+                              <button onClick={() => setAssignOpen(true)} className="italic text-primary hover:underline">
+                                Unassigned — Assign
+                              </button>
+                            ) : current.staff}
                           </td>
                           <td className="p-2 border border-border">{current.serviceCall ?? "Private Eve..."}</td>
                           <td className="p-2 border border-border">Week 1</td>
@@ -210,7 +219,12 @@ export function LiveRotaShiftDialog({
               </div>
               <div className="p-4 flex gap-6">
                 {removed ? (
-                  <p className="text-sm text-muted-foreground italic">No team member assigned.</p>
+                  <div className="flex items-center gap-3">
+                    <p className="text-sm text-muted-foreground italic">No team member assigned.</p>
+                    <Button size="sm" onClick={() => setAssignOpen(true)}>
+                      <Plus className="w-3 h-3 mr-1" /> Assign Caregiver
+                    </Button>
+                  </div>
                 ) : (
                   <>
                     <div className="flex flex-col items-center gap-2">
@@ -220,10 +234,7 @@ export function LiveRotaShiftDialog({
                       <Button
                         size="sm"
                         className="bg-destructive hover:bg-destructive/90 text-destructive-foreground h-8 w-[140px]"
-                        onClick={() => {
-                          setRemoved(true);
-                          toast.success(`${current.staff} removed from shift`);
-                        }}
+                        onClick={() => setConfirmRemove(true)}
                       >
                         ↑ Remove Team Member
                       </Button>
@@ -519,6 +530,72 @@ export function LiveRotaShiftDialog({
         data={confirmation}
         onClose={() => setConfirmation(null)}
       />
+
+      {/* Confirm remove team member */}
+      <AlertDialog open={confirmRemove} onOpenChange={setConfirmRemove}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove team member?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove <span className="font-medium text-foreground">{current.staff}</span> from this shift ({current.ref})? The shift will become unassigned.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              onClick={() => {
+                setRemoved(true);
+                toast.success(`${current.staff} removed from shift`);
+              }}
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Assign caregiver */}
+      <Dialog open={assignOpen} onOpenChange={(o) => { setAssignOpen(o); if (!o) setAssignSelected(""); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Assign Caregiver</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <Label className="text-xs">Select from available caregivers</Label>
+            <Select value={assignSelected} onValueChange={setAssignSelected}>
+              <SelectTrigger><SelectValue placeholder="Choose a caregiver..." /></SelectTrigger>
+              <SelectContent className="max-h-[260px]">
+                {caregivers
+                  .filter((c: any) => c.status === "Active" && c.name !== current.staff)
+                  .map((c: any) => (
+                    <SelectItem key={c.id} value={c.name}>
+                      {c.name} {c.email ? `— ${c.email}` : ""}
+                    </SelectItem>
+                  ))}
+                {caregivers.length === 0 && (
+                  <div className="px-3 py-2 text-xs text-muted-foreground">No caregivers available</div>
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="outline" onClick={() => setAssignOpen(false)}>Cancel</Button>
+            <Button
+              disabled={!assignSelected}
+              onClick={() => {
+                setCurrent({ ...current, staff: assignSelected });
+                setRemoved(false);
+                setAssignOpen(false);
+                toast.success(`${assignSelected} assigned to shift`);
+                setAssignSelected("");
+              }}
+            >
+              Assign
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
