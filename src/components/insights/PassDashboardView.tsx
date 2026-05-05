@@ -33,7 +33,7 @@ const statusTone: Record<string, string> = {
 };
 
 const highlights = [
-  { icon: AlertTriangle, toneClass: "bg-destructive/15 text-destructive", title: "15 missed visits", body: "Across 6 service users. Review allocation and travel routes." },
+  { icon: AlertTriangle, toneClass: "bg-destructive/15 text-destructive", title: "15 missed visits", body: "Across 6 service members. Review allocation and travel routes." },
   { icon: Clock, toneClass: "bg-warning/15 text-warning", title: "Punctuality 75.1%", body: "Above the 50% threshold. Most affected: late starts after 11:00." },
   { icon: CheckCircle2, toneClass: "bg-success/15 text-success", title: "738 bookings logged", body: "Operations on schedule for the week." },
   { icon: Users, toneClass: "bg-info/15 text-info", title: "16 cancelled hours", body: "Mostly Tuesday afternoons — confirm with funders." },

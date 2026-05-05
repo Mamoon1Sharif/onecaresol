@@ -256,7 +256,7 @@ const Roster = () => {
                 <TableRow>
                   <TableHead>Caregiver</TableHead>
                   <TableHead>Skills</TableHead>
-                  <TableHead>Service User</TableHead>
+                  <TableHead>Service Member</TableHead>
                   <TableHead>Day</TableHead>
                   <TableHead>Time</TableHead>
                   <TableHead>Type</TableHead>
@@ -322,7 +322,7 @@ const Roster = () => {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>{editingShiftId ? "Edit Shift" : "Create Shift"}</DialogTitle>
-            <DialogDescription>Assign a caregiver to a service user.</DialogDescription>
+            <DialogDescription>Assign a caregiver to a service member.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-2">
             <div className="grid grid-cols-2 gap-4">
@@ -342,7 +342,7 @@ const Roster = () => {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Service User</Label>
+                <Label>Service Member</Label>
                 <Select value={formCrId} onValueChange={setFormCrId}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select..." />

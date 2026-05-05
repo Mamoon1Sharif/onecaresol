@@ -494,7 +494,7 @@ function ListsPanel() {
 function LogsPanel() {
   const logs = [
     { who: "Hassan Hassan", what: "Updated rota for 28 Apr", when: "Just now" },
-    { who: "Sarah Lewis", what: "Created service user — J. Patel", when: "12 min ago" },
+    { who: "Sarah Lewis", what: "Created service member — J. Patel", when: "12 min ago" },
     { who: "System", what: "Backup completed (6.2 GB)", when: "2 h ago" },
     { who: "Tom Edwards", what: "Signed in from 92.40.18.221", when: "3 h ago" },
     { who: "Priya Shah", what: "Recorded MAR for visit #44218", when: "5 h ago" },

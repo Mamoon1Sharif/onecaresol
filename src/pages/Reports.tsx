@@ -36,7 +36,7 @@ const sections: ReportSection[] = [
     ],
   },
   {
-    title: "Service User Reports",
+    title: "Service Member Reports",
     color: "cyan",
     items: [
       { name: "Active Medication Report", icon: Pill },
@@ -53,7 +53,7 @@ const sections: ReportSection[] = [
       { name: "Mileage Report", icon: Car },
       { name: "Notes Report", icon: StickyNote },
       { name: "Programs Of Care Report", icon: ClipboardList },
-      { name: "Service User Report", icon: HeartHandshake },
+      { name: "Service Member Report", icon: HeartHandshake },
       { name: "Task List", icon: ListChecks },
     ],
   },

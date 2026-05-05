@@ -228,7 +228,7 @@ const Conflicts = () => {
                     <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Map} label="On run route" /></th>
                     <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Users} label="Care team tag" /></th>
                     <th className="p-2 border-r border-border text-center w-8"><IconCell icon={AlertCircle} label="Visit alert" /></th>
-                    <th className="p-2 border-r border-border text-left">Service User</th>
+                    <th className="p-2 border-r border-border text-left">Service Member</th>
                     <th className="p-2 border-r border-border text-center w-16 bg-emerald-100">
                       <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Calendar className="h-3.5 w-3.5 text-emerald-700" /></span></TooltipTrigger><TooltipContent className="text-xs">Scheduled start</TooltipContent></Tooltip>
                     </th>
@@ -518,7 +518,7 @@ function CancelledShiftDialog({
             <div>
               <h3 className="text-sm font-semibold text-primary">Live Rota Notes</h3>
               <p className="text-[11px] text-warning mt-1 max-w-3xl">
-                Notes marked as hidden will only appear on a single rota, service user and care giver note area or some of the reports. Notes marked as hidden will also not appear on the Care Portal section.
+                Notes marked as hidden will only appear on a single rota, service member and care giver note area or some of the reports. Notes marked as hidden will also not appear on the Care Portal section.
               </p>
             </div>
             <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground h-8 gap-1">

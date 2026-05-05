@@ -172,7 +172,7 @@ export function NotesTab({ careGiverId }: Props) {
   };
 
   const exportPrivate = () => {
-    const header = "Date,Service User,Note\n";
+    const header = "Date,Service Member,Note\n";
     const rows = privateNotes.map((n) => {
       const su = receivers.find((r) => r.id === n.service_user_id)?.name ?? "";
       const safe = (s: string) => `"${(s ?? "").replace(/"/g, '""')}"`;
@@ -282,10 +282,10 @@ export function NotesTab({ careGiverId }: Props) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Select value={serviceUserFilter} onValueChange={setServiceUserFilter}>
               <SelectTrigger className="h-9">
-                <SelectValue placeholder="Select Service User..." />
+                <SelectValue placeholder="Select Service Member..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Service Users</SelectItem>
+                <SelectItem value="all">All Service Members</SelectItem>
                 {receivers.map((r) => (
                   <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
                 ))}
@@ -321,7 +321,7 @@ export function NotesTab({ careGiverId }: Props) {
                     <Checkbox checked={allSelected} onCheckedChange={toggleSelectAll} />
                   </TableHead>
                   <TableHead className="w-[120px]">Date</TableHead>
-                  <TableHead className="w-[180px]">Service User</TableHead>
+                  <TableHead className="w-[180px]">Service Member</TableHead>
                   <TableHead>Note</TableHead>
                   <TableHead className="w-[100px] text-right">Actions</TableHead>
                 </TableRow>
@@ -470,10 +470,10 @@ export function NotesTab({ careGiverId }: Props) {
               <Input type="date" value={draft.note_date} onChange={(e) => setDraft({ ...draft, note_date: e.target.value })} />
             </div>
             <div>
-              <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Service User (optional)</label>
+              <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Service Member (optional)</label>
               <Select value={draft.service_user_id} onValueChange={(v) => setDraft({ ...draft, service_user_id: v })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select Service User..." />
+                  <SelectValue placeholder="Select Service Member..." />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">— None —</SelectItem>

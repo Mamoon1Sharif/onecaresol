@@ -83,7 +83,7 @@ const SEED_OUTCOMES: Outcome[] = [
   { id: "o2", title: "Improve nutrition and hydration", description: "Encourage 1.5L of fluid intake and balanced meals.", category: "Nutrition", priority: "Medium", status: "Active", targetDate: "2026-06-15", progress: 80 },
   { id: "o3", title: "Manage diabetes through routine checks", description: "Regular blood glucose monitoring and dietary adherence.", category: "Medical", priority: "High", status: "Active", targetDate: "2026-12-31", progress: 50 },
   { id: "o4", title: "Reduce social isolation", description: "Weekly community activities and family video calls.", category: "Wellbeing", priority: "Medium", status: "Achieved", targetDate: "2025-12-01", progress: 100 },
-  { id: "o5", title: "Continue smoking cessation program", description: "Discontinued — service user moved to alternative provider.", category: "Wellbeing", priority: "Low", status: "Inactive", targetDate: "2025-08-01", progress: 30 },
+  { id: "o5", title: "Continue smoking cessation program", description: "Discontinued — service member moved to alternative provider.", category: "Wellbeing", priority: "Low", status: "Inactive", targetDate: "2025-08-01", progress: 30 },
 ];
 
 const SEED_TASKS: Task[] = [
@@ -272,7 +272,7 @@ export function CareManagementTab({ careReceiverId, careReceiverName }: Props) {
   const openEditTask = (t: Task) => { setEditingTask(t); setTaskDraft(t); setTaskDlg(true); };
   const saveTask = async () => {
     if (!taskDraft.title.trim()) return toast.error("Title is required");
-    if (!careReceiverId) return toast.error("Missing service user id");
+    if (!careReceiverId) return toast.error("Missing service member id");
     try {
       await upsertTaskMut.mutateAsync({ ...taskDraft, _editingId: editingTask?.id });
       toast.success(editingTask ? "Task updated" : "Task added");

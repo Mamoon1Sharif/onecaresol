@@ -296,7 +296,7 @@ export function ScheduleView({ cg, showHeader = true }: Props) {
           <div className="flex items-center justify-between gap-3">
             <div className="relative max-w-xs flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search by service user or status..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+              <Input placeholder="Search by service member or status..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
             </div>
             <Badge variant="outline" className="text-xs px-2.5 py-1">
               {filteredVisits.length} visit{filteredVisits.length !== 1 ? "s" : ""}
@@ -309,7 +309,7 @@ export function ScheduleView({ cg, showHeader = true }: Props) {
                 <TableHeader>
                   <TableRow className="bg-muted/30">
                     <TableHead className="font-semibold">Status</TableHead>
-                    <TableHead className="font-semibold">Service User</TableHead>
+                    <TableHead className="font-semibold">Service Member</TableHead>
                     <TableHead className="font-semibold text-center">Scheduled Start</TableHead>
                     <TableHead className="font-semibold text-center">Scheduled End</TableHead>
                     <TableHead className="font-semibold text-center">Duration</TableHead>

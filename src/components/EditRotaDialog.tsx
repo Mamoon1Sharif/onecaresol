@@ -99,7 +99,7 @@ type Tab =
 const TABS: { id: Tab; label: string; icon: typeof Pencil }[] = [
   { id: "edit", label: "Edit", icon: Pencil },
   { id: "edit-staff", label: "Edit Staff with Visual", icon: Eye },
-  { id: "service-user", label: "Go to Service Users Profile", icon: UserCog },
+  { id: "service-user", label: "Go to Service Members Profile", icon: UserCog },
   { id: "manual-in", label: "Manual Clock In", icon: LogIn },
   { id: "manual-out", label: "Manual Clock Out", icon: LogOut },
   { id: "notes", label: "Notes", icon: StickyNote },
@@ -118,7 +118,7 @@ const HEADER_COLS: { label: string; icon?: typeof Info; tone?: string }[] = [
   { label: "", icon: Link2 },
   { label: "", icon: MapIcon },
   { label: "", icon: ListChecks },
-  { label: "Service User" },
+  { label: "Service Member" },
   { label: "", icon: CalendarDays, tone: "text-success" },
   { label: "", icon: CalendarDays, tone: "text-destructive" },
   { label: "", icon: TrendingUp },
@@ -437,7 +437,7 @@ export function EditRotaDialog({ open, onOpenChange, shift, onSave }: Props) {
 
               {active === "service-user" && (
                 <PlaceholderPanel
-                  title="Service User Profile"
+                  title="Service Member Profile"
                   description={`Open ${shift.client}'s full profile to view care plans, key contacts, MAR chart and visit history.`}
                   cta="Go to Profile"
                 />

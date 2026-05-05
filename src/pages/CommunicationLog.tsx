@@ -591,7 +591,7 @@ function AddLogDialog({
               <Select value={userType} onValueChange={setUserType}>
                 <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Please select" /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Service User">Service User</SelectItem>
+                  <SelectItem value="Service Member">Service Member</SelectItem>
                   <SelectItem value="Care Giver">Care Giver</SelectItem>
                   <SelectItem value="Family / NOK">Family / NOK</SelectItem>
                   <SelectItem value="Healthcare Pro">Healthcare Pro</SelectItem>

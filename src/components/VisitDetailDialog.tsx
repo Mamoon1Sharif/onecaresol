@@ -178,7 +178,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                         <th className="p-2 border-r border-border text-center w-10" title="Location"><MapIcon className={COL_ICON} /></th>
                         <th className="p-2 border-r border-border text-center w-10" title="Team"><Users className={COL_ICON} /></th>
                         <th className="p-2 border-r border-border text-center w-10" title="Alerts"><AlertCircle className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-left">Service User</th>
+                        <th className="p-2 border-r border-border text-left">Service Member</th>
                         <th className="p-2 border-r border-border text-center w-16 bg-emerald-100" title="Scheduled Start"><Calendar className="h-3.5 w-3.5 text-emerald-700 mx-auto" /></th>
                         <th className="p-2 border-r border-border text-center w-16 bg-rose-100" title="Scheduled End"><Calendar className="h-3.5 w-3.5 text-rose-700 mx-auto" /></th>
                         <th className="p-2 border-r border-border text-center w-16" title="Duration"><TrendingUp className={COL_ICON} /></th>
@@ -418,7 +418,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                 </Button>
               </div>
               <p className="text-[11px] text-muted-foreground mb-2">
-                Notes marked as hidden will only appear on a single rota, service user and care giver note area or some of the reports. Notes marked as hidden will also not appear on the Care Portal section.
+                Notes marked as hidden will only appear on a single rota, service member and care giver note area or some of the reports. Notes marked as hidden will also not appear on the Care Portal section.
               </p>
               {notes.length === 0 ? (
                 <p className="text-xs text-muted-foreground text-center py-3">No notes added.</p>
@@ -461,7 +461,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                         <th className="p-2 border-r border-border w-8"><input type="checkbox" className="rounded" /></th>
                         <th className="p-2 border-r border-border text-center w-16"><Info className={COL_ICON} /></th>
                         <th className="p-2 border-r border-border text-left w-20">Status</th>
-                        <th className="p-2 border-r border-border text-left">Service User</th>
+                        <th className="p-2 border-r border-border text-left">Service Member</th>
                         <th className="p-2 border-r border-border text-left">Care Giver</th>
                         
                         <th className="p-2 text-left w-20">Week</th>
@@ -551,7 +551,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
       <DialogContent className="max-w-md">
         <h3 className="font-semibold text-base mb-3">Add Rota Lock</h3>
         <label className="text-xs font-medium">Reason</label>
-        <Input value={lockReason} onChange={(e) => setLockReason(e.target.value)} className="mt-1" placeholder="e.g. Confirmed by service user" />
+        <Input value={lockReason} onChange={(e) => setLockReason(e.target.value)} className="mt-1" placeholder="e.g. Confirmed by service member" />
         <div className="flex justify-end gap-2 mt-4">
           <Button variant="outline" size="sm" onClick={() => setLockOpen(false)}>Cancel</Button>
           <Button size="sm" className="bg-success text-success-foreground" onClick={handleAddLock}>Add Lock</Button>

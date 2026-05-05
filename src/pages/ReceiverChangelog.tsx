@@ -68,7 +68,7 @@ export default function ReceiverChangelog() {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <ServiceUserTopBar title="Service User Change Logs" backTo={`/carereceivers/${id}`} />
+      <ServiceUserTopBar title="Service Member Change Logs" backTo={`/carereceivers/${id}`} />
 
       <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-4 p-4">
         <ServiceUserSidebar cr={cr} basePath="changelog" />
