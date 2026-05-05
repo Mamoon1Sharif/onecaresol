@@ -567,6 +567,8 @@ export function LiveRotaShiftDialog({
                 }
                 removePendingClashesForStaff(current.staff);
                 removePendingClashesForRef(current.ref);
+                await qc.invalidateQueries({ queryKey: ["daily_visits_range"] });
+                await qc.invalidateQueries({ queryKey: ["daily_visits"] });
                 setRemoved(true);
                 toast.success(`${current.staff} removed from shift. Clash cleared.`);
               }}
