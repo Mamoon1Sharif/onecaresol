@@ -333,7 +333,7 @@ const Conflicts = () => {
                             <button
                               type="button"
                               className="hover:underline cursor-pointer"
-                              onClick={() => { setAssignFor(r); setAssignSelected(""); }}
+                              onClick={() => nav(`/rota/add?receiverId=${r.receiverId}&ref=${r.ref}&date=${r.date}&start=${r.start}&end=${r.end}`)}
                               title="Click to allocate a care giver"
                             >
                               {r.teamMember}
