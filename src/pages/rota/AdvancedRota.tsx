@@ -336,6 +336,18 @@ export default function AdvancedRota() {
     end: number;
   } | null>(null);
   const [editing, setEditing] = useState<EditRotaShift | null>(null);
+  const [pendingMove, setPendingMove] = useState<{
+    id: string;
+    fromStaff: string;
+    toStaff: string;
+    fromStart: number;
+    fromEnd: number;
+    toStart: number;
+    toEnd: number;
+    client: string;
+    ref: string;
+    service: string;
+  } | null>(null);
 
   const gridRef = useRef<HTMLDivElement>(null);
 
