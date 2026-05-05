@@ -64,7 +64,6 @@ export function RotaMedicationDialog({ open, onOpenChange, context }: Props) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         className="max-w-[95vw] w-[95vw] h-[90vh] p-0 gap-0 overflow-hidden flex flex-col"
-        showCloseButton={false}
       >
         {/* Top bar */}
         <div className="bg-info text-info-foreground px-4 py-2.5 flex items-center justify-between shrink-0">
