@@ -191,7 +191,11 @@ export function LiveRotaShiftDialog({
                           <td className="p-2 border border-border">{current.end}</td>
                           <td className="p-2 border border-border">{current.schedHrs ?? "00:30"}</td>
                           <td className="p-2 border border-border text-primary underline cursor-pointer">
-                            {removed ? <span className="text-muted-foreground italic">Unassigned</span> : current.staff}
+                            {removed ? (
+                              <button onClick={() => setAssignOpen(true)} className="italic text-primary hover:underline">
+                                Unassigned — Assign
+                              </button>
+                            ) : current.staff}
                           </td>
                           <td className="p-2 border border-border">{current.serviceCall ?? "Private Eve..."}</td>
                           <td className="p-2 border border-border">Week 1</td>
