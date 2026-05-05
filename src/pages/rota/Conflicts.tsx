@@ -598,7 +598,10 @@ function ClashingRotasSection({ fromDate, toDate }: { fromDate: string; toDate: 
                   <td className="bg-[hsl(200_70%_97%)] p-2 border border-border">
                     <button
                       className="text-destructive hover:underline font-mono"
-                      onClick={() => setOpenShift({ ref: p.aRef, date: p.aDate, start: p.aStart, end: p.aEnd, client: p.aClient, staff: p.staff })}
+                      onClick={() => {
+                        const visit = (visits as any[]).find((v) => v.id.slice(0, 9) === p.aRef);
+                        setOpenShift({ ref: p.aRef, visitId: visit?.id, date: p.aDate, start: p.aStart, end: p.aEnd, client: p.aClient, staff: p.staff });
+                      }}
                     >{p.aRef}</button>
                   </td>
                   <td className="bg-[hsl(200_70%_97%)] p-2 border border-border text-foreground">{p.aDate}</td>
@@ -610,7 +613,10 @@ function ClashingRotasSection({ fromDate, toDate }: { fromDate: string; toDate: 
                   <td className="bg-[hsl(0_70%_97%)] p-2 border border-border">
                     <button
                       className="text-destructive hover:underline font-mono"
-                      onClick={() => setOpenShift({ ref: p.bRef, date: p.bDate, start: p.bStart, end: p.bEnd, client: p.bClient, staff: p.staff })}
+                      onClick={() => {
+                        const visit = (visits as any[]).find((v) => v.id.slice(0, 9) === p.bRef);
+                        setOpenShift({ ref: p.bRef, visitId: visit?.id, date: p.bDate, start: p.bStart, end: p.bEnd, client: p.bClient, staff: p.staff });
+                      }}
                     >{p.bRef}</button>
                   </td>
                   <td className="bg-[hsl(0_70%_97%)] p-2 border border-border text-foreground">{p.bDate}</td>
