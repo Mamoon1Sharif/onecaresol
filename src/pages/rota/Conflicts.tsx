@@ -393,6 +393,51 @@ const Conflicts = () => {
         open={!!cancelledDetail}
         onClose={() => setCancelledDetail(null)}
       />
+
+      <Dialog open={!!assignFor} onOpenChange={(v) => !v && setAssignFor(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-base">Assign Care Giver</DialogTitle>
+          </DialogHeader>
+          {assignFor && (
+            <div className="space-y-3 text-xs">
+              <div className="rounded border border-border bg-muted/30 p-3 space-y-1">
+                <div><span className="text-muted-foreground">Ref:</span> <span className="font-mono">{assignFor.ref}</span></div>
+                <div><span className="text-muted-foreground">Service Member:</span> {assignFor.serviceUser}</div>
+                <div><span className="text-muted-foreground">When:</span> {assignFor.date} · {assignFor.start}–{assignFor.end}</div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold">Select care giver</label>
+                <Select value={assignSelected} onValueChange={setAssignSelected}>
+                  <SelectTrigger className="h-9 text-xs"><SelectValue placeholder="Choose…" /></SelectTrigger>
+                  <SelectContent>
+                    {careGivers
+                      .filter((c: any) => c.status === "Active")
+                      .map((c: any) => (
+                        <SelectItem key={c.id} value={c.name} className="text-xs">{c.name}</SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setAssignFor(null)}>Cancel</Button>
+                <Button
+                  size="sm"
+                  className="h-8 text-xs bg-success hover:bg-success/90 text-success-foreground"
+                  onClick={() => {
+                    if (!assignSelected) { toast.error("Pick a care giver."); return; }
+                    setAssignments((p) => ({ ...p, [assignFor.id]: assignSelected }));
+                    toast.success(`${assignSelected} assigned to ${assignFor.ref}. Conflict resolved.`);
+                    setAssignFor(null);
+                  }}
+                >
+                  Assign & Resolve
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 };
