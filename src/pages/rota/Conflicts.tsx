@@ -456,17 +456,6 @@ const Conflicts = () => {
   );
 };
 
-const CLASHING_PAIRS = [
-  {
-    a: { staff: "Sumayyah Shafiq", ref: "147844258", date: "06/05/2026", start: "19:30", end: "20:00", client: "Thomas Henderson" },
-    b: { ref: "147844276", date: "06/05/2026", start: "19:45", end: "20:00", client: "Edna Morris" },
-  },
-  {
-    a: { staff: "Lisa Archer", ref: "147844660", date: "07/05/2026", start: "09:35", end: "10:20", client: "Michael Taylor" },
-    b: { ref: "147844618", date: "07/05/2026", start: "10:00", end: "10:30", client: "Craig Murray" },
-  },
-];
-
 type ClashRow = {
   staff: string;
   aRef: string; aDate: string; aStart: string; aEnd: string; aClient: string;
