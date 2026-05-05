@@ -331,12 +331,12 @@ const Conflicts = () => {
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50/40">—</td>
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50/40">—</td>
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">—</td>
-                        <td className={`p-1.5 border-r border-border text-[11px] font-medium ${teamCellColor}`}>
+                        <td className={`p-1.5 border-r border-border text-[11px] font-medium ${r.teamMember === "Unallocated" ? teamCellColor : "text-foreground"}`}>
                           {r.teamMember === "Unallocated" && !isCancelled ? (
                             <button
                               type="button"
                               className="hover:underline cursor-pointer"
-                              onClick={() => nav(`/rota/add?ref=${r.ref}&serviceUser=${encodeURIComponent(r.serviceUser)}&date=${r.date}&start=${r.start}&end=${r.end}`)}
+                              onClick={() => { setAssignFor(r); setAssignSelected(""); }}
                               title="Click to allocate a care giver"
                             >
                               {r.teamMember}
