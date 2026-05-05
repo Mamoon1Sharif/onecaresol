@@ -31,6 +31,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useCareReceivers, useCareGivers, useUpsertShift, useMedications } from "@/hooks/use-care-data";
+import { savePendingClash } from "./Conflicts";
 import { getCareReceiverAvatar } from "@/lib/avatars";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
