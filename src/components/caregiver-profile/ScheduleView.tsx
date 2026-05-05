@@ -69,6 +69,23 @@ const fmtMins = (m: number) => {
   return `${String(h).padStart(2, "0")}:${String(mins).padStart(2, "0")}`;
 };
 
+// Shifts table: day = 0..6 (Mon..Sun), start_time/end_time as "HH:MM" text
+function shiftMinutes(start: string | null, end: string | null) {
+  if (!start || !end) return 0;
+  const [sh, sm] = start.split(":").map(Number);
+  const [eh, em] = end.split(":").map(Number);
+  return (eh * 60 + em) - (sh * 60 + sm);
+}
+function shiftStartHour(start: string | null) {
+  if (!start) return 0;
+  return Number(start.split(":")[0] ?? 0);
+}
+// JS getDay: Sun=0..Sat=6 -> Mon=0..Sun=6
+function weekdayIdx(d: Date) {
+  return (d.getDay() + 6) % 7;
+}
+
+
 interface Props {
   cg: CareGiver;
   showHeader?: boolean;
