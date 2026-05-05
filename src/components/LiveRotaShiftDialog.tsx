@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useCareGivers } from "@/hooks/use-care-data";
+import { removePendingClashesForStaff, removePendingClashesForRef } from "@/pages/rota/Conflicts";
 
 export type LiveRotaShift = {
   ref: string;
