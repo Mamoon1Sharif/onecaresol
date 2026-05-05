@@ -474,6 +474,14 @@ export function savePendingClash(c: ClashRow) {
     localStorage.setItem(PENDING_CLASH_KEY, JSON.stringify(list));
   }
 }
+export function removePendingClashesForStaff(staff: string) {
+  const list = loadPendingClashes().filter((c) => c.staff !== staff);
+  localStorage.setItem(PENDING_CLASH_KEY, JSON.stringify(list));
+}
+export function removePendingClashesForRef(ref: string) {
+  const list = loadPendingClashes().filter((c) => c.aRef !== ref && c.bRef !== ref);
+  localStorage.setItem(PENDING_CLASH_KEY, JSON.stringify(list));
+}
 
 function fmtVisitDate(s: string) {
   const d = new Date(s); return d.toLocaleDateString("en-GB");
