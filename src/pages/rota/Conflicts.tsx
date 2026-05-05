@@ -192,6 +192,8 @@ const Conflicts = () => {
                   toast.error("Select at least one row.");
                   return;
                 }
+                const ok = window.confirm(`Apply "${bulk}" to ${selected.size} visit(s)?`);
+                if (!ok) return;
                 toast.success(`${bulk} applied to ${selected.size} visit(s).`);
                 setSelected(new Set());
                 setBulk("Bulk Actions...");

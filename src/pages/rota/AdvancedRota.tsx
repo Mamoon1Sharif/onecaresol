@@ -490,6 +490,7 @@ export default function AdvancedRota() {
       toast.error("Unknown team member.");
       return;
     }
+    if (!window.confirm(`Reassign ${ids.length} shift(s) to ${match}?`)) return;
     setOverrides((prev) => {
       const next = { ...prev };
       ids.forEach((id) => {
@@ -504,6 +505,7 @@ export default function AdvancedRota() {
   function handleCancelSelected() {
     const ids = requireSelection();
     if (!ids) return;
+    if (!window.confirm(`Cancel ${ids.length} shift(s)?`)) return;
     setCancelledIds((prev) => {
       const next = new Set(prev);
       ids.forEach((id) => next.add(id));
@@ -516,6 +518,7 @@ export default function AdvancedRota() {
   function handleActivateSelected() {
     const ids = requireSelection();
     if (!ids) return;
+    if (!window.confirm(`Activate ${ids.length} shift(s)?`)) return;
     setCancelledIds((prev) => {
       const next = new Set(prev);
       ids.forEach((id) => next.delete(id));
