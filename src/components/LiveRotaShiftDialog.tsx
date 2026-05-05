@@ -59,6 +59,7 @@ export function LiveRotaShiftDialog({
   const [assignOpen, setAssignOpen] = useState(false);
   const [assignSelected, setAssignSelected] = useState<string>("");
   const { data: caregivers = [] } = useCareGivers();
+  const qc = useQueryClient();
   const [locks, setLocks] = useState<{ id: string; reason: string; by: string; created: string }[]>([]);
   const [showLockPrompt, setShowLockPrompt] = useState(false);
   const [lockReason, setLockReason] = useState("");
