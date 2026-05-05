@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useCareReceivers, useCareGivers } from "@/hooks/use-care-data";
 import { toast } from "sonner";
+import { LiveRotaShiftDialog } from "@/components/LiveRotaShiftDialog";
 
 function IconCell({
   icon: Icon, label, className = "h-3.5 w-3.5 text-muted-foreground/70",
