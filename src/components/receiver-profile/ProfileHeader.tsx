@@ -44,9 +44,15 @@ export function ReceiverProfileHeader({ cr, onEdit }: Props) {
   return (
     <>
       <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={() => navigate("/carereceivers")} className="gap-2 text-muted-foreground">
-          <ArrowLeft className="h-4 w-4" /> Back to Service Members
-        </Button>
+        {(() => {
+          const from = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("from") : null;
+          const isConflicts = from === "conflicts";
+          return (
+            <Button variant="ghost" onClick={() => navigate(isConflicts ? "/rota/conflicts" : "/carereceivers")} className="gap-2 text-muted-foreground">
+              <ArrowLeft className="h-4 w-4" /> {isConflicts ? "Back to Conflicts" : "Back to Service Members"}
+            </Button>
+          );
+        })()}
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={onEdit} className="gap-2">
             <Pencil className="h-4 w-4" /> Edit
