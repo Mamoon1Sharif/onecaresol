@@ -88,6 +88,12 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
   const [clockOut, setClockOut] = useState<string | null>(null);
   const [memberRemoved, setMemberRemoved] = useState(false);
 
+  // Clock in/out confirmation dialogs
+  const [clockInOpen, setClockInOpen] = useState(false);
+  const [clockOutOpen, setClockOutOpen] = useState(false);
+  const [clockInDraft, setClockInDraft] = useState("");
+  const [clockOutDraft, setClockOutDraft] = useState("");
+
   if (!visit) return null;
 
   const built = `${visit.ref} at ${new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })} on ${visit.date}`;
@@ -113,21 +119,33 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
     setLockOpen(false);
   };
 
-  const handleClockIn = () => {
+  const openClockIn = () => {
     const now = new Date();
-    const timeStr = now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
-    setClockIn(timeStr);
+    setClockInDraft(now.toTimeString().slice(0, 5));
+    setClockInOpen(true);
+  };
+
+  const openClockOut = () => {
+    const now = new Date();
+    setClockOutDraft(now.toTimeString().slice(0, 5));
+    setClockOutOpen(true);
+  };
+
+  const confirmClockIn = () => {
+    if (!clockInDraft) { toast.error("Pick a clock-in time"); return; }
+    const [h, m] = clockInDraft.split(":").map(Number);
+    const ts = new Date();
+    ts.setHours(h, m, 0, 0);
+    setClockIn(clockInDraft);
+    setClockInOpen(false);
 
     const persist = async (lat: number | null, lng: number | null) => {
       const { error } = await supabase
         .from("daily_visits")
-        .update({ check_in_time: now.toISOString(), check_in_lat: lat, check_in_lng: lng } as any)
+        .update({ check_in_time: ts.toISOString(), check_in_lat: lat, check_in_lng: lng } as any)
         .eq("id", visit!.id);
-      if (error) {
-        toast.error("Clock-in saved locally but failed to sync: " + error.message);
-      } else {
-        toast.success(lat != null ? "Clocked in with GPS location" : "Clocked in (location unavailable)");
-      }
+      if (error) toast.error("Clock-in saved locally but failed to sync: " + error.message);
+      else toast.success(lat != null ? "Clocked in with GPS location" : "Clocked in (location unavailable)");
     };
 
     if (typeof navigator !== "undefined" && navigator.geolocation) {
@@ -141,14 +159,27 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
     }
   };
 
-  const handleClockOut = async () => {
-    const now = new Date();
-    setClockOut(now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }));
+  const confirmClockOut = async () => {
+    if (!clockOutDraft) { toast.error("Pick a clock-out time"); return; }
+    if (clockIn) {
+      const [h1, m1] = clockIn.split(":").map(Number);
+      const [h2, m2] = clockOutDraft.split(":").map(Number);
+      if (h2 * 60 + m2 < h1 * 60 + m1) {
+        toast.error("Clock-out time cannot be earlier than clock-in time");
+        return;
+      }
+    }
+    const [h, m] = clockOutDraft.split(":").map(Number);
+    const ts = new Date();
+    ts.setHours(h, m, 0, 0);
+    setClockOut(clockOutDraft);
+    setClockOutOpen(false);
     const { error } = await supabase
       .from("daily_visits")
-      .update({ check_out_time: now.toISOString() } as any)
+      .update({ check_out_time: ts.toISOString() } as any)
       .eq("id", visit!.id);
     if (error) toast.error("Clock-out failed to sync: " + error.message);
+    else toast.success("Clocked out");
   };
 
   const duration = (() => {
