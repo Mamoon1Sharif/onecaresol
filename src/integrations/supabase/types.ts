@@ -226,6 +226,7 @@ export type Database = {
       }
       care_management_tasks: {
         Row: {
+          assigned_for_shift: boolean
           care_receiver_id: string
           company_id: string
           created_at: string
@@ -241,6 +242,7 @@ export type Database = {
           visits: string[]
         }
         Insert: {
+          assigned_for_shift?: boolean
           care_receiver_id: string
           company_id: string
           created_at?: string
@@ -256,6 +258,7 @@ export type Database = {
           visits?: string[]
         }
         Update: {
+          assigned_for_shift?: boolean
           care_receiver_id?: string
           company_id?: string
           created_at?: string
