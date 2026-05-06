@@ -698,35 +698,86 @@ interface TaskItem {
   completedAt?: string;
 }
 
-function ShiftTasks({ shiftEnd, clockOut, isMissed = false }: { shiftEnd: string; clockOut: string | null; isMissed?: boolean }) {
-  const initialDone = !isMissed;
-  const [tasks, setTasks] = useState<TaskItem[]>([
-    { id: "t1", title: "Personal care — wash & dress", done: initialDone, completedAt: initialDone ? "08:14" : undefined },
-    { id: "t2", title: "Administer morning medication", done: initialDone, completedAt: initialDone ? "08:32" : undefined },
-    { id: "t3", title: "Prepare breakfast & assist with eating", done: initialDone, completedAt: initialDone ? "09:05" : undefined },
-    { id: "t4", title: "Light housekeeping in kitchen", done: false },
-    { id: "t5", title: "Lunchtime medication & meal", done: false },
-    { id: "t6", title: "Record fluid & food intake", done: false },
-  ]);
+function ShiftTasks({ visitId, shiftEnd, clockOut, isMissed = false }: { visitId: string; shiftEnd: string; clockOut: string | null; isMissed?: boolean }) {
+  const [tasks, setTasks] = useState<TaskItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("shift_tasks")
+        .select("id,title,is_completed,completed_at")
+        .eq("daily_visit_id", visitId)
+        .order("created_at", { ascending: true });
+      if (cancelled) return;
+      if (error) {
+        toast.error("Failed to load tasks: " + error.message);
+        setTasks([]);
+      } else {
+        setTasks(
+          (data ?? []).map((r: any) => ({
+            id: r.id,
+            title: r.title,
+            done: !!r.is_completed,
+            completedAt: r.completed_at
+              ? new Date(r.completed_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
+              : undefined,
+          })),
+        );
+      }
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [visitId]);
 
   const completed = tasks.filter((t) => t.done);
   const pending = tasks.filter((t) => !t.done);
   const pct = tasks.length ? Math.round((completed.length / tasks.length) * 100) : 0;
 
-  const toggle = (id: string) =>
+  const toggle = async (id: string) => {
+    const t = tasks.find((x) => x.id === id);
+    if (!t) return;
+    const newDone = !t.done;
+    const completedAtIso = newDone ? new Date().toISOString() : null;
     setTasks((arr) =>
-      arr.map((t) =>
-        t.id === id
-          ? { ...t, done: !t.done, completedAt: !t.done ? new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : undefined }
-          : t,
+      arr.map((x) =>
+        x.id === id
+          ? { ...x, done: newDone, completedAt: newDone ? new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : undefined }
+          : x,
       ),
     );
+    const { error } = await supabase
+      .from("shift_tasks")
+      .update({ is_completed: newDone, completed_at: completedAtIso } as any)
+      .eq("id", id);
+    if (error) toast.error("Failed to update task");
+  };
 
-  const addTask = () => {
-    if (!draft.trim()) return;
-    setTasks((arr) => [...arr, { id: crypto.randomUUID(), title: draft.trim(), done: false }]);
+  const addTask = async () => {
+    const title = draft.trim();
+    if (!title) return;
     setDraft("");
+    const { data, error } = await supabase
+      .from("shift_tasks")
+      .insert({ daily_visit_id: visitId, title } as any)
+      .select("id,title,is_completed,completed_at")
+      .single();
+    if (error || !data) {
+      toast.error("Failed to add task");
+      return;
+    }
+    setTasks((arr) => [...arr, { id: data.id, title: data.title, done: !!data.is_completed }]);
+  };
+
+  const removeTask = async (id: string) => {
+    setTasks((arr) => arr.filter((x) => x.id !== id));
+    const { error } = await supabase.from("shift_tasks").delete().eq("id", id);
+    if (error) toast.error("Failed to remove task");
   };
 
   return (
