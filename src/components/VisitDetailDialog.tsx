@@ -430,7 +430,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                           {clockIn ? (
                             <span className="font-mono font-semibold text-success">{clockIn}</span>
                           ) : (
-                            <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" onClick={handleClockIn}>Clock In</Button>
+                            <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" onClick={openClockIn}>Clock In</Button>
                           )}
                         </div>
                         <div className="flex items-center gap-2">
@@ -438,7 +438,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                           {clockOut ? (
                             <span className="font-mono font-semibold text-success">{clockOut}</span>
                           ) : (
-                            <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" disabled={!clockIn} onClick={handleClockOut}>Clock Out</Button>
+                            <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" disabled={!clockIn} onClick={openClockOut}>Clock Out</Button>
                           )}
                         </div>
                         <div className="text-orange-600">Duration: {duration}</div>
