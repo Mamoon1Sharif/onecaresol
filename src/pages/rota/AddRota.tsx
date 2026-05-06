@@ -199,7 +199,7 @@ const AddRota = () => {
 
       const day = new Date(form.date).getDay();
       const staffId = form.staff1 || null;
-      const durHours = Math.max(1, Math.round(durationMinutes / 60));
+      const durHours = Math.max(1, Math.ceil(durationMinutes / 60));
       const newStart = parseInt(form.startH);
       const newEnd = newStart + durHours;
 
