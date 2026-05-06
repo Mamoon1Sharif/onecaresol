@@ -525,6 +525,19 @@ const DailyRoster = () => {
                       <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{r.isFuture ? "" : r.actualStart}</td>
                       <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{r.isFuture ? "" : r.actualEnd}</td>
                       <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{r.isFuture ? "" : r.actualDuration}</td>
+                      <td className="p-1.5 border-r border-border text-center font-mono text-[10px]">
+                        {r.checkInLat != null && r.checkInLng != null ? (
+                          <a
+                            href={`https://www.google.com/maps?q=${r.checkInLat},${r.checkInLng}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline"
+                            title="Open in Google Maps"
+                          >
+                            {r.checkInLat.toFixed(5)}, {r.checkInLng.toFixed(5)}
+                          </a>
+                        ) : "—"}
+                      </td>
                       <td className="p-1.5 border-r border-border">
                         {r.caregiver?.id ? (
                           <button
