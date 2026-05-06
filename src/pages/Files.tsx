@@ -406,7 +406,7 @@ export default function Files() {
                           )}
                         </td>
                         <td className="px-3 py-2 text-muted-foreground">
-                          {new Date(d.created_at).toLocaleString()}
+                          {new Date(d.created_at).toLocaleString("en-GB", { timeZone: "Asia/Karachi" })}
                         </td>
                         <td className="px-3 py-2">
                           <div className="flex items-center gap-1 justify-end">

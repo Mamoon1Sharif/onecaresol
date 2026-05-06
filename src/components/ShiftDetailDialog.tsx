@@ -174,7 +174,7 @@ export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
                 <div key={n.id} className="bg-muted/50 rounded-lg p-3">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs font-medium text-foreground">{n.author}</span>
-                    <span className="text-[10px] text-muted-foreground">{new Date(n.created_at).toLocaleString()}</span>
+                    <span className="text-[10px] text-muted-foreground">{new Date(n.created_at).toLocaleString("en-GB", { timeZone: "Asia/Karachi" })}</span>
                   </div>
                   <p className="text-sm text-foreground">{n.note}</p>
                 </div>
