@@ -406,7 +406,7 @@ export default function Files() {
                           )}
                         </td>
                         <td className="px-3 py-2 text-muted-foreground">
-                          {format(parseISO(d.created_at), "dd/MM/yyyy")}
+                          {new Date(d.created_at).toLocaleString()}
                         </td>
                         <td className="px-3 py-2">
                           <div className="flex items-center gap-1 justify-end">

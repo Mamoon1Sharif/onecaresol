@@ -145,7 +145,7 @@ const SuperAdmin = () => {
                     <Badge variant={c.status === "Active" ? "default" : "secondary"}>{c.status}</Badge>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
-                    {new Date(c.created_at).toLocaleDateString()}
+                    {new Date(c.created_at).toLocaleString()}
                   </TableCell>
                 </TableRow>
               ))}
