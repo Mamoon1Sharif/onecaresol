@@ -290,7 +290,7 @@ export function CareReceiverProfileDialog({ open, onOpenChange, receiver }: Prop
             </TabsList>
           </div>
 
-          <ScrollArea className="max-h-[55vh]">
+          <ScrollArea className="h-[55vh]">
             {/* Personal */}
             <TabsContent value="personal" className="px-6 pb-6 mt-0">
               <SectionTitle title="Personal Details" />
