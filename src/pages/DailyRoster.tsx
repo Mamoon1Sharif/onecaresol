@@ -146,7 +146,7 @@ const DailyRoster = () => {
       let status: string;
       if (v.status === "Cancelled") {
         status = "Cancelled";
-      } else if (v.check_out_time || v.status === "Confirmed" || v.status === "Complete" || v.status === "Completed" || v.status === "Finished") {
+      } else if (v.check_out_time) {
         status = "Finished";
       } else if (v.check_in_time) {
         status = "In Progress";
