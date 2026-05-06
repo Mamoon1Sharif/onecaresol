@@ -198,8 +198,8 @@ const DailyRoster = () => {
         scheduledStart: fmtHour(start, startMin),
         scheduledEnd: fmtHour(endH, endM),
         duration: fmtDur,
-        actualStart: v.check_in_time ? new Date(v.check_in_time).toTimeString().slice(0, 5) : "—",
-        actualEnd: v.check_out_time ? new Date(v.check_out_time).toTimeString().slice(0, 5) : "—",
+        actualStart: v.check_in_time ? new Date(v.check_in_time).toISOString().slice(11, 16) : "—",
+        actualEnd: v.check_out_time ? new Date(v.check_out_time).toISOString().slice(11, 16) : "—",
         actualDuration: v.check_in_time && v.check_out_time
           ? (() => {
               const ms = new Date(v.check_out_time).getTime() - new Date(v.check_in_time).getTime();
