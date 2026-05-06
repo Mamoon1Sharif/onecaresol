@@ -145,7 +145,7 @@ const DailyRoster = () => {
       const ref = `14${(597 + idx).toString().padStart(4, "0")}${(idx * 7 % 100).toString().padStart(2, "0")}`;
       const week = Math.ceil(((new Date(dateStr).getDate())) / 7);
 
-      const visitStart = new Date(`${v.visit_date}T${String(start).padStart(2, "0")}:${String(startMin).padStart(2, "0")}:00`);
+      const visitStart = new Date(`${v.visit_date}T${String(start).padStart(2, "0")}:${String(startMin).padStart(2, "0")}:00Z`);
       const visitEnd = new Date(visitStart.getTime() + durMins * 60 * 1000);
       const isFuture = visitStart.getTime() > now.getTime();
       const accepted = !!v.care_giver_id;
