@@ -290,9 +290,22 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{editStart || visit.scheduledStart}</td>
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{editEnd || visit.scheduledEnd}</td>
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{visit.duration}</td>
-                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{visit.isFuture || (editStatus || visit.status) === "Missed" ? "—" : (clockIn || visit.actualStart || "—")}</td>
-                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{visit.isFuture || (editStatus || visit.status) === "Missed" ? "—" : (clockOut || visit.actualEnd || "—")}</td>
-                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{visit.isFuture || (editStatus || visit.status) === "Missed" ? "—" : (duration !== "0 minutes" ? duration : (visit.actualDuration || "—"))}</td>
+                         {(() => {
+                           const isMissed = (editStatus || visit.status) === "Missed";
+                           const ciVal = clockIn || (visit.actualStart && visit.actualStart !== "—" ? visit.actualStart : "");
+                           const coVal = clockOut || (visit.actualEnd && visit.actualEnd !== "—" ? visit.actualEnd : "");
+                           const durVal = duration !== "0 minutes" ? duration : (visit.actualDuration && visit.actualDuration !== "—" ? visit.actualDuration : "");
+                           const ci = isMissed ? "—" : (ciVal || (visit.isFuture ? "" : "—"));
+                           const co = isMissed ? "—" : (coVal || (visit.isFuture ? "" : "—"));
+                           const du = isMissed ? "—" : (durVal || (visit.isFuture ? "" : "—"));
+                           return (
+                             <>
+                               <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{ci}</td>
+                               <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{co}</td>
+                               <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{du}</td>
+                             </>
+                           );
+                         })()}
                         <td className="p-1.5 border-r border-border">
                           <a className="text-primary hover:underline cursor-pointer text-[11px]">{visit.teamMember}</a>
                         </td>
