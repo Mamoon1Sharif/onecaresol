@@ -1427,6 +1427,8 @@ export type Database = {
         Row: {
           care_giver_id: string | null
           care_receiver_id: string | null
+          check_in_lat: number | null
+          check_in_lng: number | null
           check_in_time: string | null
           check_out_time: string | null
           company_id: string
@@ -1443,6 +1445,8 @@ export type Database = {
         Insert: {
           care_giver_id?: string | null
           care_receiver_id?: string | null
+          check_in_lat?: number | null
+          check_in_lng?: number | null
           check_in_time?: string | null
           check_out_time?: string | null
           company_id?: string
@@ -1459,6 +1463,8 @@ export type Database = {
         Update: {
           care_giver_id?: string | null
           care_receiver_id?: string | null
+          check_in_lat?: number | null
+          check_in_lng?: number | null
           check_in_time?: string | null
           check_out_time?: string | null
           company_id?: string
