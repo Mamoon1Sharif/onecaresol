@@ -115,6 +115,8 @@ const DailyRoster = () => {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [detailVisit, setDetailVisit] = useState<any>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [receiverProfile, setReceiverProfile] = useState<any>(null);
+  const [caregiverProfile, setCaregiverProfile] = useState<any>(null);
   const [nowTick, setNowTick] = useState(0);
 
   useEffect(() => {
