@@ -78,6 +78,7 @@ const statusTone: Record<string, string> = {
   Complete: "text-success font-medium",
   Finished: "text-success font-medium",
   "In Progress": "text-success font-semibold",
+  Late: "text-amber-600 font-semibold",
   Missed: "text-destructive font-semibold",
   Pending: "text-warning",
   Due: "text-blue-600 font-semibold",
