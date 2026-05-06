@@ -170,6 +170,7 @@ export function CareManagementTab({ careReceiverId, careReceiverName }: Props) {
       isMedication: r.is_medication,
       status: r.status as Task["status"],
       outcome: r.outcome ?? "",
+      assignedForShift: !!r.assigned_for_shift,
     }));
   }, [dbTasks]);
 
