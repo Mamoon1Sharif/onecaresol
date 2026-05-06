@@ -232,6 +232,9 @@ const DailyRoster = () => {
     return acc + (h || 0) * 60 + (m || 0);
   }, 0);
   const clockHours = rows.reduce((acc, r) => {
+    if (r.actualDuration.endsWith("m")) {
+      return acc + (parseInt(r.actualDuration, 10) || 0);
+    }
     const [h, m] = r.actualDuration.split(":").map(Number);
     return acc + (h || 0) * 60 + (m || 0);
   }, 0);
