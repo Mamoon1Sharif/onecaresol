@@ -147,14 +147,17 @@ const DailyRoster = () => {
       const isFuture = visitStart.getTime() > now.getTime();
       const accepted = !!v.care_giver_id;
 
+      // Clock-in must occur within 5 minutes after scheduled start to count as a valid start
+      const checkInMs = v.check_in_time ? new Date(v.check_in_time).getTime() : null;
+      const clockedInOnTime =
+        checkInMs !== null && checkInMs <= visitStart.getTime() + 5 * 60 * 1000;
+
       let status: string;
       if (v.status === "Cancelled") {
         status = "Cancelled";
-      } else if (v.check_out_time) {
+      } else if (v.check_out_time && clockedInOnTime) {
         status = "Finished";
-      } else if (v.check_in_time) {
-        status = "In Progress";
-      } else if (now.getTime() >= visitStart.getTime() && now.getTime() < visitEnd.getTime()) {
+      } else if (clockedInOnTime && !v.check_out_time) {
         status = "In Progress";
       } else if (isFuture) {
         status = "Due";
