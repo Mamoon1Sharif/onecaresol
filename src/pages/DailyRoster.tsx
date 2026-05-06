@@ -207,6 +207,8 @@ const DailyRoster = () => {
               return `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
             })()
           : "—",
+        checkInLat: v.check_in_lat ?? null,
+        checkInLng: v.check_in_lng ?? null,
         teamMember: cg.name ?? "—",
         serviceCall,
         week: `Week ${(week % 4) || 1}`,
