@@ -204,7 +204,6 @@ const DailyRoster = () => {
           ? (() => {
               const ms = new Date(v.check_out_time).getTime() - new Date(v.check_in_time).getTime();
               const mins = Math.max(0, Math.round(ms / 60000));
-              if (mins < 60) return `${mins}m`;
               return `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
             })()
           : "—",
@@ -232,9 +231,6 @@ const DailyRoster = () => {
     return acc + (h || 0) * 60 + (m || 0);
   }, 0);
   const clockHours = rows.reduce((acc, r) => {
-    if (r.actualDuration.endsWith("m")) {
-      return acc + (parseInt(r.actualDuration, 10) || 0);
-    }
     const [h, m] = r.actualDuration.split(":").map(Number);
     return acc + (h || 0) * 60 + (m || 0);
   }, 0);

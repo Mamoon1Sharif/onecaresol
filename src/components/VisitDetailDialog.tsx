@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -88,12 +87,6 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
   const [clockOut, setClockOut] = useState<string | null>(null);
   const [memberRemoved, setMemberRemoved] = useState(false);
 
-  // Clock in/out confirmation dialogs
-  const [clockInOpen, setClockInOpen] = useState(false);
-  const [clockOutOpen, setClockOutOpen] = useState(false);
-  const [clockInDraft, setClockInDraft] = useState("");
-  const [clockOutDraft, setClockOutDraft] = useState("");
-
   if (!visit) return null;
 
   const built = `${visit.ref} at ${new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })} on ${visit.date}`;
@@ -119,33 +112,21 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
     setLockOpen(false);
   };
 
-  const openClockIn = () => {
+  const handleClockIn = () => {
     const now = new Date();
-    setClockInDraft(now.toTimeString().slice(0, 5));
-    setClockInOpen(true);
-  };
-
-  const openClockOut = () => {
-    const now = new Date();
-    setClockOutDraft(now.toTimeString().slice(0, 5));
-    setClockOutOpen(true);
-  };
-
-  const confirmClockIn = () => {
-    if (!clockInDraft) { toast.error("Pick a clock-in time"); return; }
-    const [h, m] = clockInDraft.split(":").map(Number);
-    const ts = new Date();
-    ts.setHours(h, m, 0, 0);
-    setClockIn(clockInDraft);
-    setClockInOpen(false);
+    const timeStr = now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    setClockIn(timeStr);
 
     const persist = async (lat: number | null, lng: number | null) => {
       const { error } = await supabase
         .from("daily_visits")
-        .update({ check_in_time: ts.toISOString(), check_in_lat: lat, check_in_lng: lng } as any)
+        .update({ check_in_time: now.toISOString(), check_in_lat: lat, check_in_lng: lng } as any)
         .eq("id", visit!.id);
-      if (error) toast.error("Clock-in saved locally but failed to sync: " + error.message);
-      else toast.success(lat != null ? "Clocked in with GPS location" : "Clocked in (location unavailable)");
+      if (error) {
+        toast.error("Clock-in saved locally but failed to sync: " + error.message);
+      } else {
+        toast.success(lat != null ? "Clocked in with GPS location" : "Clocked in (location unavailable)");
+      }
     };
 
     if (typeof navigator !== "undefined" && navigator.geolocation) {
@@ -159,27 +140,14 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
     }
   };
 
-  const confirmClockOut = async () => {
-    if (!clockOutDraft) { toast.error("Pick a clock-out time"); return; }
-    if (clockIn) {
-      const [h1, m1] = clockIn.split(":").map(Number);
-      const [h2, m2] = clockOutDraft.split(":").map(Number);
-      if (h2 * 60 + m2 < h1 * 60 + m1) {
-        toast.error("Clock-out time cannot be earlier than clock-in time");
-        return;
-      }
-    }
-    const [h, m] = clockOutDraft.split(":").map(Number);
-    const ts = new Date();
-    ts.setHours(h, m, 0, 0);
-    setClockOut(clockOutDraft);
-    setClockOutOpen(false);
+  const handleClockOut = async () => {
+    const now = new Date();
+    setClockOut(now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }));
     const { error } = await supabase
       .from("daily_visits")
-      .update({ check_out_time: ts.toISOString() } as any)
+      .update({ check_out_time: now.toISOString() } as any)
       .eq("id", visit!.id);
     if (error) toast.error("Clock-out failed to sync: " + error.message);
-    else toast.success("Clocked out");
   };
 
   const duration = (() => {
@@ -381,9 +349,8 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
             {/* ============== TASKS ============== */}
             <section>
               <ShiftTasks
-                visitId={visit.id}
                 shiftEnd={editEnd || visit.scheduledEnd}
-                clockOut={clockOut || (visit.actualEnd && visit.actualEnd !== "—" ? visit.actualEnd : null)}
+                clockOut={clockOut || visit.actualEnd}
                 isMissed={(editStatus || visit.status || "").toLowerCase() === "missed"}
               />
             </section>
@@ -430,7 +397,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                           {clockIn ? (
                             <span className="font-mono font-semibold text-success">{clockIn}</span>
                           ) : (
-                            <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" onClick={openClockIn}>Clock In</Button>
+                            <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" onClick={handleClockIn}>Clock In</Button>
                           )}
                         </div>
                         <div className="flex items-center gap-2">
@@ -438,7 +405,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                           {clockOut ? (
                             <span className="font-mono font-semibold text-success">{clockOut}</span>
                           ) : (
-                            <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" disabled={!clockIn} onClick={openClockOut}>Clock Out</Button>
+                            <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" disabled={!clockIn} onClick={handleClockOut}>Clock Out</Button>
                           )}
                         </div>
                         <div className="text-orange-600">Duration: {duration}</div>
@@ -636,36 +603,6 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
         <ShadowForm onCancel={() => setShadowOpen(false)} onSave={(s) => { setShadow((arr) => [...arr, s]); setShadowOpen(false); }} visit={visit} />
       </DialogContent>
     </Dialog>
-
-    {/* ============== CLOCK IN DIALOG ============== */}
-    <Dialog open={clockInOpen} onOpenChange={setClockInOpen}>
-      <DialogContent className="max-w-sm">
-        <h3 className="font-semibold text-base mb-3">Confirm Clock In</h3>
-        <label className="text-xs font-medium">Clock-in time</label>
-        <Input type="time" value={clockInDraft} onChange={(e) => setClockInDraft(e.target.value)} className="mt-1" />
-        <p className="text-[11px] text-muted-foreground mt-2">Adjust the time if needed before confirming.</p>
-        <div className="flex justify-end gap-2 mt-4">
-          <Button variant="outline" size="sm" onClick={() => setClockInOpen(false)}>Cancel</Button>
-          <Button size="sm" className="bg-success text-success-foreground" onClick={confirmClockIn}>Confirm</Button>
-        </div>
-      </DialogContent>
-    </Dialog>
-
-    {/* ============== CLOCK OUT DIALOG ============== */}
-    <Dialog open={clockOutOpen} onOpenChange={setClockOutOpen}>
-      <DialogContent className="max-w-sm">
-        <h3 className="font-semibold text-base mb-3">Confirm Clock Out</h3>
-        <label className="text-xs font-medium">Clock-out time</label>
-        <Input type="time" min={clockIn ?? undefined} value={clockOutDraft} onChange={(e) => setClockOutDraft(e.target.value)} className="mt-1" />
-        {clockIn && (
-          <p className="text-[11px] text-muted-foreground mt-2">Must be on or after clock-in ({clockIn}).</p>
-        )}
-        <div className="flex justify-end gap-2 mt-4">
-          <Button variant="outline" size="sm" onClick={() => setClockOutOpen(false)}>Cancel</Button>
-          <Button size="sm" className="bg-success text-success-foreground" onClick={confirmClockOut}>Confirm</Button>
-        </div>
-      </DialogContent>
-    </Dialog>
     </>
   );
 }
@@ -709,115 +646,37 @@ interface TaskItem {
   title: string;
   done: boolean;
   completedAt?: string;
-  source: "shift" | "care";
 }
 
-function ShiftTasks({ visitId, shiftEnd, clockOut, isMissed = false }: { visitId: string; shiftEnd: string; clockOut: string | null; isMissed?: boolean }) {
-  const qc = useQueryClient();
-  const shiftEnded = !!clockOut;
-
-  const { data: visitRow } = useQuery({
-    queryKey: ["daily_visit_row", visitId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("daily_visits")
-        .select("id, care_receiver_id, company_id")
-        .eq("id", visitId)
-        .single();
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: shiftTasks = [] } = useQuery({
-    queryKey: ["shift_tasks", visitId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("shift_tasks")
-        .select("*")
-        .eq("daily_visit_id", visitId)
-        .order("created_at");
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-
-  const { data: careTasks = [] } = useQuery({
-    queryKey: ["care_management_tasks_for_visit", visitRow?.care_receiver_id],
-    enabled: !!visitRow?.care_receiver_id,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("care_management_tasks")
-        .select("id, title, status, assigned_for_shift")
-        .eq("care_receiver_id", visitRow!.care_receiver_id)
-        .eq("assigned_for_shift", true);
-      if (error) throw error;
-      return data ?? [];
-    },
-  });
-
-  // Merge: shift_tasks are authoritative (carry completion). Add care_management tasks
-  // not already present by title.
-  const tasks: TaskItem[] = (() => {
-    const out: TaskItem[] = (shiftTasks as any[]).map((t) => ({
-      id: t.id,
-      title: t.title,
-      done: !!t.is_completed,
-      completedAt: t.completed_at ? new Date(t.completed_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : undefined,
-      source: "shift",
-    }));
-    const existingTitles = new Set(out.map((t) => t.title.toLowerCase()));
-    for (const c of (careTasks as any[])) {
-      if (!existingTitles.has(String(c.title).toLowerCase())) {
-        out.push({ id: `care-${c.id}`, title: c.title, done: false, source: "care" });
-      }
-    }
-    return out;
-  })();
-
+function ShiftTasks({ shiftEnd, clockOut, isMissed = false }: { shiftEnd: string; clockOut: string | null; isMissed?: boolean }) {
+  const initialDone = !isMissed;
+  const [tasks, setTasks] = useState<TaskItem[]>([
+    { id: "t1", title: "Personal care — wash & dress", done: initialDone, completedAt: initialDone ? "08:14" : undefined },
+    { id: "t2", title: "Administer morning medication", done: initialDone, completedAt: initialDone ? "08:32" : undefined },
+    { id: "t3", title: "Prepare breakfast & assist with eating", done: initialDone, completedAt: initialDone ? "09:05" : undefined },
+    { id: "t4", title: "Light housekeeping in kitchen", done: false },
+    { id: "t5", title: "Lunchtime medication & meal", done: false },
+    { id: "t6", title: "Record fluid & food intake", done: false },
+  ]);
   const [draft, setDraft] = useState("");
 
   const completed = tasks.filter((t) => t.done);
   const pending = tasks.filter((t) => !t.done);
   const pct = tasks.length ? Math.round((completed.length / tasks.length) * 100) : 0;
 
-  const toggle = async (t: TaskItem) => {
-    if (shiftEnded || isMissed) return;
-    if (t.source === "care") {
-      // Promote to shift_tasks first as completed
-      if (!visitRow) return;
-      const { data, error } = await supabase
-        .from("shift_tasks")
-        .insert({ daily_visit_id: visitId, title: t.title, is_completed: true, completed_at: new Date().toISOString() } as any)
-        .select()
-        .single();
-      if (error) { toast.error(error.message); return; }
-    } else {
-      const newDone = !t.done;
-      const { error } = await supabase
-        .from("shift_tasks")
-        .update({ is_completed: newDone, completed_at: newDone ? new Date().toISOString() : null } as any)
-        .eq("id", t.id);
-      if (error) { toast.error(error.message); return; }
-    }
-    qc.invalidateQueries({ queryKey: ["shift_tasks", visitId] });
-  };
+  const toggle = (id: string) =>
+    setTasks((arr) =>
+      arr.map((t) =>
+        t.id === id
+          ? { ...t, done: !t.done, completedAt: !t.done ? new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : undefined }
+          : t,
+      ),
+    );
 
-  const removeTask = async (t: TaskItem) => {
-    if (t.source !== "shift") return;
-    const { error } = await supabase.from("shift_tasks").delete().eq("id", t.id);
-    if (error) { toast.error(error.message); return; }
-    qc.invalidateQueries({ queryKey: ["shift_tasks", visitId] });
-  };
-
-  const addTask = async () => {
-    if (!draft.trim() || !visitRow) return;
-    const { error } = await supabase
-      .from("shift_tasks")
-      .insert({ daily_visit_id: visitId, title: draft.trim() } as any);
-    if (error) { toast.error(error.message); return; }
+  const addTask = () => {
+    if (!draft.trim()) return;
+    setTasks((arr) => [...arr, { id: crypto.randomUUID(), title: draft.trim(), done: false }]);
     setDraft("");
-    qc.invalidateQueries({ queryKey: ["shift_tasks", visitId] });
   };
 
   return (
@@ -830,7 +689,7 @@ function ShiftTasks({ visitId, shiftEnd, clockOut, isMissed = false }: { visitId
           </span>
         </h3>
         <span className={`text-[11px] ${isMissed ? "text-destructive font-medium" : "text-muted-foreground"}`}>
-          {isMissed ? "Shift missed — no tasks completed" : shiftEnded ? "Shift ended" : `Pending until ${shiftEnd}`}
+          {isMissed ? "Shift missed — no tasks completed" : clockOut ? "Shift ended" : `Pending until ${shiftEnd}`}
         </span>
       </div>
 
@@ -850,9 +709,9 @@ function ShiftTasks({ visitId, shiftEnd, clockOut, isMissed = false }: { visitId
             <ul className="space-y-1">
               {completed.map((t) => (
                 <li key={t.id} className="flex items-center gap-2 text-xs">
-                  <input type="checkbox" checked disabled={shiftEnded || isMissed} onChange={() => toggle(t)} className="rounded text-success" />
+                  <input type="checkbox" checked onChange={() => toggle(t.id)} className="rounded text-success" />
                   <span className="line-through text-muted-foreground flex-1">{t.title}</span>
-                  {t.completedAt && <span className="font-mono text-[10px] text-success">{t.completedAt}</span>}
+                  <span className="font-mono text-[10px] text-success">{t.completedAt}</span>
                 </li>
               ))}
             </ul>
@@ -870,13 +729,11 @@ function ShiftTasks({ visitId, shiftEnd, clockOut, isMissed = false }: { visitId
             <ul className="space-y-1">
               {pending.map((t) => (
                 <li key={t.id} className="flex items-center gap-2 text-xs">
-                  <input type="checkbox" disabled={shiftEnded || isMissed} onChange={() => toggle(t)} className="rounded" />
+                  <input type="checkbox" onChange={() => toggle(t.id)} className="rounded" />
                   <span className="flex-1 text-foreground">{t.title}</span>
-                  {!shiftEnded && t.source === "shift" && (
-                    <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => removeTask(t)}>
-                      <Trash2 className="h-3 w-3 text-destructive" />
-                    </Button>
-                  )}
+                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => setTasks((arr) => arr.filter((x) => x.id !== t.id))}>
+                    <Trash2 className="h-3 w-3 text-destructive" />
+                  </Button>
                 </li>
               ))}
             </ul>
@@ -884,21 +741,18 @@ function ShiftTasks({ visitId, shiftEnd, clockOut, isMissed = false }: { visitId
         </div>
       </div>
 
-      {!shiftEnded && !isMissed && (
-        <div className="flex gap-2 mt-3">
-          <Input
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addTask()}
-            placeholder="Add a new care task..."
-            className="h-8 text-xs"
-          />
-          <Button size="sm" onClick={addTask} className="bg-success hover:bg-success/90 text-success-foreground h-8 text-xs gap-1">
-            <Plus className="h-3.5 w-3.5" /> Add Task
-          </Button>
-        </div>
-      )}
+      <div className="flex gap-2 mt-3">
+        <Input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && addTask()}
+          placeholder="Add a new care task..."
+          className="h-8 text-xs"
+        />
+        <Button size="sm" onClick={addTask} className="bg-success hover:bg-success/90 text-success-foreground h-8 text-xs gap-1">
+          <Plus className="h-3.5 w-3.5" /> Add Task
+        </Button>
+      </div>
     </>
   );
 }
-
