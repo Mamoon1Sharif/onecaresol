@@ -62,6 +62,7 @@ interface Props {
 const COL_ICON = "h-3.5 w-3.5 text-muted-foreground/70";
 
 export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
+  const qc = useQueryClient();
   const [notes, setNotes] = useState<Note[]>([]);
   const [locks, setLocks] = useState<RotaLock[]>([]);
   const [shadow, setShadow] = useState<any[]>([]);
