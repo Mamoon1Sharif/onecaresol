@@ -492,7 +492,13 @@ const DailyRoster = () => {
                         )}
                       </td>
                       <td className="p-1.5 border-r border-border">
-                        <a className="text-primary hover:underline cursor-pointer text-[11px]">{r.serviceUser}</a>
+                        <button
+                          type="button"
+                          onClick={() => r.receiver?.id && setReceiverProfile(r.receiver)}
+                          className="text-primary hover:underline cursor-pointer text-[11px] text-left"
+                        >
+                          {r.serviceUser}
+                        </button>
                       </td>
                       <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{r.scheduledStart}</td>
                       <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{r.scheduledEnd}</td>
@@ -501,7 +507,17 @@ const DailyRoster = () => {
                       <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{r.isFuture ? "" : r.actualEnd}</td>
                       <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{r.isFuture ? "" : r.actualDuration}</td>
                       <td className="p-1.5 border-r border-border">
-                        <a className="text-primary hover:underline cursor-pointer text-[11px]">{r.teamMember}</a>
+                        {r.caregiver?.id ? (
+                          <button
+                            type="button"
+                            onClick={() => setCaregiverProfile(r.caregiver)}
+                            className="text-primary hover:underline cursor-pointer text-[11px] text-left"
+                          >
+                            {r.teamMember}
+                          </button>
+                        ) : (
+                          <span className="text-[11px] text-muted-foreground">{r.teamMember}</span>
+                        )}
                       </td>
                       <td className="p-1.5 border-r border-border text-[11px] text-foreground/80">{r.serviceCall}</td>
                       <td className="p-1.5 border-r border-border text-center">
