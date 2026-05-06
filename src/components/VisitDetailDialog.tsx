@@ -636,6 +636,36 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
         <ShadowForm onCancel={() => setShadowOpen(false)} onSave={(s) => { setShadow((arr) => [...arr, s]); setShadowOpen(false); }} visit={visit} />
       </DialogContent>
     </Dialog>
+
+    {/* ============== CLOCK IN DIALOG ============== */}
+    <Dialog open={clockInOpen} onOpenChange={setClockInOpen}>
+      <DialogContent className="max-w-sm">
+        <h3 className="font-semibold text-base mb-3">Confirm Clock In</h3>
+        <label className="text-xs font-medium">Clock-in time</label>
+        <Input type="time" value={clockInDraft} onChange={(e) => setClockInDraft(e.target.value)} className="mt-1" />
+        <p className="text-[11px] text-muted-foreground mt-2">Adjust the time if needed before confirming.</p>
+        <div className="flex justify-end gap-2 mt-4">
+          <Button variant="outline" size="sm" onClick={() => setClockInOpen(false)}>Cancel</Button>
+          <Button size="sm" className="bg-success text-success-foreground" onClick={confirmClockIn}>Confirm</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    {/* ============== CLOCK OUT DIALOG ============== */}
+    <Dialog open={clockOutOpen} onOpenChange={setClockOutOpen}>
+      <DialogContent className="max-w-sm">
+        <h3 className="font-semibold text-base mb-3">Confirm Clock Out</h3>
+        <label className="text-xs font-medium">Clock-out time</label>
+        <Input type="time" min={clockIn ?? undefined} value={clockOutDraft} onChange={(e) => setClockOutDraft(e.target.value)} className="mt-1" />
+        {clockIn && (
+          <p className="text-[11px] text-muted-foreground mt-2">Must be on or after clock-in ({clockIn}).</p>
+        )}
+        <div className="flex justify-end gap-2 mt-4">
+          <Button variant="outline" size="sm" onClick={() => setClockOutOpen(false)}>Cancel</Button>
+          <Button size="sm" className="bg-success text-success-foreground" onClick={confirmClockOut}>Confirm</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
     </>
   );
 }
