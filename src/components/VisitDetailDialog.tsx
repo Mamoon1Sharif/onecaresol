@@ -290,9 +290,22 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{editStart || visit.scheduledStart}</td>
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{editEnd || visit.scheduledEnd}</td>
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{visit.duration}</td>
-                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{visit.isFuture || (editStatus || visit.status) === "Missed" ? "—" : (clockIn || visit.actualStart || "—")}</td>
-                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{visit.isFuture || (editStatus || visit.status) === "Missed" ? "—" : (clockOut || visit.actualEnd || "—")}</td>
-                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{visit.isFuture || (editStatus || visit.status) === "Missed" ? "—" : (duration !== "0 minutes" ? duration : (visit.actualDuration || "—"))}</td>
+                         {(() => {
+                           const isMissed = (editStatus || visit.status) === "Missed";
+                           const ciVal = clockIn || (visit.actualStart && visit.actualStart !== "—" ? visit.actualStart : "");
+                           const coVal = clockOut || (visit.actualEnd && visit.actualEnd !== "—" ? visit.actualEnd : "");
+                           const durVal = duration !== "0 minutes" ? duration : (visit.actualDuration && visit.actualDuration !== "—" ? visit.actualDuration : "");
+                           const ci = isMissed ? "—" : (ciVal || (visit.isFuture ? "" : "—"));
+                           const co = isMissed ? "—" : (coVal || (visit.isFuture ? "" : "—"));
+                           const du = isMissed ? "—" : (durVal || (visit.isFuture ? "" : "—"));
+                           return (
+                             <>
+                               <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{ci}</td>
+                               <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{co}</td>
+                               <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{du}</td>
+                             </>
+                           );
+                         })()}
                         <td className="p-1.5 border-r border-border">
                           <a className="text-primary hover:underline cursor-pointer text-[11px]">{visit.teamMember}</a>
                         </td>
@@ -385,6 +398,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
             {/* ============== TASKS ============== */}
             <section>
               <ShiftTasks
+                visitId={visit.id}
                 shiftEnd={editEnd || visit.scheduledEnd}
                 clockOut={clockOut || visit.actualEnd}
                 isMissed={(editStatus || visit.status || "").toLowerCase() === "missed"}
@@ -684,35 +698,86 @@ interface TaskItem {
   completedAt?: string;
 }
 
-function ShiftTasks({ shiftEnd, clockOut, isMissed = false }: { shiftEnd: string; clockOut: string | null; isMissed?: boolean }) {
-  const initialDone = !isMissed;
-  const [tasks, setTasks] = useState<TaskItem[]>([
-    { id: "t1", title: "Personal care — wash & dress", done: initialDone, completedAt: initialDone ? "08:14" : undefined },
-    { id: "t2", title: "Administer morning medication", done: initialDone, completedAt: initialDone ? "08:32" : undefined },
-    { id: "t3", title: "Prepare breakfast & assist with eating", done: initialDone, completedAt: initialDone ? "09:05" : undefined },
-    { id: "t4", title: "Light housekeeping in kitchen", done: false },
-    { id: "t5", title: "Lunchtime medication & meal", done: false },
-    { id: "t6", title: "Record fluid & food intake", done: false },
-  ]);
+function ShiftTasks({ visitId, shiftEnd, clockOut, isMissed = false }: { visitId: string; shiftEnd: string; clockOut: string | null; isMissed?: boolean }) {
+  const [tasks, setTasks] = useState<TaskItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("shift_tasks")
+        .select("id,title,is_completed,completed_at")
+        .eq("daily_visit_id", visitId)
+        .order("created_at", { ascending: true });
+      if (cancelled) return;
+      if (error) {
+        toast.error("Failed to load tasks: " + error.message);
+        setTasks([]);
+      } else {
+        setTasks(
+          (data ?? []).map((r: any) => ({
+            id: r.id,
+            title: r.title,
+            done: !!r.is_completed,
+            completedAt: r.completed_at
+              ? new Date(r.completed_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
+              : undefined,
+          })),
+        );
+      }
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [visitId]);
 
   const completed = tasks.filter((t) => t.done);
   const pending = tasks.filter((t) => !t.done);
   const pct = tasks.length ? Math.round((completed.length / tasks.length) * 100) : 0;
 
-  const toggle = (id: string) =>
+  const toggle = async (id: string) => {
+    const t = tasks.find((x) => x.id === id);
+    if (!t) return;
+    const newDone = !t.done;
+    const completedAtIso = newDone ? new Date().toISOString() : null;
     setTasks((arr) =>
-      arr.map((t) =>
-        t.id === id
-          ? { ...t, done: !t.done, completedAt: !t.done ? new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : undefined }
-          : t,
+      arr.map((x) =>
+        x.id === id
+          ? { ...x, done: newDone, completedAt: newDone ? new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : undefined }
+          : x,
       ),
     );
+    const { error } = await supabase
+      .from("shift_tasks")
+      .update({ is_completed: newDone, completed_at: completedAtIso } as any)
+      .eq("id", id);
+    if (error) toast.error("Failed to update task");
+  };
 
-  const addTask = () => {
-    if (!draft.trim()) return;
-    setTasks((arr) => [...arr, { id: crypto.randomUUID(), title: draft.trim(), done: false }]);
+  const addTask = async () => {
+    const title = draft.trim();
+    if (!title) return;
     setDraft("");
+    const { data, error } = await supabase
+      .from("shift_tasks")
+      .insert({ daily_visit_id: visitId, title } as any)
+      .select("id,title,is_completed,completed_at")
+      .single();
+    if (error || !data) {
+      toast.error("Failed to add task");
+      return;
+    }
+    setTasks((arr) => [...arr, { id: data.id, title: data.title, done: !!data.is_completed }]);
+  };
+
+  const removeTask = async (id: string) => {
+    setTasks((arr) => arr.filter((x) => x.id !== id));
+    const { error } = await supabase.from("shift_tasks").delete().eq("id", id);
+    if (error) toast.error("Failed to remove task");
   };
 
   return (
@@ -739,7 +804,9 @@ function ShiftTasks({ shiftEnd, clockOut, isMissed = false }: { shiftEnd: string
           <div className="text-[11px] font-semibold text-success uppercase tracking-wide mb-1.5 flex items-center gap-1">
             <CheckCircle2 className="h-3 w-3" /> Completed ({completed.length})
           </div>
-          {completed.length === 0 ? (
+          {loading ? (
+            <p className="text-[11px] text-muted-foreground text-center py-2">Loading...</p>
+          ) : completed.length === 0 ? (
             <p className="text-[11px] text-muted-foreground text-center py-2">None yet.</p>
           ) : (
             <ul className="space-y-1">
@@ -759,15 +826,17 @@ function ShiftTasks({ shiftEnd, clockOut, isMissed = false }: { shiftEnd: string
           <div className={`text-[11px] font-semibold uppercase tracking-wide mb-1.5 flex items-center gap-1 ${isMissed ? "text-destructive" : "text-amber-700"}`}>
             <CircleDot className="h-3 w-3" /> {isMissed ? `Not done — shift missed (${pending.length})` : `Pending until end of shift (${pending.length})`}
           </div>
-          {pending.length === 0 ? (
-            <p className="text-[11px] text-muted-foreground text-center py-2">All tasks done. 🎉</p>
+          {loading ? (
+            <p className="text-[11px] text-muted-foreground text-center py-2">Loading...</p>
+          ) : pending.length === 0 ? (
+            <p className="text-[11px] text-muted-foreground text-center py-2">{tasks.length === 0 ? "No tasks assigned." : "All tasks done. 🎉"}</p>
           ) : (
             <ul className="space-y-1">
               {pending.map((t) => (
                 <li key={t.id} className="flex items-center gap-2 text-xs">
                   <input type="checkbox" onChange={() => toggle(t.id)} className="rounded" />
                   <span className="flex-1 text-foreground">{t.title}</span>
-                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => setTasks((arr) => arr.filter((x) => x.id !== t.id))}>
+                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => removeTask(t.id)}>
                     <Trash2 className="h-3 w-3 text-destructive" />
                   </Button>
                 </li>
