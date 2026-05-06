@@ -122,7 +122,7 @@ export default function ReceiverMessaging() {
               pageItems.map((n, i) => (
                 <div key={n.id} className={`grid grid-cols-[140px_140px_1fr] text-xs py-2.5 px-2 ${i % 2 === 0 ? "bg-muted/30" : "bg-background"}`}>
                   <div className="text-muted-foreground">{n.created_by || "—"}</div>
-                  <div className="text-muted-foreground">{format(new Date(n.created_at), "dd/MM/yyyy HH:mm")}</div>
+                  <div className="text-muted-foreground">{new Date(n.created_at).toLocaleString()}</div>
                   <div className="text-foreground break-words">{n.note}</div>
                 </div>
               ))

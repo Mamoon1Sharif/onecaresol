@@ -203,7 +203,7 @@ export function CareGiverProfileDialog({ open, onOpenChange, caregiver }: Props)
                 </p>
                 {caregiver.created_at && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    Created: {new Date(caregiver.created_at).toLocaleDateString("en-GB")}
+                    Created: {new Date(caregiver.created_at).toLocaleString()}
                   </p>
                 )}
               </div>

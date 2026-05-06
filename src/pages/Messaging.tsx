@@ -304,7 +304,7 @@ export default function Messaging() {
                 >
                   <div className="text-muted-foreground">{n.created_by || "—"}</div>
                   <div className="text-muted-foreground">
-                    {format(new Date(n.created_at), "dd/MM/yyyy HH:mm")}
+                    {new Date(n.created_at).toLocaleString()}
                   </div>
                   <div className="text-foreground break-words">{n.note}</div>
                 </div>
