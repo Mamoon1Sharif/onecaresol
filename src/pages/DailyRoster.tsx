@@ -474,6 +474,9 @@ const DailyRoster = () => {
                   const rowBg = isMissed ? "bg-purple-100/70" : i % 2 === 1 ? "bg-emerald-50/60" : "bg-emerald-50/30";
                   const dot = dotColors[i % dotColors.length];
                   const isSel = selected.has(r.id);
+                  const actualStartDisplay = r.actualStart !== "—" ? r.actualStart : (r.isFuture ? "" : "—");
+                  const actualEndDisplay = r.actualEnd !== "—" ? r.actualEnd : (r.isFuture ? "" : "—");
+                  const actualDurationDisplay = r.actualDuration !== "—" ? r.actualDuration : (r.isFuture ? "" : "—");
                   return (
                     <tr key={r.id} className={`${rowBg} border-b border-border hover:bg-muted/40 transition-colors`}>
                       <td className="p-1.5 border-r border-border text-center">
@@ -525,9 +528,9 @@ const DailyRoster = () => {
                       <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{r.scheduledStart}</td>
                       <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{r.scheduledEnd}</td>
                       <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{r.duration}</td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{r.isFuture ? "" : r.actualStart}</td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{r.isFuture ? "" : r.actualEnd}</td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{r.isFuture ? "" : r.actualDuration}</td>
+                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{actualStartDisplay}</td>
+                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{actualEndDisplay}</td>
+                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{actualDurationDisplay}</td>
                       <td className="p-1.5 border-r border-border text-center font-mono text-[10px]">
                         {r.checkInLat != null && r.checkInLng != null ? (
                           <a
