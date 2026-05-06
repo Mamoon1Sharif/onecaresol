@@ -138,12 +138,14 @@ const DailyRoster = () => {
       const cr = v.care_receivers ?? {};
       const cg = v.care_givers ?? {};
       const start = v.start_hour ?? 0;
-      const dur = v.duration ?? 0;
+      const startMin = (v as any).start_minute ?? 0;
+      const durHours = v.duration ?? 0;
+      const durMins = (v as any).duration_minutes ?? durHours * 60;
       const ref = `14${(597 + idx).toString().padStart(4, "0")}${(idx * 7 % 100).toString().padStart(2, "0")}`;
       const week = Math.ceil(((new Date(dateStr).getDate())) / 7);
 
-      const visitStart = new Date(`${v.visit_date}T${String(start).padStart(2, "0")}:00:00`);
-      const visitEnd = new Date(visitStart.getTime() + dur * 60 * 60 * 1000);
+      const visitStart = new Date(`${v.visit_date}T${String(start).padStart(2, "0")}:${String(startMin).padStart(2, "0")}:00`);
+      const visitEnd = new Date(visitStart.getTime() + durMins * 60 * 1000);
       const isFuture = visitStart.getTime() > now.getTime();
       const accepted = !!v.care_giver_id;
 
@@ -173,6 +175,11 @@ const DailyRoster = () => {
         : idx % 4 === 0 ? "Private Morning..."
         : "WCC - Morning...";
 
+      const endTotalMin = start * 60 + startMin + durMins;
+      const endH = Math.floor(endTotalMin / 60) % 24;
+      const endM = endTotalMin % 60;
+      const fmtDur = `${String(Math.floor(durMins / 60)).padStart(2, "0")}:${String(durMins % 60).padStart(2, "0")}`;
+
       return {
         id: v.id,
         ref,
@@ -182,9 +189,9 @@ const DailyRoster = () => {
         accepted,
         serviceUser: `${cr.name ?? "Unknown"}${postcode ? "-" + postcode.replace(" ", "") : ""}`,
         serviceUserRaw: cr.name ?? "Unknown",
-        scheduledStart: fmtHour(start),
-        scheduledEnd: fmtHour(start + dur),
-        duration: fmtHour(dur),
+        scheduledStart: fmtHour(start, startMin),
+        scheduledEnd: fmtHour(endH, endM),
+        duration: fmtDur,
         actualStart: v.check_in_time ? new Date(v.check_in_time).toTimeString().slice(0, 5) : "—",
         actualEnd: v.check_out_time ? new Date(v.check_out_time).toTimeString().slice(0, 5) : "—",
         actualDuration: v.check_in_time && v.check_out_time

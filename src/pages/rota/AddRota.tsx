@@ -199,7 +199,7 @@ const AddRota = () => {
 
       const day = new Date(form.date).getDay();
       const staffId = form.staff1 || null;
-      const durHours = Math.max(1, Math.round(durationMinutes / 60));
+      const durHours = Math.max(1, Math.ceil(durationMinutes / 60));
       const newStart = parseInt(form.startH);
       const newEnd = newStart + durHours;
 
@@ -236,9 +236,11 @@ const AddRota = () => {
           care_giver_id: staffId,
           visit_date: form.date,
           start_hour: parseInt(form.startH),
+          start_minute: parseInt(form.startM),
           duration: durHours,
+          duration_minutes: durationMinutes,
           status: staffId ? "Confirmed" : "Pending",
-        })
+        } as any)
         .select("id")
         .single();
       if (dvErr) throw dvErr;
