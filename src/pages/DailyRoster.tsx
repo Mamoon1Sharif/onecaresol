@@ -441,6 +441,7 @@ const DailyRoster = () => {
                     <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Clock className="h-3.5 w-3.5 text-rose-700" /></span></TooltipTrigger><TooltipContent className="text-xs">Actual clock-out time</TooltipContent></Tooltip>
                   </th>
                   <th className="p-2 border-r border-border text-center w-16"><IconCell icon={TrendingUp} label="Actual duration worked" /></th>
+                  <th className="p-2 border-r border-border text-center w-28"><IconCell icon={Map} label="Clock-in GPS location (lat, lng)" /></th>
                   <th className="p-2 border-r border-border text-left">Care Giver</th>
                   <th className="p-2 border-r border-border text-left">Service Call</th>
                   <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Tag} label="Service tag" /></th>
