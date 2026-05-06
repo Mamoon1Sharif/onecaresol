@@ -236,9 +236,11 @@ const AddRota = () => {
           care_giver_id: staffId,
           visit_date: form.date,
           start_hour: parseInt(form.startH),
+          start_minute: parseInt(form.startM),
           duration: durHours,
+          duration_minutes: durationMinutes,
           status: staffId ? "Confirmed" : "Pending",
-        })
+        } as any)
         .select("id")
         .single();
       if (dvErr) throw dvErr;
