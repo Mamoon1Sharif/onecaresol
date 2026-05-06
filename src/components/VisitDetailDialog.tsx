@@ -350,8 +350,9 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
             {/* ============== TASKS ============== */}
             <section>
               <ShiftTasks
+                visitId={visit.id}
                 shiftEnd={editEnd || visit.scheduledEnd}
-                clockOut={clockOut || visit.actualEnd}
+                clockOut={clockOut || (visit.actualEnd && visit.actualEnd !== "—" ? visit.actualEnd : null)}
                 isMissed={(editStatus || visit.status || "").toLowerCase() === "missed"}
               />
             </section>
