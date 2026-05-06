@@ -1,0 +1,1 @@
+ALTER TABLE public.care_management_tasks ADD COLUMN IF NOT EXISTS assigned_for_shift boolean NOT NULL DEFAULT false;

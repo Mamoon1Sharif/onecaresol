@@ -48,6 +48,7 @@ interface Task {
   isMedication: boolean;      // renders as blue document row (e.g. "Medication Stock Check")
   status: "Active" | "Inactive";
   outcome?: string;           // optional linked outcome (kept for compatibility)
+  assignedForShift?: boolean; // highlighted when assigned to a shift via a rota
 }
 
 interface Visit {
@@ -169,6 +170,7 @@ export function CareManagementTab({ careReceiverId, careReceiverName }: Props) {
       isMedication: r.is_medication,
       status: r.status as Task["status"],
       outcome: r.outcome ?? "",
+      assignedForShift: !!r.assigned_for_shift,
     }));
   }, [dbTasks]);
 
@@ -448,14 +450,26 @@ export function CareManagementTab({ careReceiverId, careReceiverName }: Props) {
             <div className="space-y-2">
               {[...visibleTasks].sort((a, b) => a.title.localeCompare(b.title)).map((t) => {
                 const isMed = t.isMedication;
-                // Header strip color: yellow for normal tasks, blue for medication
-                const headerCls = isMed
+                const isAssigned = !!t.assignedForShift;
+                // Header strip color: violet ring for assigned-for-shift, otherwise blue (med) or amber (normal)
+                const headerCls = isAssigned
+                  ? "bg-violet-100/80 border-violet-300"
+                  : isMed
                   ? "bg-sky-100/80 border-sky-200"
                   : "bg-amber-100/70 border-amber-200";
-                const headerTitleCls = isMed ? "text-sky-700" : "text-amber-700";
+                const headerTitleCls = isAssigned
+                  ? "text-violet-800"
+                  : isMed
+                  ? "text-sky-700"
+                  : "text-amber-700";
                 const HeaderIcon = isMed ? FileText : Check;
                 return (
-                  <div key={t.id} className="border border-border rounded-md overflow-hidden bg-background group">
+                  <div
+                    key={t.id}
+                    className={`border rounded-md overflow-hidden bg-background group ${
+                      isAssigned ? "border-violet-400 ring-2 ring-violet-300/60 shadow-sm" : "border-border"
+                    }`}
+                  >
                     {/* Title strip */}
                     <div className={`flex items-center justify-between px-3 py-2 border-b ${headerCls}`}>
                       <div className={`flex items-center gap-2 text-sm font-semibold ${headerTitleCls}`}>
@@ -463,6 +477,14 @@ export function CareManagementTab({ careReceiverId, careReceiverName }: Props) {
                         <span>{t.title}</span>
                       </div>
                       <div className="flex items-center gap-2">
+                        {isAssigned && (
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] uppercase tracking-wide bg-violet-600 text-white border-violet-700"
+                          >
+                            Assigned for Shift
+                          </Badge>
+                        )}
                         <Badge
                           variant="outline"
                           className={`text-[10px] uppercase tracking-wide ${

@@ -258,6 +258,43 @@ const AddRota = () => {
         if (stErr) throw stErr;
       }
 
+      // Persist selected approved tasks to care_management_tasks, marking them as assigned for shift
+      if (form.tasksRequired && selectedTasks.length > 0) {
+        const visitLabel = form.serviceList;
+        const { data: existingTasks } = await supabase
+          .from("care_management_tasks")
+          .select("id, title, visits, assigned_for_shift")
+          .eq("care_receiver_id", selected.id)
+          .eq("company_id", companyUser.company_id);
+        const existingByTitle = new Map<string, any>(
+          (existingTasks ?? []).map((r: any) => [String(r.title).toLowerCase(), r]),
+        );
+        for (const title of selectedTasks) {
+          const existing = existingByTitle.get(title.toLowerCase());
+          if (existing) {
+            const mergedVisits = Array.from(new Set([...(existing.visits ?? []), visitLabel]));
+            await supabase
+              .from("care_management_tasks")
+              .update({ assigned_for_shift: true, visits: mergedVisits, status: "Active" } as any)
+              .eq("id", existing.id);
+          } else {
+            await supabase.from("care_management_tasks").insert({
+              care_receiver_id: selected.id,
+              company_id: companyUser.company_id,
+              title,
+              description: null,
+              start_date: form.date,
+              is_ongoing: true,
+              visits: [visitLabel],
+              is_medication: false,
+              status: "Active",
+              assigned_for_shift: true,
+            } as any);
+          }
+        }
+        await queryClient.invalidateQueries({ queryKey: ["care_management_tasks", selected.id] });
+      }
+
       await queryClient.invalidateQueries({ queryKey: ["daily_visits"] });
       await queryClient.invalidateQueries({ queryKey: ["shift_tasks"] });
       toast.success("Shift saved successfully");
