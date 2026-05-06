@@ -74,6 +74,18 @@ function fmtHour(h?: number, mm = 0) {
   return `${String(hr).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
 }
 
+function buildLocalDateTime(dateStr: string, hour = 0, minute = 0) {
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, (month || 1) - 1, day || 1, hour, minute, 0, 0);
+}
+
+function formatLocalTime(value?: string | null) {
+  if (!value) return "—";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "—";
+  return parsed.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+}
+
 const statusTone: Record<string, string> = {
   Complete: "text-success font-medium",
   Finished: "text-success font-medium",
@@ -145,7 +157,7 @@ const DailyRoster = () => {
       const ref = `14${(597 + idx).toString().padStart(4, "0")}${(idx * 7 % 100).toString().padStart(2, "0")}`;
       const week = Math.ceil(((new Date(dateStr).getDate())) / 7);
 
-      const visitStart = new Date(`${v.visit_date}T${String(start).padStart(2, "0")}:${String(startMin).padStart(2, "0")}:00Z`);
+      const visitStart = buildLocalDateTime(v.visit_date, start, startMin);
       const visitEnd = new Date(visitStart.getTime() + durMins * 60 * 1000);
       const isFuture = visitStart.getTime() > now.getTime();
       const accepted = !!v.care_giver_id;
@@ -201,8 +213,8 @@ const DailyRoster = () => {
         scheduledStart: fmtHour(start, startMin),
         scheduledEnd: fmtHour(endH, endM),
         duration: fmtDur,
-        actualStart: v.check_in_time ? new Date(v.check_in_time).toISOString().slice(11, 16) : "—",
-        actualEnd: v.check_out_time ? new Date(v.check_out_time).toISOString().slice(11, 16) : "—",
+        actualStart: formatLocalTime(v.check_in_time),
+        actualEnd: formatLocalTime(v.check_out_time),
         actualDuration: v.check_in_time && v.check_out_time
           ? (() => {
               const ms = new Date(v.check_out_time).getTime() - new Date(v.check_in_time).getTime();
