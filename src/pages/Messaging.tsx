@@ -304,7 +304,7 @@ export default function Messaging() {
                 >
                   <div className="text-muted-foreground">{n.created_by || "—"}</div>
                   <div className="text-muted-foreground">
-                    {new Date(n.created_at).toLocaleString()}
+                    {new Date(n.created_at).toLocaleString("en-GB", { timeZone: "Asia/Karachi" })}
                   </div>
                   <div className="text-foreground break-words">{n.note}</div>
                 </div>

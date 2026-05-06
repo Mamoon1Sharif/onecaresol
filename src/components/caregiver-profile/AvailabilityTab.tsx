@@ -183,7 +183,7 @@ export const AvailabilityTab = ({ cg }: Props) => {
         </Button>
         {cg.handset_logged_out_at && (
           <span className="text-xs text-muted-foreground italic">
-            Last logged out: {new Date(cg.handset_logged_out_at).toLocaleString()}
+            Last logged out: {new Date(cg.handset_logged_out_at).toLocaleString("en-GB", { timeZone: "Asia/Karachi" })}
           </span>
         )}
         <AlertDialog open={confirmHandsetLogout} onOpenChange={setConfirmHandsetLogout}>

@@ -238,7 +238,7 @@ export function CareReceiverProfileDialog({ open, onOpenChange, receiver }: Prop
                 </p>
                 {receiver.created_at && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    Created: {new Date(receiver.created_at).toLocaleString()}
+                    Created: {new Date(receiver.created_at).toLocaleString("en-GB", { timeZone: "Asia/Karachi" })}
                   </p>
                 )}
               </div>
