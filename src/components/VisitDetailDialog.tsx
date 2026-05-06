@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,7 @@ interface Props {
 const COL_ICON = "h-3.5 w-3.5 text-muted-foreground/70";
 
 export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
+  const qc = useQueryClient();
   const [notes, setNotes] = useState<Note[]>([]);
   const [locks, setLocks] = useState<RotaLock[]>([]);
   const [shadow, setShadow] = useState<any[]>([]);
@@ -126,6 +128,8 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
         toast.error("Clock-in saved locally but failed to sync: " + error.message);
       } else {
         toast.success(lat != null ? "Clocked in with GPS location" : "Clocked in (location unavailable)");
+        qc.invalidateQueries({ queryKey: ["daily_visits"] });
+        qc.invalidateQueries({ queryKey: ["daily_visits_range"] });
       }
     };
 
@@ -145,9 +149,15 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
     setClockOut(now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }));
     const { error } = await supabase
       .from("daily_visits")
-      .update({ check_out_time: now.toISOString() } as any)
+      .update({ check_out_time: now.toISOString(), status: "Completed" } as any)
       .eq("id", visit!.id);
-    if (error) toast.error("Clock-out failed to sync: " + error.message);
+    if (error) {
+      toast.error("Clock-out failed to sync: " + error.message);
+    } else {
+      toast.success("Clocked out");
+      qc.invalidateQueries({ queryKey: ["daily_visits"] });
+      qc.invalidateQueries({ queryKey: ["daily_visits_range"] });
+    }
   };
 
   const duration = (() => {
