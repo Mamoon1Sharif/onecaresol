@@ -113,6 +113,12 @@ const DailyRoster = () => {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [detailVisit, setDetailVisit] = useState<any>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [nowTick, setNowTick] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setNowTick((n) => n + 1), 30000);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     const ch = supabase
