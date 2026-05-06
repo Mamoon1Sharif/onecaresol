@@ -48,6 +48,7 @@ interface Task {
   isMedication: boolean;      // renders as blue document row (e.g. "Medication Stock Check")
   status: "Active" | "Inactive";
   outcome?: string;           // optional linked outcome (kept for compatibility)
+  assignedForShift?: boolean; // highlighted when assigned to a shift via a rota
 }
 
 interface Visit {
