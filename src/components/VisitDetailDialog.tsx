@@ -149,9 +149,15 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
     setClockOut(now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }));
     const { error } = await supabase
       .from("daily_visits")
-      .update({ check_out_time: now.toISOString() } as any)
+      .update({ check_out_time: now.toISOString(), status: "Completed" } as any)
       .eq("id", visit!.id);
-    if (error) toast.error("Clock-out failed to sync: " + error.message);
+    if (error) {
+      toast.error("Clock-out failed to sync: " + error.message);
+    } else {
+      toast.success("Clocked out");
+      qc.invalidateQueries({ queryKey: ["daily_visits"] });
+      qc.invalidateQueries({ queryKey: ["daily_visits_range"] });
+    }
   };
 
   const duration = (() => {
