@@ -602,6 +602,16 @@ const DailyRoster = () => {
         </div>
 
         <VisitDetailDialog visit={detailVisit} open={detailOpen} onOpenChange={setDetailOpen} />
+        <CareReceiverProfileDialog
+          open={!!receiverProfile}
+          onOpenChange={(o) => { if (!o) setReceiverProfile(null); }}
+          receiver={receiverProfile}
+        />
+        <CareGiverProfileDialog
+          open={!!caregiverProfile}
+          onOpenChange={(o) => { if (!o) setCaregiverProfile(null); }}
+          caregiver={caregiverProfile}
+        />
       </div>
     </AppLayout>
   );
