@@ -24,6 +24,8 @@ import { useDailyVisits, useCareGivers, useCareReceivers } from "@/hooks/use-car
 import { supabase } from "@/integrations/supabase/client";
 import { RosterViewSwitcher } from "@/components/RosterViewSwitcher";
 import { VisitDetailDialog } from "@/components/VisitDetailDialog";
+import { CareGiverProfileDialog } from "@/components/CareGiverProfileDialog";
+import { CareReceiverProfileDialog } from "@/components/CareReceiverProfileDialog";
 
 // Reusable tooltip-wrapped icon for table headers/cells
 function IconCell({
@@ -113,6 +115,8 @@ const DailyRoster = () => {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [detailVisit, setDetailVisit] = useState<any>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [receiverProfile, setReceiverProfile] = useState<any>(null);
+  const [caregiverProfile, setCaregiverProfile] = useState<any>(null);
   const [nowTick, setNowTick] = useState(0);
 
   useEffect(() => {
@@ -191,6 +195,8 @@ const DailyRoster = () => {
         serviceCall,
         week: `Week ${(week % 4) || 1}`,
         weekNum: 17,
+        receiver: cr,
+        caregiver: v.care_givers ?? null,
       };
     });
 
@@ -486,7 +492,13 @@ const DailyRoster = () => {
                         )}
                       </td>
                       <td className="p-1.5 border-r border-border">
-                        <a className="text-primary hover:underline cursor-pointer text-[11px]">{r.serviceUser}</a>
+                        <button
+                          type="button"
+                          onClick={() => r.receiver?.id && setReceiverProfile(r.receiver)}
+                          className="text-primary hover:underline cursor-pointer text-[11px] text-left"
+                        >
+                          {r.serviceUser}
+                        </button>
                       </td>
                       <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{r.scheduledStart}</td>
                       <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{r.scheduledEnd}</td>
@@ -495,7 +507,17 @@ const DailyRoster = () => {
                       <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{r.isFuture ? "" : r.actualEnd}</td>
                       <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{r.isFuture ? "" : r.actualDuration}</td>
                       <td className="p-1.5 border-r border-border">
-                        <a className="text-primary hover:underline cursor-pointer text-[11px]">{r.teamMember}</a>
+                        {r.caregiver?.id ? (
+                          <button
+                            type="button"
+                            onClick={() => setCaregiverProfile(r.caregiver)}
+                            className="text-primary hover:underline cursor-pointer text-[11px] text-left"
+                          >
+                            {r.teamMember}
+                          </button>
+                        ) : (
+                          <span className="text-[11px] text-muted-foreground">{r.teamMember}</span>
+                        )}
                       </td>
                       <td className="p-1.5 border-r border-border text-[11px] text-foreground/80">{r.serviceCall}</td>
                       <td className="p-1.5 border-r border-border text-center">
@@ -580,6 +602,16 @@ const DailyRoster = () => {
         </div>
 
         <VisitDetailDialog visit={detailVisit} open={detailOpen} onOpenChange={setDetailOpen} />
+        <CareReceiverProfileDialog
+          open={!!receiverProfile}
+          onOpenChange={(o) => { if (!o) setReceiverProfile(null); }}
+          receiver={receiverProfile}
+        />
+        <CareGiverProfileDialog
+          open={!!caregiverProfile}
+          onOpenChange={(o) => { if (!o) setCaregiverProfile(null); }}
+          caregiver={caregiverProfile}
+        />
       </div>
     </AppLayout>
   );
