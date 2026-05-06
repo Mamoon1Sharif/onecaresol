@@ -191,6 +191,8 @@ const DailyRoster = () => {
         serviceCall,
         week: `Week ${(week % 4) || 1}`,
         weekNum: 17,
+        receiver: cr,
+        caregiver: v.care_givers ?? null,
       };
     });
 
