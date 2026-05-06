@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -349,8 +350,9 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
             {/* ============== TASKS ============== */}
             <section>
               <ShiftTasks
+                visitId={visit.id}
                 shiftEnd={editEnd || visit.scheduledEnd}
-                clockOut={clockOut || visit.actualEnd}
+                clockOut={clockOut || (visit.actualEnd && visit.actualEnd !== "—" ? visit.actualEnd : null)}
                 isMissed={(editStatus || visit.status || "").toLowerCase() === "missed"}
               />
             </section>
@@ -646,37 +648,115 @@ interface TaskItem {
   title: string;
   done: boolean;
   completedAt?: string;
+  source: "shift" | "care";
 }
 
-function ShiftTasks({ shiftEnd, clockOut, isMissed = false }: { shiftEnd: string; clockOut: string | null; isMissed?: boolean }) {
-  const initialDone = !isMissed;
-  const [tasks, setTasks] = useState<TaskItem[]>([
-    { id: "t1", title: "Personal care — wash & dress", done: initialDone, completedAt: initialDone ? "08:14" : undefined },
-    { id: "t2", title: "Administer morning medication", done: initialDone, completedAt: initialDone ? "08:32" : undefined },
-    { id: "t3", title: "Prepare breakfast & assist with eating", done: initialDone, completedAt: initialDone ? "09:05" : undefined },
-    { id: "t4", title: "Light housekeeping in kitchen", done: false },
-    { id: "t5", title: "Lunchtime medication & meal", done: false },
-    { id: "t6", title: "Record fluid & food intake", done: false },
-  ]);
+function ShiftTasks({ visitId, shiftEnd, clockOut, isMissed = false }: { visitId: string; shiftEnd: string; clockOut: string | null; isMissed?: boolean }) {
+  const qc = useQueryClient();
+  const shiftEnded = !!clockOut;
+
+  const { data: visitRow } = useQuery({
+    queryKey: ["daily_visit_row", visitId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("daily_visits")
+        .select("id, care_receiver_id, company_id")
+        .eq("id", visitId)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: shiftTasks = [] } = useQuery({
+    queryKey: ["shift_tasks", visitId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("shift_tasks")
+        .select("*")
+        .eq("daily_visit_id", visitId)
+        .order("created_at");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const { data: careTasks = [] } = useQuery({
+    queryKey: ["care_management_tasks_for_visit", visitRow?.care_receiver_id],
+    enabled: !!visitRow?.care_receiver_id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("care_management_tasks")
+        .select("id, title, status, assigned_for_shift")
+        .eq("care_receiver_id", visitRow!.care_receiver_id)
+        .eq("assigned_for_shift", true);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  // Merge: shift_tasks are authoritative (carry completion). Add care_management tasks
+  // not already present by title.
+  const tasks: TaskItem[] = (() => {
+    const out: TaskItem[] = (shiftTasks as any[]).map((t) => ({
+      id: t.id,
+      title: t.title,
+      done: !!t.is_completed,
+      completedAt: t.completed_at ? new Date(t.completed_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : undefined,
+      source: "shift",
+    }));
+    const existingTitles = new Set(out.map((t) => t.title.toLowerCase()));
+    for (const c of (careTasks as any[])) {
+      if (!existingTitles.has(String(c.title).toLowerCase())) {
+        out.push({ id: `care-${c.id}`, title: c.title, done: false, source: "care" });
+      }
+    }
+    return out;
+  })();
+
   const [draft, setDraft] = useState("");
 
   const completed = tasks.filter((t) => t.done);
   const pending = tasks.filter((t) => !t.done);
   const pct = tasks.length ? Math.round((completed.length / tasks.length) * 100) : 0;
 
-  const toggle = (id: string) =>
-    setTasks((arr) =>
-      arr.map((t) =>
-        t.id === id
-          ? { ...t, done: !t.done, completedAt: !t.done ? new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : undefined }
-          : t,
-      ),
-    );
+  const toggle = async (t: TaskItem) => {
+    if (shiftEnded || isMissed) return;
+    if (t.source === "care") {
+      // Promote to shift_tasks first as completed
+      if (!visitRow) return;
+      const { data, error } = await supabase
+        .from("shift_tasks")
+        .insert({ daily_visit_id: visitId, title: t.title, is_completed: true, completed_at: new Date().toISOString() } as any)
+        .select()
+        .single();
+      if (error) { toast.error(error.message); return; }
+    } else {
+      const newDone = !t.done;
+      const { error } = await supabase
+        .from("shift_tasks")
+        .update({ is_completed: newDone, completed_at: newDone ? new Date().toISOString() : null } as any)
+        .eq("id", t.id);
+      if (error) { toast.error(error.message); return; }
+    }
+    qc.invalidateQueries({ queryKey: ["shift_tasks", visitId] });
+  };
 
-  const addTask = () => {
-    if (!draft.trim()) return;
-    setTasks((arr) => [...arr, { id: crypto.randomUUID(), title: draft.trim(), done: false }]);
+  const removeTask = async (t: TaskItem) => {
+    if (t.source !== "shift") return;
+    const { error } = await supabase.from("shift_tasks").delete().eq("id", t.id);
+    if (error) { toast.error(error.message); return; }
+    qc.invalidateQueries({ queryKey: ["shift_tasks", visitId] });
+  };
+
+  const addTask = async () => {
+    if (!draft.trim() || !visitRow) return;
+    const { error } = await supabase
+      .from("shift_tasks")
+      .insert({ daily_visit_id: visitId, title: draft.trim() } as any);
+    if (error) { toast.error(error.message); return; }
     setDraft("");
+    qc.invalidateQueries({ queryKey: ["shift_tasks", visitId] });
   };
 
   return (
@@ -689,7 +769,7 @@ function ShiftTasks({ shiftEnd, clockOut, isMissed = false }: { shiftEnd: string
           </span>
         </h3>
         <span className={`text-[11px] ${isMissed ? "text-destructive font-medium" : "text-muted-foreground"}`}>
-          {isMissed ? "Shift missed — no tasks completed" : clockOut ? "Shift ended" : `Pending until ${shiftEnd}`}
+          {isMissed ? "Shift missed — no tasks completed" : shiftEnded ? "Shift ended" : `Pending until ${shiftEnd}`}
         </span>
       </div>
 
@@ -709,9 +789,9 @@ function ShiftTasks({ shiftEnd, clockOut, isMissed = false }: { shiftEnd: string
             <ul className="space-y-1">
               {completed.map((t) => (
                 <li key={t.id} className="flex items-center gap-2 text-xs">
-                  <input type="checkbox" checked onChange={() => toggle(t.id)} className="rounded text-success" />
+                  <input type="checkbox" checked disabled={shiftEnded || isMissed} onChange={() => toggle(t)} className="rounded text-success" />
                   <span className="line-through text-muted-foreground flex-1">{t.title}</span>
-                  <span className="font-mono text-[10px] text-success">{t.completedAt}</span>
+                  {t.completedAt && <span className="font-mono text-[10px] text-success">{t.completedAt}</span>}
                 </li>
               ))}
             </ul>
@@ -729,11 +809,13 @@ function ShiftTasks({ shiftEnd, clockOut, isMissed = false }: { shiftEnd: string
             <ul className="space-y-1">
               {pending.map((t) => (
                 <li key={t.id} className="flex items-center gap-2 text-xs">
-                  <input type="checkbox" onChange={() => toggle(t.id)} className="rounded" />
+                  <input type="checkbox" disabled={shiftEnded || isMissed} onChange={() => toggle(t)} className="rounded" />
                   <span className="flex-1 text-foreground">{t.title}</span>
-                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => setTasks((arr) => arr.filter((x) => x.id !== t.id))}>
-                    <Trash2 className="h-3 w-3 text-destructive" />
-                  </Button>
+                  {!shiftEnded && t.source === "shift" && (
+                    <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => removeTask(t)}>
+                      <Trash2 className="h-3 w-3 text-destructive" />
+                    </Button>
+                  )}
                 </li>
               ))}
             </ul>
@@ -741,18 +823,21 @@ function ShiftTasks({ shiftEnd, clockOut, isMissed = false }: { shiftEnd: string
         </div>
       </div>
 
-      <div className="flex gap-2 mt-3">
-        <Input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && addTask()}
-          placeholder="Add a new care task..."
-          className="h-8 text-xs"
-        />
-        <Button size="sm" onClick={addTask} className="bg-success hover:bg-success/90 text-success-foreground h-8 text-xs gap-1">
-          <Plus className="h-3.5 w-3.5" /> Add Task
-        </Button>
-      </div>
+      {!shiftEnded && !isMissed && (
+        <div className="flex gap-2 mt-3">
+          <Input
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && addTask()}
+            placeholder="Add a new care task..."
+            className="h-8 text-xs"
+          />
+          <Button size="sm" onClick={addTask} className="bg-success hover:bg-success/90 text-success-foreground h-8 text-xs gap-1">
+            <Plus className="h-3.5 w-3.5" /> Add Task
+          </Button>
+        </div>
+      )}
     </>
   );
 }
+
