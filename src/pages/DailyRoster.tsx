@@ -207,6 +207,8 @@ const DailyRoster = () => {
               return `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
             })()
           : "—",
+        checkInLat: v.check_in_lat ?? null,
+        checkInLng: v.check_in_lng ?? null,
         teamMember: cg.name ?? "—",
         serviceCall,
         week: `Week ${(week % 4) || 1}`,
@@ -439,6 +441,7 @@ const DailyRoster = () => {
                     <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Clock className="h-3.5 w-3.5 text-rose-700" /></span></TooltipTrigger><TooltipContent className="text-xs">Actual clock-out time</TooltipContent></Tooltip>
                   </th>
                   <th className="p-2 border-r border-border text-center w-16"><IconCell icon={TrendingUp} label="Actual duration worked" /></th>
+                  <th className="p-2 border-r border-border text-center w-28"><IconCell icon={Map} label="Clock-in GPS location (lat, lng)" /></th>
                   <th className="p-2 border-r border-border text-left">Care Giver</th>
                   <th className="p-2 border-r border-border text-left">Service Call</th>
                   <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Tag} label="Service tag" /></th>
@@ -461,7 +464,7 @@ const DailyRoster = () => {
               </thead>
               <tbody>
                 {rows.length === 0 && (
-                  <tr><td colSpan={35} className="p-8 text-center text-muted-foreground">No shifts scheduled for this day.</td></tr>
+                  <tr><td colSpan={36} className="p-8 text-center text-muted-foreground">No shifts scheduled for this day.</td></tr>
                 )}
                 {rows.map((r, i) => {
                   const isMissed = r.status === "Missed";
@@ -522,6 +525,19 @@ const DailyRoster = () => {
                       <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{r.isFuture ? "" : r.actualStart}</td>
                       <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{r.isFuture ? "" : r.actualEnd}</td>
                       <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{r.isFuture ? "" : r.actualDuration}</td>
+                      <td className="p-1.5 border-r border-border text-center font-mono text-[10px]">
+                        {r.checkInLat != null && r.checkInLng != null ? (
+                          <a
+                            href={`https://www.google.com/maps?q=${r.checkInLat},${r.checkInLng}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline"
+                            title="Open in Google Maps"
+                          >
+                            {r.checkInLat.toFixed(5)}, {r.checkInLng.toFixed(5)}
+                          </a>
+                        ) : "—"}
+                      </td>
                       <td className="p-1.5 border-r border-border">
                         {r.caregiver?.id ? (
                           <button
@@ -587,7 +603,7 @@ const DailyRoster = () => {
               {rows.length > 0 && (
                 <tfoot>
                   <tr className="bg-muted/30 border-t-2 border-border">
-                    <td colSpan={35} className="p-2">
+                    <td colSpan={36} className="p-2">
                       <div className="flex items-center gap-8">
                         <div>
                           <div className="font-bold text-sm">{fmtTotal(schedHours)}</div>

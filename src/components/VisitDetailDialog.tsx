@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -110,8 +112,43 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
     setLockOpen(false);
   };
 
-  const handleClockIn = () => setClockIn(new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }));
-  const handleClockOut = () => setClockOut(new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }));
+  const handleClockIn = () => {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    setClockIn(timeStr);
+
+    const persist = async (lat: number | null, lng: number | null) => {
+      const { error } = await supabase
+        .from("daily_visits")
+        .update({ check_in_time: now.toISOString(), check_in_lat: lat, check_in_lng: lng } as any)
+        .eq("id", visit!.id);
+      if (error) {
+        toast.error("Clock-in saved locally but failed to sync: " + error.message);
+      } else {
+        toast.success(lat != null ? "Clocked in with GPS location" : "Clocked in (location unavailable)");
+      }
+    };
+
+    if (typeof navigator !== "undefined" && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => persist(pos.coords.latitude, pos.coords.longitude),
+        () => persist(null, null),
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    } else {
+      persist(null, null);
+    }
+  };
+
+  const handleClockOut = async () => {
+    const now = new Date();
+    setClockOut(now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }));
+    const { error } = await supabase
+      .from("daily_visits")
+      .update({ check_out_time: now.toISOString() } as any)
+      .eq("id", visit!.id);
+    if (error) toast.error("Clock-out failed to sync: " + error.message);
+  };
 
   const duration = (() => {
     if (!clockIn || !clockOut) return "0 minutes";
