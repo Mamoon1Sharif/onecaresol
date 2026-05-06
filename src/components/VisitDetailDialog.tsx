@@ -804,7 +804,9 @@ function ShiftTasks({ visitId, shiftEnd, clockOut, isMissed = false }: { visitId
           <div className="text-[11px] font-semibold text-success uppercase tracking-wide mb-1.5 flex items-center gap-1">
             <CheckCircle2 className="h-3 w-3" /> Completed ({completed.length})
           </div>
-          {completed.length === 0 ? (
+          {loading ? (
+            <p className="text-[11px] text-muted-foreground text-center py-2">Loading...</p>
+          ) : completed.length === 0 ? (
             <p className="text-[11px] text-muted-foreground text-center py-2">None yet.</p>
           ) : (
             <ul className="space-y-1">
@@ -824,15 +826,17 @@ function ShiftTasks({ visitId, shiftEnd, clockOut, isMissed = false }: { visitId
           <div className={`text-[11px] font-semibold uppercase tracking-wide mb-1.5 flex items-center gap-1 ${isMissed ? "text-destructive" : "text-amber-700"}`}>
             <CircleDot className="h-3 w-3" /> {isMissed ? `Not done — shift missed (${pending.length})` : `Pending until end of shift (${pending.length})`}
           </div>
-          {pending.length === 0 ? (
-            <p className="text-[11px] text-muted-foreground text-center py-2">All tasks done. 🎉</p>
+          {loading ? (
+            <p className="text-[11px] text-muted-foreground text-center py-2">Loading...</p>
+          ) : pending.length === 0 ? (
+            <p className="text-[11px] text-muted-foreground text-center py-2">{tasks.length === 0 ? "No tasks assigned." : "All tasks done. 🎉"}</p>
           ) : (
             <ul className="space-y-1">
               {pending.map((t) => (
                 <li key={t.id} className="flex items-center gap-2 text-xs">
                   <input type="checkbox" onChange={() => toggle(t.id)} className="rounded" />
                   <span className="flex-1 text-foreground">{t.title}</span>
-                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => setTasks((arr) => arr.filter((x) => x.id !== t.id))}>
+                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => removeTask(t.id)}>
                     <Trash2 className="h-3 w-3 text-destructive" />
                   </Button>
                 </li>
