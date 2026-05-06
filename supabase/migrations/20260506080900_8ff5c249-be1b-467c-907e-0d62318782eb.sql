@@ -1,0 +1,3 @@
+ALTER TABLE public.daily_visits
+  ADD COLUMN IF NOT EXISTS start_minute INTEGER NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS duration_minutes INTEGER;

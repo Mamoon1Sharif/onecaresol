@@ -1432,8 +1432,10 @@ export type Database = {
           company_id: string
           created_at: string
           duration: number
+          duration_minutes: number | null
           id: string
           start_hour: number
+          start_minute: number
           status: string
           updated_at: string
           visit_date: string
@@ -1446,8 +1448,10 @@ export type Database = {
           company_id?: string
           created_at?: string
           duration?: number
+          duration_minutes?: number | null
           id?: string
           start_hour?: number
+          start_minute?: number
           status?: string
           updated_at?: string
           visit_date?: string
@@ -1460,8 +1464,10 @@ export type Database = {
           company_id?: string
           created_at?: string
           duration?: number
+          duration_minutes?: number | null
           id?: string
           start_hour?: number
+          start_minute?: number
           status?: string
           updated_at?: string
           visit_date?: string
