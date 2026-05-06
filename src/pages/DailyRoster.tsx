@@ -154,6 +154,9 @@ const DailyRoster = () => {
       const clockedInOnTime =
         checkInMs !== null && checkInMs <= visitStart.getTime() + 5 * 60 * 1000;
 
+      const graceEndMs = visitStart.getTime() + 5 * 60 * 1000;
+      const withinGrace = !isFuture && now.getTime() <= graceEndMs;
+
       let status: string;
       if (v.status === "Cancelled") {
         status = "Cancelled";
@@ -163,6 +166,8 @@ const DailyRoster = () => {
         status = "In Progress";
       } else if (isFuture) {
         status = "Due";
+      } else if (withinGrace && !checkInMs) {
+        status = "Late";
       } else {
         status = "Missed";
       }
