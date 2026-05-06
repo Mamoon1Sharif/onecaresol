@@ -464,7 +464,7 @@ const DailyRoster = () => {
               </thead>
               <tbody>
                 {rows.length === 0 && (
-                  <tr><td colSpan={35} className="p-8 text-center text-muted-foreground">No shifts scheduled for this day.</td></tr>
+                  <tr><td colSpan={36} className="p-8 text-center text-muted-foreground">No shifts scheduled for this day.</td></tr>
                 )}
                 {rows.map((r, i) => {
                   const isMissed = r.status === "Missed";
@@ -603,7 +603,7 @@ const DailyRoster = () => {
               {rows.length > 0 && (
                 <tfoot>
                   <tr className="bg-muted/30 border-t-2 border-border">
-                    <td colSpan={35} className="p-2">
+                    <td colSpan={36} className="p-2">
                       <div className="flex items-center gap-8">
                         <div>
                           <div className="font-bold text-sm">{fmtTotal(schedHours)}</div>
