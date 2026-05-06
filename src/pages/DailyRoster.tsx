@@ -24,6 +24,8 @@ import { useDailyVisits, useCareGivers, useCareReceivers } from "@/hooks/use-car
 import { supabase } from "@/integrations/supabase/client";
 import { RosterViewSwitcher } from "@/components/RosterViewSwitcher";
 import { VisitDetailDialog } from "@/components/VisitDetailDialog";
+import { CareGiverProfileDialog } from "@/components/CareGiverProfileDialog";
+import { CareReceiverProfileDialog } from "@/components/CareReceiverProfileDialog";
 
 // Reusable tooltip-wrapped icon for table headers/cells
 function IconCell({
