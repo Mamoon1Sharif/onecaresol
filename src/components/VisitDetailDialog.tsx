@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -89,9 +89,30 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
   const [clockOut, setClockOut] = useState<string | null>(null);
   const [memberRemoved, setMemberRemoved] = useState(false);
 
+  useEffect(() => {
+    if (!visit) return;
+    setClockIn(visit.actualStart && visit.actualStart !== "—" ? visit.actualStart : null);
+    setClockOut(visit.actualEnd && visit.actualEnd !== "—" ? visit.actualEnd : null);
+    setEditStatus(visit.status ?? "");
+    setEditStart(visit.scheduledStart ?? "");
+    setEditEnd(visit.scheduledEnd ?? "");
+    setEditServiceCall(visit.serviceCall ?? "");
+    setMemberRemoved(false);
+  }, [visit]);
+
   if (!visit) return null;
 
   const built = `${visit.ref} at ${new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })} on ${visit.date}`;
+
+  const syncVisitCache = (updates: Record<string, any>) => {
+    const applyUpdates = (current: any) => {
+      if (!Array.isArray(current)) return current;
+      return current.map((row) => (row?.id === visit.id ? { ...row, ...updates } : row));
+    };
+
+    qc.setQueriesData({ queryKey: ["daily_visits"] }, applyUpdates);
+    qc.setQueriesData({ queryKey: ["daily_visits_range"] }, applyUpdates);
+  };
 
   const handleAddNote = () => {
     if (!noteText.trim()) return;
@@ -117,16 +138,18 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
   const handleClockIn = () => {
     const now = new Date();
     const timeStr = now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
-    setClockIn(timeStr);
 
     const persist = async (lat: number | null, lng: number | null) => {
+      const checkInIso = now.toISOString();
       const { error } = await supabase
         .from("daily_visits")
-        .update({ check_in_time: now.toISOString(), check_in_lat: lat, check_in_lng: lng } as any)
+        .update({ check_in_time: checkInIso, check_in_lat: lat, check_in_lng: lng } as any)
         .eq("id", visit!.id);
       if (error) {
-        toast.error("Clock-in saved locally but failed to sync: " + error.message);
+        toast.error("Clock-in failed to sync: " + error.message);
       } else {
+        setClockIn(timeStr);
+        syncVisitCache({ check_in_time: checkInIso, check_in_lat: lat, check_in_lng: lng });
         toast.success(lat != null ? "Clocked in with GPS location" : "Clocked in (location unavailable)");
         qc.invalidateQueries({ queryKey: ["daily_visits"] });
         qc.invalidateQueries({ queryKey: ["daily_visits_range"] });
@@ -146,14 +169,17 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
 
   const handleClockOut = async () => {
     const now = new Date();
-    setClockOut(now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }));
+    const timeStr = now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    const checkOutIso = now.toISOString();
     const { error } = await supabase
       .from("daily_visits")
-      .update({ check_out_time: now.toISOString(), status: "Completed" } as any)
+      .update({ check_out_time: checkOutIso, status: "Completed" } as any)
       .eq("id", visit!.id);
     if (error) {
       toast.error("Clock-out failed to sync: " + error.message);
     } else {
+      setClockOut(timeStr);
+      syncVisitCache({ check_out_time: checkOutIso, status: "Completed" });
       toast.success("Clocked out");
       qc.invalidateQueries({ queryKey: ["daily_visits"] });
       qc.invalidateQueries({ queryKey: ["daily_visits_range"] });
