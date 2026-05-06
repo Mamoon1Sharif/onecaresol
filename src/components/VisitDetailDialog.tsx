@@ -128,6 +128,8 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
         toast.error("Clock-in saved locally but failed to sync: " + error.message);
       } else {
         toast.success(lat != null ? "Clocked in with GPS location" : "Clocked in (location unavailable)");
+        qc.invalidateQueries({ queryKey: ["daily_visits"] });
+        qc.invalidateQueries({ queryKey: ["daily_visits_range"] });
       }
     };
 
