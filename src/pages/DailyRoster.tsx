@@ -182,15 +182,15 @@ const DailyRoster = () => {
         scheduledStart: fmtHour(start),
         scheduledEnd: fmtHour(start + dur),
         duration: fmtHour(dur),
-        actualStart: v.check_in_time ? new Date(v.check_in_time).toTimeString().slice(0, 5) : fmtHour(start, (idx * 3) % 6),
-        actualEnd: v.check_out_time ? new Date(v.check_out_time).toTimeString().slice(0, 5) : fmtHour(start + dur, (idx * 5) % 6),
+        actualStart: v.check_in_time ? new Date(v.check_in_time).toTimeString().slice(0, 5) : "—",
+        actualEnd: v.check_out_time ? new Date(v.check_out_time).toTimeString().slice(0, 5) : "—",
         actualDuration: v.check_in_time && v.check_out_time
           ? (() => {
               const ms = new Date(v.check_out_time).getTime() - new Date(v.check_in_time).getTime();
               const mins = Math.max(0, Math.round(ms / 60000));
               return `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
             })()
-          : fmtHour(dur, (idx * 2) % 6),
+          : "—",
         teamMember: cg.name ?? "—",
         serviceCall,
         week: `Week ${(week % 4) || 1}`,
