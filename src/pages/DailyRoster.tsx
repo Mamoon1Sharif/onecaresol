@@ -133,20 +133,23 @@ const DailyRoster = () => {
       const week = Math.ceil(((new Date(dateStr).getDate())) / 7);
 
       const visitStart = new Date(`${v.visit_date}T${String(start).padStart(2, "0")}:00:00`);
+      const visitEnd = new Date(visitStart.getTime() + dur * 60 * 60 * 1000);
       const isFuture = visitStart.getTime() > now.getTime();
       const accepted = !!v.care_giver_id;
 
       let status: string;
-      if (idx === 0) {
-        status = "Missed";
-      } else if (v.status === "Confirmed" || v.check_out_time) {
-        status = "Complete";
+      if (v.status === "Cancelled") {
+        status = "Cancelled";
+      } else if (v.check_out_time || v.status === "Confirmed" || v.status === "Complete" || v.status === "Completed" || v.status === "Finished") {
+        status = "Finished";
+      } else if (v.check_in_time) {
+        status = "In Progress";
+      } else if (now.getTime() >= visitStart.getTime() && now.getTime() < visitEnd.getTime()) {
+        status = "In Progress";
       } else if (isFuture) {
         status = "Due";
-      } else if (v.status === "Pending") {
-        status = "Missed";
       } else {
-        status = v.status ?? "Due";
+        status = "Missed";
       }
 
       const postcode = (cr.address ?? "").split(" ").slice(-2).join(" ").toUpperCase() || "";
