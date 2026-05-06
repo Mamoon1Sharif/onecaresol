@@ -89,9 +89,8 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
   const [clockOut, setClockOut] = useState<string | null>(null);
   const [memberRemoved, setMemberRemoved] = useState(false);
 
-  if (!visit) return null;
-
   useEffect(() => {
+    if (!visit) return;
     setClockIn(visit.actualStart && visit.actualStart !== "—" ? visit.actualStart : null);
     setClockOut(visit.actualEnd && visit.actualEnd !== "—" ? visit.actualEnd : null);
     setEditStatus(visit.status ?? "");
@@ -100,6 +99,8 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
     setEditServiceCall(visit.serviceCall ?? "");
     setMemberRemoved(false);
   }, [visit]);
+
+  if (!visit) return null;
 
   const built = `${visit.ref} at ${new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })} on ${visit.date}`;
 
