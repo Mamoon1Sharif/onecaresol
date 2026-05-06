@@ -150,10 +150,13 @@ const DailyRoster = () => {
       const isFuture = visitStart.getTime() > now.getTime();
       const accepted = !!v.care_giver_id;
 
-      // Clock-in must occur within 5 minutes after scheduled start to count as a valid start
+      // Clock-in valid window: 15 minutes before scheduled start through 5 minutes after
       const checkInMs = v.check_in_time ? new Date(v.check_in_time).getTime() : null;
+      const earlyGraceMs = visitStart.getTime() - 15 * 60 * 1000;
       const clockedInOnTime =
-        checkInMs !== null && checkInMs <= visitStart.getTime() + 5 * 60 * 1000;
+        checkInMs !== null &&
+        checkInMs >= earlyGraceMs &&
+        checkInMs <= visitStart.getTime() + 5 * 60 * 1000;
 
       const graceEndMs = visitStart.getTime() + 5 * 60 * 1000;
       const withinGrace = !isFuture && now.getTime() <= graceEndMs;
