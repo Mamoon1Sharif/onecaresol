@@ -103,6 +103,9 @@ const AddRota = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [savedOpen, setSavedOpen] = useState(false);
   const [clashInfo, setClashInfo] = useState<null | { other: any; staffName: string; otherClient: string }>(null);
+  const [caregiverSearch, setCaregiverSearch] = useState("");
+  const [recurUnit, setRecurUnit] = useState<"days" | "weeks" | "months">("weeks");
+  const [recurCount, setRecurCount] = useState<number>(4);
 
   // Dedup MAR medications by name+dosage+time so the same prescription isn't repeated.
   const uniqueMeds = useMemo(() => {
