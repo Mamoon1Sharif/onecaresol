@@ -129,7 +129,7 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
       </TableRow>
       {showNotes && (
         <TableRow className="bg-muted/20">
-          <TableCell colSpan={8} className="py-2 px-6">
+          <TableCell colSpan={9} className="py-2 px-6">
             <div className="space-y-1.5">
               <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><StickyNote className="h-3 w-3" /> Notes</p>
               {notes.length === 0 ? (
@@ -147,7 +147,7 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
       )}
       {showTasks && (
         <TableRow className="bg-muted/20">
-          <TableCell colSpan={8} className="py-2 px-6">
+          <TableCell colSpan={9} className="py-2 px-6">
             <div className="space-y-1.5">
               <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><ClipboardCheck className="h-3 w-3" /> Tasks</p>
               {tasks.length === 0 ? (
@@ -316,7 +316,7 @@ const Dashboard = () => {
               <TableBody>
                 {completedVisits.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">No completed shifts yet today</TableCell>
+                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">No completed shifts yet today</TableCell>
                   </TableRow>
                 ) : completedVisits.map((v) => (
                   <CompletedVisitRow key={v.id} v={v} onClick={() => setSelectedVisit(v)} />
