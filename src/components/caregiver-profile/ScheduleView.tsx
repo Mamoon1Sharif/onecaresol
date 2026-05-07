@@ -115,14 +115,34 @@ export function ScheduleView({ cg, showHeader = true }: Props) {
 
   const weekDates = useMemo(() => getWeekDates(weekOffset), [weekOffset]);
 
+  const { data: dailyVisitsForDay = [] } = useDailyVisits(dateStr);
+
   const myShifts = useMemo(() => allShifts.filter((s: any) => s.care_giver_id === cg.id), [allShifts, cg.id]);
 
-  // Daily view: filter shifts by weekday matching the selected date
+  // Daily view: combine recurring shifts (matching weekday) with daily_visits assigned for the date
   const dayIdx = weekdayIdx(currentDate);
-  const myVisits = useMemo(
-    () => myShifts.filter((s: any) => s.day === dayIdx),
-    [myShifts, dayIdx]
-  );
+  const myVisits = useMemo(() => {
+    const recurring = myShifts.filter((s: any) => s.day === dayIdx);
+    const dailyMapped = dailyVisitsForDay
+      .filter((v: any) => v.care_giver_id === cg.id)
+      .map((v: any) => {
+        const sh = String(v.start_hour ?? 0).padStart(2, "0");
+        const sm = String(v.start_minute ?? 0).padStart(2, "0");
+        const endH = String((v.start_hour ?? 0) + (v.duration ?? 0)).padStart(2, "0");
+        return {
+          id: `dv-${v.id}`,
+          care_receivers: v.care_receivers,
+          care_giver_id: v.care_giver_id,
+          start_time: `${sh}:${sm}`,
+          end_time: `${endH}:${sm}`,
+          arrived_at: v.check_in_time,
+          departed_at: v.check_out_time,
+          shift_type: null,
+          status: v.status,
+        };
+      });
+    return [...recurring, ...dailyMapped];
+  }, [myShifts, dayIdx, dailyVisitsForDay, cg.id]);
 
   const filteredVisits = useMemo(() => {
     if (!search) return myVisits;
