@@ -1008,6 +1008,10 @@ const AddRota = () => {
                   <div><span className="text-muted-foreground">Caregiver:</span> <span className="font-medium text-foreground">{selectedCaregiver?.name || "Unassigned"}</span></div>
                   {form.medicationRequired && <div><span className="text-muted-foreground">Medications:</span> <span className="font-medium text-foreground">{selectedMedIds.length} selected</span></div>}
                   {form.tasksRequired && <div><span className="text-muted-foreground">Tasks:</span> <span className="font-medium text-foreground">{selectedTasks.length} selected</span></div>}
+                  {form.recurring && (
+                    <div><span className="text-muted-foreground">Recurring:</span> <span className="font-medium text-foreground">Every {recurUnit === "days" ? "day" : recurUnit === "weeks" ? "week" : "month"} for {recurCount} occurrence{recurCount !== 1 ? "s" : ""} ({occurrenceDates.length} shifts)</span></div>
+                  )}
+                  {form.linkUp && <div><span className="text-muted-foreground">Linked:</span> <span className="font-medium text-foreground">Yes</span></div>}
                 </div>
               </div>
             </AlertDialogDescription>
