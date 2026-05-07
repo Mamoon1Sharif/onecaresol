@@ -76,6 +76,7 @@ function fmtHour(h?: number, mm = 0) {
 
 const statusTone: Record<string, string> = {
   Complete: "text-success font-medium",
+  Completed: "text-success font-medium",
   Finished: "text-success font-medium",
   "In Progress": "text-success font-semibold",
   Late: "text-amber-600 font-semibold",
@@ -147,35 +148,57 @@ const DailyRoster = () => {
 
       const [vy, vm, vd] = String(v.visit_date).split("-").map(Number);
       const visitStart = new Date(vy, (vm || 1) - 1, vd || 1, start, startMin, 0, 0);
+      const visitStartUtc = new Date(Date.UTC(vy, (vm || 1) - 1, vd || 1, start, startMin, 0, 0));
       const visitEnd = new Date(visitStart.getTime() + durMins * 60 * 1000);
+      const visitEndUtc = new Date(visitStartUtc.getTime() + durMins * 60 * 1000);
       const isFuture = visitStart.getTime() > now.getTime();
       const accepted = !!v.care_giver_id;
 
-      // Clock-in valid window: 15 minutes before scheduled start through 5 minutes after
-      const checkInMs = v.check_in_time ? new Date(v.check_in_time).getTime() : null;
-      const earlyGraceMs = visitStart.getTime() - 15 * 60 * 1000;
-      const clockedInOnTime =
-        checkInMs !== null &&
-        checkInMs >= earlyGraceMs &&
-        checkInMs <= visitStart.getTime() + 5 * 60 * 1000;
+      const endTotalMin = start * 60 + startMin + durMins;
+      const endH = Math.floor(endTotalMin / 60) % 24;
+      const endM = endTotalMin % 60;
 
+      // Evaluate check-ins/check-outs against the local visit schedule.
+      const checkInDate = v.check_in_time ? new Date(v.check_in_time) : null;
+      const checkOutDate = v.check_out_time ? new Date(v.check_out_time) : null;
+      const nowMs = now.getTime();
+
+      const hasCheckIn = !!checkInDate;
+      const hasCheckOut = !!checkOutDate;
+      const sameUtcDay = (a: Date, b: Date) =>
+        a.getUTCFullYear() === b.getUTCFullYear() && a.getUTCMonth() === b.getUTCMonth() && a.getUTCDate() === b.getUTCDate();
+      const isBetweenUtcTime = (date: Date, startH: number, startM: number, endH: number, endM: number) => {
+        const hours = date.getUTCHours();
+        const minutes = date.getUTCMinutes();
+        const afterStart = hours > startH || (hours === startH && minutes >= startM);
+        const beforeEnd = hours < endH || (hours === endH && minutes <= endM);
+        return afterStart && beforeEnd;
+      };
+
+      const checkInWithinSchedule = hasCheckIn && sameUtcDay(checkInDate!, visitStartUtc);  // Allow check-in any time on the visit day
+      const checkOutWithinSchedule = hasCheckOut && sameUtcDay(checkOutDate!, visitStartUtc) && isBetweenUtcTime(checkOutDate!, start, startMin, endH, endM);
+      const hasValidCheckOut = hasCheckOut && checkOutWithinSchedule;
+      const hasCompletedWithinRange = hasCheckIn && hasValidCheckOut;
+
+      const hasArrived = nowMs >= visitStart.getTime();
       const graceEndMs = visitStart.getTime() + 5 * 60 * 1000;
-      const withinGrace = !isFuture && now.getTime() <= graceEndMs;
+      const withinGracePeriod = hasArrived && nowMs <= graceEndMs;
 
       let status: string;
       if (v.status === "Cancelled") {
         status = "Cancelled";
-      } else if (v.check_out_time && clockedInOnTime) {
-        status = "Finished";
-      } else if (clockedInOnTime && !v.check_out_time) {
+      } else if (hasCompletedWithinRange) {
+        status = "Completed";
+      } else if (hasCheckIn) {
         status = "In Progress";
-      } else if (isFuture) {
+      } else if (!hasArrived) {
         status = "Due";
-      } else if (withinGrace && !checkInMs) {
+      } else if (withinGracePeriod) {
         status = "Late";
       } else {
         status = "Missed";
       }
+
 
       const postcode = (cr.address ?? "").split(" ").slice(-2).join(" ").toUpperCase() || "";
       const serviceCall =
@@ -185,9 +208,6 @@ const DailyRoster = () => {
         : idx % 4 === 0 ? "Private Morning..."
         : "WCC - Morning...";
 
-      const endTotalMin = start * 60 + startMin + durMins;
-      const endH = Math.floor(endTotalMin / 60) % 24;
-      const endM = endTotalMin % 60;
       const fmtDur = `${String(Math.floor(durMins / 60)).padStart(2, "0")}:${String(durMins % 60).padStart(2, "0")}`;
 
       return {

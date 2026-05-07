@@ -158,13 +158,10 @@ const Roster = () => {
           </div>
           <div className="flex items-center gap-3 flex-wrap">
             <RosterViewSwitcher />
-<<<<<<< HEAD
-            <Button onClick={openCreate} className="gap-2"><Plus className="h-4 w-4" /> Create Rota</Button>
-=======
             <Button onClick={openCreate} className="gap-2">
               <Plus className="h-4 w-4" /> Create Rota
             </Button>
->>>>>>> 2f46e11e4f64adb0ff67cab2168c902654ff27a9
+
           </div>
         </div>
 
