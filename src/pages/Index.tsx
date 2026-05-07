@@ -88,6 +88,15 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
             {v.duration}h
           </Badge>
         </TableCell>
+        <TableCell>
+          {v.check_in_time ? (
+            <Badge className={statusStyles[lateMins > 0 ? "Late" : "On Time"] + " text-xs"}>
+              {lateMins > 0 ? `Late +${lateMins}m` : "On Time"}
+            </Badge>
+          ) : (
+            <Badge className={statusStyles["Not Arrived"] + " text-xs"}>Not Arrived</Badge>
+          )}
+        </TableCell>
         <TableCell className="text-sm">
           <span className={lateMins > 0 ? "text-destructive font-semibold" : "text-foreground"}>
             {fmtTime(v.check_in_time)}
