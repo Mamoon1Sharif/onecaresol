@@ -183,18 +183,36 @@ const Dashboard = () => {
   const { data: stats } = useDashboardStats();
   const { data: dbVisits, refetch } = useDashboardVisits();
   const { data: completedVisits = [], refetch: refetchCompleted } = useCompletedVisitsToday();
+  const todayStr = new Date().toISOString().split("T")[0];
+  const { data: todaysVisits = [], refetch: refetchToday } = useDailyVisits(todayStr);
   const [selectedVisit, setSelectedVisit] = useState<any>(null);
+  const [now, setNow] = useState(() => new Date());
+
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 30_000);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     const channel = supabase
       .channel("dashboard-visits-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "dashboard_visits" }, () => refetch())
-      .on("postgres_changes", { event: "*", schema: "public", table: "daily_visits" }, () => refetchCompleted())
+      .on("postgres_changes", { event: "*", schema: "public", table: "daily_visits" }, () => { refetchCompleted(); refetchToday(); })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [refetch, refetchCompleted]);
+  }, [refetch, refetchCompleted, refetchToday]);
 
-  const visits = dbVisits ?? [];
+  // Live visits: scheduled start has begun, and shift is not yet completed (no clock-out) and within scheduled window or in progress
+  const liveVisits = (todaysVisits as any[]).filter((v) => {
+    const startMinutes = (v.start_hour ?? 0) * 60 + (v.start_minute ?? 0);
+    const endMinutes = startMinutes + (v.duration ?? 0) * 60 + (v.duration_minutes ?? 0);
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
+    const status = (v.status || "").toLowerCase();
+    if (status === "completed" || status === "complete") return false;
+    if (v.check_out_time) return false;
+    if (v.check_in_time) return true; // already clocked in - in progress
+    return nowMinutes >= startMinutes && nowMinutes <= endMinutes;
+  });
 
   const statCards = [
     { title: "Total Care Givers", value: String(stats?.totalCareGivers ?? "—"), icon: Users, iconBg: "bg-primary/10", color: "text-primary", borderAccent: "" },
