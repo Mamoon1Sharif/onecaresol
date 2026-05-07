@@ -32,6 +32,7 @@ function diffMinutes(start: string | null, end: string | null) {
   const ms = new Date(end).getTime() - new Date(start).getTime();
   if (ms < 0) return "—";
   const totalMin = Math.floor(ms / 60000);
+  if (totalMin < 60) return `${totalMin}m`;
   const hrs = Math.floor(totalMin / 60);
   const mins = totalMin % 60;
   return `${hrs}h ${String(mins).padStart(2, "0")}m`;
