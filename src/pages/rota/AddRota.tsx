@@ -255,22 +255,27 @@ const AddRota = () => {
         notes: `Rota Type: ${form.rotaType}${form.alert ? " · Alert" : ""}`,
       });
 
-      const { data: dvRow, error: dvErr } = await supabase
-        .from("daily_visits")
-        .insert({
-          company_id: companyUser.company_id,
-          care_receiver_id: selected.id,
-          care_giver_id: staffId,
-          visit_date: form.date,
-          start_hour: parseInt(form.startH),
-          start_minute: parseInt(form.startM),
-          duration: durHours,
-          duration_minutes: durationMinutes,
-          status: staffId ? "Confirmed" : "Pending",
-        } as any)
-        .select("id")
-        .single();
-      if (dvErr) throw dvErr;
+      const dvRows: { id: string }[] = [];
+      for (const dateIso of occurrenceDates) {
+        const { data: dvRow, error: dvErr } = await supabase
+          .from("daily_visits")
+          .insert({
+            company_id: companyUser.company_id,
+            care_receiver_id: selected.id,
+            care_giver_id: staffId,
+            visit_date: dateIso,
+            start_hour: parseInt(form.startH),
+            start_minute: parseInt(form.startM),
+            duration: durHours,
+            duration_minutes: durationMinutes,
+            status: staffId ? "Confirmed" : "Pending",
+          } as any)
+          .select("id")
+          .single();
+        if (dvErr) throw dvErr;
+        if (dvRow?.id) dvRows.push(dvRow as any);
+      }
+      const dvRow = dvRows[0];
 
       const taskTitles: string[] = [];
       if (form.tasksRequired) taskTitles.push(...selectedTasks);
@@ -280,10 +285,9 @@ const AddRota = () => {
           if (m) taskTitles.push(`Administer ${m.medication}${m.dosage ? ` (${m.dosage})` : ""}`);
         }
       }
-      if (dvRow?.id && taskTitles.length > 0) {
-        const { error: stErr } = await supabase
-          .from("shift_tasks")
-          .insert(taskTitles.map((title) => ({ daily_visit_id: dvRow.id, title })));
+      if (taskTitles.length > 0 && dvRows.length > 0) {
+        const rows = dvRows.flatMap((r) => taskTitles.map((title) => ({ daily_visit_id: r.id, title })));
+        const { error: stErr } = await supabase.from("shift_tasks").insert(rows);
         if (stErr) throw stErr;
       }
 
