@@ -832,6 +832,61 @@ const AddRota = () => {
                   onChange={(v) => setForm({ ...form, template: v })}
                 />
               </div>
+
+              {form.recurring && (
+                <div className="space-y-3 rounded-lg border border-primary/30 bg-primary/5 p-3 mt-1">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <Label className="text-xs font-medium flex items-center gap-1.5">
+                      <Repeat className="h-3.5 w-3.5 text-primary" /> Recurrence schedule
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] text-muted-foreground">Repeat every</span>
+                      <Select value={recurUnit} onValueChange={(v: any) => setRecurUnit(v)}>
+                        <SelectTrigger className="h-8 w-[110px] text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="days">Day</SelectItem>
+                          <SelectItem value="weeks">Week</SelectItem>
+                          <SelectItem value="months">Month</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <span className="text-[11px] text-muted-foreground">for</span>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={52}
+                        value={recurCount}
+                        onChange={(e) => setRecurCount(Math.max(1, Math.min(52, Number(e.target.value) || 1)))}
+                        className="h-8 w-16 text-xs"
+                      />
+                      <span className="text-[11px] text-muted-foreground">
+                        {recurUnit === "days" ? "day(s)" : recurUnit === "weeks" ? "week(s)" : "month(s)"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="rounded-md border border-border bg-background overflow-hidden">
+                    <div className="grid grid-cols-[60px_1fr_120px] text-[10px] uppercase tracking-wide text-muted-foreground bg-muted/40 px-3 py-1.5">
+                      <span>#</span><span>Date</span><span className="text-right">Time</span>
+                    </div>
+                    <div className="max-h-48 overflow-y-auto divide-y divide-border">
+                      {occurrenceDates.map((d, i) => (
+                        <div key={d + i} className="grid grid-cols-[60px_1fr_120px] px-3 py-1.5 text-xs items-center">
+                          <span className="text-muted-foreground">{i + 1}</span>
+                          <span className="font-medium">
+                            {new Date(d).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+                          </span>
+                          <span className="text-right font-mono text-muted-foreground">
+                            {form.startH}:{form.startM} → {form.endH}:{form.endM}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground flex items-start gap-1.5">
+                    <Info className="h-3 w-3 mt-0.5 shrink-0" />
+                    {occurrenceDates.length} shift{occurrenceDates.length !== 1 ? "s" : ""} will be created across the schedule above.
+                  </p>
+                </div>
+              )}
             </Section>
           </div>
 
