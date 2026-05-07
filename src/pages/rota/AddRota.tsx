@@ -90,6 +90,7 @@ const AddRota = () => {
     endH: "21",
     endM: "00",
     staff1: "",
+    staff2: "",
     medicationRequired: false,
     tasksRequired: false,
     addTimeLock: false,
