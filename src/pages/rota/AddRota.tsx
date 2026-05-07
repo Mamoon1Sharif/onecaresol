@@ -575,10 +575,53 @@ const AddRota = () => {
                   </SelectContent>
                 </Select>
               </Field>
-              <p className="text-[11px] text-destructive flex items-start gap-1.5">
-                <ShieldCheck className="h-3 w-3 mt-0.5 shrink-0" />
-                Service-user preference lock is on — caregivers rated below 3 won't be available.
-              </p>
+              {form.linkUp && (
+                <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <Label className="text-xs font-medium flex items-center gap-1.5">
+                      <Repeat className="h-3.5 w-3.5 text-primary" /> Link up — pick a caregiver from the list
+                    </Label>
+                    <Badge variant="outline" className="text-[10px]">{filteredCaregivers.length} available</Badge>
+                  </div>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <Input
+                      placeholder="Search caregivers…"
+                      value={caregiverSearch}
+                      onChange={(e) => setCaregiverSearch(e.target.value)}
+                      className="pl-9 h-8 text-xs"
+                    />
+                  </div>
+                  <div className="max-h-60 overflow-y-auto rounded-md border border-border divide-y divide-border bg-background">
+                    {filteredCaregivers.length === 0 && (
+                      <div className="text-center text-xs text-muted-foreground py-6">No caregivers found.</div>
+                    )}
+                    {filteredCaregivers.map((c: any) => {
+                      const active = form.staff1 === c.id;
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => setForm({ ...form, staff1: c.id })}
+                          className={cn(
+                            "w-full flex items-center gap-3 px-3 py-2 text-left transition-colors",
+                            active ? "bg-primary/10" : "hover:bg-muted/50",
+                          )}
+                        >
+                          <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                            <User className="h-4 w-4" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm font-medium truncate">{c.name}</div>
+                            <div className="text-[10px] text-muted-foreground truncate">{c.role_title ?? "Homecare Assistant"}</div>
+                          </div>
+                          {active && <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </Section>
 
             {/* 4. Medications */}
