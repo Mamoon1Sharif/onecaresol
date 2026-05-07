@@ -179,6 +179,30 @@ const AddRota = () => {
     });
   };
 
+  // Build the list of occurrence dates based on recurrence settings.
+  const occurrenceDates = useMemo(() => {
+    const base = new Date(form.date);
+    if (!form.recurring || recurCount < 1) return [form.date];
+    const out: string[] = [];
+    for (let i = 0; i < recurCount; i++) {
+      const d = new Date(base);
+      if (recurUnit === "days") d.setDate(base.getDate() + i);
+      else if (recurUnit === "weeks") d.setDate(base.getDate() + i * 7);
+      else d.setMonth(base.getMonth() + i);
+      out.push(d.toISOString().slice(0, 10));
+    }
+    return out;
+  }, [form.date, form.recurring, recurUnit, recurCount]);
+
+  const filteredCaregivers = useMemo(() => {
+    const q = caregiverSearch.trim().toLowerCase();
+    if (!q) return caregivers;
+    return caregivers.filter((c: any) =>
+      (c.name ?? "").toLowerCase().includes(q) ||
+      (c.role_title ?? "").toLowerCase().includes(q),
+    );
+  }, [caregivers, caregiverSearch]);
+
   const handleSaveClick = () => {
     if (!selected) return;
     setConfirmOpen(true);
