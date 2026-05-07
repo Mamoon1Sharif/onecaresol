@@ -13,11 +13,12 @@ import { ShiftDetailDialog } from "@/components/ShiftDetailDialog";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-type CheckInStatus = "On Time" | "Late" | "Not Arrived";
+type CheckInStatus = "On Time" | "Late" | "Missed" | "Not Arrived";
 
 const statusStyles: Record<CheckInStatus, string> = {
   "On Time": "bg-success/15 text-success border-0 hover:bg-success/20",
   Late: "bg-warning/15 text-warning border-0 hover:bg-warning/20",
+  Missed: "bg-destructive/15 text-destructive border-0 hover:bg-destructive/20",
   "Not Arrived": "bg-destructive/15 text-destructive border-0 hover:bg-destructive/20",
 };
 
