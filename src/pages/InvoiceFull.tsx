@@ -101,27 +101,27 @@ const settingFields: Array<{
   options: string[];
 }> = [
   { key: "invoiceLayout", label: "Invoice Layout", required: true, options: ["Mayfair Care (CHC)", "Mayfair Care (Private)", "Default"] },
-  { key: "serviceUserNameConfig", label: "Service User Name Config", options: ["Show Only Service User Ref Number", "Show Full Name", "Show Initials Only"] },
-  { key: "showServiceUserEmail", label: "Show Service User Email", options: ["No", "Yes"] },
+  { key: "serviceUserNameConfig", label: "Service Member Name Config", options: ["Show Only Service Member Ref Number", "Show Full Name", "Show Initials Only"] },
+  { key: "showServiceUserEmail", label: "Show Service Member Email", options: ["No", "Yes"] },
   { key: "includeTerms", label: "Include Terms", options: ["Yes", "No"] },
   { key: "includeBanking", label: "Include Banking", options: ["Yes", "No"] },
   { key: "includeInvoiceBreakdown", label: "Include Invoice Breakdown", options: ["Yes", "No"] },
   { key: "showBreakdownTableOnInvoice", label: "Show Breakdown Table on Invoice", options: ["Yes", "No"] },
-  { key: "showTeamMemberInBreakdown", label: "Show Team Member In Breakdown", options: ["Don't Show Team Member Name", "Show Team Member Name"] },
+  { key: "showTeamMemberInBreakdown", label: "Show Care Giver In Breakdown", options: ["Don't Show Care Giver Name", "Show Care Giver Name"] },
   { key: "includeAmountRateBreakdown", label: "Include Amount/Rate Breakdown", options: ["No", "Yes"] },
   { key: "includeNotes", label: "Include Notes", options: ["No", "Yes"] },
-  { key: "showServiceUserAddress", label: "Show Service User Address", options: ["No", "Yes"] },
+  { key: "showServiceUserAddress", label: "Show Service Member Address", options: ["No", "Yes"] },
 ];
 
 const initialSettings: SettingsState = {
   invoiceLayout: "Mayfair Care (CHC)",
-  serviceUserNameConfig: "Show Only Service User Ref Number",
+  serviceUserNameConfig: "Show Only Service Member Ref Number",
   showServiceUserEmail: "No",
   includeTerms: "Yes",
   includeBanking: "Yes",
   includeInvoiceBreakdown: "Yes",
   showBreakdownTableOnInvoice: "Yes",
-  showTeamMemberInBreakdown: "Don't Show Team Member Name",
+  showTeamMemberInBreakdown: "Don't Show Care Giver Name",
   includeAmountRateBreakdown: "No",
   includeNotes: "No",
   showServiceUserAddress: "No",
@@ -559,7 +559,7 @@ export default function InvoiceFull() {
                   {[
                     ["Invoice No", invoiceRef],
                     ["Invoice Date", "07/04/2026"],
-                    ["Service User Ref", "UID 64288 (XXJCARTER)"],
+                    ["Service Member Ref", "UID 64288 (XXJCARTER)"],
                     ["Date Range", "30/03/2026 - 05/04/2026"],
                     ["Due By", "07/05/2026"],
                   ].map(([k, v]) => (

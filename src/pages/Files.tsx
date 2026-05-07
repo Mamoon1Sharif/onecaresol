@@ -89,17 +89,20 @@ export default function Files() {
   const [search, setSearch] = useState("");
   const [bulkAction, setBulkAction] = useState<"Remove" | "Move">("Remove");
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   const filteredDocs = useMemo(() => {
     const q = search.toLowerCase().trim();
-    if (!q) return docs;
     return docs.filter((d) => {
+      if (categoryFilter === "uncategorised" && d.category_id) return false;
+      if (categoryFilter !== "all" && categoryFilter !== "uncategorised" && d.category_id !== categoryFilter) return false;
+      if (!q) return true;
       const cat = d.category_id ? categoryById[d.category_id]?.name ?? "" : "";
       return [d.file_name, cat, ...(d.tags ?? [])]
         .filter(Boolean)
         .some((v) => v.toLowerCase().includes(q));
     });
-  }, [docs, search, categoryById]);
+  }, [docs, search, categoryById, categoryFilter]);
 
   // Dialog state
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -235,7 +238,7 @@ export default function Files() {
               onValueChange={(val) => navigate(`/caregivers/${val}/files`)}
             >
               <SelectTrigger className="h-9 bg-muted/50">
-                <SelectValue placeholder="Select team member" />
+                <SelectValue placeholder="Select care giver" />
               </SelectTrigger>
               <SelectContent>
                 {careGivers.map((m) => (
@@ -245,7 +248,7 @@ export default function Files() {
             </Select>
             <Select onValueChange={() => {}}>
               <SelectTrigger className="h-9 bg-muted/30 text-muted-foreground">
-                <SelectValue placeholder="Select Service User..." />
+                <SelectValue placeholder="Select Service Member..." />
               </SelectTrigger>
               <SelectContent>
                 {careReceivers.map((r) => (
@@ -303,8 +306,21 @@ export default function Files() {
                 Go
               </Button>
             </div>
-            <div className="flex items-center gap-2 text-xs">
-              <span className="font-semibold">Search:</span>
+            <div className="flex items-center gap-2 text-xs flex-wrap">
+              <span className="font-semibold">Category:</span>
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="h-8 w-44 text-xs">
+                  <SelectValue placeholder="All categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All categories</SelectItem>
+                  <SelectItem value="uncategorised">Uncategorised</SelectItem>
+                  {categories.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <span className="font-semibold ml-2">Search:</span>
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -390,7 +406,7 @@ export default function Files() {
                           )}
                         </td>
                         <td className="px-3 py-2 text-muted-foreground">
-                          {format(parseISO(d.created_at), "dd/MM/yyyy")}
+                          {new Date(d.created_at).toLocaleString("en-GB", { timeZone: "Asia/Karachi" })}
                         </td>
                         <td className="px-3 py-2">
                           <div className="flex items-center gap-1 justify-end">

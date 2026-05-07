@@ -24,6 +24,18 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { EditRotaDialog, type EditRotaShift } from "@/components/EditRotaDialog";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 /* -------------------------------------------------------------------------- */
 /*  Data                                                                       */
@@ -298,7 +310,9 @@ function statusLabel(s: ShiftStatus): string {
 }
 
 export default function AdvancedRota() {
+  const navigate = useNavigate();
   const [date, setDate] = useState(() => new Date());
+  const [cancelledIds, setCancelledIds] = useState<Set<string>>(new Set());
   // Overrides per day per shift id (stores edited start/end/staff after drag)
   const [overrides, setOverrides] = useState<Record<string, Partial<Shift>>>({});
   const [bulkSelect, setBulkSelect] = useState(false);
@@ -322,6 +336,18 @@ export default function AdvancedRota() {
     end: number;
   } | null>(null);
   const [editing, setEditing] = useState<EditRotaShift | null>(null);
+  const [pendingMove, setPendingMove] = useState<{
+    id: string;
+    fromStaff: string;
+    toStaff: string;
+    fromStart: number;
+    fromEnd: number;
+    toStart: number;
+    toEnd: number;
+    client: string;
+    ref: string;
+    service: string;
+  } | null>(null);
 
   const gridRef = useRef<HTMLDivElement>(null);
 
@@ -409,14 +435,27 @@ export default function AdvancedRota() {
   function onPointerUpGrid() {
     if (drag) {
       if (drag.moved && hoverGhost) {
-        setOverrides((prev) => ({
-          ...prev,
-          [drag.id]: {
-            staff: hoverGhost.staff,
-            start: hoverGhost.start,
-            end: hoverGhost.end,
-          },
-        }));
+        const s = shifts.find((x) => x.id === drag.id);
+        if (s) {
+          const changed =
+            hoverGhost.staff !== s.staff ||
+            hoverGhost.start !== s.start ||
+            hoverGhost.end !== s.end;
+          if (changed) {
+            setPendingMove({
+              id: s.id,
+              fromStaff: s.staff,
+              toStaff: hoverGhost.staff,
+              fromStart: s.start,
+              fromEnd: s.end,
+              toStart: hoverGhost.start,
+              toEnd: hoverGhost.end,
+              client: s.client,
+              ref: s.ref,
+              service: s.service,
+            });
+          }
+        }
       } else {
         // Treat as a click — open the edit dialog
         const s = shifts.find((x) => x.id === drag.id);
@@ -437,6 +476,28 @@ export default function AdvancedRota() {
     }
     setDrag(null);
     setHoverGhost(null);
+  }
+
+  function confirmPendingMove() {
+    if (!pendingMove) return;
+    setOverrides((prev) => ({
+      ...prev,
+      [pendingMove.id]: {
+        staff: pendingMove.toStaff,
+        start: pendingMove.toStart,
+        end: pendingMove.toEnd,
+      },
+    }));
+    const wasUnassigned = pendingMove.fromStaff === "Unassigned Shifts";
+    toast.success(
+      wasUnassigned
+        ? `Shift assigned to ${pendingMove.toStaff}`
+        : `Shift moved to ${pendingMove.toStaff}`,
+      {
+        description: `${pendingMove.client} • ${fmtTime(pendingMove.toStart)}–${fmtTime(pendingMove.toEnd)} • Ref ${pendingMove.ref}`,
+      }
+    );
+    setPendingMove(null);
   }
 
   function handleSaveEdit(updates: {
@@ -460,6 +521,95 @@ export default function AdvancedRota() {
     }));
   }
 
+  /* ----------------------------- Actions ---------------------------------- */
+
+  function requireSelection(): string[] | null {
+    if (selected.size === 0) {
+      toast.error("No shifts selected. Enable Bulk Select and pick some.");
+      return null;
+    }
+    return Array.from(selected);
+  }
+
+  function handleAddShift() {
+    navigate("/rota/add");
+  }
+
+  function handleBulkReassign() {
+    const ids = requireSelection();
+    if (!ids) return;
+    const name = window.prompt(
+      `Reassign ${ids.length} shift(s) to which care giver?\n\n${STAFF.join(", ")}`
+    );
+    if (!name) return;
+    const match = STAFF.find((s) => s.toLowerCase() === name.trim().toLowerCase());
+    if (!match) {
+      toast.error("Unknown care giver.");
+      return;
+    }
+    if (!window.confirm(`Reassign ${ids.length} shift(s) to ${match}?`)) return;
+    setOverrides((prev) => {
+      const next = { ...prev };
+      ids.forEach((id) => {
+        next[id] = { ...(next[id] || {}), staff: match };
+      });
+      return next;
+    });
+    setSelected(new Set());
+    toast.success(`Reassigned ${ids.length} shift(s) to ${match}.`);
+  }
+
+  function handleCancelSelected() {
+    const ids = requireSelection();
+    if (!ids) return;
+    if (!window.confirm(`Cancel ${ids.length} shift(s)?`)) return;
+    setCancelledIds((prev) => {
+      const next = new Set(prev);
+      ids.forEach((id) => next.add(id));
+      return next;
+    });
+    setSelected(new Set());
+    toast.success(`Cancelled ${ids.length} shift(s).`);
+  }
+
+  function handleActivateSelected() {
+    const ids = requireSelection();
+    if (!ids) return;
+    if (!window.confirm(`Activate ${ids.length} shift(s)?`)) return;
+    setCancelledIds((prev) => {
+      const next = new Set(prev);
+      ids.forEach((id) => next.delete(id));
+      return next;
+    });
+    setSelected(new Set());
+    toast.success(`Activated ${ids.length} shift(s).`);
+  }
+
+  function handleExportCsv() {
+    const rows = shifts.filter((s) => !cancelledIds.has(s.id));
+    const header = ["Date", "Staff", "Client", "Reference", "Service", "Start", "End", "Status"];
+    const lines = [header.join(",")];
+    rows.forEach((s) => {
+      lines.push(
+        [dateLabel, s.staff, s.client, s.ref, s.service, fmtTime(s.start), fmtTime(s.end), statusLabel(s.status)]
+          .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+          .join(",")
+      );
+    });
+    const blob = new Blob([lines.join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `rota-${dateLabel.replace(/\//g, "-")}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("CSV exported.");
+  }
+
+  function handlePrintRota() {
+    window.print();
+  }
+
   return (
     <AppLayout>
       <div className="space-y-4">
@@ -474,8 +624,8 @@ export default function AdvancedRota() {
             <Select value={filterTeam} onValueChange={setFilterTeam}>
               <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="today">Team Members Today...</SelectItem>
-                <SelectItem value="all">All Team Members</SelectItem>
+                <SelectItem value="today">Care Givers Today...</SelectItem>
+                <SelectItem value="all">All Care Givers</SelectItem>
                 <SelectItem value="active">Active Only</SelectItem>
               </SelectContent>
             </Select>
@@ -548,13 +698,13 @@ export default function AdvancedRota() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-popover">
-                <DropdownMenuItem>Add Shift</DropdownMenuItem>
-                <DropdownMenuItem>Bulk Reassign</DropdownMenuItem>
-                <DropdownMenuItem>Cancel Selected</DropdownMenuItem>
-                <DropdownMenuItem>Activate Selected</DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleAddShift}>Add Shift</DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleBulkReassign}>Bulk Reassign</DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleCancelSelected}>Cancel Selected</DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleActivateSelected}>Activate Selected</DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Export CSV</DropdownMenuItem>
-                <DropdownMenuItem>Print Rota</DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleExportCsv}>Export CSV</DropdownMenuItem>
+                <DropdownMenuItem onSelect={handlePrintRota}>Print Rota</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -635,11 +785,13 @@ export default function AdvancedRota() {
                     {/* shifts in this row */}
                     {shifts
                       .filter((s) => s.staff === staff && (!hoverGhost || s.id !== hoverGhost.id))
+                      .filter((s) => filterCancelled === "show" || !cancelledIds.has(s.id))
                       .map((s) => (
                         <ShiftBlock
                           key={s.id}
                           shift={s}
                           selected={selected.has(s.id)}
+                          cancelled={cancelledIds.has(s.id)}
                           onPointerDown={(e) => onPointerDownShift(e, s)}
                         />
                       ))}
@@ -683,6 +835,47 @@ export default function AdvancedRota() {
         shift={editing}
         onSave={handleSaveEdit}
       />
+
+      <AlertDialog open={!!pendingMove} onOpenChange={(o) => !o && setPendingMove(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {pendingMove?.fromStaff === "Unassigned Shifts" ? "Assign shift?" : "Move shift?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <div className="rounded-md border border-border bg-muted/40 p-3 space-y-1">
+                  <div><span className="text-muted-foreground">Client:</span> <span className="font-medium text-foreground">{pendingMove?.client}</span></div>
+                  <div><span className="text-muted-foreground">Reference:</span> <span className="font-mono text-foreground">{pendingMove?.ref}</span></div>
+                  <div><span className="text-muted-foreground">Service:</span> <span className="text-foreground">{pendingMove?.service}</span></div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="rounded-md border border-border p-2">
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">From</div>
+                    <div className="font-medium text-foreground">{pendingMove?.fromStaff}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {pendingMove && `${fmtTime(pendingMove.fromStart)}–${fmtTime(pendingMove.fromEnd)}`}
+                    </div>
+                  </div>
+                  <div className="rounded-md border border-primary/40 bg-primary/5 p-2">
+                    <div className="text-[10px] uppercase tracking-wider text-primary">To</div>
+                    <div className="font-medium text-foreground">{pendingMove?.toStaff}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {pendingMove && `${fmtTime(pendingMove.toStart)}–${fmtTime(pendingMove.toEnd)}`}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmPendingMove}>
+              {pendingMove?.fromStaff === "Unassigned Shifts" ? "Assign" : "Confirm move"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }
@@ -704,11 +897,13 @@ function ShiftBlock({
   shift,
   selected,
   ghost,
+  cancelled,
   onPointerDown,
 }: {
   shift: Shift;
   selected: boolean;
   ghost?: boolean;
+  cancelled?: boolean;
   onPointerDown?: (e: React.PointerEvent) => void;
 }) {
   const left = shift.start * PX_PER_HOUR;
@@ -720,7 +915,8 @@ function ShiftBlock({
         "absolute top-1 bottom-1 rounded-sm border px-1.5 py-0.5 cursor-grab active:cursor-grabbing overflow-hidden text-[10px] leading-tight shadow-sm",
         statusStyles(shift.status),
         selected && "ring-2 ring-primary ring-offset-1",
-        ghost && "opacity-60 ring-2 ring-primary"
+        ghost && "opacity-60 ring-2 ring-primary",
+        cancelled && "opacity-50 line-through"
       )}
       style={{ left, width }}
       title={`${shift.client} • ${fmtTime(shift.start)}–${fmtTime(shift.end)} • ${shift.service}`}

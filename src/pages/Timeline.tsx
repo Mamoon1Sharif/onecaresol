@@ -151,7 +151,7 @@ function buildSeed(): TimelineEvent[] {
         notes: status === "given"
           ? "Administered as prescribed."
           : status === "refused"
-          ? "Service member declined the dose. Will retry next visit."
+          ? "Service user declined the dose. Will retry next visit."
           : status === "missed_med"
           ? "Missed dose — added to handover."
           : "Half dose accepted; remainder noted in care notes.",
@@ -490,7 +490,7 @@ function EventDetail({ e }: { e: TimelineEvent }) {
             {end && <> — {format(end, "HH:mm")}</>}
             {dur && <span className="text-muted-foreground"> · {dur} min</span>}
           </Row>
-          <Row label="Service member">{e.member}</Row>
+          <Row label="Service user">{e.member}</Row>
           {e.caregiver && <Row label="Caregiver">{e.caregiver}</Row>}
           {e.category === "visit" && (
             <>

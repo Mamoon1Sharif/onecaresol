@@ -109,7 +109,7 @@ export default function Messaging() {
               className="h-8 bg-primary hover:bg-primary/90 text-primary-foreground"
               onClick={() => navigate("/caregivers")}
             >
-              All Team Members
+              All Care Givers
             </Button>
             <Button
               size="sm"
@@ -122,7 +122,7 @@ export default function Messaging() {
             </Button>
           </div>
           <h1 className="text-base font-medium text-foreground">
-            Team Member - Send Message
+            Care Giver - Send Message
           </h1>
           <div className="w-[260px]" />
         </div>
@@ -138,7 +138,7 @@ export default function Messaging() {
               onValueChange={(val) => navigate(`/caregivers/${val}/messaging`)}
             >
               <SelectTrigger className="h-9 bg-muted/50 border-border">
-                <SelectValue placeholder="Select team member" />
+                <SelectValue placeholder="Select care giver" />
               </SelectTrigger>
               <SelectContent>
                 {careGivers.map((m) => (
@@ -304,7 +304,7 @@ export default function Messaging() {
                 >
                   <div className="text-muted-foreground">{n.created_by || "—"}</div>
                   <div className="text-muted-foreground">
-                    {format(new Date(n.created_at), "dd/MM/yyyy HH:mm")}
+                    {new Date(n.created_at).toLocaleString("en-GB", { timeZone: "Asia/Karachi" })}
                   </div>
                   <div className="text-foreground break-words">{n.note}</div>
                 </div>
@@ -369,7 +369,7 @@ export default function Messaging() {
               value={draftNote}
               onChange={(e) => setDraftNote(e.target.value)}
               rows={5}
-              placeholder="Type the message to send to this team member's device…"
+              placeholder="Type the message to send to this care giver's device…"
             />
           </div>
           <DialogFooter>

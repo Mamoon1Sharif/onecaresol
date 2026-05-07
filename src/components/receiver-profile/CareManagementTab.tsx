@@ -1,4 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -46,6 +48,7 @@ interface Task {
   isMedication: boolean;      // renders as blue document row (e.g. "Medication Stock Check")
   status: "Active" | "Inactive";
   outcome?: string;           // optional linked outcome (kept for compatibility)
+  assignedForShift?: boolean; // highlighted when assigned to a shift via a rota
 }
 
 interface Visit {
@@ -81,7 +84,7 @@ const SEED_OUTCOMES: Outcome[] = [
   { id: "o2", title: "Improve nutrition and hydration", description: "Encourage 1.5L of fluid intake and balanced meals.", category: "Nutrition", priority: "Medium", status: "Active", targetDate: "2026-06-15", progress: 80 },
   { id: "o3", title: "Manage diabetes through routine checks", description: "Regular blood glucose monitoring and dietary adherence.", category: "Medical", priority: "High", status: "Active", targetDate: "2026-12-31", progress: 50 },
   { id: "o4", title: "Reduce social isolation", description: "Weekly community activities and family video calls.", category: "Wellbeing", priority: "Medium", status: "Achieved", targetDate: "2025-12-01", progress: 100 },
-  { id: "o5", title: "Continue smoking cessation program", description: "Discontinued — service user moved to alternative provider.", category: "Wellbeing", priority: "Low", status: "Inactive", targetDate: "2025-08-01", progress: 30 },
+  { id: "o5", title: "Continue smoking cessation program", description: "Discontinued — service member moved to alternative provider.", category: "Wellbeing", priority: "Low", status: "Inactive", targetDate: "2025-08-01", progress: 30 },
 ];
 
 const SEED_TASKS: Task[] = [
@@ -131,14 +134,87 @@ interface Props {
   careReceiverName: string;
 }
 
-export function CareManagementTab({ careReceiverName }: Props) {
+export function CareManagementTab({ careReceiverId, careReceiverName }: Props) {
   const [sub, setSub] = useState<SubTab>("outcomes");
   const [hideInactive, setHideInactive] = useState(true);
+  const qc = useQueryClient();
 
   const [outcomes, setOutcomes] = useState<Outcome[]>(SEED_OUTCOMES);
-  const [tasks, setTasks] = useState<Task[]>(SEED_TASKS);
   const [visits, setVisits] = useState<Visit[]>(SEED_VISITS);
   const [groups, setGroups] = useState<CareGroup[]>(SEED_GROUPS);
+
+  // ── Tasks: load from Supabase (care_management_tasks) ──
+  const { data: dbTasks } = useQuery({
+    queryKey: ["care_management_tasks", careReceiverId],
+    enabled: !!careReceiverId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("care_management_tasks")
+        .select("*")
+        .eq("care_receiver_id", careReceiverId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const tasks: Task[] = useMemo(() => {
+    if (!dbTasks) return [];
+    return dbTasks.map((r: any) => ({
+      id: r.id,
+      title: r.title,
+      description: r.description ?? "",
+      startDate: r.start_date,
+      isOngoing: r.is_ongoing,
+      visits: r.visits ?? [],
+      isMedication: r.is_medication,
+      status: r.status as Task["status"],
+      outcome: r.outcome ?? "",
+      assignedForShift: !!r.assigned_for_shift,
+    }));
+  }, [dbTasks]);
+
+  const upsertTaskMut = useMutation({
+    mutationFn: async (t: Task & { _editingId?: string }) => {
+      // Resolve current company
+      const { data: auth } = await supabase.auth.getUser();
+      const userId = auth.user?.id;
+      if (!userId) throw new Error("You must be signed in.");
+      const { data: cu, error: cuErr } = await supabase
+        .from("company_users").select("company_id").eq("user_id", userId).maybeSingle();
+      if (cuErr) throw cuErr;
+      if (!cu?.company_id) throw new Error("Account not linked to a company.");
+
+      const payload = {
+        care_receiver_id: careReceiverId,
+        company_id: cu.company_id,
+        title: t.title,
+        description: t.description || null,
+        start_date: t.startDate,
+        is_ongoing: t.isOngoing,
+        visits: t.visits,
+        is_medication: t.isMedication,
+        status: t.status,
+        outcome: t.outcome || null,
+      };
+      if (t._editingId) {
+        const { error } = await supabase.from("care_management_tasks").update(payload).eq("id", t._editingId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("care_management_tasks").insert(payload);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["care_management_tasks", careReceiverId] }),
+  });
+
+  const deleteTaskMut = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("care_management_tasks").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["care_management_tasks", careReceiverId] }),
+  });
 
   const [historyOpen, setHistoryOpen] = useState(false);
   const [printOpen, setPrintOpen] = useState(false);
@@ -196,16 +272,16 @@ export function CareManagementTab({ careReceiverName }: Props) {
   // ------- Tasks
   const openAddTask = () => { setEditingTask(null); setTaskDraft(blankTask); setTaskDlg(true); };
   const openEditTask = (t: Task) => { setEditingTask(t); setTaskDraft(t); setTaskDlg(true); };
-  const saveTask = () => {
+  const saveTask = async () => {
     if (!taskDraft.title.trim()) return toast.error("Title is required");
-    if (editingTask) {
-      setTasks((prev) => prev.map((t) => (t.id === editingTask.id ? { ...taskDraft, id: editingTask.id } : t)));
-      toast.success("Task updated");
-    } else {
-      setTasks((prev) => [{ ...taskDraft, id: uid() }, ...prev]);
-      toast.success("Task added");
+    if (!careReceiverId) return toast.error("Missing service member id");
+    try {
+      await upsertTaskMut.mutateAsync({ ...taskDraft, _editingId: editingTask?.id });
+      toast.success(editingTask ? "Task updated" : "Task added");
+      setTaskDlg(false);
+    } catch (e: any) {
+      toast.error(e.message ?? "Failed to save task");
     }
-    setTaskDlg(false);
   };
 
   // ------- Visits
@@ -239,10 +315,12 @@ export function CareManagementTab({ careReceiverName }: Props) {
   };
 
   // ------- Delete
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!deleting) return;
     if (deleting.kind === "outcomes") setOutcomes((p) => p.filter((x) => x.id !== deleting.id));
-    if (deleting.kind === "tasks") setTasks((p) => p.filter((x) => x.id !== deleting.id));
+    if (deleting.kind === "tasks") {
+      try { await deleteTaskMut.mutateAsync(deleting.id); } catch (e: any) { toast.error(e.message ?? "Failed to delete"); setDeleting(null); return; }
+    }
     if (deleting.kind === "visits") setVisits((p) => p.filter((x) => x.id !== deleting.id));
     if (deleting.kind === "groups") setGroups((p) => p.filter((x) => x.id !== deleting.id));
     toast.success("Deleted");
@@ -372,14 +450,26 @@ export function CareManagementTab({ careReceiverName }: Props) {
             <div className="space-y-2">
               {[...visibleTasks].sort((a, b) => a.title.localeCompare(b.title)).map((t) => {
                 const isMed = t.isMedication;
-                // Header strip color: yellow for normal tasks, blue for medication
-                const headerCls = isMed
+                const isAssigned = !!t.assignedForShift;
+                // Header strip color: violet ring for assigned-for-shift, otherwise blue (med) or amber (normal)
+                const headerCls = isAssigned
+                  ? "bg-violet-100/80 border-violet-300"
+                  : isMed
                   ? "bg-sky-100/80 border-sky-200"
                   : "bg-amber-100/70 border-amber-200";
-                const headerTitleCls = isMed ? "text-sky-700" : "text-amber-700";
+                const headerTitleCls = isAssigned
+                  ? "text-violet-800"
+                  : isMed
+                  ? "text-sky-700"
+                  : "text-amber-700";
                 const HeaderIcon = isMed ? FileText : Check;
                 return (
-                  <div key={t.id} className="border border-border rounded-md overflow-hidden bg-background group">
+                  <div
+                    key={t.id}
+                    className={`border rounded-md overflow-hidden bg-background group ${
+                      isAssigned ? "border-violet-400 ring-2 ring-violet-300/60 shadow-sm" : "border-border"
+                    }`}
+                  >
                     {/* Title strip */}
                     <div className={`flex items-center justify-between px-3 py-2 border-b ${headerCls}`}>
                       <div className={`flex items-center gap-2 text-sm font-semibold ${headerTitleCls}`}>
@@ -387,6 +477,14 @@ export function CareManagementTab({ careReceiverName }: Props) {
                         <span>{t.title}</span>
                       </div>
                       <div className="flex items-center gap-2">
+                        {isAssigned && (
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] uppercase tracking-wide bg-violet-600 text-white border-violet-700"
+                          >
+                            Assigned for Shift
+                          </Badge>
+                        )}
                         <Badge
                           variant="outline"
                           className={`text-[10px] uppercase tracking-wide ${

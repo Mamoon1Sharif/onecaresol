@@ -30,7 +30,7 @@ export function ServiceUserSidebar({ cr, basePath }: Props) {
           onValueChange={(val) => navigate(`/carereceivers/${val}/${basePath}`)}
         >
           <SelectTrigger className="h-9 bg-muted/50 border-border">
-            <SelectValue placeholder="Select Service User" />
+            <SelectValue placeholder="Select Service Member" />
           </SelectTrigger>
           <SelectContent>
             {receivers.map((m) => (
@@ -51,7 +51,7 @@ export function ServiceUserSidebar({ cr, basePath }: Props) {
               </div>
               <h2 className="mt-3 text-lg font-semibold text-primary">{cr.name}</h2>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {cr.care_type || "Service User"}
+                {cr.care_type || "Service Member"}
               </p>
             </div>
             <Separator />
@@ -165,7 +165,7 @@ export function ServiceUserTopBar({ title, backTo }: { title: string; backTo?: s
             className="h-8 px-3 text-xs rounded bg-primary hover:bg-primary/90 text-primary-foreground"
             onClick={() => navigate("/carereceivers")}
           >
-            All Service Users
+            All Service Members
           </button>
         </div>
         <h1 className="text-base font-medium text-foreground">{title}</h1>

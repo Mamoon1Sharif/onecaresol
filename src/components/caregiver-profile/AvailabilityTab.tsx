@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-type CareGiver = { id: string; requested_hours?: any };
+type CareGiver = { id: string; requested_hours?: any; handset_logged_out_at?: string | null };
 
 interface Slot {
   id: string;
@@ -53,6 +53,7 @@ export const AvailabilityTab = ({ cg }: Props) => {
   const [requestedOpen, setRequestedOpen] = useState(false);
   const [confirmWeek, setConfirmWeek] = useState<number | null>(null);
   const [confirmSlotId, setConfirmSlotId] = useState<string | null>(null);
+  const [confirmHandsetLogout, setConfirmHandsetLogout] = useState(false);
 
   const { data: slots = [], isLoading } = useQuery({
     queryKey: ["caregiver_availability", cg.id],
@@ -138,6 +139,22 @@ export const AvailabilityTab = ({ cg }: Props) => {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const handsetLogout = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("care_givers")
+        .update({ handset_logged_out_at: new Date().toISOString() })
+        .eq("id", cg.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+      setConfirmHandsetLogout(false);
+      toast.success("Caregiver logged out of handset");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   const openAdd = (week: number) => {
     setEditorSlot(null);
     setEditorWeek(week);
@@ -154,11 +171,40 @@ export const AvailabilityTab = ({ cg }: Props) => {
       {/* Top action bar */}
       <div className="flex flex-wrap items-center gap-2">
         <Button variant="secondary" size="sm" className="gap-1.5">
-          <Users className="h-3.5 w-3.5" /> All Team Members
+          <Users className="h-3.5 w-3.5" /> All Care Givers
         </Button>
-        <Button size="sm" className="gap-1.5 bg-red-500 hover:bg-red-600 text-white">
+        <Button
+          size="sm"
+          className="gap-1.5 bg-red-500 hover:bg-red-600 text-white"
+          onClick={() => setConfirmHandsetLogout(true)}
+          disabled={handsetLogout.isPending}
+        >
           <LogOut className="h-3.5 w-3.5" /> Logout of handset
         </Button>
+        {cg.handset_logged_out_at && (
+          <span className="text-xs text-muted-foreground italic">
+            Last logged out: {new Date(cg.handset_logged_out_at).toLocaleString("en-GB", { timeZone: "Asia/Karachi" })}
+          </span>
+        )}
+        <AlertDialog open={confirmHandsetLogout} onOpenChange={setConfirmHandsetLogout}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Log out of handset?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will end the caregiver's current session on their mobile handset. They will need to sign in again to continue using the app.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => handsetLogout.mutate()}
+                className="bg-red-500 hover:bg-red-600 text-white"
+              >
+                Log out
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         <Button size="sm" className="gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white" onClick={() => openAdd(1)}>
           <Plus className="h-3.5 w-3.5" /> Add Availability
         </Button>

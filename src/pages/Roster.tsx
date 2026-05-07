@@ -28,8 +28,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { CalendarDays, ChevronLeft, ChevronRight, Plus, Edit2, Trash2, Clock, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useShifts, useUpsertShift, useDeleteShift, useCareGivers, useCareReceivers } from "@/hooks/use-care-data";
+import { useShifts, useUpsertShift, useDeleteShift, useCareGivers, useCareReceivers, useDailyVisitsRange } from "@/hooks/use-care-data";
 import { RosterViewSwitcher } from "@/components/RosterViewSwitcher";
+import { useCaregiverHolidayEntries, caregiverUnavailableReason } from "@/hooks/use-caregiver-availability";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -58,6 +59,7 @@ const Roster = () => {
   const { data: careReceivers = [] } = useCareReceivers();
   const upsertShift = useUpsertShift();
   const delShift = useDeleteShift();
+  const { data: holidayEntries = [] } = useCaregiverHolidayEntries();
 
   const [weekOffset, setWeekOffset] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -74,6 +76,9 @@ const Roster = () => {
 
   const weekDates = useMemo(() => getWeekDates(weekOffset), [weekOffset]);
   const weekLabel = `${weekDates[0].toLocaleDateString("en-GB", { day: "numeric", month: "short" })} – ${weekDates[6].toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`;
+  const weekFromStr = useMemo(() => weekDates[0].toISOString().split("T")[0], [weekDates]);
+  const weekToStr = useMemo(() => weekDates[6].toISOString().split("T")[0], [weekDates]);
+  const { data: weekVisits = [] } = useDailyVisitsRange(weekFromStr, weekToStr);
 
   const resetForm = () => {
     setFormCgId("");
@@ -105,6 +110,17 @@ const Roster = () => {
 
   const handleSave = async () => {
     if (!formCgId || !formCrId) return;
+    const cg = careGivers.find((c) => c.id === formCgId);
+    const targetDate = weekDates[Number(formDay)].toISOString().split("T")[0];
+    const reason = caregiverUnavailableReason(cg as any, holidayEntries, targetDate);
+    if (reason) {
+      const detail =
+        reason.kind === "inactive"
+          ? `${cg?.name ?? "This caregiver"} is marked ${reason.label} and cannot be assigned to a rota.`
+          : `${cg?.name ?? "This caregiver"} is ${reason.label} on ${targetDate}${reason.to && reason.to !== reason.from ? ` (until ${reason.to})` : ""} and cannot be assigned.`;
+      toast({ title: "Cannot assign rota", description: detail, variant: "destructive" });
+      return;
+    }
     try {
       await upsertShift.mutateAsync({
         id: editingShiftId ?? undefined,
@@ -163,7 +179,7 @@ const Roster = () => {
           <div className="flex gap-2">
             {weekOffset !== 0 && (
               <Button variant="ghost" size="sm" onClick={() => setWeekOffset(0)}>
-                Today
+                This Week
               </Button>
             )}
             <Button variant="outline" size="icon" onClick={() => setWeekOffset((o) => o + 1)}>
@@ -190,45 +206,40 @@ const Roster = () => {
               <TableBody>
                 <TableRow>
                   {DAYS.map((_, dayIdx) => {
-                    const dayShifts = shiftsData.filter((s) => s.day === dayIdx);
+                    const cellDateStr = weekDates[dayIdx].toISOString().split("T")[0];
+                    const dayVisits = weekVisits.filter((v) => v.visit_date === cellDateStr);
                     return (
                       <TableCell key={dayIdx} className="align-top border-r last:border-r-0 p-2 min-h-[120px]">
                         <div className="space-y-2 min-h-[100px]">
-                          {dayShifts.length === 0 && (
+                          {dayVisits.length === 0 && (
                             <p className="text-xs text-muted-foreground/50 text-center pt-8">No shifts</p>
                           )}
-                          {dayShifts.map((shift) => (
-                            <div
-                              key={shift.id}
-                              className={`rounded-lg border p-2 text-xs cursor-pointer hover:shadow-md transition-shadow ${shiftTypeColors[shift.shift_type] ?? ""}`}
-                              onClick={() => openEdit(shift)}
-                            >
-                              <div className="flex items-center justify-between mb-1">
-                                <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-current">
-                                  {shift.shift_type}
-                                </Badge>
-                                <button
-                                  className="opacity-50 hover:opacity-100"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setDeleteConfirm(shift.id);
-                                  }}
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </button>
+                          {dayVisits.map((v) => {
+                            const shiftType = v.start_hour < 12 ? "Morning" : v.start_hour < 17 ? "Afternoon" : "Night";
+                            const endHour = v.start_hour + (v.duration ?? 0);
+                            return (
+                              <div
+                                key={v.id}
+                                className={`rounded-lg border p-2 text-xs ${shiftTypeColors[shiftType] ?? ""}`}
+                              >
+                                <div className="flex items-center justify-between mb-1">
+                                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-current">
+                                    {shiftType}
+                                  </Badge>
+                                </div>
+                                <div className="flex items-center gap-1 font-medium">
+                                  <User className="h-3 w-3" /> {(v.care_givers as any)?.name?.split(" ")[0] ?? "—"}
+                                </div>
+                                <div className="text-[10px] opacity-75 mt-0.5">
+                                  → {(v.care_receivers as any)?.name?.split(" ")[0] ?? "—"}
+                                </div>
+                                <div className="flex items-center gap-1 mt-1 opacity-75">
+                                  <Clock className="h-3 w-3" />
+                                  {String(v.start_hour).padStart(2, "0")}:00–{String(endHour).padStart(2, "0")}:00
+                                </div>
                               </div>
-                              <div className="flex items-center gap-1 font-medium">
-                                <User className="h-3 w-3" /> {(shift.care_givers as any)?.name?.split(" ")[0] ?? "—"}
-                              </div>
-                              <div className="text-[10px] opacity-75 mt-0.5">
-                                → {(shift.care_receivers as any)?.name?.split(" ")[0] ?? "—"}
-                              </div>
-                              <div className="flex items-center gap-1 mt-1 opacity-75">
-                                <Clock className="h-3 w-3" />
-                                {shift.start_time}–{shift.end_time}
-                              </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </TableCell>
                     );

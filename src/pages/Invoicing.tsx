@@ -14,7 +14,7 @@ import {
 const sections = [
   {
     title: "Invoice Groups",
-    description: "Create, view and manage authority and service user invoice groups.",
+    description: "Create, view and manage authority and service member invoice groups.",
     icon: FileText,
     href: "/invoicing/invoice-groups",
     accent: "text-emerald-600",
@@ -22,7 +22,7 @@ const sections = [
   },
   {
     title: "Wages",
-    description: "Process and review team member wages, payslips and exports.",
+    description: "Process and review care giver wages, payslips and exports.",
     icon: Wallet,
     href: "/invoicing/wages",
     accent: "text-amber-600",

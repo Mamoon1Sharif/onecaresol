@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { useCurrentCompany, useHasAppRole } from "@/hooks/use-company";
+import { useFeatureToggles } from "@/hooks/use-feature-toggles";
 import {
   Sidebar,
   SidebarContent,
@@ -27,10 +28,10 @@ import {
 
 const topItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Insights", url: "/insights", icon: Sparkles },
+  { title: "Insights", url: "/insights", icon: Sparkles, feature: "insights" as const },
   { title: "Care Givers", url: "/caregivers", icon: Users },
   { title: "Service Members", url: "/carereceivers", icon: HeartHandshake },
-  { title: "Bookings", url: "/bookings", icon: BookMarked },
+  { title: "Bookings", url: "/bookings", icon: BookMarked, feature: "bookings" as const },
   { title: "Location Tracking", url: "/location-tracking", icon: MapPin },
   { title: "Communication Log", url: "/communication-log", icon: MessageSquare },
   { title: "Timeline", url: "/timeline", icon: Activity },
@@ -66,7 +67,12 @@ export function AppSidebar() {
   const location = useLocation();
   const { data: cu } = useCurrentCompany();
   const { data: isSuper } = useHasAppRole("super_admin");
+  const { features } = useFeatureToggles();
   const isCompanyAdmin = cu && (cu.role === "owner" || cu.role === "admin");
+
+  const visibleTopItems = topItems.filter(
+    (item) => !("feature" in item) || features[item.feature as "insights" | "bookings"],
+  );
 
   const isActive = (path: string) =>
     path === "/" ? location.pathname === "/" : location.pathname.startsWith(path);
@@ -94,11 +100,11 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="pt-2 overflow-hidden">
+      <SidebarContent className="pt-2 overflow-y-auto overflow-x-hidden scrollbar-themed">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {topItems.map((item) => (
+              {visibleTopItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild

@@ -1,4 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { AppLayout } from "@/components/AppLayout";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,6 +24,8 @@ import { useDailyVisits, useCareGivers, useCareReceivers } from "@/hooks/use-car
 import { supabase } from "@/integrations/supabase/client";
 import { RosterViewSwitcher } from "@/components/RosterViewSwitcher";
 import { VisitDetailDialog } from "@/components/VisitDetailDialog";
+import { CareGiverProfileDialog } from "@/components/CareGiverProfileDialog";
+import { CareReceiverProfileDialog } from "@/components/CareReceiverProfileDialog";
 
 // Reusable tooltip-wrapped icon for table headers/cells
 function IconCell({
@@ -73,6 +78,7 @@ const statusTone: Record<string, string> = {
   Complete: "text-success font-medium",
   Finished: "text-success font-medium",
   "In Progress": "text-success font-semibold",
+  Late: "text-amber-600 font-semibold",
   Missed: "text-destructive font-semibold",
   Pending: "text-warning",
   Due: "text-blue-600 font-semibold",
@@ -94,11 +100,14 @@ const BULK_ACTIONS = [
 ];
 
 const DailyRoster = () => {
+  const navigate = useNavigate();
+  const qc = useQueryClient();
   const [dayOffset, setDayOffset] = useState(0);
   const dateStr = getDateStr(dayOffset);
   const { data: rawVisits = [], refetch } = useDailyVisits(dateStr);
   const { data: careGivers = [] } = useCareGivers();
   const { data: careReceivers = [] } = useCareReceivers();
+  const [showDeleted, setShowDeleted] = useState(false);
 
   const [teamFilter, setTeamFilter] = useState<string>("");
   const [serviceFilter, setServiceFilter] = useState<string>("");
@@ -107,6 +116,14 @@ const DailyRoster = () => {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [detailVisit, setDetailVisit] = useState<any>(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [receiverProfile, setReceiverProfile] = useState<any>(null);
+  const [caregiverProfile, setCaregiverProfile] = useState<any>(null);
+  const [nowTick, setNowTick] = useState(0);
+
+  useEffect(() => {
+    const t = setInterval(() => setNowTick((n) => n + 1), 30000);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     const ch = supabase
@@ -122,25 +139,42 @@ const DailyRoster = () => {
       const cr = v.care_receivers ?? {};
       const cg = v.care_givers ?? {};
       const start = v.start_hour ?? 0;
-      const dur = v.duration ?? 0;
+      const startMin = (v as any).start_minute ?? 0;
+      const durHours = v.duration ?? 0;
+      const durMins = (v as any).duration_minutes ?? durHours * 60;
       const ref = `14${(597 + idx).toString().padStart(4, "0")}${(idx * 7 % 100).toString().padStart(2, "0")}`;
       const week = Math.ceil(((new Date(dateStr).getDate())) / 7);
 
-      const visitStart = new Date(`${v.visit_date}T${String(start).padStart(2, "0")}:00:00`);
+      const [vy, vm, vd] = String(v.visit_date).split("-").map(Number);
+      const visitStart = new Date(vy, (vm || 1) - 1, vd || 1, start, startMin, 0, 0);
+      const visitEnd = new Date(visitStart.getTime() + durMins * 60 * 1000);
       const isFuture = visitStart.getTime() > now.getTime();
       const accepted = !!v.care_giver_id;
 
+      // Clock-in valid window: 15 minutes before scheduled start through 5 minutes after
+      const checkInMs = v.check_in_time ? new Date(v.check_in_time).getTime() : null;
+      const earlyGraceMs = visitStart.getTime() - 15 * 60 * 1000;
+      const clockedInOnTime =
+        checkInMs !== null &&
+        checkInMs >= earlyGraceMs &&
+        checkInMs <= visitStart.getTime() + 5 * 60 * 1000;
+
+      const graceEndMs = visitStart.getTime() + 5 * 60 * 1000;
+      const withinGrace = !isFuture && now.getTime() <= graceEndMs;
+
       let status: string;
-      if (idx === 0) {
-        status = "Missed";
-      } else if (v.status === "Confirmed" || v.check_out_time) {
-        status = "Complete";
+      if (v.status === "Cancelled") {
+        status = "Cancelled";
+      } else if (v.check_out_time && clockedInOnTime) {
+        status = "Finished";
+      } else if (clockedInOnTime && !v.check_out_time) {
+        status = "In Progress";
       } else if (isFuture) {
         status = "Due";
-      } else if (v.status === "Pending") {
-        status = "Missed";
+      } else if (withinGrace && !checkInMs) {
+        status = "Late";
       } else {
-        status = v.status ?? "Due";
+        status = "Missed";
       }
 
       const postcode = (cr.address ?? "").split(" ").slice(-2).join(" ").toUpperCase() || "";
@@ -151,6 +185,11 @@ const DailyRoster = () => {
         : idx % 4 === 0 ? "Private Morning..."
         : "WCC - Morning...";
 
+      const endTotalMin = start * 60 + startMin + durMins;
+      const endH = Math.floor(endTotalMin / 60) % 24;
+      const endM = endTotalMin % 60;
+      const fmtDur = `${String(Math.floor(durMins / 60)).padStart(2, "0")}:${String(durMins % 60).padStart(2, "0")}`;
+
       return {
         id: v.id,
         ref,
@@ -160,22 +199,26 @@ const DailyRoster = () => {
         accepted,
         serviceUser: `${cr.name ?? "Unknown"}${postcode ? "-" + postcode.replace(" ", "") : ""}`,
         serviceUserRaw: cr.name ?? "Unknown",
-        scheduledStart: fmtHour(start),
-        scheduledEnd: fmtHour(start + dur),
-        duration: fmtHour(dur),
-        actualStart: v.check_in_time ? new Date(v.check_in_time).toTimeString().slice(0, 5) : fmtHour(start, Math.floor(Math.random() * 5)),
-        actualEnd: v.check_out_time ? new Date(v.check_out_time).toTimeString().slice(0, 5) : fmtHour(start + dur, Math.floor(Math.random() * 5)),
+        scheduledStart: fmtHour(start, startMin),
+        scheduledEnd: fmtHour(endH, endM),
+        duration: fmtDur,
+        actualStart: v.check_in_time ? new Date(v.check_in_time).toISOString().slice(11, 16) : "—",
+        actualEnd: v.check_out_time ? new Date(v.check_out_time).toISOString().slice(11, 16) : "—",
         actualDuration: v.check_in_time && v.check_out_time
           ? (() => {
               const ms = new Date(v.check_out_time).getTime() - new Date(v.check_in_time).getTime();
               const mins = Math.max(0, Math.round(ms / 60000));
               return `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
             })()
-          : fmtHour(dur, Math.floor(Math.random() * 5)),
+          : "—",
+        checkInLat: v.check_in_lat ?? null,
+        checkInLng: v.check_in_lng ?? null,
         teamMember: cg.name ?? "—",
         serviceCall,
         week: `Week ${(week % 4) || 1}`,
         weekNum: 17,
+        receiver: cr,
+        caregiver: v.care_givers ?? null,
       };
     });
 
@@ -185,7 +228,7 @@ const DailyRoster = () => {
       if (search && !r.serviceUser.toLowerCase().includes(search.toLowerCase()) && !r.teamMember.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
-  }, [rawVisits, dayOffset, dateStr, teamFilter, serviceFilter, search]);
+  }, [rawVisits, dayOffset, dateStr, teamFilter, serviceFilter, search, nowTick]);
 
   const schedHours = rows.reduce((acc, r) => {
     const [h, m] = r.duration.split(":").map(Number);
@@ -210,10 +253,79 @@ const DailyRoster = () => {
     setSelected(prev => prev.size === rows.length ? new Set() : new Set(rows.map(r => r.id)));
   };
 
-  const runBulk = () => {
-    if (bulkAction === "Bulk Actions..." || selected.size === 0) return;
-    // demo placeholder; real implementation would call mutations
-    console.log("Bulk:", bulkAction, "on", Array.from(selected));
+  const refreshVisits = async () => {
+    await qc.invalidateQueries({ queryKey: ["daily_visits"] });
+    await refetch();
+  };
+
+  const runBulk = async () => {
+    if (bulkAction === "Bulk Actions...") {
+      toast.error("Choose a bulk action first");
+      return;
+    }
+    if (selected.size === 0) {
+      toast.error("Select at least one visit");
+      return;
+    }
+    const ids = Array.from(selected);
+    try {
+      switch (bulkAction) {
+        case "Cancel Visits": {
+          const { error } = await supabase.from("daily_visits").update({ status: "Cancelled" }).in("id", ids);
+          if (error) throw error;
+          toast.success(`Cancelled ${ids.length} visit${ids.length > 1 ? "s" : ""}`);
+          break;
+        }
+        case "Activate Visits":
+        case "Reset Visits": {
+          const { error } = await supabase.from("daily_visits").update({ status: "Pending" }).in("id", ids);
+          if (error) throw error;
+          toast.success(`Reset ${ids.length} visit${ids.length > 1 ? "s" : ""}`);
+          break;
+        }
+        case "Complete Visits": {
+          const { error } = await supabase.from("daily_visits").update({ status: "Confirmed" }).in("id", ids);
+          if (error) throw error;
+          toast.success(`Completed ${ids.length} visit${ids.length > 1 ? "s" : ""}`);
+          break;
+        }
+        case "Unassign Visits": {
+          const { error } = await supabase.from("daily_visits").update({ care_giver_id: null }).in("id", ids);
+          if (error) throw error;
+          toast.success(`Unassigned ${ids.length} visit${ids.length > 1 ? "s" : ""}`);
+          break;
+        }
+        case "Delete Visits": {
+          if (!confirm(`Permanently delete ${ids.length} visit${ids.length > 1 ? "s" : ""}? This cannot be undone.`)) return;
+          const { error } = await supabase.from("daily_visits").delete().in("id", ids);
+          if (error) throw error;
+          toast.success(`Deleted ${ids.length} visit${ids.length > 1 ? "s" : ""}`);
+          break;
+        }
+        case "Export": {
+          const header = ["Ref", "Date", "Status", "Service Member", "Sched Start", "Sched End", "Duration", "Care Giver", "Service Call"];
+          const lines = [header.join(",")].concat(
+            rows.filter(r => selected.has(r.id)).map(r => [r.ref, r.date, r.status, r.serviceUser, r.scheduledStart, r.scheduledEnd, r.duration, r.teamMember, r.serviceCall].map(v => `"${String(v).replace(/"/g, '""')}"`).join(","))
+          );
+          const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `daily-rota-${dateStr}.csv`;
+          a.click();
+          URL.revokeObjectURL(url);
+          toast.success(`Exported ${ids.length} visit${ids.length > 1 ? "s" : ""}`);
+          break;
+        }
+        default:
+          toast.info(`"${bulkAction}" is not yet available`);
+          return;
+      }
+      setSelected(new Set());
+      await refreshVisits();
+    } catch (e: any) {
+      toast.error(e?.message ?? "Bulk action failed");
+    }
   };
 
   return (
@@ -229,16 +341,16 @@ const DailyRoster = () => {
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <div className="flex items-center gap-2 flex-wrap">
               <Select value={teamFilter || "all"} onValueChange={(v) => setTeamFilter(v === "all" ? "" : v)}>
-                <SelectTrigger className="w-[240px] h-9 bg-background"><SelectValue placeholder="Select Team Member..." /></SelectTrigger>
+                <SelectTrigger className="w-[240px] h-9 bg-background"><SelectValue placeholder="Select Care Giver..." /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All team members</SelectItem>
+                  <SelectItem value="all">All care givers</SelectItem>
                   {careGivers.map((c) => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
                 </SelectContent>
               </Select>
               <Select value={serviceFilter || "all"} onValueChange={(v) => setServiceFilter(v === "all" ? "" : v)}>
-                <SelectTrigger className="w-[240px] h-9 bg-background"><SelectValue placeholder="Select Service User..." /></SelectTrigger>
+                <SelectTrigger className="w-[240px] h-9 bg-background"><SelectValue placeholder="Select Service Member..." /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All service users</SelectItem>
+                  <SelectItem value="all">All service members</SelectItem>
                   {careReceivers.map((c) => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -250,10 +362,18 @@ const DailyRoster = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52">
-                <DropdownMenuItem className="gap-2"><Plus className="h-4 w-4 text-primary" /> Add Visit</DropdownMenuItem>
-                <DropdownMenuItem className="gap-2"><Eye className="h-4 w-4 text-primary" /> View Deleted</DropdownMenuItem>
-                <DropdownMenuItem className="gap-2"><Plane className="h-4 w-4 text-primary" /> View Holidays (10)</DropdownMenuItem>
-                <DropdownMenuItem className="gap-2"><LayoutTemplate className="h-4 w-4 text-primary" /> To Templates</DropdownMenuItem>
+                <DropdownMenuItem className="gap-2" onClick={() => navigate("/rota/add")}>
+                  <Plus className="h-4 w-4 text-primary" /> Add Visit
+                </DropdownMenuItem>
+                <DropdownMenuItem className="gap-2" onClick={() => { setShowDeleted(v => !v); toast.info(showDeleted ? "Hiding deleted visits" : "Showing deleted visits"); }}>
+                  <Eye className="h-4 w-4 text-primary" /> {showDeleted ? "Hide Deleted" : "View Deleted"}
+                </DropdownMenuItem>
+                <DropdownMenuItem className="gap-2" onClick={() => navigate("/holidays-absence")}>
+                  <Plane className="h-4 w-4 text-primary" /> View Holidays
+                </DropdownMenuItem>
+                <DropdownMenuItem className="gap-2" onClick={() => navigate("/rota/build")}>
+                  <LayoutTemplate className="h-4 w-4 text-primary" /> To Templates
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -310,7 +430,7 @@ const DailyRoster = () => {
                   <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Map} label="Run route assigned" /></th>
                   <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Users} label="Care team color tag" /></th>
                   <th className="p-2 border-r border-border text-center w-8"><IconCell icon={AlertCircle} label="Visit alert / flag" /></th>
-                  <th className="p-2 border-r border-border text-left">Service User</th>
+                  <th className="p-2 border-r border-border text-left">Service Member</th>
                   <th className="p-2 border-r border-border text-center w-16 bg-emerald-100">
                     <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Calendar className="h-3.5 w-3.5 text-emerald-700" /></span></TooltipTrigger><TooltipContent className="text-xs">Scheduled start time</TooltipContent></Tooltip>
                   </th>
@@ -325,7 +445,8 @@ const DailyRoster = () => {
                     <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Clock className="h-3.5 w-3.5 text-rose-700" /></span></TooltipTrigger><TooltipContent className="text-xs">Actual clock-out time</TooltipContent></Tooltip>
                   </th>
                   <th className="p-2 border-r border-border text-center w-16"><IconCell icon={TrendingUp} label="Actual duration worked" /></th>
-                  <th className="p-2 border-r border-border text-left">Team Member</th>
+                  <th className="p-2 border-r border-border text-center w-28"><IconCell icon={Map} label="Clock-in GPS location (lat, lng)" /></th>
+                  <th className="p-2 border-r border-border text-left">Care Giver</th>
                   <th className="p-2 border-r border-border text-left">Service Call</th>
                   <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Tag} label="Service tag" /></th>
                   <th className="p-2 border-r border-border text-center w-8"><IconCell icon={UserPlus} label="Double-up / shadow" /></th>
@@ -347,13 +468,16 @@ const DailyRoster = () => {
               </thead>
               <tbody>
                 {rows.length === 0 && (
-                  <tr><td colSpan={35} className="p-8 text-center text-muted-foreground">No shifts scheduled for this day.</td></tr>
+                  <tr><td colSpan={36} className="p-8 text-center text-muted-foreground">No shifts scheduled for this day.</td></tr>
                 )}
                 {rows.map((r, i) => {
                   const isMissed = r.status === "Missed";
                   const rowBg = isMissed ? "bg-purple-100/70" : i % 2 === 1 ? "bg-emerald-50/60" : "bg-emerald-50/30";
                   const dot = dotColors[i % dotColors.length];
                   const isSel = selected.has(r.id);
+                  const actualStartDisplay = r.actualStart !== "—" ? r.actualStart : (r.isFuture ? "" : "—");
+                  const actualEndDisplay = r.actualEnd !== "—" ? r.actualEnd : (r.isFuture ? "" : "—");
+                  const actualDurationDisplay = r.actualDuration !== "—" ? r.actualDuration : (r.isFuture ? "" : "—");
                   return (
                     <tr key={r.id} className={`${rowBg} border-b border-border hover:bg-muted/40 transition-colors`}>
                       <td className="p-1.5 border-r border-border text-center">
@@ -394,16 +518,45 @@ const DailyRoster = () => {
                         )}
                       </td>
                       <td className="p-1.5 border-r border-border">
-                        <a className="text-primary hover:underline cursor-pointer text-[11px]">{r.serviceUser}</a>
+                        <button
+                          type="button"
+                          onClick={() => r.receiver?.id && setReceiverProfile(r.receiver)}
+                          className="text-primary hover:underline cursor-pointer text-[11px] text-left"
+                        >
+                          {r.serviceUser}
+                        </button>
                       </td>
                       <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{r.scheduledStart}</td>
                       <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{r.scheduledEnd}</td>
                       <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{r.duration}</td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{r.isFuture ? "" : r.actualStart}</td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{r.isFuture ? "" : r.actualEnd}</td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{r.isFuture ? "" : r.actualDuration}</td>
+                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{actualStartDisplay}</td>
+                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{actualEndDisplay}</td>
+                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{actualDurationDisplay}</td>
+                      <td className="p-1.5 border-r border-border text-center font-mono text-[10px]">
+                        {r.checkInLat != null && r.checkInLng != null ? (
+                          <a
+                            href={`https://www.google.com/maps?q=${r.checkInLat},${r.checkInLng}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline"
+                            title="Open in Google Maps"
+                          >
+                            {r.checkInLat.toFixed(5)}, {r.checkInLng.toFixed(5)}
+                          </a>
+                        ) : "—"}
+                      </td>
                       <td className="p-1.5 border-r border-border">
-                        <a className="text-primary hover:underline cursor-pointer text-[11px]">{r.teamMember}</a>
+                        {r.caregiver?.id ? (
+                          <button
+                            type="button"
+                            onClick={() => setCaregiverProfile(r.caregiver)}
+                            className="text-primary hover:underline cursor-pointer text-[11px] text-left"
+                          >
+                            {r.teamMember}
+                          </button>
+                        ) : (
+                          <span className="text-[11px] text-muted-foreground">{r.teamMember}</span>
+                        )}
                       </td>
                       <td className="p-1.5 border-r border-border text-[11px] text-foreground/80">{r.serviceCall}</td>
                       <td className="p-1.5 border-r border-border text-center">
@@ -457,7 +610,7 @@ const DailyRoster = () => {
               {rows.length > 0 && (
                 <tfoot>
                   <tr className="bg-muted/30 border-t-2 border-border">
-                    <td colSpan={35} className="p-2">
+                    <td colSpan={36} className="p-2">
                       <div className="flex items-center gap-8">
                         <div>
                           <div className="font-bold text-sm">{fmtTotal(schedHours)}</div>
@@ -488,6 +641,16 @@ const DailyRoster = () => {
         </div>
 
         <VisitDetailDialog visit={detailVisit} open={detailOpen} onOpenChange={setDetailOpen} />
+        <CareReceiverProfileDialog
+          open={!!receiverProfile}
+          onOpenChange={(o) => { if (!o) setReceiverProfile(null); }}
+          receiver={receiverProfile}
+        />
+        <CareGiverProfileDialog
+          open={!!caregiverProfile}
+          onOpenChange={(o) => { if (!o) setCaregiverProfile(null); }}
+          caregiver={caregiverProfile}
+        />
       </div>
     </AppLayout>
   );

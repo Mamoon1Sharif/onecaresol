@@ -37,12 +37,14 @@ export type Database = {
           ethnicity: string | null
           forename: string | null
           gender: string | null
+          handset_logged_out_at: string | null
           home_phone: string | null
           house_street: string | null
           id: string
           is_driver: boolean | null
           last_check_in: string | null
           login_code: string | null
+          login_password: string | null
           manager: string | null
           marital_status: string | null
           name: string
@@ -104,12 +106,14 @@ export type Database = {
           ethnicity?: string | null
           forename?: string | null
           gender?: string | null
+          handset_logged_out_at?: string | null
           home_phone?: string | null
           house_street?: string | null
           id?: string
           is_driver?: boolean | null
           last_check_in?: string | null
           login_code?: string | null
+          login_password?: string | null
           manager?: string | null
           marital_status?: string | null
           name: string
@@ -171,12 +175,14 @@ export type Database = {
           ethnicity?: string | null
           forename?: string | null
           gender?: string | null
+          handset_logged_out_at?: string | null
           home_phone?: string | null
           house_street?: string | null
           id?: string
           is_driver?: boolean | null
           last_check_in?: string | null
           login_code?: string | null
+          login_password?: string | null
           manager?: string | null
           marital_status?: string | null
           name?: string
@@ -218,6 +224,72 @@ export type Database = {
         }
         Relationships: []
       }
+      care_management_tasks: {
+        Row: {
+          assigned_for_shift: boolean
+          care_receiver_id: string
+          company_id: string
+          created_at: string
+          description: string | null
+          id: string
+          is_medication: boolean
+          is_ongoing: boolean
+          outcome: string | null
+          start_date: string
+          status: string
+          title: string
+          updated_at: string
+          visits: string[]
+        }
+        Insert: {
+          assigned_for_shift?: boolean
+          care_receiver_id: string
+          company_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_medication?: boolean
+          is_ongoing?: boolean
+          outcome?: string | null
+          start_date?: string
+          status?: string
+          title: string
+          updated_at?: string
+          visits?: string[]
+        }
+        Update: {
+          assigned_for_shift?: boolean
+          care_receiver_id?: string
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_medication?: boolean
+          is_ongoing?: boolean
+          outcome?: string | null
+          start_date?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          visits?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "care_management_tasks_care_receiver_id_fkey"
+            columns: ["care_receiver_id"]
+            isOneToOne: false
+            referencedRelation: "care_receivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "care_management_tasks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       care_receivers: {
         Row: {
           account_status: string | null
@@ -225,6 +297,7 @@ export type Database = {
           age: number | null
           alias: string | null
           allergies: string | null
+          approved_tasks: string[]
           area_name: string | null
           authority_ref: string | null
           avatar_url: string | null
@@ -304,6 +377,7 @@ export type Database = {
           age?: number | null
           alias?: string | null
           allergies?: string | null
+          approved_tasks?: string[]
           area_name?: string | null
           authority_ref?: string | null
           avatar_url?: string | null
@@ -383,6 +457,7 @@ export type Database = {
           age?: number | null
           alias?: string | null
           allergies?: string | null
+          approved_tasks?: string[]
           area_name?: string | null
           authority_ref?: string | null
           avatar_url?: string | null
@@ -1352,13 +1427,17 @@ export type Database = {
         Row: {
           care_giver_id: string | null
           care_receiver_id: string | null
+          check_in_lat: number | null
+          check_in_lng: number | null
           check_in_time: string | null
           check_out_time: string | null
           company_id: string
           created_at: string
           duration: number
+          duration_minutes: number | null
           id: string
           start_hour: number
+          start_minute: number
           status: string
           updated_at: string
           visit_date: string
@@ -1366,13 +1445,17 @@ export type Database = {
         Insert: {
           care_giver_id?: string | null
           care_receiver_id?: string | null
+          check_in_lat?: number | null
+          check_in_lng?: number | null
           check_in_time?: string | null
           check_out_time?: string | null
           company_id?: string
           created_at?: string
           duration?: number
+          duration_minutes?: number | null
           id?: string
           start_hour?: number
+          start_minute?: number
           status?: string
           updated_at?: string
           visit_date?: string
@@ -1380,13 +1463,17 @@ export type Database = {
         Update: {
           care_giver_id?: string | null
           care_receiver_id?: string | null
+          check_in_lat?: number | null
+          check_in_lng?: number | null
           check_in_time?: string | null
           check_out_time?: string | null
           company_id?: string
           created_at?: string
           duration?: number
+          duration_minutes?: number | null
           id?: string
           start_hour?: number
+          start_minute?: number
           status?: string
           updated_at?: string
           visit_date?: string
@@ -1493,6 +1580,8 @@ export type Database = {
           id: string
           medication: string
           notes: string | null
+          scheduled_time: string | null
+          time_of_day: string | null
         }
         Insert: {
           administered_by?: string | null
@@ -1504,6 +1593,8 @@ export type Database = {
           id?: string
           medication: string
           notes?: string | null
+          scheduled_time?: string | null
+          time_of_day?: string | null
         }
         Update: {
           administered_by?: string | null
@@ -1515,6 +1606,8 @@ export type Database = {
           id?: string
           medication?: string
           notes?: string | null
+          scheduled_time?: string | null
+          time_of_day?: string | null
         }
         Relationships: [
           {
@@ -2133,6 +2226,39 @@ export type Database = {
           description?: string | null
           id?: string
           rating?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reminder_templates: {
+        Row: {
+          company_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          reminder_name: string
+          scope: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          reminder_name: string
+          scope: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          reminder_name?: string
+          scope?: string
+          status?: string
           updated_at?: string
         }
         Relationships: []

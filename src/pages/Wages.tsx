@@ -76,12 +76,23 @@ export default function Wages() {
   const [newStart, setNewStart] = useState<Date | undefined>(new Date());
   const [newEnd, setNewEnd] = useState<Date | undefined>(new Date());
 
+  const parseDdMmYyyy = (s: string) => {
+    const [d, m, y] = s.split("/").map(Number);
+    return new Date(y, m - 1, d);
+  };
+
   const filtered = useMemo(
     () =>
-      rows.filter((r) =>
-        r.groupName.toLowerCase().includes(search.toLowerCase()),
-      ),
-    [rows, search],
+      rows.filter((r) => {
+        const matchesSearch = r.groupName.toLowerCase().includes(search.toLowerCase());
+        if (!matchesSearch) return false;
+        const rowStart = parseDdMmYyyy(r.startDate);
+        const rowEnd = parseDdMmYyyy(r.endDate);
+        if (filterStart && rowEnd < filterStart) return false;
+        if (filterEnd && rowStart > filterEnd) return false;
+        return true;
+      }),
+    [rows, search, filterStart, filterEnd],
   );
 
   const totals = useMemo(

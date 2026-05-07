@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +62,7 @@ interface Props {
 const COL_ICON = "h-3.5 w-3.5 text-muted-foreground/70";
 
 export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
+  const qc = useQueryClient();
   const [notes, setNotes] = useState<Note[]>([]);
   const [locks, setLocks] = useState<RotaLock[]>([]);
   const [shadow, setShadow] = useState<any[]>([]);
@@ -80,14 +84,35 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
   // Lock draft
   const [lockReason, setLockReason] = useState("");
 
-  // Clock state per team member (single member here)
+  // Clock state per care giver (single member here)
   const [clockIn, setClockIn] = useState<string | null>(null);
   const [clockOut, setClockOut] = useState<string | null>(null);
   const [memberRemoved, setMemberRemoved] = useState(false);
 
+  useEffect(() => {
+    if (!visit) return;
+    setClockIn(visit.actualStart && visit.actualStart !== "—" ? visit.actualStart : null);
+    setClockOut(visit.actualEnd && visit.actualEnd !== "—" ? visit.actualEnd : null);
+    setEditStatus(visit.status ?? "");
+    setEditStart(visit.scheduledStart ?? "");
+    setEditEnd(visit.scheduledEnd ?? "");
+    setEditServiceCall(visit.serviceCall ?? "");
+    setMemberRemoved(false);
+  }, [visit]);
+
   if (!visit) return null;
 
   const built = `${visit.ref} at ${new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })} on ${visit.date}`;
+
+  const syncVisitCache = (updates: Record<string, any>) => {
+    const applyUpdates = (current: any) => {
+      if (!Array.isArray(current)) return current;
+      return current.map((row) => (row?.id === visit.id ? { ...row, ...updates } : row));
+    };
+
+    qc.setQueriesData({ queryKey: ["daily_visits"] }, applyUpdates);
+    qc.setQueriesData({ queryKey: ["daily_visits_range"] }, applyUpdates);
+  };
 
   const handleAddNote = () => {
     if (!noteText.trim()) return;
@@ -110,8 +135,56 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
     setLockOpen(false);
   };
 
-  const handleClockIn = () => setClockIn(new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }));
-  const handleClockOut = () => setClockOut(new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }));
+  const handleClockIn = () => {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+
+    const persist = async (lat: number | null, lng: number | null) => {
+      const checkInIso = now.toISOString();
+      const { error } = await supabase
+        .from("daily_visits")
+        .update({ check_in_time: checkInIso, check_in_lat: lat, check_in_lng: lng } as any)
+        .eq("id", visit!.id);
+      if (error) {
+        toast.error("Clock-in failed to sync: " + error.message);
+      } else {
+        setClockIn(timeStr);
+        syncVisitCache({ check_in_time: checkInIso, check_in_lat: lat, check_in_lng: lng });
+        toast.success(lat != null ? "Clocked in with GPS location" : "Clocked in (location unavailable)");
+        qc.invalidateQueries({ queryKey: ["daily_visits"] });
+        qc.invalidateQueries({ queryKey: ["daily_visits_range"] });
+      }
+    };
+
+    if (typeof navigator !== "undefined" && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => persist(pos.coords.latitude, pos.coords.longitude),
+        () => persist(null, null),
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    } else {
+      persist(null, null);
+    }
+  };
+
+  const handleClockOut = async () => {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+    const checkOutIso = now.toISOString();
+    const { error } = await supabase
+      .from("daily_visits")
+      .update({ check_out_time: checkOutIso, status: "Completed" } as any)
+      .eq("id", visit!.id);
+    if (error) {
+      toast.error("Clock-out failed to sync: " + error.message);
+    } else {
+      setClockOut(timeStr);
+      syncVisitCache({ check_out_time: checkOutIso, status: "Completed" });
+      toast.success("Clocked out");
+      qc.invalidateQueries({ queryKey: ["daily_visits"] });
+      qc.invalidateQueries({ queryKey: ["daily_visits_range"] });
+    }
+  };
 
   const duration = (() => {
     if (!clockIn || !clockOut) return "0 minutes";
@@ -122,6 +195,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
   })();
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] w-[95vw] h-[92vh] p-0 gap-0 overflow-hidden">
         {/* ============== HEADER ============== */}
@@ -162,10 +236,6 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                     </Select>
                     <Button size="sm" className="bg-success hover:bg-success/90 text-success-foreground h-8 px-4 text-xs">Go</Button>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold">Search:</span>
-                    <Input className="h-8 w-[180px] text-xs" />
-                  </div>
                 </div>
 
                 <div className="overflow-x-auto">
@@ -181,14 +251,14 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                         <th className="p-2 border-r border-border text-center w-10" title="Location"><MapIcon className={COL_ICON} /></th>
                         <th className="p-2 border-r border-border text-center w-10" title="Team"><Users className={COL_ICON} /></th>
                         <th className="p-2 border-r border-border text-center w-10" title="Alerts"><AlertCircle className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-left">Service User</th>
+                        <th className="p-2 border-r border-border text-left">Service Member</th>
                         <th className="p-2 border-r border-border text-center w-16 bg-emerald-100" title="Scheduled Start"><Calendar className="h-3.5 w-3.5 text-emerald-700 mx-auto" /></th>
                         <th className="p-2 border-r border-border text-center w-16 bg-rose-100" title="Scheduled End"><Calendar className="h-3.5 w-3.5 text-rose-700 mx-auto" /></th>
                         <th className="p-2 border-r border-border text-center w-16" title="Duration"><TrendingUp className={COL_ICON} /></th>
                         <th className="p-2 border-r border-border text-center w-16 bg-emerald-100" title="Clocked In"><Clock className="h-3.5 w-3.5 text-emerald-700 mx-auto" /></th>
                         <th className="p-2 border-r border-border text-center w-16 bg-rose-100" title="Clocked Out"><Clock className="h-3.5 w-3.5 text-rose-700 mx-auto" /></th>
                         <th className="p-2 border-r border-border text-center w-16" title="Worked"><TrendingUp className={COL_ICON} /></th>
-                        <th className="p-2 border-r border-border text-left">Team Member</th>
+                        <th className="p-2 border-r border-border text-left">Care Giver</th>
                         <th className="p-2 border-r border-border text-left w-20">Week</th>
                         <th className="p-2 text-center w-10"><Lock className={COL_ICON} /></th>
                       </tr>
@@ -220,9 +290,22 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{editStart || visit.scheduledStart}</td>
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{editEnd || visit.scheduledEnd}</td>
                         <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{visit.duration}</td>
-                        <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{visit.isFuture ? "—" : (clockIn || visit.actualStart || "—")}</td>
-                        <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{visit.isFuture ? "—" : (clockOut || visit.actualEnd || "—")}</td>
-                        <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{visit.isFuture ? "—" : (visit.actualDuration || "—")}</td>
+                         {(() => {
+                           const isMissed = (editStatus || visit.status) === "Missed";
+                           const ciVal = clockIn || (visit.actualStart && visit.actualStart !== "—" ? visit.actualStart : "");
+                           const coVal = clockOut || (visit.actualEnd && visit.actualEnd !== "—" ? visit.actualEnd : "");
+                           const durVal = duration !== "0 minutes" ? duration : (visit.actualDuration && visit.actualDuration !== "—" ? visit.actualDuration : "");
+                           const ci = isMissed ? "—" : (ciVal || (visit.isFuture ? "" : "—"));
+                           const co = isMissed ? "—" : (coVal || (visit.isFuture ? "" : "—"));
+                           const du = isMissed ? "—" : (durVal || (visit.isFuture ? "" : "—"));
+                           return (
+                             <>
+                               <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{ci}</td>
+                               <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{co}</td>
+                               <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{du}</td>
+                             </>
+                           );
+                         })()}
                         <td className="p-1.5 border-r border-border">
                           <a className="text-primary hover:underline cursor-pointer text-[11px]">{visit.teamMember}</a>
                         </td>
@@ -236,7 +319,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                           <div className="text-[10px] text-muted-foreground">Sched hrs</div>
                         </td>
                         <td className="p-1.5 border-r border-border text-[11px] font-mono" colSpan={3}>
-                          <div>{visit.actualDuration || "00:00"}</div>
+                          <div>{(editStatus || visit.status) === "Missed" ? "00:00" : (duration !== "0 minutes" ? duration : (visit.actualDuration || "00:00"))}</div>
                           <div className="text-[10px] text-muted-foreground">Clock hrs</div>
                         </td>
                         <td className="p-1.5 border-r border-border" colSpan={3} />
@@ -257,16 +340,38 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                 <Activity className="h-3.5 w-3.5" /> Shift Timeline
               </h3>
               {(() => {
+                const currentStatus = (editStatus || visit.status || "").toLowerCase();
+                const isMissed = currentStatus === "missed";
                 const events: { time: string; label: string; icon: any; tone: string; sub?: string }[] = [];
+
                 events.push({ time: editStart || visit.scheduledStart, label: "Shift scheduled to start", icon: Calendar, tone: "text-blue-600", sub: "Built from rota template" });
-                if (clockIn || visit.actualStart) {
-                  events.push({ time: clockIn || visit.actualStart, label: `${visit.teamMember} clocked in`, icon: LogIn, tone: "text-success", sub: "GPS verified at service-user address" });
-                  events.push({ time: clockIn || visit.actualStart, label: "Shift in progress", icon: PlayCircle, tone: "text-success" });
+
+                if (isMissed) {
+                  // Missed shift: no clock-in/out, no "in progress". Show that no-one attended.
+                  events.push({
+                    time: editStart || visit.scheduledStart,
+                    label: `${visit.teamMember && visit.teamMember !== "—" ? visit.teamMember : "Caregiver"} did not clock in`,
+                    icon: XCircle,
+                    tone: "text-destructive",
+                    sub: "No GPS check-in recorded at scheduled start time",
+                  });
+                  events.push({
+                    time: editEnd || visit.scheduledEnd,
+                    label: "Shift marked as Missed",
+                    icon: AlertCircle,
+                    tone: "text-destructive",
+                    sub: "Office notified · added to incidents for follow-up",
+                  });
+                } else {
+                  if (clockIn || visit.actualStart) {
+                    events.push({ time: clockIn || visit.actualStart, label: `${visit.teamMember} clocked in`, icon: LogIn, tone: "text-success", sub: "GPS verified at service-user address" });
+                    events.push({ time: clockIn || visit.actualStart, label: "Shift in progress", icon: PlayCircle, tone: "text-success" });
+                  }
+                  if (clockOut || visit.actualEnd) {
+                    events.push({ time: clockOut || visit.actualEnd, label: `${visit.teamMember} clocked out`, icon: LogOut, tone: "text-rose-600", sub: `Total worked: ${duration !== "0 minutes" ? duration : visit.actualDuration || "—"}` });
+                  }
+                  events.push({ time: editEnd || visit.scheduledEnd, label: "Shift scheduled to end", icon: Calendar, tone: "text-blue-600" });
                 }
-                if (clockOut || visit.actualEnd) {
-                  events.push({ time: clockOut || visit.actualEnd, label: `${visit.teamMember} clocked out`, icon: LogOut, tone: "text-rose-600", sub: `Total worked: ${duration !== "0 minutes" ? duration : visit.actualDuration || "—"}` });
-                }
-                events.push({ time: editEnd || visit.scheduledEnd, label: "Shift scheduled to end", icon: Calendar, tone: "text-blue-600" });
 
                 return (
                   <ol className="relative border-l-2 border-border ml-3 space-y-4 py-1">
@@ -292,14 +397,19 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
 
             {/* ============== TASKS ============== */}
             <section>
-              <ShiftTasks shiftEnd={editEnd || visit.scheduledEnd} clockOut={clockOut || visit.actualEnd} />
+              <ShiftTasks
+                visitId={visit.id}
+                shiftEnd={editEnd || visit.scheduledEnd}
+                clockOut={clockOut || visit.actualEnd}
+                isMissed={(editStatus || visit.status || "").toLowerCase() === "missed"}
+              />
             </section>
 
             {/* ============== ASSIGNED TEAM MEMBERS ============== */}
             <section>
-              <h3 className="text-sm font-semibold text-foreground border-b pb-1 mb-3">Assigned Team Members</h3>
+              <h3 className="text-sm font-semibold text-foreground border-b pb-1 mb-3">Assigned Care Givers</h3>
               {memberRemoved || visit.teamMember === "—" ? (
-                <p className="text-xs text-muted-foreground text-center py-6">No team member assigned.</p>
+                <p className="text-xs text-muted-foreground text-center py-6">No care giver assigned.</p>
               ) : (
                 <div className="flex items-start gap-6 flex-wrap">
                   <div className="flex flex-col items-center gap-2">
@@ -313,35 +423,49 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                       className="bg-orange-500 hover:bg-orange-600 text-white h-8 text-xs w-full gap-1.5"
                       onClick={() => setMemberRemoved(true)}
                     >
-                      ↑ Remove Team Member
+                      ↑ Remove Care Giver
                     </Button>
                   </div>
                   <div className="flex-1 min-w-[240px]">
                     <a className="text-primary hover:underline font-medium text-sm cursor-pointer">{visit.teamMember}</a>
-                    <div className="mt-3 space-y-1.5 text-xs">
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">- Clock In:</span>
-                        {clockIn ? (
-                          <span className="font-mono font-semibold text-success">{clockIn}</span>
-                        ) : (
-                          <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" onClick={handleClockIn}>Clock In</Button>
-                        )}
+                    {(editStatus || visit.status || "").toLowerCase() === "missed" ? (
+                      <div className="mt-3 space-y-1.5 text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground">- Clock In:</span>
+                          <span className="font-mono font-semibold text-destructive">No check-in</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground">- Clock Out:</span>
+                          <span className="font-mono font-semibold text-destructive">No check-out</span>
+                        </div>
+                        <div className="text-destructive font-medium">Shift was missed — caregiver did not attend.</div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-muted-foreground">- Clock Out:</span>
-                        {clockOut ? (
-                          <span className="font-mono font-semibold text-success">{clockOut}</span>
-                        ) : (
-                          <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" disabled={!clockIn} onClick={handleClockOut}>Clock Out</Button>
-                        )}
+                    ) : (
+                      <div className="mt-3 space-y-1.5 text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground">- Clock In:</span>
+                          {clockIn ? (
+                            <span className="font-mono font-semibold text-success">{clockIn}</span>
+                          ) : (
+                            <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" onClick={handleClockIn}>Clock In</Button>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-muted-foreground">- Clock Out:</span>
+                          {clockOut ? (
+                            <span className="font-mono font-semibold text-success">{clockOut}</span>
+                          ) : (
+                            <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" disabled={!clockIn} onClick={handleClockOut}>Clock Out</Button>
+                          )}
+                        </div>
+                        <div className="text-orange-600">Duration: {duration}</div>
                       </div>
-                      <div className="text-orange-600">Duration: {duration}</div>
-                    </div>
+                    )}
                   </div>
                 </div>
               )}
               <p className="text-[11px] text-center text-primary mt-4">
-                If clock in or out distances are not showing, it means your team member has location services off on their mobile phone.
+                If clock in or out distances are not showing, it means your care giver has location services off on their mobile phone.
               </p>
             </section>
 
@@ -381,7 +505,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                 </Button>
               </div>
               <p className="text-[11px] text-muted-foreground mb-2">
-                Notes marked as hidden will only appear on a single rota, service user and team member note area or some of the reports. Notes marked as hidden will also not appear on the Care Portal section.
+                Notes marked as hidden will only appear on a single rota, service member and care giver note area or some of the reports. Notes marked as hidden will also not appear on the Care Portal section.
               </p>
               {notes.length === 0 ? (
                 <p className="text-xs text-muted-foreground text-center py-3">No notes added.</p>
@@ -424,8 +548,8 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                         <th className="p-2 border-r border-border w-8"><input type="checkbox" className="rounded" /></th>
                         <th className="p-2 border-r border-border text-center w-16"><Info className={COL_ICON} /></th>
                         <th className="p-2 border-r border-border text-left w-20">Status</th>
-                        <th className="p-2 border-r border-border text-left">Service User</th>
-                        <th className="p-2 border-r border-border text-left">Team Member</th>
+                        <th className="p-2 border-r border-border text-left">Service Member</th>
+                        <th className="p-2 border-r border-border text-left">Care Giver</th>
                         
                         <th className="p-2 text-left w-20">Week</th>
                       </tr>
@@ -454,82 +578,82 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
 
           </div>
         </ScrollArea>
-
-        {/* ============== EDIT SHIFT DIALOG ============== */}
-        <Dialog open={editOpen} onOpenChange={setEditOpen}>
-          <DialogContent className="max-w-md">
-            <h3 className="font-semibold text-base mb-3">Edit Shift Details</h3>
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs font-medium">Status</label>
-                <Select value={editStatus || visit.status} onValueChange={setEditStatus}>
-                  <SelectTrigger className="h-9 mt-1"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Due">Due</SelectItem>
-                    <SelectItem value="In Progress">In Progress</SelectItem>
-                    <SelectItem value="Finished">Finished</SelectItem>
-                    <SelectItem value="Missed">Missed</SelectItem>
-                    <SelectItem value="Cancelled">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium">Scheduled Start</label>
-                  <Input value={editStart || visit.scheduledStart} onChange={(e) => setEditStart(e.target.value)} className="h-9 mt-1" />
-                </div>
-                <div>
-                  <label className="text-xs font-medium">Scheduled End</label>
-                  <Input value={editEnd || visit.scheduledEnd} onChange={(e) => setEditEnd(e.target.value)} className="h-9 mt-1" />
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" size="sm" onClick={() => setEditOpen(false)}>Cancel</Button>
-              <Button size="sm" className="bg-primary text-primary-foreground" onClick={() => setEditOpen(false)}>Save</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* ============== ADD NOTE DIALOG ============== */}
-        <Dialog open={noteOpen} onOpenChange={setNoteOpen}>
-          <DialogContent className="max-w-md">
-            <h3 className="font-semibold text-base mb-3">Add Live Rota Note</h3>
-            <Textarea value={noteText} onChange={(e) => setNoteText(e.target.value)} rows={4} placeholder="Write your note..." />
-            <label className="flex items-center gap-2 text-xs mt-2">
-              <input type="checkbox" checked={noteHidden} onChange={(e) => setNoteHidden(e.target.checked)} />
-              Mark as hidden (won't appear on Care Portal)
-            </label>
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" size="sm" onClick={() => setNoteOpen(false)}>Cancel</Button>
-              <Button size="sm" className="bg-success text-success-foreground" onClick={handleAddNote}>Add Note</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* ============== ADD LOCK DIALOG ============== */}
-        <Dialog open={lockOpen} onOpenChange={setLockOpen}>
-          <DialogContent className="max-w-md">
-            <h3 className="font-semibold text-base mb-3">Add Rota Lock</h3>
-            <label className="text-xs font-medium">Reason</label>
-            <Input value={lockReason} onChange={(e) => setLockReason(e.target.value)} className="mt-1" placeholder="e.g. Confirmed by service user" />
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" size="sm" onClick={() => setLockOpen(false)}>Cancel</Button>
-              <Button size="sm" className="bg-success text-success-foreground" onClick={handleAddLock}>Add Lock</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* ============== ADD SHADOW SHIFT DIALOG ============== */}
-        <Dialog open={shadowOpen} onOpenChange={setShadowOpen}>
-          <DialogContent className="max-w-md">
-            <h3 className="font-semibold text-base mb-3">Add Shadow Shift</h3>
-            <ShadowForm onCancel={() => setShadowOpen(false)} onSave={(s) => { setShadow((arr) => [...arr, s]); setShadowOpen(false); }} visit={visit} />
-          </DialogContent>
-        </Dialog>
-
       </DialogContent>
     </Dialog>
+
+    {/* ============== EDIT SHIFT DIALOG ============== */}
+    <Dialog open={editOpen} onOpenChange={setEditOpen}>
+      <DialogContent className="max-w-md">
+        <h3 className="font-semibold text-base mb-3">Edit Shift Details</h3>
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs font-medium">Status</label>
+            <Select value={editStatus || visit.status} onValueChange={setEditStatus}>
+              <SelectTrigger className="h-9 mt-1"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Due">Due</SelectItem>
+                <SelectItem value="In Progress">In Progress</SelectItem>
+                <SelectItem value="Finished">Finished</SelectItem>
+                <SelectItem value="Missed">Missed</SelectItem>
+                <SelectItem value="Cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium">Scheduled Start</label>
+              <Input value={editStart || visit.scheduledStart} onChange={(e) => setEditStart(e.target.value)} className="h-9 mt-1" />
+            </div>
+            <div>
+              <label className="text-xs font-medium">Scheduled End</label>
+              <Input value={editEnd || visit.scheduledEnd} onChange={(e) => setEditEnd(e.target.value)} className="h-9 mt-1" />
+            </div>
+          </div>
+        </div>
+        <div className="flex justify-end gap-2 mt-4">
+          <Button variant="outline" size="sm" onClick={() => setEditOpen(false)}>Cancel</Button>
+          <Button size="sm" className="bg-primary text-primary-foreground" onClick={() => setEditOpen(false)}>Save</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    {/* ============== ADD NOTE DIALOG ============== */}
+    <Dialog open={noteOpen} onOpenChange={setNoteOpen}>
+      <DialogContent className="max-w-md">
+        <h3 className="font-semibold text-base mb-3">Add Live Rota Note</h3>
+        <Textarea value={noteText} onChange={(e) => setNoteText(e.target.value)} rows={4} placeholder="Write your note..." />
+        <label className="flex items-center gap-2 text-xs mt-2">
+          <input type="checkbox" checked={noteHidden} onChange={(e) => setNoteHidden(e.target.checked)} />
+          Mark as hidden (won't appear on Care Portal)
+        </label>
+        <div className="flex justify-end gap-2 mt-4">
+          <Button variant="outline" size="sm" onClick={() => setNoteOpen(false)}>Cancel</Button>
+          <Button size="sm" className="bg-success text-success-foreground" onClick={handleAddNote}>Add Note</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    {/* ============== ADD LOCK DIALOG ============== */}
+    <Dialog open={lockOpen} onOpenChange={setLockOpen}>
+      <DialogContent className="max-w-md">
+        <h3 className="font-semibold text-base mb-3">Add Rota Lock</h3>
+        <label className="text-xs font-medium">Reason</label>
+        <Input value={lockReason} onChange={(e) => setLockReason(e.target.value)} className="mt-1" placeholder="e.g. Confirmed by service member" />
+        <div className="flex justify-end gap-2 mt-4">
+          <Button variant="outline" size="sm" onClick={() => setLockOpen(false)}>Cancel</Button>
+          <Button size="sm" className="bg-success text-success-foreground" onClick={handleAddLock}>Add Lock</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+
+    {/* ============== ADD SHADOW SHIFT DIALOG ============== */}
+    <Dialog open={shadowOpen} onOpenChange={setShadowOpen}>
+      <DialogContent className="max-w-md">
+        <h3 className="font-semibold text-base mb-3">Add Shadow Shift</h3>
+        <ShadowForm onCancel={() => setShadowOpen(false)} onSave={(s) => { setShadow((arr) => [...arr, s]); setShadowOpen(false); }} visit={visit} />
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
 
@@ -539,8 +663,8 @@ function ShadowForm({ visit, onCancel, onSave }: { visit: VisitRow; onCancel: ()
     <>
       <div className="space-y-3">
         <div>
-          <label className="text-xs font-medium">Shadowing Team Member</label>
-          <Input value={team} onChange={(e) => setTeam(e.target.value)} className="mt-1" placeholder="Team member name" />
+          <label className="text-xs font-medium">Shadowing Care Giver</label>
+          <Input value={team} onChange={(e) => setTeam(e.target.value)} className="mt-1" placeholder="Care giver name" />
         </div>
         <div className="text-[11px] text-muted-foreground">
           Will shadow {visit.teamMember} on shift {visit.ref}
@@ -574,34 +698,86 @@ interface TaskItem {
   completedAt?: string;
 }
 
-function ShiftTasks({ shiftEnd, clockOut }: { shiftEnd: string; clockOut: string | null }) {
-  const [tasks, setTasks] = useState<TaskItem[]>([
-    { id: "t1", title: "Personal care — wash & dress", done: true, completedAt: "08:14" },
-    { id: "t2", title: "Administer morning medication", done: true, completedAt: "08:32" },
-    { id: "t3", title: "Prepare breakfast & assist with eating", done: true, completedAt: "09:05" },
-    { id: "t4", title: "Light housekeeping in kitchen", done: false },
-    { id: "t5", title: "Lunchtime medication & meal", done: false },
-    { id: "t6", title: "Record fluid & food intake", done: false },
-  ]);
+function ShiftTasks({ visitId, shiftEnd, clockOut, isMissed = false }: { visitId: string; shiftEnd: string; clockOut: string | null; isMissed?: boolean }) {
+  const [tasks, setTasks] = useState<TaskItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("shift_tasks")
+        .select("id,title,is_completed,completed_at")
+        .eq("daily_visit_id", visitId)
+        .order("created_at", { ascending: true });
+      if (cancelled) return;
+      if (error) {
+        toast.error("Failed to load tasks: " + error.message);
+        setTasks([]);
+      } else {
+        setTasks(
+          (data ?? []).map((r: any) => ({
+            id: r.id,
+            title: r.title,
+            done: !!r.is_completed,
+            completedAt: r.completed_at
+              ? new Date(r.completed_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
+              : undefined,
+          })),
+        );
+      }
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [visitId]);
 
   const completed = tasks.filter((t) => t.done);
   const pending = tasks.filter((t) => !t.done);
   const pct = tasks.length ? Math.round((completed.length / tasks.length) * 100) : 0;
 
-  const toggle = (id: string) =>
+  const toggle = async (id: string) => {
+    const t = tasks.find((x) => x.id === id);
+    if (!t) return;
+    const newDone = !t.done;
+    const completedAtIso = newDone ? new Date().toISOString() : null;
     setTasks((arr) =>
-      arr.map((t) =>
-        t.id === id
-          ? { ...t, done: !t.done, completedAt: !t.done ? new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : undefined }
-          : t,
+      arr.map((x) =>
+        x.id === id
+          ? { ...x, done: newDone, completedAt: newDone ? new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : undefined }
+          : x,
       ),
     );
+    const { error } = await supabase
+      .from("shift_tasks")
+      .update({ is_completed: newDone, completed_at: completedAtIso } as any)
+      .eq("id", id);
+    if (error) toast.error("Failed to update task");
+  };
 
-  const addTask = () => {
-    if (!draft.trim()) return;
-    setTasks((arr) => [...arr, { id: crypto.randomUUID(), title: draft.trim(), done: false }]);
+  const addTask = async () => {
+    const title = draft.trim();
+    if (!title) return;
     setDraft("");
+    const { data, error } = await supabase
+      .from("shift_tasks")
+      .insert({ daily_visit_id: visitId, title } as any)
+      .select("id,title,is_completed,completed_at")
+      .single();
+    if (error || !data) {
+      toast.error("Failed to add task");
+      return;
+    }
+    setTasks((arr) => [...arr, { id: data.id, title: data.title, done: !!data.is_completed }]);
+  };
+
+  const removeTask = async (id: string) => {
+    setTasks((arr) => arr.filter((x) => x.id !== id));
+    const { error } = await supabase.from("shift_tasks").delete().eq("id", id);
+    if (error) toast.error("Failed to remove task");
   };
 
   return (
@@ -613,13 +789,13 @@ function ShiftTasks({ shiftEnd, clockOut }: { shiftEnd: string; clockOut: string
             ({completed.length}/{tasks.length} complete · {pct}%)
           </span>
         </h3>
-        <span className="text-[11px] text-muted-foreground">
-          {clockOut ? "Shift ended" : `Pending until ${shiftEnd}`}
+        <span className={`text-[11px] ${isMissed ? "text-destructive font-medium" : "text-muted-foreground"}`}>
+          {isMissed ? "Shift missed — no tasks completed" : clockOut ? "Shift ended" : `Pending until ${shiftEnd}`}
         </span>
       </div>
 
       <div className="h-1.5 bg-muted rounded-full overflow-hidden mb-3">
-        <div className="h-full bg-success transition-all" style={{ width: `${pct}%` }} />
+        <div className={`h-full transition-all ${isMissed ? "bg-destructive" : "bg-success"}`} style={{ width: `${isMissed ? 100 : pct}%` }} />
       </div>
 
       <div className="grid md:grid-cols-2 gap-3">
@@ -628,13 +804,15 @@ function ShiftTasks({ shiftEnd, clockOut }: { shiftEnd: string; clockOut: string
           <div className="text-[11px] font-semibold text-success uppercase tracking-wide mb-1.5 flex items-center gap-1">
             <CheckCircle2 className="h-3 w-3" /> Completed ({completed.length})
           </div>
-          {completed.length === 0 ? (
+          {loading ? (
+            <p className="text-[11px] text-muted-foreground text-center py-2">Loading...</p>
+          ) : completed.length === 0 ? (
             <p className="text-[11px] text-muted-foreground text-center py-2">None yet.</p>
           ) : (
             <ul className="space-y-1">
               {completed.map((t) => (
                 <li key={t.id} className="flex items-center gap-2 text-xs">
-                  <input type="checkbox" checked readOnly onClick={() => toggle(t.id)} className="rounded text-success" />
+                  <input type="checkbox" checked onChange={() => toggle(t.id)} className="rounded text-success" />
                   <span className="line-through text-muted-foreground flex-1">{t.title}</span>
                   <span className="font-mono text-[10px] text-success">{t.completedAt}</span>
                 </li>
@@ -644,19 +822,21 @@ function ShiftTasks({ shiftEnd, clockOut }: { shiftEnd: string; clockOut: string
         </div>
 
         {/* Pending */}
-        <div className="rounded border border-border bg-amber-50 p-2">
-          <div className="text-[11px] font-semibold text-amber-700 uppercase tracking-wide mb-1.5 flex items-center gap-1">
-            <CircleDot className="h-3 w-3" /> Pending until end of shift ({pending.length})
+        <div className={`rounded border border-border p-2 ${isMissed ? "bg-destructive/5" : "bg-amber-50"}`}>
+          <div className={`text-[11px] font-semibold uppercase tracking-wide mb-1.5 flex items-center gap-1 ${isMissed ? "text-destructive" : "text-amber-700"}`}>
+            <CircleDot className="h-3 w-3" /> {isMissed ? `Not done — shift missed (${pending.length})` : `Pending until end of shift (${pending.length})`}
           </div>
-          {pending.length === 0 ? (
-            <p className="text-[11px] text-muted-foreground text-center py-2">All tasks done. 🎉</p>
+          {loading ? (
+            <p className="text-[11px] text-muted-foreground text-center py-2">Loading...</p>
+          ) : pending.length === 0 ? (
+            <p className="text-[11px] text-muted-foreground text-center py-2">{tasks.length === 0 ? "No tasks assigned." : "All tasks done. 🎉"}</p>
           ) : (
             <ul className="space-y-1">
               {pending.map((t) => (
                 <li key={t.id} className="flex items-center gap-2 text-xs">
                   <input type="checkbox" onChange={() => toggle(t.id)} className="rounded" />
                   <span className="flex-1 text-foreground">{t.title}</span>
-                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => setTasks((arr) => arr.filter((x) => x.id !== t.id))}>
+                  <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => removeTask(t.id)}>
                     <Trash2 className="h-3 w-3 text-destructive" />
                   </Button>
                 </li>

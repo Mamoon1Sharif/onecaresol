@@ -246,7 +246,7 @@ const FieldRow = ({
 export default function HolidayReport() {
   const navigate = useNavigate();
 
-  const [userType, setUserType] = useState("Team Member");
+  const [userType, setUserType] = useState("Care Giver");
   const [activity, setActivity] = useState("Active Users");
   const [members, setMembers] = useState<string[]>(TEAM_MEMBERS.slice(0, 3));
   const [reportType, setReportType] = useState("Holiday Report");
@@ -263,7 +263,7 @@ export default function HolidayReport() {
 
   const runReport = () => {
     if (members.length === 0) {
-      toast({ title: "Select at least one team member", variant: "destructive" });
+      toast({ title: "Select at least one care giver", variant: "destructive" });
       return;
     }
     if (types.length === 0) {
@@ -314,7 +314,7 @@ export default function HolidayReport() {
   const exportFile = (fmt: "Excel" | "CSV") => {
     setExportTab(fmt);
     const headers = [
-      "Team Member Name",
+      "Care Giver Name",
       "Role",
       "Payroll No.",
       "Type",
@@ -387,8 +387,8 @@ export default function HolidayReport() {
                 <Select value={userType} onValueChange={setUserType}>
                   <SelectTrigger className="text-primary"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Team Member">Team Member</SelectItem>
-                    <SelectItem value="Service User">Service User</SelectItem>
+                    <SelectItem value="Care Giver">Care Giver</SelectItem>
+                    <SelectItem value="Service Member">Service Member</SelectItem>
                     <SelectItem value="Manager">Manager</SelectItem>
                   </SelectContent>
                 </Select>
@@ -405,13 +405,13 @@ export default function HolidayReport() {
                 </Select>
               </FieldRow>
 
-              <FieldRow label="Select Team Member" required>
+              <FieldRow label="Select Care Giver" required>
                 <MultiSelect
                   options={TEAM_MEMBERS}
                   value={members}
                   onChange={setMembers}
-                  placeholderSingle="Select team member"
-                  placeholderMulti="Multiple Team Member selected"
+                  placeholderSingle="Select care giver"
+                  placeholderMulti="Multiple Care Giver selected"
                 />
               </FieldRow>
 
@@ -507,7 +507,7 @@ export default function HolidayReport() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead><SortHeader k="teamMember">Team Member Name</SortHeader></TableHead>
+                  <TableHead><SortHeader k="teamMember">Care Giver Name</SortHeader></TableHead>
                   <TableHead><SortHeader k="role">Role</SortHeader></TableHead>
                   <TableHead><SortHeader k="payrollNo">Payroll No.</SortHeader></TableHead>
                   <TableHead><SortHeader k="type">Type</SortHeader></TableHead>

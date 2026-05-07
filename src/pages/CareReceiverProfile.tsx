@@ -20,7 +20,7 @@ import { MarChartTab } from "@/components/receiver-profile/MarChartTab";
 import {
   LayoutDashboard, UserCog, CalendarDays, LayoutTemplate,
   Users, Bell, StickyNote, CalendarCheck, Plane,
-  MessageSquare, Pill, GraduationCap, AlertTriangle, FileText, History,
+  MessageSquare, Pill, AlertTriangle, FileText, History,
   HeartPulse, ClipboardList,
 } from "lucide-react";
 
@@ -45,7 +45,7 @@ const CareReceiverProfile = () => {
     return (
       <AppLayout>
         <div className="text-center py-20">
-          <p className="text-muted-foreground">Service member not found.</p>
+          <p className="text-muted-foreground">Service user not found.</p>
           <Button variant="link" onClick={() => navigate("/carereceivers")}>Back to list</Button>
         </div>
       </AppLayout>
@@ -103,12 +103,6 @@ const CareReceiverProfile = () => {
               className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-sm font-medium text-muted-foreground hover:bg-background hover:text-foreground transition-colors"
             >
               <Pill className="h-3.5 w-3.5" /> Medication
-            </button>
-            <button
-              onClick={() => navigate(`/carereceivers/${cr.id}/qualifications`)}
-              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-sm font-medium text-muted-foreground hover:bg-background hover:text-foreground transition-colors"
-            >
-              <GraduationCap className="h-3.5 w-3.5" /> Qualifications
             </button>
             <button
               onClick={() => navigate(`/carereceivers/${cr.id}/incidents`)}

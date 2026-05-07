@@ -280,19 +280,19 @@ export default function InvoiceDetail() {
           </p>
         </Card>
 
-        {/* All Service Users In Authority */}
+        {/* All Service Members In Authority */}
         <Card className="p-5 space-y-4">
           <div className="flex items-start justify-between gap-3 flex-wrap">
             <div className="max-w-4xl">
-              <h2 className="font-semibold">All Service Users In Authority</h2>
+              <h2 className="font-semibold">All Service Members In Authority</h2>
               <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                 Below you will see a forecast of scheduled and clocked based on a copy of shifts in the live rota that
                 are complete or cancelled and chargeable. The scheduled and clocked fields below are only showing
                 chargeable totals. Any shifts set to not chargeable are not included in the totals. You can see a list
-                of shifts that are not chargeable by clicking on the service users name.
+                of shifts that are not chargeable by clicking on the service members name.
               </p>
               <p className="text-xs text-muted-foreground mt-2">
-                Select your service users and click run now to run more invoices for this authority.
+                Select your service members and click run now to run more invoices for this authority.
               </p>
             </div>
             <Button size="sm" variant="secondary" className="h-8">

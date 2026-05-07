@@ -73,7 +73,7 @@ export default function ReceiverMessaging() {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <ServiceUserTopBar title="Service User - Send Message" backTo={`/carereceivers/${id}`} />
+      <ServiceUserTopBar title="Service Member - Send Message" backTo={`/carereceivers/${id}`} />
 
       <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-4 p-4">
         <ServiceUserSidebar cr={cr} basePath="messaging" />
@@ -82,7 +82,7 @@ export default function ReceiverMessaging() {
           <div className="flex items-center justify-between pb-3 border-b border-border">
             <h3 className="text-sm font-medium text-primary flex items-center gap-2">
               <Bell className="h-4 w-4" />
-              Send Notification To Service User
+              Send Notification To Service Member
             </h3>
             <Button
               size="sm"
@@ -122,7 +122,7 @@ export default function ReceiverMessaging() {
               pageItems.map((n, i) => (
                 <div key={n.id} className={`grid grid-cols-[140px_140px_1fr] text-xs py-2.5 px-2 ${i % 2 === 0 ? "bg-muted/30" : "bg-background"}`}>
                   <div className="text-muted-foreground">{n.created_by || "—"}</div>
-                  <div className="text-muted-foreground">{format(new Date(n.created_at), "dd/MM/yyyy HH:mm")}</div>
+                  <div className="text-muted-foreground">{new Date(n.created_at).toLocaleString("en-GB", { timeZone: "Asia/Karachi" })}</div>
                   <div className="text-foreground break-words">{n.note}</div>
                 </div>
               ))

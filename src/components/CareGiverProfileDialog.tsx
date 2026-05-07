@@ -203,7 +203,7 @@ export function CareGiverProfileDialog({ open, onOpenChange, caregiver }: Props)
                 </p>
                 {caregiver.created_at && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    Created: {new Date(caregiver.created_at).toLocaleDateString("en-GB")}
+                    Created: {new Date(caregiver.created_at).toLocaleString("en-GB", { timeZone: "Asia/Karachi" })}
                   </p>
                 )}
               </div>
@@ -255,7 +255,7 @@ export function CareGiverProfileDialog({ open, onOpenChange, caregiver }: Props)
             </TabsList>
           </div>
 
-          <ScrollArea className="max-h-[55vh]">
+          <ScrollArea className="h-[55vh]">
             {/* Personal Tab */}
             <TabsContent value="personal" className="px-6 pb-6 mt-0">
               <SectionTitle title="Contact Details" />

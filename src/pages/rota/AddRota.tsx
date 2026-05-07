@@ -1,60 +1,73 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Search, ArrowLeft, MapPin, Phone, User, Save, Loader2 } from "lucide-react";
-import { useCareReceivers, useCareGivers, useUpsertShift } from "@/hooks/use-care-data";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
+import {
+  Search,
+  ArrowLeft,
+  MapPin,
+  User,
+  Save,
+  Loader2,
+  Pill,
+  ClipboardList,
+  CalendarDays,
+  Clock,
+  Briefcase,
+  AlertTriangle,
+  Repeat,
+  FileText,
+  ShieldCheck,
+  ChevronRight,
+  Info,
+  CheckCircle2,
+} from "lucide-react";
+import { useCareReceivers, useCareGivers, useUpsertShift, useMedications } from "@/hooks/use-care-data";
+import { savePendingClash } from "./Conflicts";
 import { getCareReceiverAvatar } from "@/lib/avatars";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
-function calcAge(dob?: string | null) {
+const hours = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
+const minutes = ["00", "15", "30", "45"];
+
+const SERVICE_OPTIONS = [
+  "CHC - Morning Call",
+  "CHC - Lunch Call",
+  "CHC - Tea Call",
+  "CHC - Evening Call",
+  "Domiciliary",
+  "Live-In",
+  "Respite",
+  "Waking Night",
+  "Sleeping Night",
+];
+
+const calcAge = (dob?: string | null) => {
   if (!dob) return null;
   const d = new Date(dob);
   if (isNaN(d.getTime())) return null;
-  const diff = Date.now() - d.getTime();
-  return Math.floor(diff / (365.25 * 24 * 3600 * 1000));
-}
-
-// Deterministic helpers so empty DB fields still produce a populated-looking profile
-function hashStr(s: string) {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
-  return Math.abs(h);
-}
-function pick<T>(seed: string, arr: T[]) {
-  return arr[hashStr(seed) % arr.length];
-}
-function fallbackRef(id: string) {
-  return `1459${((hashStr(id) % 90000) + 10000).toString()}`;
-}
-function fallbackNfc(id: string) {
-  return `NFC-${((hashStr(id + "nfc") % 9000) + 1000).toString()}`;
-}
-function fallbackPhone(id: string) {
-  return `07${(hashStr(id + "p") % 900) + 100} ${(hashStr(id + "p2") % 900000) + 100000}`;
-}
-function fallbackEmail(name: string) {
-  return `${name.toLowerCase().replace(/[^a-z]+/g, ".")}@familycare.co.uk`;
-}
-function fallbackNHS(id: string) {
-  const n = hashStr(id + "nhs");
-  return `${100 + (n % 900)} ${100 + ((n >> 3) % 900)} ${1000 + ((n >> 6) % 9000)}`;
-}
-function fallbackNI(id: string) {
-  const n = hashStr(id + "ni");
-  return `QQ ${10 + (n % 90)} ${10 + ((n >> 3) % 90)} ${10 + ((n >> 6) % 90)} A`;
-}
-
-const hours = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
-const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"));
+  return Math.floor((Date.now() - d.getTime()) / (365.25 * 24 * 3600 * 1000));
+};
 
 const AddRota = () => {
   const { data: receivers = [], isLoading } = useCareReceivers();
@@ -63,7 +76,9 @@ const AddRota = () => {
   const queryClient = useQueryClient();
 
   const [search, setSearch] = useState("");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const initialId = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("receiverId") : null;
+  const [selectedId, setSelectedId] = useState<string | null>(initialId);
+  const { data: medications = [] } = useMedications(selectedId ?? undefined);
 
   const today = new Date().toISOString().slice(0, 10);
   const [form, setForm] = useState({
@@ -74,15 +89,63 @@ const AddRota = () => {
     startM: "00",
     endH: "21",
     endM: "00",
-    addTimeLock: "No",
-    linkUp: "No",
     staff1: "",
-    medicationRequired: "No",
-    tasksRequired: "No",
-    alert: "No",
-    recurring: "No",
-    template: "No",
+    medicationRequired: false,
+    tasksRequired: false,
+    addTimeLock: false,
+    linkUp: false,
+    alert: false,
+    recurring: false,
+    template: false,
   });
+  const [selectedMedIds, setSelectedMedIds] = useState<string[]>([]);
+  const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [savedOpen, setSavedOpen] = useState(false);
+  const [clashInfo, setClashInfo] = useState<null | { other: any; staffName: string; otherClient: string }>(null);
+
+  // Dedup MAR medications by name+dosage+time so the same prescription isn't repeated.
+  const uniqueMeds = useMemo(() => {
+    const map = new Map<string, any>();
+    for (const m of medications as any[]) {
+      const key = `${(m.medication || "").toLowerCase()}|${(m.dosage || "").toLowerCase()}|${(m.time_of_day || "").toLowerCase()}`;
+      if (!map.has(key)) map.set(key, m);
+    }
+    return Array.from(map.values());
+  }, [medications]);
+
+  // Bucket the shift's start time into a time-of-day window.
+  const shiftWindow = useMemo(() => {
+    const h = parseInt(form.startH, 10);
+    if (h >= 6 && h < 11) return "Morning";
+    if (h >= 11 && h < 14) return "Lunch";
+    if (h >= 14 && h < 18) return "Tea";
+    if (h >= 18 && h < 21) return "Evening";
+    return "Night";
+  }, [form.startH]);
+
+  // Group medications by time-of-day for display.
+  const TOD_ORDER = ["Morning", "Lunch", "Tea", "Evening", "Night"] as const;
+  const medsByTod = useMemo(() => {
+    const groups: Record<string, any[]> = { Morning: [], Lunch: [], Tea: [], Evening: [], Night: [], Other: [] };
+    for (const m of uniqueMeds) {
+      const t = (m as any).time_of_day || "Other";
+      (groups[t] ??= []).push(m);
+    }
+    return groups;
+  }, [uniqueMeds]);
+
+  // Auto-select the meds that match the current shift window when medication is enabled.
+  useEffect(() => {
+    if (!form.medicationRequired) return;
+    const matching = uniqueMeds
+      .filter((m: any) => (m.time_of_day || "").toLowerCase() === shiftWindow.toLowerCase())
+      .map((m: any) => m.id);
+    setSelectedMedIds(matching);
+  }, [form.medicationRequired, shiftWindow, uniqueMeds]);
+
+  const toggleMed = (id: string) => setSelectedMedIds((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));
+  const toggleTask = (t: string) => setSelectedTasks((p) => (p.includes(t) ? p.filter((x) => x !== t) : [...p, t]));
 
   const filtered = useMemo(
     () =>
@@ -93,24 +156,19 @@ const AddRota = () => {
   );
 
   const selected = useMemo(() => receivers.find((r) => r.id === selectedId) ?? null, [receivers, selectedId]);
+  const selectedCaregiver = useMemo(
+    () => caregivers.find((c) => c.id === form.staff1) ?? null,
+    [caregivers, form.staff1],
+  );
 
-  const duration = useMemo(() => {
-    const s = parseInt(form.startH) * 60 + parseInt(form.startM);
-    let e = parseInt(form.endH) * 60 + parseInt(form.endM);
-    if (e < s) e += 24 * 60;
-    const mins = e - s;
-    return `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
-  }, [form]);
-
-  const durationMinutes = useMemo(() => {
-    const [h, m] = duration.split(":").map(Number);
-    return h * 60 + m;
-  }, [duration]);
+  const startMins = parseInt(form.startH) * 60 + parseInt(form.startM);
+  let endMinsAdj = parseInt(form.endH) * 60 + parseInt(form.endM);
+  if (endMinsAdj < startMins) endMinsAdj += 24 * 60;
+  const durationMinutes = endMinsAdj - startMins;
+  const duration = `${String(Math.floor(durationMinutes / 60)).padStart(2, "0")}:${String(durationMinutes % 60).padStart(2, "0")}`;
 
   const handleDurationSlider = (val: number[]) => {
-    const mins = val[0];
-    const s = parseInt(form.startH) * 60 + parseInt(form.startM);
-    const total = (s + mins) % (24 * 60);
+    const total = (startMins + val[0]) % (24 * 60);
     setForm({
       ...form,
       endH: String(Math.floor(total / 60)).padStart(2, "0"),
@@ -118,7 +176,13 @@ const AddRota = () => {
     });
   };
 
+  const handleSaveClick = () => {
+    if (!selected) return;
+    setConfirmOpen(true);
+  };
+
   const handleSave = async () => {
+    setConfirmOpen(false);
     if (!selected) return;
     try {
       const { data: auth } = await supabase.auth.getUser();
@@ -130,18 +194,30 @@ const AddRota = () => {
         .select("company_id")
         .eq("user_id", userId)
         .maybeSingle();
-
       if (companyError) throw companyError;
       if (!companyUser?.company_id) throw new Error("Your account is not linked to a company.");
 
       const day = new Date(form.date).getDay();
-      const staffId = form.staff1 && form.staff1.length > 0 ? form.staff1 : null;
-      const startMins = parseInt(form.startH) * 60 + parseInt(form.startM);
-      let endMins = parseInt(form.endH) * 60 + parseInt(form.endM);
-      if (endMins < startMins) endMins += 24 * 60;
-      const durHours = Math.max(1, Math.round((endMins - startMins) / 60));
+      const staffId = form.staff1 || null;
+      const durHours = Math.max(1, Math.ceil(durationMinutes / 60));
+      const newStart = parseInt(form.startH);
+      const newEnd = newStart + durHours;
 
-      // Save the recurring shift template (shifts table)
+      // Detect overlapping shift for the same caregiver on the same date
+      let clashOther: any = null;
+      if (staffId) {
+        const { data: existing } = await supabase
+          .from("daily_visits")
+          .select("id, start_hour, duration, care_receivers(name)")
+          .eq("care_giver_id", staffId)
+          .eq("visit_date", form.date);
+        for (const v of existing ?? []) {
+          const s = Number(v.start_hour ?? 0);
+          const e = s + Number(v.duration ?? 0);
+          if (newStart < e && s < newEnd) { clashOther = v; break; }
+        }
+      }
+
       await upsertShift.mutateAsync({
         care_giver_id: staffId as any,
         care_receiver_id: selected.id,
@@ -149,30 +225,98 @@ const AddRota = () => {
         start_time: `${form.startH}:${form.startM}`,
         end_time: `${form.endH}:${form.endM}`,
         shift_type: form.serviceList,
-        notes: `Rota Type: ${form.rotaType}${form.alert === "Yes" ? " · Alert" : ""}`,
+        notes: `Rota Type: ${form.rotaType}${form.alert ? " · Alert" : ""}`,
       });
 
-      // Also create the actual daily visit so it shows up in Daily Rota
-      const { error: dvErr } = await supabase.from("daily_visits").insert({
-        company_id: companyUser.company_id,
-        care_receiver_id: selected.id,
-        care_giver_id: staffId,
-        visit_date: form.date,
-        start_hour: parseInt(form.startH),
-        duration: durHours,
-        status: staffId ? "Confirmed" : "Pending",
-      });
+      const { data: dvRow, error: dvErr } = await supabase
+        .from("daily_visits")
+        .insert({
+          company_id: companyUser.company_id,
+          care_receiver_id: selected.id,
+          care_giver_id: staffId,
+          visit_date: form.date,
+          start_hour: parseInt(form.startH),
+          start_minute: parseInt(form.startM),
+          duration: durHours,
+          duration_minutes: durationMinutes,
+          status: staffId ? "Confirmed" : "Pending",
+        } as any)
+        .select("id")
+        .single();
       if (dvErr) throw dvErr;
 
-      await queryClient.invalidateQueries({ queryKey: ["daily_visits"] });
+      const taskTitles: string[] = [];
+      if (form.tasksRequired) taskTitles.push(...selectedTasks);
+      if (form.medicationRequired) {
+        for (const mid of selectedMedIds) {
+          const m = uniqueMeds.find((x: any) => x.id === mid);
+          if (m) taskTitles.push(`Administer ${m.medication}${m.dosage ? ` (${m.dosage})` : ""}`);
+        }
+      }
+      if (dvRow?.id && taskTitles.length > 0) {
+        const { error: stErr } = await supabase
+          .from("shift_tasks")
+          .insert(taskTitles.map((title) => ({ daily_visit_id: dvRow.id, title })));
+        if (stErr) throw stErr;
+      }
 
-      toast.success("Shift saved");
+      // Persist selected approved tasks to care_management_tasks, marking them as assigned for shift
+      if (form.tasksRequired && selectedTasks.length > 0) {
+        const visitLabel = form.serviceList;
+        const { data: existingTasks } = await supabase
+          .from("care_management_tasks")
+          .select("id, title, visits, assigned_for_shift")
+          .eq("care_receiver_id", selected.id)
+          .eq("company_id", companyUser.company_id);
+        const existingByTitle = new Map<string, any>(
+          (existingTasks ?? []).map((r: any) => [String(r.title).toLowerCase(), r]),
+        );
+        for (const title of selectedTasks) {
+          const existing = existingByTitle.get(title.toLowerCase());
+          if (existing) {
+            const mergedVisits = Array.from(new Set([...(existing.visits ?? []), visitLabel]));
+            await supabase
+              .from("care_management_tasks")
+              .update({ assigned_for_shift: true, visits: mergedVisits, status: "Active" } as any)
+              .eq("id", existing.id);
+          } else {
+            await supabase.from("care_management_tasks").insert({
+              care_receiver_id: selected.id,
+              company_id: companyUser.company_id,
+              title,
+              description: null,
+              start_date: form.date,
+              is_ongoing: true,
+              visits: [visitLabel],
+              is_medication: false,
+              status: "Active",
+              assigned_for_shift: true,
+            } as any);
+          }
+        }
+        await queryClient.invalidateQueries({ queryKey: ["care_management_tasks", selected.id] });
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ["daily_visits"] });
+      await queryClient.invalidateQueries({ queryKey: ["shift_tasks"] });
+      toast.success("Shift saved successfully");
+
+      if (clashOther && staffId && dvRow?.id) {
+        const staffName = selectedCaregiver?.name ?? "Care giver";
+        setClashInfo({
+          other: { ...clashOther, _newId: dvRow.id, _newStartH: newStart, _newDur: durHours },
+          staffName,
+          otherClient: (clashOther as any).care_receivers?.name ?? "—",
+        });
+      } else {
+        setSavedOpen(true);
+      }
     } catch (err: any) {
       toast.error(err?.message ?? "Failed to save shift");
     }
   };
 
-  // ── Selection screen ──
+  // ── Service-member picker ──
   if (!selected) {
     return (
       <AppLayout>
@@ -209,7 +353,7 @@ const AddRota = () => {
                   key={r.id}
                   type="button"
                   onClick={() => setSelectedId(r.id)}
-                  className="flex items-center gap-3 border border-border rounded-xl bg-card p-3 text-left hover:shadow-md hover:border-primary/40 transition-all"
+                  className="group flex items-center gap-3 border border-border rounded-xl bg-card p-3 text-left hover:shadow-md hover:border-primary/40 transition-all"
                 >
                   <div className="h-12 w-12 rounded-full overflow-hidden border-2 border-border shrink-0">
                     <img
@@ -218,7 +362,7 @@ const AddRota = () => {
                       className="h-full w-full object-cover"
                     />
                   </div>
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="font-semibold text-sm truncate">{r.name}</div>
                     {r.address && (
                       <div className="text-xs text-muted-foreground truncate flex items-center gap-1">
@@ -226,6 +370,7 @@ const AddRota = () => {
                       </div>
                     )}
                   </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                 </button>
               ))}
             </div>
@@ -240,320 +385,157 @@ const AddRota = () => {
 
   return (
     <AppLayout>
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" onClick={() => setSelectedId(null)} className="gap-2">
-            <ArrowLeft className="h-4 w-4" /> Back
-          </Button>
-          <h1 className="text-xl font-bold text-foreground">Rota — Add New Rota</h1>
+      <div className="space-y-5">
+        {/* Header */}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" onClick={() => setSelectedId(null)} className="gap-2">
+              <ArrowLeft className="h-4 w-4" /> Back
+            </Button>
+            <div>
+              <h1 className="text-xl font-bold text-foreground">New Rota</h1>
+              <p className="text-xs text-muted-foreground">Schedule a shift for {selected.name}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => setSelectedId(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveClick} disabled={upsertShift.isPending} className="gap-2">
+              {upsertShift.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              Save Rota
+            </Button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* LEFT: Service member profile */}
-          <Card className="border-t-4 border-t-primary">
-            <CardContent className="pt-6">
-              <div className="flex flex-col items-center text-center">
-                <div className="h-20 w-20 rounded-full overflow-hidden border-2 border-border mb-2">
-                  <img
-                    src={getCareReceiverAvatar(selected.id, selected.avatar_url)}
-                    alt={selected.name}
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <div className="text-primary font-semibold">{selected.name}</div>
-                <div className="text-xs text-muted-foreground">Service User</div>
-                <div className="mt-2 flex flex-wrap gap-1 justify-center">
-                  <Badge variant="outline" className="text-[10px]">
-                    {selected.care_status || "Active"}
+        {/* Service-user banner */}
+        <Card className="overflow-hidden">
+          <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-4 flex items-center gap-4">
+            <div className="h-14 w-14 rounded-full overflow-hidden border-2 border-background shadow-sm shrink-0">
+              <img
+                src={getCareReceiverAvatar(selected.id, selected.avatar_url)}
+                alt={selected.name}
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-semibold text-foreground">{selected.name}</span>
+                {age !== null && <span className="text-xs text-muted-foreground">· Age {age}</span>}
+                <Badge variant="outline" className="text-[10px]">
+                  {selected.care_status || "Active"}
+                </Badge>
+                {selected.care_type && (
+                  <Badge variant="secondary" className="text-[10px]">
+                    {selected.care_type}
                   </Badge>
-                  {selected.care_type && (
-                    <Badge variant="outline" className="text-[10px]">
-                      {selected.care_type}
-                    </Badge>
-                  )}
-                  {(selected.tags ?? []).slice(0, 3).map((t) => (
-                    <Badge key={t} variant="secondary" className="text-[10px]">
-                      {t}
-                    </Badge>
-                  ))}
+                )}
+              </div>
+              {selected.address && (
+                <div className="text-xs text-muted-foreground truncate flex items-center gap-1 mt-1">
+                  <MapPin className="h-3 w-3" /> {selected.address}
                 </div>
-              </div>
-
-              <div className="mt-6 divide-y text-sm">
-                <Row
-                  label="Tags"
-                  value={selected.tags && selected.tags.length > 0 ? selected.tags.join(", ") : "General Care"}
-                />
-                <Row label="Sub Status" value={selected.sub_status || "Active"} />
-                <Row
-                  label="DOB (AGE)"
-                  value={
-                    selected.dob
-                      ? `${new Date(selected.dob).toLocaleDateString("en-GB")}${age !== null ? ` (${age})` : ""}`
-                      : selected.age != null
-                        ? `— (${selected.age})`
-                        : "—"
-                  }
-                />
-                <Row
-                  label="Sex Assigned At Birth"
-                  value={
-                    selected.sex_assigned_at_birth || selected.gender || pick(selected.id + "sex", ["Female", "Male"])
-                  }
-                />
-                <Row label="Reference No" value={selected.reference_no || fallbackRef(selected.id)} />
-                <Row label="NFC number" value={selected.nfc_code || fallbackNfc(selected.id)} />
-                <Row label="Pref" value={selected.preference || selected.pref || selected.carer_pref || "Either"} />
-                <Row label="Language" value={selected.language || selected.preferred_language || "English"} />
-                {selected.religion && <Row label="Religion" value={selected.religion} />}
-                {selected.marital_status && <Row label="Marital Status" value={selected.marital_status} />}
-              </div>
-
-              <Separator className="my-4" />
-              <div className="text-sm">
-                <div className="text-xs font-semibold text-muted-foreground mb-1">Areas</div>
-                <div>
-                  {selected.area_name ||
-                    pick(selected.id + "area", ["North Manchester", "South Manchester", "Salford", "Trafford"])}
-                </div>
-              </div>
-
-              <Separator className="my-4" />
-              <div className="text-sm font-semibold mb-3 text-foreground">About Me</div>
-              <div className="divide-y text-sm">
-                <Row label="NI Number" value={selected.ni_number || fallbackNI(selected.id)} />
-                <Row label="NHS Number" value={selected.nhs_number || fallbackNHS(selected.id)} />
-                <Row
-                  label="Patient Number"
-                  value={selected.patient_number || `P-${(hashStr(selected.id + "pn") % 900000) + 100000}`}
-                />
-                <Row
-                  label="Health Care Number"
-                  value={selected.health_care_number || `HC-${(hashStr(selected.id + "hc") % 900000) + 100000}`}
-                />
-                <Row
-                  label="Community Health Index"
-                  value={selected.community_health_index || `${(hashStr(selected.id + "chi") % 9000000) + 1000000}`}
-                />
-                <Row label="Keysafe" value={selected.keysafe || `C${(hashStr(selected.id + "ks") % 9000) + 1000}`} />
-              </div>
-
-              {(selected.allergies || selected.diagnoses) && (
-                <>
-                  <Separator className="my-4" />
-                  <div className="text-sm font-semibold mb-2 text-foreground">Health</div>
-                  <div className="divide-y text-sm">
-                    {selected.allergies && (
-                      <Row
-                        label="Allergies"
-                        value={
-                          Array.isArray(selected.allergies) ? selected.allergies.join(", ") : String(selected.allergies)
-                        }
-                      />
-                    )}
-                    {selected.diagnoses && (
-                      <Row
-                        label="Diagnoses"
-                        value={
-                          Array.isArray(selected.diagnoses) ? selected.diagnoses.join(", ") : String(selected.diagnoses)
-                        }
-                      />
-                    )}
-                  </div>
-                </>
               )}
+            </div>
+          </div>
+        </Card>
 
-              <Separator className="my-4" />
-              <div className="text-sm">
-                <div className="text-xs font-semibold text-muted-foreground mb-1 flex items-center gap-1">
-                  <MapPin className="h-3 w-3" /> Address
-                </div>
-                <div>{selected.address || "—"}</div>
-              </div>
-
-              <Separator className="my-4" />
-              <div className="text-sm">
-                <div className="text-xs font-semibold text-muted-foreground mb-1 flex items-center gap-1">
-                  <Phone className="h-3 w-3" /> Contact Details
-                </div>
-                <div className="space-y-1">
-                  <div>{selected.phone_number || selected.mobile_num_1 || fallbackPhone(selected.id)}</div>
-                  {selected.mobile_num_2 && <div>{selected.mobile_num_2}</div>}
-                  <div className="text-primary">{selected.email_1 || fallbackEmail(selected.name)}</div>
-                </div>
-              </div>
-
-              {(selected.next_of_kin || selected.next_of_kin_phone) && (
-                <>
-                  <Separator className="my-4" />
-                  <div className="text-sm">
-                    <div className="text-xs font-semibold text-muted-foreground mb-1">Next of Kin</div>
-                    <div className="font-medium">{selected.next_of_kin || "—"}</div>
-                    {selected.next_of_kin_phone && (
-                      <div className="text-muted-foreground text-xs">{selected.next_of_kin_phone}</div>
-                    )}
-                    {selected.next_of_kin_email && (
-                      <div className="text-primary text-xs">{selected.next_of_kin_email}</div>
-                    )}
-                  </div>
-                </>
-              )}
-
-              {selected.doctor_name && (
-                <>
-                  <Separator className="my-4" />
-                  <div className="text-sm">
-                    <div className="text-xs font-semibold text-muted-foreground mb-1">GP / Doctor</div>
-                    <div className="font-medium">{selected.doctor_name}</div>
-                    {selected.doctor_phone && (
-                      <div className="text-muted-foreground text-xs">{selected.doctor_phone}</div>
-                    )}
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* RIGHT: Add shift form */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Add Rota</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-xs text-destructive">
-                You have the setting turned on for locking Team Members by Service User pref. This means if this Service
-                User rates a Team Member less than 3, that team member will not be allowed to be assigned to the visit.
-              </p>
-
-              <FormRow label="Service List" required>
-                <Select value={form.serviceList} onValueChange={(v) => setForm({ ...form, serviceList: v })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="CHC - Evening Call">CHC - Evening Call</SelectItem>
-                    <SelectItem value="CHC - Morning Call">CHC - Morning Call</SelectItem>
-                    <SelectItem value="Domiciliary">Domiciliary</SelectItem>
-                    <SelectItem value="Live-In">Live-In</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormRow>
-
-              <p className="text-xs text-muted-foreground italic">
-                "Rota Types set to Alternative are handled differently when running wages."
-              </p>
-
-              <FormRow label="Rota Type" required highlight>
-                <Select value={form.rotaType} onValueChange={(v) => setForm({ ...form, rotaType: v })}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Normal">Normal</SelectItem>
-                    <SelectItem value="Alternative">Alternative</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormRow>
-
-              <FormRow label="Date" required>
-                <Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
-              </FormRow>
-
-              <FormRow label="Start Time" required>
-                <div className="flex items-center gap-2">
-                  <Select value={form.startH} onValueChange={(v) => setForm({ ...form, startH: v })}>
-                    <SelectTrigger className="w-20">
+        <div className="space-y-5">
+          {/* MAIN: form sections */}
+          <div className="space-y-5">
+            {/* 1. Service & Type */}
+            <Section icon={Briefcase} title="Service & rota type" subtitle="What kind of visit is this?">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Field label="Service" required>
+                  <Select value={form.serviceList} onValueChange={(v) => setForm({ ...form, serviceList: v })}>
+                    <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {hours.map((h) => (
-                        <SelectItem key={h} value={h}>
-                          {h}
+                      {SERVICE_OPTIONS.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {s}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <span>:</span>
-                  <Select value={form.startM} onValueChange={(v) => setForm({ ...form, startM: v })}>
-                    <SelectTrigger className="w-20">
+                </Field>
+                <Field label="Rota type" required>
+                  <Select value={form.rotaType} onValueChange={(v) => setForm({ ...form, rotaType: v })}>
+                    <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {minutes.map((m) => (
-                        <SelectItem key={m} value={m}>
-                          {m}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="Normal">Normal</SelectItem>
+                      <SelectItem value="Alternative">Alternative</SelectItem>
                     </SelectContent>
                   </Select>
-                </div>
-              </FormRow>
+                </Field>
+              </div>
+              <p className="text-xs text-muted-foreground flex items-start gap-1.5 mt-1">
+                <Info className="h-3 w-3 mt-0.5 shrink-0" />
+                Alternative rota types are handled differently when running wages.
+              </p>
+            </Section>
 
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium">Duration</Label>
-                  <span className="text-warning font-semibold text-sm">{duration}</span>
+            {/* 2. When */}
+            <Section icon={CalendarDays} title="When" subtitle="Date, start, end and duration.">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <Field label="Date" required>
+                  <Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
+                </Field>
+                <Field label="Start time" required>
+                  <TimePicker
+                    h={form.startH}
+                    m={form.startM}
+                    onH={(v) => setForm({ ...form, startH: v })}
+                    onM={(v) => setForm({ ...form, startM: v })}
+                  />
+                </Field>
+                <Field label="End time" required>
+                  <TimePicker
+                    h={form.endH}
+                    m={form.endM}
+                    onH={(v) => setForm({ ...form, endH: v })}
+                    onM={(v) => setForm({ ...form, endM: v })}
+                  />
+                </Field>
+              </div>
+
+              <div className="rounded-lg border border-border bg-muted/40 p-3 mt-2">
+                <div className="flex items-center justify-between mb-2">
+                  <Label className="text-sm font-medium flex items-center gap-2">
+                    <Clock className="h-3.5 w-3.5 text-primary" /> Duration
+                  </Label>
+                  <span className="text-primary font-semibold text-sm tabular-nums">{duration}</span>
                 </div>
                 <Slider
-                  min={0}
+                  min={15}
                   max={24 * 60}
                   step={15}
-                  value={[durationMinutes]}
+                  value={[Math.max(15, durationMinutes)]}
                   onValueChange={handleDurationSlider}
                 />
-              </div>
-
-              <FormRow label="End Time" required>
-                <div className="flex items-center gap-2">
-                  <Select value={form.endH} onValueChange={(v) => setForm({ ...form, endH: v })}>
-                    <SelectTrigger className="w-20">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {hours.map((h) => (
-                        <SelectItem key={h} value={h}>
-                          {h}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <span>:</span>
-                  <Select value={form.endM} onValueChange={(v) => setForm({ ...form, endM: v })}>
-                    <SelectTrigger className="w-20">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {minutes.map((m) => (
-                        <SelectItem key={m} value={m}>
-                          {m}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+                  <span>15m</span>
+                  <span>6h</span>
+                  <span>12h</span>
+                  <span>18h</span>
+                  <span>24h</span>
                 </div>
-              </FormRow>
+              </div>
+            </Section>
 
-              <YesNoRow
-                label="Add Time Lock?"
-                value={form.addTimeLock}
-                onChange={(v) => setForm({ ...form, addTimeLock: v })}
-              />
-              <YesNoRow
-                label="Link Up?"
-                value={form.linkUp}
-                onChange={(v) => setForm({ ...form, linkUp: v })}
-                required
-                highlight
-              />
-
-              <FormRow label="Care Giver">
+            {/* 3. Caregiver */}
+            <Section icon={User} title="Care giver" subtitle="Assign or leave open for later.">
+              <Field label="Assign caregiver">
                 <Select value={form.staff1} onValueChange={(v) => setForm({ ...form, staff1: v })}>
                   <SelectTrigger>
-                    <SelectValue placeholder="choose one..." />
+                    <SelectValue placeholder="Choose a caregiver…" />
                   </SelectTrigger>
-                  <SelectContent className="bg-blue-50">
+                  <SelectContent>
                     {caregivers.map((c) => (
-                      <SelectItem key={c.id} value={c.id} className="hover:bg-blue-100 focus:bg-blue-100">
+                      <SelectItem key={c.id} value={c.id}>
                         <span className="flex items-center gap-2">
                           <User className="h-3 w-3" /> {c.name}
                         </span>
@@ -561,101 +543,566 @@ const AddRota = () => {
                     ))}
                   </SelectContent>
                 </Select>
-              </FormRow>
+              </Field>
+              <p className="text-[11px] text-destructive flex items-start gap-1.5">
+                <ShieldCheck className="h-3 w-3 mt-0.5 shrink-0" />
+                Service-user preference lock is on — caregivers rated below 3 won't be available.
+              </p>
+            </Section>
 
-              <YesNoRow
-                label="Medication Required?"
-                value={form.medicationRequired}
-                onChange={(v) => setForm({ ...form, medicationRequired: v })}
-              />
-              <YesNoRow
-                label="Tasks Required?"
-                value={form.tasksRequired}
-                onChange={(v) => setForm({ ...form, tasksRequired: v })}
-              />
-              <YesNoRow label="Alert?" value={form.alert} onChange={(v) => setForm({ ...form, alert: v })} />
-              <YesNoRow
-                label="Add as recurring shift?"
-                value={form.recurring}
-                onChange={(v) => setForm({ ...form, recurring: v })}
-              />
-              <YesNoRow
-                label="Add as new template shift?"
-                value={form.template}
-                onChange={(v) => setForm({ ...form, template: v })}
-              />
+            {/* 4. Medications */}
+            <Section
+              icon={Pill}
+              title="Medication"
+              subtitle="Pulled live from the MAR chart."
+              right={
+                <SwitchRow
+                  checked={form.medicationRequired}
+                  onChange={(v) => setForm({ ...form, medicationRequired: v })}
+                />
+              }
+            >
+              {form.medicationRequired ? (
+                uniqueMeds.length === 0 ? (
+                  <EmptyState text="No prescriptions on the MAR chart for this service member." />
+                ) : (
+                  <>
+                    <div className="rounded-lg border border-primary/30 bg-primary/5 p-2.5 flex items-center gap-2 text-xs">
+                      <Clock className="h-3.5 w-3.5 text-primary shrink-0" />
+                      <span>
+                        Shift starts at{" "}
+                        <strong>
+                          {form.startH}:{form.startM}
+                        </strong>{" "}
+                        · auto-selected <strong>{shiftWindow}</strong> medications.
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>
+                        {uniqueMeds.length} prescription{uniqueMeds.length !== 1 ? "s" : ""} from MAR ·{" "}
+                        {selectedMedIds.length} selected
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSelectedMedIds(
+                            selectedMedIds.length === uniqueMeds.length ? [] : uniqueMeds.map((m: any) => m.id),
+                          )
+                        }
+                        className="text-primary hover:underline font-medium"
+                      >
+                        {selectedMedIds.length === uniqueMeds.length ? "Clear all" : "Select all"}
+                      </button>
+                    </div>
+                    <div className="space-y-3">
+                      {TOD_ORDER.concat(["Other" as any]).map((tod) => {
+                        const items = medsByTod[tod] || [];
+                        if (items.length === 0) return null;
+                        const isCurrent = tod === shiftWindow;
+                        return (
+                          <div key={tod} className="space-y-1.5">
+                            <div className="flex items-center gap-2">
+                              <Badge variant={isCurrent ? "default" : "outline"} className="text-[10px]">
+                                {tod}
+                              </Badge>
+                              <span className="text-[10px] text-muted-foreground">
+                                {items.length} med{items.length !== 1 ? "s" : ""}
+                              </span>
+                              {isCurrent && (
+                                <span className="text-[10px] text-primary font-medium">· matches this shift</span>
+                              )}
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                              {items.map((m: any) => {
+                                const checked = selectedMedIds.includes(m.id);
+                                return (
+                                  <label
+                                    key={m.id}
+                                    className={cn(
+                                      "flex items-start gap-3 rounded-lg border p-3 cursor-pointer transition-all",
+                                      checked
+                                        ? "border-primary bg-primary/5"
+                                        : "border-border hover:border-primary/40 hover:bg-muted/40",
+                                    )}
+                                  >
+                                    <Checkbox
+                                      checked={checked}
+                                      onCheckedChange={() => toggleMed(m.id)}
+                                      className="mt-0.5"
+                                    />
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-start gap-2">
+                                        <Pill className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
+                                        <div className="min-w-0">
+                                          <div className="text-sm font-semibold truncate">{m.medication}</div>
+                                          {m.dosage && <div className="text-xs text-muted-foreground">{m.dosage}</div>}
+                                          {m.scheduled_time && (
+                                            <div className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-1">
+                                              <Clock className="h-2.5 w-2.5" /> {m.scheduled_time}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                      {m.notes && (
+                                        <div className="text-[11px] text-muted-foreground mt-1.5 line-clamp-2">
+                                          {m.notes}
+                                        </div>
+                                      )}
+                                    </div>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Toggle on to auto-pull doctor-approved medications from the MAR chart for this time of day.
+                </p>
+              )}
+            </Section>
 
-              <div className="pt-2">
-                <Button
-                  onClick={handleSave}
-                  disabled={upsertShift.isPending}
-                  className="bg-success hover:bg-success/90 text-success-foreground gap-2"
-                >
-                  {upsertShift.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                  Save
-                </Button>
+            {/* 5. Tasks */}
+            <Section
+              icon={ClipboardList}
+              title="Tasks"
+              subtitle="Pre-approved by the service member."
+              right={
+                <SwitchRow checked={form.tasksRequired} onChange={(v) => setForm({ ...form, tasksRequired: v })} />
+              }
+            >
+              {form.tasksRequired ? (
+                ((selected as any).approved_tasks ?? []).length === 0 ? (
+                  <EmptyState text="No approved tasks set for this service member." />
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>
+                        {((selected as any).approved_tasks as string[]).length} approved · {selectedTasks.length}{" "}
+                        selected
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const all = (selected as any).approved_tasks as string[];
+                          setSelectedTasks(selectedTasks.length === all.length ? [] : all);
+                        }}
+                        className="text-primary hover:underline font-medium"
+                      >
+                        {selectedTasks.length === ((selected as any).approved_tasks as string[]).length
+                          ? "Clear all"
+                          : "Select all"}
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {((selected as any).approved_tasks as string[]).map((t) => {
+                        const checked = selectedTasks.includes(t);
+                        return (
+                          <label
+                            key={t}
+                            className={cn(
+                              "flex items-center gap-3 rounded-lg border p-2.5 cursor-pointer transition-all",
+                              checked
+                                ? "border-primary bg-primary/5"
+                                : "border-border hover:border-primary/40 hover:bg-muted/40",
+                            )}
+                          >
+                            <Checkbox checked={checked} onCheckedChange={() => toggleTask(t)} />
+                            <span className="text-sm">{t}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </>
+                )
+              ) : (
+                <p className="text-xs text-muted-foreground">No tasks will be assigned for this shift.</p>
+              )}
+            </Section>
+
+            {/* 6. Options */}
+            <Section icon={Repeat} title="Options" subtitle="Recurrence, alerts and templates.">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <ToggleCard
+                  icon={Clock}
+                  label="Add time lock"
+                  checked={form.addTimeLock}
+                  onChange={(v) => setForm({ ...form, addTimeLock: v })}
+                />
+                <ToggleCard
+                  icon={Repeat}
+                  label="Link up shifts"
+                  checked={form.linkUp}
+                  onChange={(v) => setForm({ ...form, linkUp: v })}
+                />
+                <ToggleCard
+                  icon={AlertTriangle}
+                  label="Mark as alert"
+                  checked={form.alert}
+                  onChange={(v) => setForm({ ...form, alert: v })}
+                />
+                <ToggleCard
+                  icon={Repeat}
+                  label="Recurring shift"
+                  checked={form.recurring}
+                  onChange={(v) => setForm({ ...form, recurring: v })}
+                />
+                <ToggleCard
+                  icon={FileText}
+                  label="Save as template"
+                  checked={form.template}
+                  onChange={(v) => setForm({ ...form, template: v })}
+                />
               </div>
-            </CardContent>
-          </Card>
+            </Section>
+          </div>
+
+          {/* BOTTOM: rota summary */}
+          <div>
+            <div className="space-y-4">
+              <Card>
+                <CardContent className="p-4 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold">Rota summary</h3>
+                    <Badge variant="outline" className="text-[10px]">
+                      Preview
+                    </Badge>
+                  </div>
+
+                  <SummaryRow label="Service" value={form.serviceList} />
+                  <SummaryRow label="Rota type" value={form.rotaType} />
+                  <SummaryRow
+                    label="Date"
+                    value={new Date(form.date).toLocaleDateString("en-GB", {
+                      weekday: "short",
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  />
+                  <SummaryRow label="Time" value={`${form.startH}:${form.startM} → ${form.endH}:${form.endM}`} />
+                  <SummaryRow label="Duration" value={duration} highlight />
+                  <SummaryRow
+                    label="Caregiver"
+                    value={selectedCaregiver?.name || <span className="text-muted-foreground italic">Unassigned</span>}
+                  />
+
+                  <div className="border-t pt-3 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground flex items-center gap-1.5">
+                        <Pill className="h-3 w-3" /> Medications
+                      </span>
+                      <Badge
+                        variant={form.medicationRequired && selectedMedIds.length > 0 ? "default" : "outline"}
+                        className="text-[10px]"
+                      >
+                        {form.medicationRequired ? `${selectedMedIds.length} selected` : "None"}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-muted-foreground flex items-center gap-1.5">
+                        <ClipboardList className="h-3 w-3" /> Tasks
+                      </span>
+                      <Badge
+                        variant={form.tasksRequired && selectedTasks.length > 0 ? "default" : "outline"}
+                        className="text-[10px]"
+                      >
+                        {form.tasksRequired ? `${selectedTasks.length} selected` : "None"}
+                      </Badge>
+                    </div>
+                    {form.alert && (
+                      <div className="flex items-center gap-1.5 text-xs text-warning">
+                        <AlertTriangle className="h-3 w-3" /> Alert flagged
+                      </div>
+                    )}
+                    {form.recurring && (
+                      <div className="flex items-center gap-1.5 text-xs text-primary">
+                        <Repeat className="h-3 w-3" /> Recurring
+                      </div>
+                    )}
+                  </div>
+
+                  <Button onClick={handleSaveClick} disabled={upsertShift.isPending} className="w-full gap-2">
+                    {upsertShift.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4" />
+                    )}
+                    Save Rota
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {form.medicationRequired && selectedMedIds.length > 0 && (
+                <Card>
+                  <CardContent className="p-4 space-y-2">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                      Medications on this shift
+                    </h3>
+                    {selectedMedIds.map((id) => {
+                      const m: any = uniqueMeds.find((x: any) => x.id === id);
+                      if (!m) return null;
+                      return (
+                        <div key={id} className="flex items-start gap-2 text-xs">
+                          <Pill className="h-3 w-3 text-primary mt-0.5 shrink-0" />
+                          <div>
+                            <div className="font-medium">{m.medication}</div>
+                            {m.dosage && <div className="text-muted-foreground">{m.dosage}</div>}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          </div>
         </div>
       </div>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Save this rota?</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <div>Please confirm the details below before saving.</div>
+                <div className="rounded-md border border-border bg-muted/40 p-3 space-y-1 text-xs">
+                  <div><span className="text-muted-foreground">Service user:</span> <span className="font-medium text-foreground">{selected.name}</span></div>
+                  <div><span className="text-muted-foreground">Service:</span> <span className="font-medium text-foreground">{form.serviceList}</span></div>
+                  <div><span className="text-muted-foreground">Date:</span> <span className="font-medium text-foreground">{new Date(form.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}</span></div>
+                  <div><span className="text-muted-foreground">Time:</span> <span className="font-medium text-foreground">{form.startH}:{form.startM} → {form.endH}:{form.endM} ({duration})</span></div>
+                  <div><span className="text-muted-foreground">Caregiver:</span> <span className="font-medium text-foreground">{selectedCaregiver?.name || "Unassigned"}</span></div>
+                  {form.medicationRequired && <div><span className="text-muted-foreground">Medications:</span> <span className="font-medium text-foreground">{selectedMedIds.length} selected</span></div>}
+                  {form.tasksRequired && <div><span className="text-muted-foreground">Tasks:</span> <span className="font-medium text-foreground">{selectedTasks.length} selected</span></div>}
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleSave} disabled={upsertShift.isPending}>
+              {upsertShift.isPending ? "Saving…" : "Confirm & Save"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={savedOpen} onOpenChange={setSavedOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-success" />
+              Rota saved
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              The shift for {selected.name} on{" "}
+              {new Date(form.date).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short" })}{" "}
+              has been saved successfully.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setSavedOpen(false)}>Close</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setSavedOpen(false);
+                setSelectedId(null);
+              }}
+            >
+              Done
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!clashInfo} onOpenChange={(v) => !v && setClashInfo(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              Rota Conflict Detected
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2 text-sm">
+                <div>
+                  <span className="font-medium text-foreground">{clashInfo?.staffName}</span> already has an
+                  overlapping shift on this date with{" "}
+                  <span className="font-medium text-foreground">{clashInfo?.otherClient}</span>.
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  You can resolve this now (reassign or change times) or fix it later from the Conflicts page.
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                if (clashInfo && selected) {
+                  savePendingClash({
+                    staff: clashInfo.staffName,
+                    aRef: String(clashInfo.other.id ?? "").slice(0, 9),
+                    aDate: new Date(form.date).toLocaleDateString("en-GB"),
+                    aStart: `${String(clashInfo.other.start_hour).padStart(2, "0")}:00`,
+                    aEnd: `${String(Number(clashInfo.other.start_hour) + Number(clashInfo.other.duration)).padStart(2, "0")}:00`,
+                    aClient: clashInfo.otherClient,
+                    bRef: String(clashInfo.other._newId ?? "").slice(0, 9),
+                    bDate: new Date(form.date).toLocaleDateString("en-GB"),
+                    bStart: `${String(clashInfo.other._newStartH).padStart(2, "0")}:00`,
+                    bEnd: `${String(clashInfo.other._newStartH + clashInfo.other._newDur).padStart(2, "0")}:00`,
+                    bClient: selected.name,
+                  });
+                  toast.warning("Conflict saved to Clashing Rotas. Fix it later.");
+                }
+                setClashInfo(null);
+                setSavedOpen(true);
+              }}
+            >
+              Fix Later
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setClashInfo(null);
+                setSavedOpen(true);
+              }}
+            >
+              Resolve Now
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 };
 
-const Row = ({ label, value }: { label: string; value: React.ReactNode }) => (
-  <div className="flex justify-between py-2 gap-3">
-    <span className="text-muted-foreground">{label}</span>
-    <span className="text-foreground text-right">{value}</span>
-  </div>
-);
-
-const FormRow = ({
-  label,
+// ── small presentational helpers ──
+const Section = ({
+  icon: Icon,
+  title,
+  subtitle,
+  right,
   children,
-  required,
-  highlight,
 }: {
-  label: string;
+  icon: any;
+  title: string;
+  subtitle?: string;
+  right?: React.ReactNode;
   children: React.ReactNode;
-  required?: boolean;
-  highlight?: boolean;
 }) => (
-  <div
-    className={`grid grid-cols-[140px_1fr] items-center gap-3 ${highlight ? "bg-success/10 -mx-2 px-2 py-1.5 rounded" : ""}`}
-  >
-    <Label className="text-sm font-medium text-right">
-      {required && <span className="text-destructive">* </span>}
+  <Card>
+    <CardContent className="p-5 space-y-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <div className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <Icon className="h-4 w-4" />
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold text-foreground leading-tight">{title}</h2>
+            {subtitle && <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>}
+          </div>
+        </div>
+        {right}
+      </div>
+      <div className="space-y-3">{children}</div>
+    </CardContent>
+  </Card>
+);
+
+const Field = ({ label, required, children }: { label: string; required?: boolean; children: React.ReactNode }) => (
+  <div className="space-y-1.5">
+    <Label className="text-xs font-medium text-muted-foreground">
       {label}
+      {required && <span className="text-destructive ml-0.5">*</span>}
     </Label>
-    <div>{children}</div>
+    {children}
   </div>
 );
 
-const YesNoRow = ({
-  label,
-  value,
-  onChange,
-  required,
-  highlight,
+const TimePicker = ({
+  h,
+  m,
+  onH,
+  onM,
 }: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  required?: boolean;
-  highlight?: boolean;
+  h: string;
+  m: string;
+  onH: (v: string) => void;
+  onM: (v: string) => void;
 }) => (
-  <FormRow label={label} required={required} highlight={highlight}>
-    <Select value={value} onValueChange={onChange}>
-      <SelectTrigger>
+  <div className="flex items-center gap-1.5">
+    <Select value={h} onValueChange={onH}>
+      <SelectTrigger className="w-full">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent className="max-h-60">
+        {hours.map((x) => (
+          <SelectItem key={x} value={x}>
+            {x}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+    <span className="text-muted-foreground font-medium">:</span>
+    <Select value={m} onValueChange={onM}>
+      <SelectTrigger className="w-full">
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        <SelectItem value="No">No</SelectItem>
-        <SelectItem value="Yes">Yes</SelectItem>
+        {minutes.map((x) => (
+          <SelectItem key={x} value={x}>
+            {x}
+          </SelectItem>
+        ))}
       </SelectContent>
     </Select>
-  </FormRow>
+  </div>
+);
+
+const SwitchRow = ({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) => (
+  <div className="flex items-center gap-2">
+    <span className="text-xs text-muted-foreground">{checked ? "Required" : "Not required"}</span>
+    <Switch checked={checked} onCheckedChange={onChange} />
+  </div>
+);
+
+const ToggleCard = ({
+  icon: Icon,
+  label,
+  checked,
+  onChange,
+}: {
+  icon: any;
+  label: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+}) => (
+  <label
+    className={cn(
+      "flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-all",
+      checked ? "border-primary bg-primary/5" : "border-border hover:border-primary/40 hover:bg-muted/40",
+    )}
+  >
+    <Icon className={cn("h-4 w-4 shrink-0", checked ? "text-primary" : "text-muted-foreground")} />
+    <span className="text-sm flex-1">{label}</span>
+    <Switch checked={checked} onCheckedChange={onChange} />
+  </label>
+);
+
+const SummaryRow = ({ label, value, highlight }: { label: string; value: React.ReactNode; highlight?: boolean }) => (
+  <div className="flex items-center justify-between gap-3 text-xs">
+    <span className="text-muted-foreground">{label}</span>
+    <span className={cn("text-right font-medium tabular-nums", highlight && "text-primary text-sm")}>{value}</span>
+  </div>
+);
+
+const EmptyState = ({ text }: { text: string }) => (
+  <div className="text-center py-6 text-xs text-muted-foreground border border-dashed border-border rounded-lg bg-muted/20">
+    {text}
+  </div>
 );
 
 export default AddRota;

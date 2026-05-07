@@ -1,0 +1,1 @@
+ALTER TABLE public.care_givers ADD COLUMN IF NOT EXISTS login_password text;

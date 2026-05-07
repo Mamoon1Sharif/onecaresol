@@ -130,11 +130,11 @@ function HoursGrid({ hours, editing, form, setForm }: {
 
 const consentLabels: Record<string, string> = {
   contract_received: "Care Service Contract Received",
-  user_pack_issued: "Service User Pack Issued",
+  user_pack_issued: "Service Member Pack Issued",
   consent_form_done: "Consent Form Done",
   poa_in_place: "Power of Attorney in Place",
   privacy_notice: "Privacy Notice",
-  user_guide: "Service User Guide",
+  user_guide: "Service Member Guide",
 };
 
 const riskColors: Record<string, string> = {
@@ -238,7 +238,7 @@ export function CareReceiverProfileDialog({ open, onOpenChange, receiver }: Prop
                 </p>
                 {receiver.created_at && (
                   <p className="text-xs text-muted-foreground mt-1">
-                    Created: {new Date(receiver.created_at).toLocaleDateString("en-GB")}
+                    Created: {new Date(receiver.created_at).toLocaleString("en-GB", { timeZone: "Asia/Karachi" })}
                   </p>
                 )}
               </div>
@@ -290,7 +290,7 @@ export function CareReceiverProfileDialog({ open, onOpenChange, receiver }: Prop
             </TabsList>
           </div>
 
-          <ScrollArea className="max-h-[55vh]">
+          <ScrollArea className="h-[55vh]">
             {/* Personal */}
             <TabsContent value="personal" className="px-6 pb-6 mt-0">
               <SectionTitle title="Personal Details" />

@@ -162,7 +162,7 @@ export default function ReceiverFiles() {
                           <td className="px-3 py-2"><div className="flex flex-wrap gap-1">{(d.tags ?? []).map((t) => <span key={t} className="text-[10px] px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground">{t}</span>)}</div></td>
                           <td className="px-3 py-2">{d.mime_type?.includes("pdf") ? <span className="inline-flex items-center justify-center h-5 w-7 rounded text-[9px] font-bold bg-destructive text-destructive-foreground">PDF</span> : d.mime_type?.startsWith("image/") ? <FileImage className="h-4 w-4 text-primary" /> : <FileIcon className="h-4 w-4 text-muted-foreground" />}</td>
                           <td className="px-3 py-2">{cat ? <span className="inline-block px-2 py-0.5 rounded text-[10px] font-medium" style={{ backgroundColor: cat.color + "22", color: cat.color }}>{cat.name}</span> : <span className="text-muted-foreground">—</span>}</td>
-                          <td className="px-3 py-2 text-muted-foreground">{format(parseISO(d.created_at), "dd/MM/yyyy")}</td>
+                          <td className="px-3 py-2 text-muted-foreground">{new Date(d.created_at).toLocaleString("en-GB", { timeZone: "Asia/Karachi" })}</td>
                           <td className="px-3 py-2"><div className="flex items-center gap-1 justify-end">
                             <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setEditing(d)}><Pencil className="h-3.5 w-3.5" /></Button>
                             <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setDeleteId(d.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>

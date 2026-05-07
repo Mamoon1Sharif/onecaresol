@@ -74,11 +74,11 @@ export function ReceiverDetailedProfileTab({ cr }: { cr: CareReceiver }) {
 
   return (
     <div className="space-y-4">
-      {/* ============ Service User Details ============ */}
+      {/* ============ Service Member Details ============ */}
       <Card className="overflow-hidden">
         <div className="px-4 py-2.5 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-2 text-[13px] font-medium text-foreground">
-            <UserIcon className="h-3.5 w-3.5" /> Service User Details
+            <UserIcon className="h-3.5 w-3.5" /> Service Member Details
           </div>
           <div className="flex items-center gap-1.5">
             <Button size="sm" className="h-7 px-2.5 text-[11px] bg-primary hover:bg-primary/90 text-primary-foreground gap-1" onClick={() => setEditTagsOpen(true)}>
@@ -362,17 +362,17 @@ function DnarSettingsCard({ careReceiverId }: { careReceiverId: string }) {
     <Card className="overflow-hidden border-t-2 border-t-primary/40">
       <div className="px-4 py-2.5 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2 text-[13px] font-medium text-foreground">
-          <ShieldAlert className="h-3.5 w-3.5 text-primary" /> Service User Do Not Attempt Resuscitation (DNAR) Settings
+          <ShieldAlert className="h-3.5 w-3.5 text-primary" /> Service Member Do Not Attempt Resuscitation (DNAR) Settings
         </div>
         <Button size="sm" className="h-7 px-2.5 text-[11px] bg-emerald-600 hover:bg-emerald-700 text-white gap-1" onClick={() => { setEditing(null); setDraft({ status: "Active", applies_from: "", applies_until: "", document_ref: "", notes: "" }); setOpen(true); }}>
           <Plus className="h-3 w-3" /> Add
         </Button>
       </div>
       <div className="px-4 py-3 text-[12px] text-muted-foreground">
-        If this Service User has DNAR (do not attempt resuscitation) in place you can replicate that setting here. This will be shown around the entire system when viewing the service users profile. Please be very careful turning this setting on as getting this wrong is a matter of life and death. The user that turns this on will be clearly logged in the system and may be held accountable. You must put your password in to turn this setting on or off.
+        If this Service Member has DNAR (do not attempt resuscitation) in place you can replicate that setting here. This will be shown around the entire system when viewing the service members profile. Please be very careful turning this setting on as getting this wrong is a matter of life and death. The user that turns this on will be clearly logged in the system and may be held accountable. You must put your password in to turn this setting on or off.
       </div>
       <div className="px-4 pb-3 space-y-1.5">
-        <p className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">Below you will find the DNAR history for this service user.</p>
+        <p className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">Below you will find the DNAR history for this service member.</p>
         {rows.length === 0 ? (
           <p className="text-[12px] text-muted-foreground italic py-2">No DNAR records.</p>
         ) : (
@@ -451,7 +451,7 @@ function MedicalLoginCard({ cr, onEdit }: { cr: CareReceiver; onEdit: () => void
       </div>
       <div className="px-4 py-3 space-y-1">
         <Row label="Company Number" value={(cr as any).medical_company_number} />
-        <Row label="Service User Number" value={(cr as any).medical_service_user_number} />
+        <Row label="Service Member Number" value={(cr as any).medical_service_user_number} />
         <div className="flex flex-wrap items-baseline gap-1.5 py-[3px] text-[12px]">
           <span className="font-semibold text-foreground">Password:</span>
           <span className="text-muted-foreground font-mono">
@@ -463,7 +463,7 @@ function MedicalLoginCard({ cr, onEdit }: { cr: CareReceiver; onEdit: () => void
             </button>
           )}
         </div>
-        <p className="text-[11px] text-destructive italic pt-2">This login will display all Service User medical info and is intended for doctor/paramedic use</p>
+        <p className="text-[11px] text-destructive italic pt-2">This login will display all Service Member medical info and is intended for doctor/paramedic use</p>
       </div>
     </Card>
   );
@@ -513,7 +513,7 @@ function QualificationRequirementsCard({ careReceiverId }: { careReceiverId: str
     <Card className="overflow-hidden border-t-2 border-t-primary/40">
       <div className="px-4 py-2.5 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2 text-[13px] font-medium text-foreground">
-          <GraduationCap className="h-3.5 w-3.5 text-primary" /> Service User Qualification Requirements
+          <GraduationCap className="h-3.5 w-3.5 text-primary" /> Service Member Qualification Requirements
         </div>
         <Button size="sm" className="h-7 px-2.5 text-[11px] bg-emerald-600 hover:bg-emerald-700 text-white gap-1" onClick={() => { setEditing(null); setDraft({ qualification: "", mandatory: true, notes: "" }); setOpen(true); }}>
           <Plus className="h-3 w-3" /> Add
@@ -648,8 +648,8 @@ function UserPreferencesCard({ careReceiverId, careReceiverName }: { careReceive
         </Button>
       </div>
       <div className="px-4 py-3 text-[12px] text-amber-700 dark:text-amber-500 space-y-1">
-        <p>You have the setting turned on for locking team member pref. This means if this service user access a team member less than 3, that team member will not be allowed to be assigned to the call. This is something to be mindful of when using the bulk actions as there will be no warning the team member has not been assigned in some instances, you need to double check. If there is no preference set between the service user and the team member, the team member will be allowed to be assigned and a default rating will be created between the two accounts at the min star level set in settings.</p>
-        <p className="pt-2">Preferences show the team member→service user/service user→team member preference for the corresponding user to aid judgment when assigning team member to rotas. To edit a users preference click on their name in the table. Hovering over the stars will display the description for that users preference.</p>
+        <p>You have the setting turned on for locking care giver pref. This means if this service member access a care giver less than 3, that care giver will not be allowed to be assigned to the call. This is something to be mindful of when using the bulk actions as there will be no warning the care giver has not been assigned in some instances, you need to double check. If there is no preference set between the service member and the care giver, the care giver will be allowed to be assigned and a default rating will be created between the two accounts at the min star level set in settings.</p>
+        <p className="pt-2">Preferences show the care giver→service member/service member→care giver preference for the corresponding user to aid judgment when assigning care giver to rotas. To edit a users preference click on their name in the table. Hovering over the stars will display the description for that users preference.</p>
       </div>
 
       <div className="px-4 pb-2 flex items-center justify-end gap-2">
@@ -662,10 +662,10 @@ function UserPreferencesCard({ careReceiverId, careReceiverName }: { careReceive
           <thead className="bg-cyan-500 text-white">
             <tr>
               <th className="w-10 px-2 py-2"></th>
-              <th className="text-left px-3 py-2 font-semibold">Service User Name</th>
+              <th className="text-left px-3 py-2 font-semibold">Service Member Name</th>
               <th className="text-center px-3 py-2 font-semibold">→</th>
               <th className="text-left px-3 py-2 font-semibold bg-violet-400">Preference</th>
-              <th className="text-left px-3 py-2 font-semibold bg-violet-400">Team Member Name</th>
+              <th className="text-left px-3 py-2 font-semibold bg-violet-400">Care Giver Name</th>
               <th className="text-center px-3 py-2 font-semibold bg-violet-400">→</th>
               <th className="text-left px-3 py-2 font-semibold bg-violet-400">Preference</th>
               <th className="w-12 px-2 py-2 bg-violet-400"></th>
@@ -693,12 +693,12 @@ function UserPreferencesCard({ careReceiverId, careReceiverName }: { careReceive
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Add Team Member Preference</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>Add Care Giver Preference</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div className="space-y-1">
-              <Label className="text-xs">Team Member</Label>
+              <Label className="text-xs">Care Giver</Label>
               <Select value={draft.care_giver_id} onValueChange={(v) => setDraft({ ...draft, care_giver_id: v })}>
-                <SelectTrigger><SelectValue placeholder="Select team member" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Select care giver" /></SelectTrigger>
                 <SelectContent>{caregivers.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
@@ -714,7 +714,7 @@ function UserPreferencesCard({ careReceiverId, careReceiverName }: { careReceive
 
       <AlertDialog open={!!delId} onOpenChange={(o) => !o && setDelId(null)}>
         <AlertDialogContent>
-          <AlertDialogHeader><AlertDialogTitle>Remove preference?</AlertDialogTitle><AlertDialogDescription>This will remove the rating between this team member and service user.</AlertDialogDescription></AlertDialogHeader>
+          <AlertDialogHeader><AlertDialogTitle>Remove preference?</AlertDialogTitle><AlertDialogDescription>This will remove the rating between this care giver and service member.</AlertDialogDescription></AlertDialogHeader>
           <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction className="bg-destructive hover:bg-destructive/90" onClick={() => delId && del.mutate(delId)}>Delete</AlertDialogAction></AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -762,7 +762,7 @@ function EditDetailsDialog({ open, onOpenChange, cr, onSave }: { open: boolean; 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
-        <DialogHeader><DialogTitle>Edit Service User Details</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle>Edit Service Member Details</DialogTitle></DialogHeader>
         <div className="grid grid-cols-2 gap-3">
           {fields.map(f => (
             <div key={f.k} className="space-y-1">
@@ -800,7 +800,7 @@ function EditAddressDialog({ open, onOpenChange, cr, onSave }: { open: boolean; 
       <DialogContent className="max-w-xl">
         <DialogHeader><DialogTitle>Edit Addresses</DialogTitle></DialogHeader>
         <div className="space-y-3">
-          <div className="space-y-1"><Label className="text-xs">Service User Address</Label><Textarea rows={2} value={v.address} onChange={e => setV({ ...v, address: e.target.value })} /></div>
+          <div className="space-y-1"><Label className="text-xs">Service Member Address</Label><Textarea rows={2} value={v.address} onChange={e => setV({ ...v, address: e.target.value })} /></div>
           <div className="space-y-1"><Label className="text-xs">Next of Kin Address</Label><Textarea rows={2} value={v.next_of_kin_address} onChange={e => setV({ ...v, next_of_kin_address: e.target.value })} /></div>
           <div className="space-y-1"><Label className="text-xs">Doctor Address</Label><Textarea rows={2} value={v.doctor_address} onChange={e => setV({ ...v, doctor_address: e.target.value })} /></div>
           <div className="space-y-1"><Label className="text-xs">Pharmacy Address</Label><Textarea rows={2} value={v.pharmacy_address} onChange={e => setV({ ...v, pharmacy_address: e.target.value })} /></div>
@@ -820,7 +820,7 @@ function EditTagsDialog({ open, onOpenChange, cr, onSave }: { open: boolean; onO
         <DialogHeader><DialogTitle>Edit Tags</DialogTitle></DialogHeader>
         <div className="space-y-2">
           <Label className="text-xs">Tags (comma separated)</Label>
-          <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="Care Service Contract Reaffirmed, Service User pack issued, ..." />
+          <Input value={text} onChange={(e) => setText(e.target.value)} placeholder="Care Service Contract Reaffirmed, Service Member pack issued, ..." />
         </div>
         <DialogFooter><Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button><Button onClick={() => { onSave({ tags: text.split(",").map(s => s.trim()).filter(Boolean) }); onOpenChange(false); }}>Save</Button></DialogFooter>
       </DialogContent>
@@ -858,7 +858,7 @@ function EditMedicalDialog({ open, onOpenChange, cr, onSave }: { open: boolean; 
         <DialogHeader><DialogTitle>Edit Medical Login Details</DialogTitle></DialogHeader>
         <div className="space-y-3">
           <div className="space-y-1"><Label className="text-xs">Company Number</Label><Input value={v.medical_company_number} onChange={(e) => setV({ ...v, medical_company_number: e.target.value })} /></div>
-          <div className="space-y-1"><Label className="text-xs">Service User Number</Label><Input value={v.medical_service_user_number} onChange={(e) => setV({ ...v, medical_service_user_number: e.target.value })} /></div>
+          <div className="space-y-1"><Label className="text-xs">Service Member Number</Label><Input value={v.medical_service_user_number} onChange={(e) => setV({ ...v, medical_service_user_number: e.target.value })} /></div>
           <div className="space-y-1"><Label className="text-xs">Password</Label><Input type="password" value={v.medical_password} onChange={(e) => setV({ ...v, medical_password: e.target.value })} /></div>
         </div>
         <DialogFooter><Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button><Button onClick={() => { onSave(v); onOpenChange(false); }}>Save</Button></DialogFooter>

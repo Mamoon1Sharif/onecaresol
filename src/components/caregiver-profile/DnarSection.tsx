@@ -49,7 +49,7 @@ export function DnarSection({ enabled, onChange }: Props) {
           <div className="flex items-center gap-2 mb-1">
             <ShieldAlert className="h-4 w-4 text-destructive" />
             <h3 className="text-sm font-bold uppercase tracking-widest text-destructive">
-              Team Member DNAR Settings
+              Care Giver DNAR Settings
             </h3>
           </div>
           <Separator className="mb-4" />
@@ -57,7 +57,7 @@ export function DnarSection({ enabled, onChange }: Props) {
           <div className="flex items-start gap-3 p-3 rounded-lg bg-destructive/5 border border-destructive/20 mb-4">
             <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
             <p className="text-xs text-muted-foreground leading-relaxed">
-              If this Team Member has a <span className="font-semibold text-foreground">DNAR (Do Not Attempt Resuscitation)</span>{" "}
+              If this Care Giver has a <span className="font-semibold text-foreground">DNAR (Do Not Attempt Resuscitation)</span>{" "}
               in place you can replicate that setting here. This will be shown around the entire system when viewing the Team
               Member's profile. Please be very careful turning this setting on — getting this wrong is a matter of life and
               death. The user that turns this on will be clearly logged in the system and may be held accountable.{" "}
@@ -69,7 +69,7 @@ export function DnarSection({ enabled, onChange }: Props) {
             <div>
               <p className="text-sm font-semibold text-foreground">DNAR Status</p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {enabled ? "DNAR is currently active for this team member." : "No DNAR in place."}
+                {enabled ? "DNAR is currently active for this care giver." : "No DNAR in place."}
               </p>
             </div>
             <div className="flex items-center gap-3">
@@ -110,7 +110,7 @@ export function DnarSection({ enabled, onChange }: Props) {
               Confirm DNAR change
             </DialogTitle>
             <DialogDescription>
-              You are about to {pendingValue ? "enable" : "disable"} DNAR for this team member. This action will be logged.
+              You are about to {pendingValue ? "enable" : "disable"} DNAR for this care giver. This action will be logged.
               Please enter your password to confirm.
             </DialogDescription>
           </DialogHeader>

@@ -172,7 +172,7 @@ export function NotesTab({ careGiverId }: Props) {
   };
 
   const exportPrivate = () => {
-    const header = "Date,Service User,Note\n";
+    const header = "Date,Service Member,Note\n";
     const rows = privateNotes.map((n) => {
       const su = receivers.find((r) => r.id === n.service_user_id)?.name ?? "";
       const safe = (s: string) => `"${(s ?? "").replace(/"/g, '""')}"`;
@@ -257,13 +257,13 @@ export function NotesTab({ careGiverId }: Props) {
               type="date"
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
-              className="h-8 text-xs w-[130px]"
+              className="h-8 text-xs w-[170px] pr-2"
             />
             <Input
               type="date"
               value={toDate}
               onChange={(e) => setToDate(e.target.value)}
-              className="h-8 text-xs w-[130px]"
+              className="h-8 text-xs w-[170px] pr-2"
             />
             <Button size="sm" className="h-8 gap-1.5 bg-success text-success-foreground hover:bg-success/90" onClick={handleApplyDates}>
               <RefreshCw className="h-3.5 w-3.5" /> Update
@@ -282,10 +282,10 @@ export function NotesTab({ careGiverId }: Props) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <Select value={serviceUserFilter} onValueChange={setServiceUserFilter}>
               <SelectTrigger className="h-9">
-                <SelectValue placeholder="Select Service User..." />
+                <SelectValue placeholder="Select Service Member..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Service Users</SelectItem>
+                <SelectItem value="all">All Service Members</SelectItem>
                 {receivers.map((r) => (
                   <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>
                 ))}
@@ -321,7 +321,7 @@ export function NotesTab({ careGiverId }: Props) {
                     <Checkbox checked={allSelected} onCheckedChange={toggleSelectAll} />
                   </TableHead>
                   <TableHead className="w-[120px]">Date</TableHead>
-                  <TableHead className="w-[180px]">Service User</TableHead>
+                  <TableHead className="w-[180px]">Service Member</TableHead>
                   <TableHead>Note</TableHead>
                   <TableHead className="w-[100px] text-right">Actions</TableHead>
                 </TableRow>
@@ -372,11 +372,11 @@ export function NotesTab({ careGiverId }: Props) {
       <Card className="border border-border shadow-sm overflow-hidden">
         <div className="flex items-center gap-2 px-4 py-3 bg-muted/30 border-b">
           <CalendarDays className="h-4 w-4 text-primary" />
-          <span className="text-sm font-semibold text-foreground">Team Member Notes (Rota)</span>
+          <span className="text-sm font-semibold text-foreground">Care Giver Notes (Rota)</span>
         </div>
         <CardContent className="p-4 space-y-3">
           <p className="text-sm text-info">
-            Live rota notes from services involving this team member
+            Live rota notes from services involving this care giver
           </p>
 
           <div className="border rounded-md overflow-hidden">
@@ -470,10 +470,10 @@ export function NotesTab({ careGiverId }: Props) {
               <Input type="date" value={draft.note_date} onChange={(e) => setDraft({ ...draft, note_date: e.target.value })} />
             </div>
             <div>
-              <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Service User (optional)</label>
+              <label className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Service Member (optional)</label>
               <Select value={draft.service_user_id} onValueChange={(v) => setDraft({ ...draft, service_user_id: v })}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select Service User..." />
+                  <SelectValue placeholder="Select Service Member..." />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">— None —</SelectItem>

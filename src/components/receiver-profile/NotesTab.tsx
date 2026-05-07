@@ -168,7 +168,7 @@ export function ReceiverNotesTab({ careReceiverId }: { careReceiverId: string })
   };
   const allSelected = notes.length > 0 && notes.every((n) => selected.has(n.id));
 
-  // ============== Team Member Notes (Rota) ==============
+  // ============== Care Giver Notes (Rota) ==============
   // Sourced from caregivers who have visited this receiver
   const [page, setPage] = useState(1);
 
@@ -233,8 +233,8 @@ export function ReceiverNotesTab({ careReceiverId }: { careReceiverId: string })
             <FileText className="h-4 w-4 text-primary" /> Private Notes
           </div>
           <div className="flex items-center gap-2 flex-wrap">
-            <Input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="h-8 text-xs w-[130px]" />
-            <Input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className="h-8 text-xs w-[130px]" />
+            <Input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} className="h-8 text-xs w-[170px] pr-2" />
+            <Input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} className="h-8 text-xs w-[170px] pr-2" />
             <Button size="sm" className="h-8 gap-1.5 bg-success text-success-foreground hover:bg-success/90"
               onClick={() => { setAppliedFrom(fromDate); setAppliedTo(toDate); }}>
               <RefreshCw className="h-3.5 w-3.5" /> Update
@@ -325,11 +325,11 @@ export function ReceiverNotesTab({ careReceiverId }: { careReceiverId: string })
       <Card className="border border-border shadow-sm overflow-hidden">
         <div className="flex items-center gap-2 px-4 py-3 bg-muted/30 border-b">
           <CalendarDays className="h-4 w-4 text-primary" />
-          <span className="text-sm font-semibold text-foreground">Team Member Notes (Rota)</span>
+          <span className="text-sm font-semibold text-foreground">Care Giver Notes (Rota)</span>
         </div>
         <CardContent className="p-4 space-y-3">
           <p className="text-sm text-info">
-            Live rota notes from team members involved in this service user's care
+            Live rota notes from care givers involved in this service member's care
           </p>
 
           <div className="border rounded-md overflow-hidden">

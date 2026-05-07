@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AppLayout } from "@/components/AppLayout";
 import { useCareGivers } from "@/hooks/use-care-data";
@@ -9,14 +9,20 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
+} from "@/components/ui/dialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import {
   Plus, CalendarDays, Filter, Search, ChevronLeft, ChevronRight,
-  Calendar as CalIcon, FileText, Send, Pin, PieChart, Settings,
+  Calendar as CalIcon, FileText, Send, Pin, PieChart, Settings, Check, X,
 } from "lucide-react";
 import {
   startOfMonth, endOfMonth, startOfWeek, endOfWeek, addDays,
@@ -24,6 +30,7 @@ import {
   parseISO,
 } from "date-fns";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 type ViewMode = "month" | "week" | "list";
 
@@ -35,6 +42,8 @@ interface HolidayRow {
   end_date: string | null;
   status: string;
   reason: string | null;
+  hours?: number | null;
+  notes?: string | null;
 }
 
 const TYPE_COLORS: Record<string, string> = {
@@ -48,6 +57,7 @@ const HolidaysAbsence = () => {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const initialId = params.get("caregiver") || "";
+  const qc = useQueryClient();
 
   const [selectedCgId, setSelectedCgId] = useState<string>(initialId);
   const [view, setView] = useState<ViewMode>("month");
@@ -56,6 +66,11 @@ const HolidaysAbsence = () => {
   const [showHolidays, setShowHolidays] = useState(true);
   const [showAbsence, setShowAbsence] = useState(true);
   const [showLateness, setShowLateness] = useState(true);
+
+  const [addOpen, setAddOpen] = useState(false);
+  const [requestsOpen, setRequestsOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [reportOpen, setReportOpen] = useState(false);
 
   const { data: caregivers = [] } = useCareGivers();
 
@@ -83,9 +98,10 @@ const HolidaysAbsence = () => {
         if (e.entry_type === "holiday" && !showHolidays) return false;
         if (e.entry_type === "absence" && !showAbsence) return false;
         if (e.entry_type === "late" && !showLateness) return false;
+        if (statusFilter !== "all" && e.status !== statusFilter) return false;
         return true;
       }),
-    [entries, showHolidays, showAbsence, showLateness],
+    [entries, showHolidays, showAbsence, showLateness, statusFilter],
   );
 
   const filteredCgs = useMemo(
@@ -96,7 +112,10 @@ const HolidaysAbsence = () => {
     [caregivers, search],
   );
 
-  const pendingCount = entries.filter((e) => e.status === "pending").length;
+  const pendingRequests = useMemo(
+    () => entries.filter((e) => e.status === "pending"),
+    [entries],
+  );
 
   const monthDays = useMemo(() => {
     const start = startOfWeek(startOfMonth(cursor), { weekStartsOn: 6 });
@@ -136,6 +155,68 @@ const HolidaysAbsence = () => {
 
   const dayLabels = ["Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri"];
 
+  const insertEntry = useMutation({
+    mutationFn: async (v: Partial<HolidayRow>) => {
+      const { error } = await supabase.from("caregiver_holidays").insert({
+        care_giver_id: selectedCg!.id,
+        entry_type: v.entry_type || "holiday",
+        start_date: v.start_date!,
+        end_date: v.end_date || null,
+        hours: v.hours ?? 0,
+        status: v.status || "approved",
+        reason: v.reason || null,
+        notes: v.notes || null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["holidays_all", selectedCg?.id] });
+      qc.invalidateQueries({ queryKey: ["caregiver_holidays_all"] });
+      setAddOpen(false);
+      toast.success("Entry added");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const setStatus = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const { error } = await supabase
+        .from("caregiver_holidays")
+        .update({ status })
+        .eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["holidays_all", selectedCg?.id] });
+      qc.invalidateQueries({ queryKey: ["caregiver_holidays_all"] });
+      toast.success("Updated");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const exportCsv = () => {
+    if (visibleEntries.length === 0) {
+      toast.info("No entries to export");
+      return;
+    }
+    const headers = ["Type", "Start", "End", "Status", "Reason"];
+    const rows = visibleEntries.map((e) => [
+      e.entry_type,
+      e.start_date,
+      e.end_date || "",
+      e.status,
+      (e.reason || "").replace(/[",\n]/g, " "),
+    ]);
+    const csv = [headers, ...rows].map((r) => r.map((c) => `"${c}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `holidays_${selectedCg?.name || "export"}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <AppLayout>
       <div className="space-y-3">
@@ -145,7 +226,7 @@ const HolidaysAbsence = () => {
             <Badge className="bg-sky-500 hover:bg-sky-500 text-white text-base px-3 py-1.5">
               Holidays & Absence
             </Badge>
-            <span className="text-sm text-muted-foreground">- Team Member</span>
+            <span className="text-sm text-muted-foreground">- Care Giver</span>
           </div>
 
           <div className="flex items-center gap-4 flex-wrap">
@@ -155,28 +236,85 @@ const HolidaysAbsence = () => {
           </div>
 
           <div className="flex items-center gap-1.5 flex-wrap">
-            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 gap-1 h-8">
+            <Button
+              size="sm"
+              className="bg-emerald-600 hover:bg-emerald-700 gap-1 h-8"
+              onClick={() => setAddOpen(true)}
+              disabled={!selectedCg}
+            >
               <Plus className="h-3.5 w-3.5" /> Add
             </Button>
-            <Button size="sm" className="bg-sky-500 hover:bg-sky-600 text-white gap-1 h-8">
-              <CalendarDays className="h-3.5 w-3.5" /> Requests ({pendingCount})
+            <Button
+              size="sm"
+              className="bg-sky-500 hover:bg-sky-600 text-white gap-1 h-8"
+              onClick={() => setRequestsOpen(true)}
+            >
+              <CalendarDays className="h-3.5 w-3.5" /> Requests ({pendingRequests.length})
             </Button>
-            <Button size="sm" className="bg-amber-500 hover:bg-amber-600 text-white gap-1 h-8">
-              <Filter className="h-3.5 w-3.5" /> Filters
-            </Button>
-            <Button size="icon" variant="outline" className="h-8 w-8 bg-amber-500 border-amber-500 text-white hover:bg-amber-600">
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button size="sm" className="bg-amber-500 hover:bg-amber-600 text-white gap-1 h-8">
+                  <Filter className="h-3.5 w-3.5" /> Filters
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 space-y-3" align="end">
+                <div>
+                  <Label className="text-xs">Status</Label>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  size="sm" variant="outline" className="w-full h-8 text-xs"
+                  onClick={() => {
+                    setStatusFilter("all"); setShowHolidays(true);
+                    setShowAbsence(true); setShowLateness(true);
+                  }}
+                >
+                  Reset
+                </Button>
+              </PopoverContent>
+            </Popover>
+
+            <Button
+              size="icon" variant="outline" title="Export CSV"
+              className="h-8 w-8 bg-amber-500 border-amber-500 text-white hover:bg-amber-600"
+              onClick={exportCsv}
+            >
               <FileText className="h-3.5 w-3.5" />
             </Button>
-            <Button size="icon" variant="outline" className="h-8 w-8 bg-sky-400 border-sky-400 text-white hover:bg-sky-500">
+            <Button
+              size="icon" variant="outline" title="Send Request"
+              className="h-8 w-8 bg-sky-400 border-sky-400 text-white hover:bg-sky-500"
+              onClick={() => { setAddOpen(true); }}
+            >
               <Send className="h-3.5 w-3.5" />
             </Button>
-            <Button size="icon" variant="outline" className="h-8 w-8 bg-slate-500 border-slate-500 text-white hover:bg-slate-600">
+            <Button
+              size="icon" variant="outline" title="Pin to today"
+              className="h-8 w-8 bg-slate-500 border-slate-500 text-white hover:bg-slate-600"
+              onClick={() => setCursor(new Date())}
+            >
               <Pin className="h-3.5 w-3.5" />
             </Button>
-            <Button size="icon" variant="outline" className="h-8 w-8 bg-rose-500 border-rose-500 text-white hover:bg-rose-600">
+            <Button
+              size="icon" variant="outline" title="Holiday Report"
+              className="h-8 w-8 bg-rose-500 border-rose-500 text-white hover:bg-rose-600"
+              onClick={() => navigate("/reports/holidays")}
+            >
               <PieChart className="h-3.5 w-3.5" />
             </Button>
-            <Button size="icon" variant="outline" className="h-8 w-8">
+            <Button
+              size="icon" variant="outline" className="h-8 w-8" title="Settings"
+              onClick={() => navigate("/settings")}
+            >
               <Settings className="h-3.5 w-3.5" />
             </Button>
           </div>
@@ -190,7 +328,7 @@ const HolidaysAbsence = () => {
               onValueChange={(v) => setSelectedCgId(v)}
             >
               <SelectTrigger className="w-full h-9 bg-orange-50">
-                <SelectValue placeholder="Select team member" />
+                <SelectValue placeholder="Select care giver" />
               </SelectTrigger>
               <SelectContent>
                 {caregivers.map((c) => (
@@ -200,7 +338,7 @@ const HolidaysAbsence = () => {
             </Select>
 
             <div className="border-t pt-2">
-              <h3 className="text-sm font-semibold mb-2">Team Member Statistics</h3>
+              <h3 className="text-sm font-semibold mb-2">Care Giver Statistics</h3>
               <div className="relative mb-2">
                 <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                 <Input
@@ -269,9 +407,21 @@ const HolidaysAbsence = () => {
                 <Button size="icon" variant="outline" className="h-7 w-7" onClick={navigatePrev}>
                   <ChevronLeft className="h-3.5 w-3.5" />
                 </Button>
-                <Button size="icon" variant="outline" className="h-7 w-7">
-                  <CalIcon className="h-3.5 w-3.5" />
-                </Button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button size="icon" variant="outline" className="h-7 w-7" title="Pick date">
+                      <CalIcon className="h-3.5 w-3.5" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end">
+                    <Calendar
+                      mode="single"
+                      selected={cursor}
+                      onSelect={(d) => d && setCursor(d)}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
                 <Button size="icon" variant="outline" className="h-7 w-7" onClick={navigateNext}>
                   <ChevronRight className="h-3.5 w-3.5" />
                 </Button>
@@ -404,7 +554,139 @@ const HolidaysAbsence = () => {
           </Card>
         </div>
       </div>
+
+      {/* Add Entry Dialog */}
+      <Dialog open={addOpen} onOpenChange={setAddOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Entry for {selectedCg?.name}</DialogTitle>
+            <DialogDescription>Record a holiday, absence, lateness, or pending request.</DialogDescription>
+          </DialogHeader>
+          <AddEntryForm onSubmit={(v) => insertEntry.mutate(v)} submitting={insertEntry.isPending} />
+        </DialogContent>
+      </Dialog>
+
+      {/* Pending Requests Dialog */}
+      <Dialog open={requestsOpen} onOpenChange={setRequestsOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Pending Requests ({pendingRequests.length})</DialogTitle>
+            <DialogDescription>Approve or reject pending entries for {selectedCg?.name}.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+            {pendingRequests.length === 0 ? (
+              <div className="text-sm text-muted-foreground text-center py-8">No pending requests</div>
+            ) : (
+              pendingRequests.map((e) => (
+                <div key={e.id} className="flex items-center gap-3 border rounded p-2 text-sm">
+                  <div className={cn("w-2 h-10 rounded", TYPE_COLORS[e.entry_type] || "bg-slate-500")} />
+                  <div className="flex-1">
+                    <div className="font-medium capitalize">{e.entry_type}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {format(parseISO(e.start_date), "dd MMM yyyy")}
+                      {e.end_date && ` – ${format(parseISO(e.end_date), "dd MMM yyyy")}`}
+                      {e.reason && ` · ${e.reason}`}
+                    </div>
+                  </div>
+                  <Button
+                    size="sm" variant="outline" className="h-7 gap-1 text-emerald-700 border-emerald-500"
+                    onClick={() => setStatus.mutate({ id: e.id, status: "approved" })}
+                  >
+                    <Check className="h-3.5 w-3.5" /> Approve
+                  </Button>
+                  <Button
+                    size="sm" variant="outline" className="h-7 gap-1 text-destructive border-destructive"
+                    onClick={() => setStatus.mutate({ id: e.id, status: "rejected" })}
+                  >
+                    <X className="h-3.5 w-3.5" /> Reject
+                  </Button>
+                </div>
+              ))
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRequestsOpen(false)}>Close</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </AppLayout>
+  );
+};
+
+const AddEntryForm = ({
+  onSubmit, submitting,
+}: { onSubmit: (v: Partial<HolidayRow>) => void; submitting: boolean }) => {
+  const [type, setType] = useState("holiday");
+  const [start, setStart] = useState("");
+  const [end, setEnd] = useState("");
+  const [hours, setHours] = useState("0");
+  const [status, setStatus] = useState("approved");
+  const [reason, setReason] = useState("");
+  const [notes, setNotes] = useState("");
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!start) return toast.error("Start date is required");
+        onSubmit({
+          entry_type: type, start_date: start, end_date: end || null,
+          hours: Number(hours) || 0, status, reason: reason || null, notes: notes || null,
+        });
+      }}
+      className="space-y-3"
+    >
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <Label className="text-xs">Type</Label>
+          <Select value={type} onValueChange={setType}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="holiday">Holiday</SelectItem>
+              <SelectItem value="absence">Absence</SelectItem>
+              <SelectItem value="late">Late</SelectItem>
+              <SelectItem value="request">Pending Request</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className="text-xs">Status</Label>
+          <Select value={status} onValueChange={setStatus}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="rejected">Rejected</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className="text-xs">From *</Label>
+          <Input type="date" value={start} onChange={(e) => setStart(e.target.value)} required />
+        </div>
+        <div>
+          <Label className="text-xs">To</Label>
+          <Input type="date" value={end} onChange={(e) => setEnd(e.target.value)} />
+        </div>
+        <div>
+          <Label className="text-xs">Hours</Label>
+          <Input type="number" step="0.5" value={hours} onChange={(e) => setHours(e.target.value)} />
+        </div>
+        <div>
+          <Label className="text-xs">Reason</Label>
+          <Input value={reason} onChange={(e) => setReason(e.target.value)} />
+        </div>
+      </div>
+      <div>
+        <Label className="text-xs">Notes</Label>
+        <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} />
+      </div>
+      <DialogFooter>
+        <Button type="submit" disabled={submitting} className="bg-emerald-600 hover:bg-emerald-700">
+          {submitting ? "Saving..." : "Save"}
+        </Button>
+      </DialogFooter>
+    </form>
   );
 };
 

@@ -7,27 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
 import {
   Camera,
@@ -156,13 +138,9 @@ export default function MyProfile() {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-                Account
-              </p>
+              <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Account</p>
               <h1 className="text-3xl font-bold text-foreground">My Profile</h1>
-              <p className="text-sm text-muted-foreground mt-1">
-                Personal details, login, role and PPE allocation.
-              </p>
+              <p className="text-sm text-muted-foreground mt-1">Personal details, login, role and PPE allocation.</p>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setP(INITIAL)}>
@@ -196,9 +174,7 @@ export default function MyProfile() {
                         variant="ghost"
                         size="sm"
                         className="h-7 text-xs"
-                        onClick={() =>
-                          update("status", p.status === "Active" ? "Inactive" : "Active")
-                        }
+                        onClick={() => update("status", p.status === "Active" ? "Inactive" : "Active")}
                       >
                         <Pencil className="h-3 w-3 mr-1" /> Update
                       </Button>
@@ -332,9 +308,7 @@ export default function MyProfile() {
               <Section title="Tags">
                 <div className="space-y-2">
                   <div className="flex flex-wrap gap-1.5 min-h-[2rem]">
-                    {p.tags.length === 0 && (
-                      <span className="text-xs text-muted-foreground">No tags selected</span>
-                    )}
+                    {p.tags.length === 0 && <span className="text-xs text-muted-foreground">No tags selected</span>}
                     {p.tags.map((t) => (
                       <Badge key={t} variant="secondary" className="gap-1">
                         {t}
@@ -393,13 +367,7 @@ export default function MyProfile() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {[
-                      "Super User",
-                      "Registered Manager",
-                      "Care Coordinator",
-                      "Senior Carer",
-                      "Carer",
-                    ].map((r) => (
+                    {["Super User", "Registered Manager", "Care Coordinator", "Senior Carer", "Carer"].map((r) => (
                       <SelectItem key={r} value={r}>
                         {r}
                       </SelectItem>
@@ -437,10 +405,7 @@ export default function MyProfile() {
                     <TableBody>
                       <TableRow>
                         <TableCell>
-                          <Select
-                            value={p.externalSystem}
-                            onValueChange={(v) => update("externalSystem", v)}
-                          >
+                          <Select value={p.externalSystem} onValueChange={(v) => update("externalSystem", v)}>
                             <SelectTrigger className="h-8">
                               <SelectValue />
                             </SelectTrigger>
@@ -473,10 +438,7 @@ export default function MyProfile() {
                     </TableBody>
                   </Table>
                   <label className="flex items-center gap-2 text-xs">
-                    <Checkbox
-                      checked={p.syncToPass}
-                      onCheckedChange={(c) => update("syncToPass", !!c)}
-                    />
+                    <Checkbox checked={p.syncToPass} onCheckedChange={(c) => update("syncToPass", !!c)} />
                     Sync details changes to PASSroster
                   </label>
                 </div>
@@ -507,9 +469,9 @@ export default function MyProfile() {
           >
             <div className="space-y-3">
               <div className="rounded-md bg-accent/40 border border-accent p-3 text-xs text-foreground/80 leading-relaxed">
-                Days remaining is an approximation based on your PPE stock history and the current PPE
-                stock. It's important to update your office PPE stock levels regularly in order for PASS
-                to calculate this more accurately.
+                Days remaining is an approximation based on your PPE stock history and the current PPE stock. It's
+                important to update your office PPE stock levels regularly in order for PASS to calculate this more
+                accurately.
                 <br />
                 Please ensure the unit recorded is consistent across your organisation.
                 <br />
@@ -531,9 +493,7 @@ export default function MyProfile() {
                             <TooltipTrigger asChild>
                               <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
                             </TooltipTrigger>
-                            <TooltipContent>
-                              Based on average daily usage across your organisation.
-                            </TooltipContent>
+                            <TooltipContent>Based on average daily usage across your organisation.</TooltipContent>
                           </Tooltip>
                         </span>
                       </TableHead>
@@ -545,12 +505,7 @@ export default function MyProfile() {
                         <TableCell className="font-medium text-sm">{r.type}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-1">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => adjustPpe(i, -1)}
-                            >
+                            <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => adjustPpe(i, -1)}>
                               <Minus className="h-3.5 w-3.5" />
                             </Button>
                             <Input
@@ -560,12 +515,7 @@ export default function MyProfile() {
                               onChange={(e) => setPpeValue(i, e.target.value)}
                               className="h-8 w-20 text-center"
                             />
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={() => adjustPpe(i, 1)}
-                            >
+                            <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => adjustPpe(i, 1)}>
                               <Plus className="h-3.5 w-3.5" />
                             </Button>
                           </div>
@@ -574,9 +524,7 @@ export default function MyProfile() {
                           <Badge
                             variant="outline"
                             className={
-                              r.units === 0
-                                ? "border-muted text-muted-foreground"
-                                : "border-success text-success"
+                              r.units === 0 ? "border-muted text-muted-foreground" : "border-success text-success"
                             }
                           >
                             {daysRemaining(r)}
@@ -628,9 +576,7 @@ function Section({
 function FieldBlock({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
-        {label}
-      </Label>
+      <Label className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">{label}</Label>
       {children}
     </div>
   );
@@ -640,8 +586,7 @@ function CareGroups() {
   const groups = ["North London", "South London", "Westminster", "City of London", "Greenwich"];
   const [all, setAll] = useState(false);
   const [sel, setSel] = useState<string[]>(["Westminster"]);
-  const toggle = (g: string) =>
-    setSel((s) => (s.includes(g) ? s.filter((x) => x !== g) : [...s, g]));
+  const toggle = (g: string) => setSel((s) => (s.includes(g) ? s.filter((x) => x !== g) : [...s, g]));
   return (
     <div className="space-y-2">
       <label className="flex items-center gap-2 text-sm">

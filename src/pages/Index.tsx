@@ -117,36 +117,44 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
           </div>
         </TableCell>
       </TableRow>
-      {showNotes && notes.length > 0 && (
+      {showNotes && (
         <TableRow className="bg-muted/20">
           <TableCell colSpan={8} className="py-2 px-6">
             <div className="space-y-1.5">
               <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><StickyNote className="h-3 w-3" /> Notes</p>
-              {notes.map((n: any) => (
-                <div key={n.id} className="text-sm text-foreground bg-background rounded px-3 py-1.5 border border-border">
-                  <span className="font-medium text-primary text-xs">{n.author}:</span> {n.note}
-                </div>
-              ))}
+              {notes.length === 0 ? (
+                <div className="text-xs text-muted-foreground italic px-3 py-1.5">No notes recorded for this shift.</div>
+              ) : (
+                notes.map((n: any) => (
+                  <div key={n.id} className="text-sm text-foreground bg-background rounded px-3 py-1.5 border border-border">
+                    <span className="font-medium text-primary text-xs">{n.author}:</span> {n.note}
+                  </div>
+                ))
+              )}
             </div>
           </TableCell>
         </TableRow>
       )}
-      {showTasks && tasks.length > 0 && (
+      {showTasks && (
         <TableRow className="bg-muted/20">
           <TableCell colSpan={8} className="py-2 px-6">
             <div className="space-y-1.5">
               <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><ClipboardCheck className="h-3 w-3" /> Tasks</p>
-              {tasks.map((t: any) => (
-                <div key={t.id} className="flex items-center gap-2 text-sm bg-background rounded px-3 py-1.5 border border-border">
-                  {t.is_completed ? (
-                    <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0" />
-                  ) : (
-                    <XCircle className="h-3.5 w-3.5 text-destructive shrink-0" />
-                  )}
-                  <span className={t.is_completed ? "text-foreground" : "text-muted-foreground"}>{t.title}</span>
-                  {t.completed_by && <span className="text-xs text-muted-foreground ml-auto">by {t.completed_by}</span>}
-                </div>
-              ))}
+              {tasks.length === 0 ? (
+                <div className="text-xs text-muted-foreground italic px-3 py-1.5">No tasks recorded for this shift.</div>
+              ) : (
+                tasks.map((t: any) => (
+                  <div key={t.id} className="flex items-center gap-2 text-sm bg-background rounded px-3 py-1.5 border border-border">
+                    {t.is_completed ? (
+                      <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0" />
+                    ) : (
+                      <XCircle className="h-3.5 w-3.5 text-destructive shrink-0" />
+                    )}
+                    <span className={t.is_completed ? "text-foreground" : "text-muted-foreground"}>{t.title}</span>
+                    {t.completed_by && <span className="text-xs text-muted-foreground ml-auto">by {t.completed_by}</span>}
+                  </div>
+                ))
+              )}
             </div>
           </TableCell>
         </TableRow>

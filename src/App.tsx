@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/use-auth";
+import { FeatureTogglesProvider } from "@/hooks/use-feature-toggles";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index.tsx";
 import InsightsDashboard from "./pages/InsightsDashboard.tsx";
@@ -17,7 +18,7 @@ import AddCareReceiver from "./pages/AddCareReceiver.tsx";
 import CareReceiverProfile from "./pages/CareReceiverProfile.tsx";
 import ReceiverMessaging from "./pages/ReceiverMessaging.tsx";
 import ReceiverMedication from "./pages/ReceiverMedication.tsx";
-import ReceiverQualifications from "./pages/ReceiverQualifications.tsx";
+
 import ReceiverIncidents from "./pages/ReceiverIncidents.tsx";
 import ReceiverFiles from "./pages/ReceiverFiles.tsx";
 import ReceiverChangelog from "./pages/ReceiverChangelog.tsx";
@@ -72,6 +73,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
+      <FeatureTogglesProvider>
       <TooltipProvider>
         <Toaster />
         <Sonner />
@@ -93,7 +95,7 @@ const App = () => (
             <Route path="/carereceivers/:id" element={<ProtectedRoute><CareReceiverProfile /></ProtectedRoute>} />
             <Route path="/carereceivers/:id/messaging" element={<ProtectedRoute><ReceiverMessaging /></ProtectedRoute>} />
             <Route path="/carereceivers/:id/medication" element={<ProtectedRoute><ReceiverMedication /></ProtectedRoute>} />
-            <Route path="/carereceivers/:id/qualifications" element={<ProtectedRoute><ReceiverQualifications /></ProtectedRoute>} />
+            
             <Route path="/carereceivers/:id/incidents" element={<ProtectedRoute><ReceiverIncidents /></ProtectedRoute>} />
             <Route path="/carereceivers/:id/files" element={<ProtectedRoute><ReceiverFiles /></ProtectedRoute>} />
             <Route path="/carereceivers/:id/changelog" element={<ProtectedRoute><ReceiverChangelog /></ProtectedRoute>} />
@@ -143,6 +145,7 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
+      </FeatureTogglesProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

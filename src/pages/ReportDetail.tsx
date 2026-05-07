@@ -40,9 +40,9 @@ const PEOPLE = [
 ];
 
 const TYPE_OPTIONS = [
-  "Active Team Members",
-  "Inactive Team Members",
-  "All Team Members",
+  "Active Care Givers",
+  "Inactive Care Givers",
+  "All Care Givers",
 ];
 
 function MultiSelectPeople({
@@ -226,7 +226,7 @@ export default function ReportDetail() {
             </Select>
 
             <Label className="text-sm font-medium">
-              <span className="text-destructive mr-1">*</span>Team Member
+              <span className="text-destructive mr-1">*</span>Care Giver
             </Label>
             <MultiSelectPeople selected={people} onChange={setPeople} />
 
@@ -291,7 +291,7 @@ export default function ReportDetail() {
             </Button>
             {!people.length || !startDate || !endDate ? (
               <span className="text-xs text-muted-foreground">
-                Select team member, start date and end date to run the report.
+                Select care giver, start date and end date to run the report.
               </span>
             ) : null}
           </div>
@@ -306,7 +306,7 @@ export default function ReportDetail() {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50">
-                      <TableHead className="text-xs">Team Member</TableHead>
+                      <TableHead className="text-xs">Care Giver</TableHead>
                       <TableHead className="text-xs">Date</TableHead>
                       <TableHead className="text-xs">Location</TableHead>
                       <TableHead className="text-xs">Duration</TableHead>
