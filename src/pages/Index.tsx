@@ -365,26 +365,39 @@ const Dashboard = () => {
                   <TableHead className="font-semibold text-foreground">Care Giver</TableHead>
                   <TableHead className="font-semibold text-foreground">Assigned Member</TableHead>
                   <TableHead className="font-semibold text-foreground">Scheduled Time</TableHead>
-                  <TableHead className="font-semibold text-foreground">Check-in Status</TableHead>
+                  <TableHead className="font-semibold text-foreground">Clock In</TableHead>
+                  <TableHead className="font-semibold text-foreground">Status</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {visits.length === 0 ? (
+                {liveVisits.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No live visits today</TableCell>
+                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No live visits right now</TableCell>
                   </TableRow>
-                ) : visits.map((visit) => (
-                  <TableRow key={visit.id} className="hover:bg-muted/30 transition-colors">
-                    <TableCell className="font-medium text-foreground">{visit.care_giver}</TableCell>
-                    <TableCell className="text-sm text-foreground">{visit.assigned_member}</TableCell>
-                    <TableCell className="text-sm text-muted-foreground">{visit.scheduled_time}</TableCell>
-                    <TableCell>
-                      <Badge variant="default" className={statusStyles[visit.check_in_status as CheckInStatus] ?? ""}>
-                        {visit.check_in_status}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                ) : liveVisits.map((v: any) => {
+                  const startMinutes = (v.start_hour ?? 0) * 60 + (v.start_minute ?? 0);
+                  const endHour = v.start_hour + (v.duration ?? 0);
+                  const schedLabel = `${String(v.start_hour).padStart(2, "0")}:${String(v.start_minute ?? 0).padStart(2, "0")} – ${String(endHour).padStart(2, "0")}:${String(v.start_minute ?? 0).padStart(2, "0")}`;
+                  const inProgress = !!v.check_in_time;
+                  const lateMins = getLateMins(v);
+                  let statusLabel: CheckInStatus = "Not Arrived";
+                  if (inProgress) statusLabel = "On Time";
+                  return (
+                    <TableRow key={v.id} className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => setSelectedVisit(v)}>
+                      <TableCell className="font-medium text-foreground">{(v.care_givers as any)?.name ?? "—"}</TableCell>
+                      <TableCell className="text-sm text-foreground">{(v.care_receivers as any)?.name ?? "—"}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{schedLabel}</TableCell>
+                      <TableCell className="text-sm font-mono">{fmtTime(v.check_in_time)}</TableCell>
+                      <TableCell>
+                        {inProgress ? (
+                          <Badge className={statusStyles[lateMins > 0 ? "Late" : "On Time"] + " text-xs"}>In Progress</Badge>
+                        ) : (
+                          <Badge className={statusStyles["Not Arrived"] + " text-xs"}>Not Arrived</Badge>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </CardContent>
