@@ -577,50 +577,86 @@ const AddRota = () => {
                 </Select>
               </Field>
               {form.linkUp && (
-                <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3">
-                  <div className="flex items-center justify-between gap-2">
-                    <Label className="text-xs font-medium flex items-center gap-1.5">
-                      <Repeat className="h-3.5 w-3.5 text-primary" /> Link up — pick a caregiver from the list
+                <div className="space-y-3 rounded-lg border border-primary/30 bg-primary/5 p-4">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <Label className="text-sm font-semibold flex items-center gap-1.5">
+                      <Repeat className="h-4 w-4 text-primary" /> Linked staff
                     </Label>
-                    <Badge variant="outline" className="text-[10px]">{filteredCaregivers.length} available</Badge>
+                    <Badge variant="outline" className="text-[10px]">
+                      {(form.staff1 ? 1 : 0) + (form.staff2 ? 1 : 0)} of 2 assigned
+                    </Badge>
                   </div>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                    <Input
-                      placeholder="Search caregivers…"
-                      value={caregiverSearch}
-                      onChange={(e) => setCaregiverSearch(e.target.value)}
-                      className="pl-9 h-8 text-xs"
-                    />
-                  </div>
-                  <div className="max-h-60 overflow-y-auto rounded-md border border-border divide-y divide-border bg-background">
-                    {filteredCaregivers.length === 0 && (
-                      <div className="text-center text-xs text-muted-foreground py-6">No caregivers found.</div>
-                    )}
-                    {filteredCaregivers.map((c: any) => {
-                      const active = form.staff1 === c.id;
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {[
+                      { key: "staff1" as const, label: "Staff 1", required: true },
+                      { key: "staff2" as const, label: "Staff 2", required: false },
+                    ].map(({ key, label, required }) => {
+                      const value = (form as any)[key] as string;
+                      const cg = caregivers.find((c) => c.id === value) ?? null;
+                      const otherKey = key === "staff1" ? "staff2" : "staff1";
+                      const otherValue = (form as any)[otherKey] as string;
                       return (
-                        <button
-                          key={c.id}
-                          type="button"
-                          onClick={() => setForm({ ...form, staff1: c.id })}
-                          className={cn(
-                            "w-full flex items-center gap-3 px-3 py-2 text-left transition-colors",
-                            active ? "bg-primary/10" : "hover:bg-muted/50",
+                        <div key={key} className="rounded-lg border border-border bg-background p-3 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-xs font-medium">
+                              {label}{" "}
+                              <span className={cn("text-[10px]", required ? "text-destructive" : "text-muted-foreground")}>
+                                {required ? "*" : "(Optional)"}
+                              </span>
+                            </Label>
+                            {value && (
+                              <button
+                                type="button"
+                                onClick={() => setForm({ ...form, [key]: "" } as any)}
+                                className="text-[10px] text-muted-foreground hover:text-destructive"
+                              >
+                                Clear
+                              </button>
+                            )}
+                          </div>
+                          <Select
+                            value={value}
+                            onValueChange={(v) => setForm({ ...form, [key]: v } as any)}
+                          >
+                            <SelectTrigger className="h-9">
+                              <SelectValue placeholder="Choose one…" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {caregivers
+                                .filter((c) => c.id !== otherValue)
+                                .map((c) => (
+                                  <SelectItem key={c.id} value={c.id}>
+                                    <span className="flex items-center gap-2">
+                                      <User className="h-3 w-3" /> {c.name}
+                                    </span>
+                                  </SelectItem>
+                                ))}
+                            </SelectContent>
+                          </Select>
+                          {cg && (
+                            <div className="flex items-center gap-2 rounded-md bg-primary/5 border border-primary/20 px-2 py-1.5">
+                              <div className="h-7 w-7 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                                <User className="h-3.5 w-3.5" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="text-xs font-medium truncate">{cg.name}</div>
+                                <div className="text-[10px] text-muted-foreground truncate">
+                                  {cg.role_title ?? "Homecare Assistant"}
+                                </div>
+                              </div>
+                              <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                            </div>
                           )}
-                        >
-                          <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                            <User className="h-4 w-4" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="text-sm font-medium truncate">{c.name}</div>
-                            <div className="text-[10px] text-muted-foreground truncate">{c.role_title ?? "Homecare Assistant"}</div>
-                          </div>
-                          {active && <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />}
-                        </button>
+                        </div>
                       );
                     })}
                   </div>
+
+                  <p className="text-[11px] text-muted-foreground flex items-start gap-1.5">
+                    <Info className="h-3 w-3 mt-0.5 shrink-0" />
+                    Linked shifts pair two carers on the same visit. Staff 2 is optional.
+                  </p>
                 </div>
               )}
             </Section>
