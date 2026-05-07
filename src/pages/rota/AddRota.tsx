@@ -103,6 +103,9 @@ const AddRota = () => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [savedOpen, setSavedOpen] = useState(false);
   const [clashInfo, setClashInfo] = useState<null | { other: any; staffName: string; otherClient: string }>(null);
+  const [caregiverSearch, setCaregiverSearch] = useState("");
+  const [recurUnit, setRecurUnit] = useState<"days" | "weeks" | "months">("weeks");
+  const [recurCount, setRecurCount] = useState<number>(4);
 
   // Dedup MAR medications by name+dosage+time so the same prescription isn't repeated.
   const uniqueMeds = useMemo(() => {
@@ -176,6 +179,30 @@ const AddRota = () => {
     });
   };
 
+  // Build the list of occurrence dates based on recurrence settings.
+  const occurrenceDates = useMemo(() => {
+    const base = new Date(form.date);
+    if (!form.recurring || recurCount < 1) return [form.date];
+    const out: string[] = [];
+    for (let i = 0; i < recurCount; i++) {
+      const d = new Date(base);
+      if (recurUnit === "days") d.setDate(base.getDate() + i);
+      else if (recurUnit === "weeks") d.setDate(base.getDate() + i * 7);
+      else d.setMonth(base.getMonth() + i);
+      out.push(d.toISOString().slice(0, 10));
+    }
+    return out;
+  }, [form.date, form.recurring, recurUnit, recurCount]);
+
+  const filteredCaregivers = useMemo(() => {
+    const q = caregiverSearch.trim().toLowerCase();
+    if (!q) return caregivers;
+    return caregivers.filter((c: any) =>
+      (c.name ?? "").toLowerCase().includes(q) ||
+      (c.role_title ?? "").toLowerCase().includes(q),
+    );
+  }, [caregivers, caregiverSearch]);
+
   const handleSaveClick = () => {
     if (!selected) return;
     setConfirmOpen(true);
@@ -228,22 +255,27 @@ const AddRota = () => {
         notes: `Rota Type: ${form.rotaType}${form.alert ? " · Alert" : ""}`,
       });
 
-      const { data: dvRow, error: dvErr } = await supabase
-        .from("daily_visits")
-        .insert({
-          company_id: companyUser.company_id,
-          care_receiver_id: selected.id,
-          care_giver_id: staffId,
-          visit_date: form.date,
-          start_hour: parseInt(form.startH),
-          start_minute: parseInt(form.startM),
-          duration: durHours,
-          duration_minutes: durationMinutes,
-          status: staffId ? "Confirmed" : "Pending",
-        } as any)
-        .select("id")
-        .single();
-      if (dvErr) throw dvErr;
+      const dvRows: { id: string }[] = [];
+      for (const dateIso of occurrenceDates) {
+        const { data: dvRow, error: dvErr } = await supabase
+          .from("daily_visits")
+          .insert({
+            company_id: companyUser.company_id,
+            care_receiver_id: selected.id,
+            care_giver_id: staffId,
+            visit_date: dateIso,
+            start_hour: parseInt(form.startH),
+            start_minute: parseInt(form.startM),
+            duration: durHours,
+            duration_minutes: durationMinutes,
+            status: staffId ? "Confirmed" : "Pending",
+          } as any)
+          .select("id")
+          .single();
+        if (dvErr) throw dvErr;
+        if (dvRow?.id) dvRows.push(dvRow as any);
+      }
+      const dvRow = dvRows[0];
 
       const taskTitles: string[] = [];
       if (form.tasksRequired) taskTitles.push(...selectedTasks);
@@ -253,10 +285,9 @@ const AddRota = () => {
           if (m) taskTitles.push(`Administer ${m.medication}${m.dosage ? ` (${m.dosage})` : ""}`);
         }
       }
-      if (dvRow?.id && taskTitles.length > 0) {
-        const { error: stErr } = await supabase
-          .from("shift_tasks")
-          .insert(taskTitles.map((title) => ({ daily_visit_id: dvRow.id, title })));
+      if (taskTitles.length > 0 && dvRows.length > 0) {
+        const rows = dvRows.flatMap((r) => taskTitles.map((title) => ({ daily_visit_id: r.id, title })));
+        const { error: stErr } = await supabase.from("shift_tasks").insert(rows);
         if (stErr) throw stErr;
       }
 
@@ -544,10 +575,53 @@ const AddRota = () => {
                   </SelectContent>
                 </Select>
               </Field>
-              <p className="text-[11px] text-destructive flex items-start gap-1.5">
-                <ShieldCheck className="h-3 w-3 mt-0.5 shrink-0" />
-                Service-user preference lock is on — caregivers rated below 3 won't be available.
-              </p>
+              {form.linkUp && (
+                <div className="space-y-2 rounded-lg border border-border bg-muted/30 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <Label className="text-xs font-medium flex items-center gap-1.5">
+                      <Repeat className="h-3.5 w-3.5 text-primary" /> Link up — pick a caregiver from the list
+                    </Label>
+                    <Badge variant="outline" className="text-[10px]">{filteredCaregivers.length} available</Badge>
+                  </div>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <Input
+                      placeholder="Search caregivers…"
+                      value={caregiverSearch}
+                      onChange={(e) => setCaregiverSearch(e.target.value)}
+                      className="pl-9 h-8 text-xs"
+                    />
+                  </div>
+                  <div className="max-h-60 overflow-y-auto rounded-md border border-border divide-y divide-border bg-background">
+                    {filteredCaregivers.length === 0 && (
+                      <div className="text-center text-xs text-muted-foreground py-6">No caregivers found.</div>
+                    )}
+                    {filteredCaregivers.map((c: any) => {
+                      const active = form.staff1 === c.id;
+                      return (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => setForm({ ...form, staff1: c.id })}
+                          className={cn(
+                            "w-full flex items-center gap-3 px-3 py-2 text-left transition-colors",
+                            active ? "bg-primary/10" : "hover:bg-muted/50",
+                          )}
+                        >
+                          <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                            <User className="h-4 w-4" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm font-medium truncate">{c.name}</div>
+                            <div className="text-[10px] text-muted-foreground truncate">{c.role_title ?? "Homecare Assistant"}</div>
+                          </div>
+                          {active && <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </Section>
 
             {/* 4. Medications */}
@@ -758,6 +832,61 @@ const AddRota = () => {
                   onChange={(v) => setForm({ ...form, template: v })}
                 />
               </div>
+
+              {form.recurring && (
+                <div className="space-y-3 rounded-lg border border-primary/30 bg-primary/5 p-3 mt-1">
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <Label className="text-xs font-medium flex items-center gap-1.5">
+                      <Repeat className="h-3.5 w-3.5 text-primary" /> Recurrence schedule
+                    </Label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] text-muted-foreground">Repeat every</span>
+                      <Select value={recurUnit} onValueChange={(v: any) => setRecurUnit(v)}>
+                        <SelectTrigger className="h-8 w-[110px] text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="days">Day</SelectItem>
+                          <SelectItem value="weeks">Week</SelectItem>
+                          <SelectItem value="months">Month</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <span className="text-[11px] text-muted-foreground">for</span>
+                      <Input
+                        type="number"
+                        min={1}
+                        max={52}
+                        value={recurCount}
+                        onChange={(e) => setRecurCount(Math.max(1, Math.min(52, Number(e.target.value) || 1)))}
+                        className="h-8 w-16 text-xs"
+                      />
+                      <span className="text-[11px] text-muted-foreground">
+                        {recurUnit === "days" ? "day(s)" : recurUnit === "weeks" ? "week(s)" : "month(s)"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="rounded-md border border-border bg-background overflow-hidden">
+                    <div className="grid grid-cols-[60px_1fr_120px] text-[10px] uppercase tracking-wide text-muted-foreground bg-muted/40 px-3 py-1.5">
+                      <span>#</span><span>Date</span><span className="text-right">Time</span>
+                    </div>
+                    <div className="max-h-48 overflow-y-auto divide-y divide-border">
+                      {occurrenceDates.map((d, i) => (
+                        <div key={d + i} className="grid grid-cols-[60px_1fr_120px] px-3 py-1.5 text-xs items-center">
+                          <span className="text-muted-foreground">{i + 1}</span>
+                          <span className="font-medium">
+                            {new Date(d).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+                          </span>
+                          <span className="text-right font-mono text-muted-foreground">
+                            {form.startH}:{form.startM} → {form.endH}:{form.endM}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground flex items-start gap-1.5">
+                    <Info className="h-3 w-3 mt-0.5 shrink-0" />
+                    {occurrenceDates.length} shift{occurrenceDates.length !== 1 ? "s" : ""} will be created across the schedule above.
+                  </p>
+                </div>
+              )}
             </Section>
           </div>
 
@@ -879,6 +1008,10 @@ const AddRota = () => {
                   <div><span className="text-muted-foreground">Caregiver:</span> <span className="font-medium text-foreground">{selectedCaregiver?.name || "Unassigned"}</span></div>
                   {form.medicationRequired && <div><span className="text-muted-foreground">Medications:</span> <span className="font-medium text-foreground">{selectedMedIds.length} selected</span></div>}
                   {form.tasksRequired && <div><span className="text-muted-foreground">Tasks:</span> <span className="font-medium text-foreground">{selectedTasks.length} selected</span></div>}
+                  {form.recurring && (
+                    <div><span className="text-muted-foreground">Recurring:</span> <span className="font-medium text-foreground">Every {recurUnit === "days" ? "day" : recurUnit === "weeks" ? "week" : "month"} for {recurCount} occurrence{recurCount !== 1 ? "s" : ""} ({occurrenceDates.length} shifts)</span></div>
+                  )}
+                  {form.linkUp && <div><span className="text-muted-foreground">Linked:</span> <span className="font-medium text-foreground">Yes</span></div>}
                 </div>
               </div>
             </AlertDialogDescription>
