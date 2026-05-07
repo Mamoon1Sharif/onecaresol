@@ -314,7 +314,7 @@ const Dashboard = () => {
                   <TableHead className="font-semibold text-foreground">Status</TableHead>
                   <TableHead className="font-semibold text-foreground">Checked In</TableHead>
                   <TableHead className="font-semibold text-foreground">Clocked Out</TableHead>
-                  <TableHead className="font-semibold text-foreground">Total Worked</TableHead>
+                  <TableHead className="font-semibold text-foreground">Total Time Worked</TableHead>
                   <TableHead className="font-semibold text-foreground">Details</TableHead>
                 </TableRow>
               </TableHeader>
