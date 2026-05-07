@@ -32,6 +32,7 @@ function diffMinutes(start: string | null, end: string | null) {
   const ms = new Date(end).getTime() - new Date(start).getTime();
   if (ms < 0) return "—";
   const totalMin = Math.floor(ms / 60000);
+  if (totalMin < 60) return `${totalMin}m`;
   const hrs = Math.floor(totalMin / 60);
   const mins = totalMin % 60;
   return `${hrs}h ${String(mins).padStart(2, "0")}m`;
@@ -87,6 +88,15 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
             {v.duration}h
           </Badge>
         </TableCell>
+        <TableCell>
+          {v.check_in_time ? (
+            <Badge className={statusStyles[lateMins > 0 ? "Late" : "On Time"] + " text-xs"}>
+              {lateMins > 0 ? `Late +${lateMins}m` : "On Time"}
+            </Badge>
+          ) : (
+            <Badge className={statusStyles["Not Arrived"] + " text-xs"}>Not Arrived</Badge>
+          )}
+        </TableCell>
         <TableCell className="text-sm">
           <span className={lateMins > 0 ? "text-destructive font-semibold" : "text-foreground"}>
             {fmtTime(v.check_in_time)}
@@ -119,7 +129,7 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
       </TableRow>
       {showNotes && (
         <TableRow className="bg-muted/20">
-          <TableCell colSpan={8} className="py-2 px-6">
+          <TableCell colSpan={9} className="py-2 px-6">
             <div className="space-y-1.5">
               <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><StickyNote className="h-3 w-3" /> Notes</p>
               {notes.length === 0 ? (
@@ -137,7 +147,7 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
       )}
       {showTasks && (
         <TableRow className="bg-muted/20">
-          <TableCell colSpan={8} className="py-2 px-6">
+          <TableCell colSpan={9} className="py-2 px-6">
             <div className="space-y-1.5">
               <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><ClipboardCheck className="h-3 w-3" /> Tasks</p>
               {tasks.length === 0 ? (
@@ -296,6 +306,7 @@ const Dashboard = () => {
                   <TableHead className="font-semibold text-foreground">Service Member</TableHead>
                   <TableHead className="font-semibold text-foreground">Scheduled</TableHead>
                   <TableHead className="font-semibold text-foreground">Type</TableHead>
+                  <TableHead className="font-semibold text-foreground">Status</TableHead>
                   <TableHead className="font-semibold text-foreground">Checked In</TableHead>
                   <TableHead className="font-semibold text-foreground">Clocked Out</TableHead>
                   <TableHead className="font-semibold text-foreground">Total Worked</TableHead>
@@ -305,7 +316,7 @@ const Dashboard = () => {
               <TableBody>
                 {completedVisits.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">No completed shifts yet today</TableCell>
+                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">No completed shifts yet today</TableCell>
                   </TableRow>
                 ) : completedVisits.map((v) => (
                   <CompletedVisitRow key={v.id} v={v} onClick={() => setSelectedVisit(v)} />
