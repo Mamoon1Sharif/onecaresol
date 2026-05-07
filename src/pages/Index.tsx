@@ -13,11 +13,12 @@ import { ShiftDetailDialog } from "@/components/ShiftDetailDialog";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-type CheckInStatus = "On Time" | "Late" | "Not Arrived";
+type CheckInStatus = "On Time" | "Late" | "Missed" | "Not Arrived";
 
 const statusStyles: Record<CheckInStatus, string> = {
   "On Time": "bg-success/15 text-success border-0 hover:bg-success/20",
   Late: "bg-warning/15 text-warning border-0 hover:bg-warning/20",
+  Missed: "bg-destructive/15 text-destructive border-0 hover:bg-destructive/20",
   "Not Arrived": "bg-destructive/15 text-destructive border-0 hover:bg-destructive/20",
 };
 
@@ -90,9 +91,13 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
         </TableCell>
         <TableCell>
           {v.check_in_time ? (
-            <Badge className={statusStyles[lateMins > 0 ? "Late" : "On Time"] + " text-xs"}>
-              {lateMins > 0 ? `Late +${lateMins}m` : "On Time"}
-            </Badge>
+            lateMins > 15 ? (
+              <Badge className={statusStyles.Missed + " text-xs"}>Missed</Badge>
+            ) : lateMins > 0 ? (
+              <Badge className={statusStyles.Late + " text-xs"}>{`Late (-${lateMins} minutes)`}</Badge>
+            ) : (
+              <Badge className={statusStyles["On Time"] + " text-xs"}>On Time</Badge>
+            )
           ) : (
             <Badge className={statusStyles["Not Arrived"] + " text-xs"}>Not Arrived</Badge>
           )}
@@ -309,7 +314,7 @@ const Dashboard = () => {
                   <TableHead className="font-semibold text-foreground">Status</TableHead>
                   <TableHead className="font-semibold text-foreground">Checked In</TableHead>
                   <TableHead className="font-semibold text-foreground">Clocked Out</TableHead>
-                  <TableHead className="font-semibold text-foreground">Total Worked</TableHead>
+                  <TableHead className="font-semibold text-foreground">Total Time Worked</TableHead>
                   <TableHead className="font-semibold text-foreground">Details</TableHead>
                 </TableRow>
               </TableHeader>
