@@ -82,8 +82,8 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="px-4 py-5 border-b border-sidebar-border">
-        <div className="flex items-center gap-3">
+      <SidebarHeader className="py-5 border-b border-sidebar-border">
+        <div className={`flex items-center gap-3 ${collapsed ? "justify-center" : ""}`}>
           <div className="w-8 h-8 rounded-lg bg-sidebar-primary flex items-center justify-center">
             <HeartHandshake className="w-5 h-5 text-sidebar-primary-foreground" />
           </div>
@@ -231,16 +231,19 @@ export function AppSidebar() {
       </SidebarContent>
 
       <div className="mt-auto p-3 border-t border-sidebar-border">
-        <Button
-          variant="ghost"
-          className="w-full justify-start gap-2 text-sidebar-foreground/70 hover:text-sidebar-foreground"
-          onClick={async () => {
-            await signOut();
-            nav("/login");
-          }}
-        >
-          <LogOut className="h-4 w-4" /> Sign Out
-        </Button>
+       <Button
+  variant="ghost"
+  className={`w-full gap-2 text-white bg-[#EF4444] hover:bg-[#DC2626] hover:text-white ${
+    collapsed ? "justify-center mr-2" : "justify-start"
+  }`}
+  onClick={async () => {
+    await signOut();
+    nav("/login");
+  }}
+>
+  <LogOut className="h-4 w-4" />
+  {!collapsed && "Sign Out"}
+</Button>
       </div>
     </Sidebar>
   );

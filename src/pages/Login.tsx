@@ -16,6 +16,20 @@ const Login = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const getLoginErrorMessage = (err: any) => {
+    const message = typeof err === "string" ? err : err?.message ?? String(err ?? "");
+
+    if (/invalid login credentials|invalid credentials|incorrect password|invalid password|invalid username|invalid user/i.test(message)) {
+      return "Invalid username or password. Please try again.";
+    }
+
+    if (/company id|username|not found|no user|user not found/i.test(message)) {
+      return "Invalid Company ID or username. Please check your details and try again.";
+    }
+
+    return "Check your Company ID, username, and password.";
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -32,12 +46,14 @@ const Login = () => {
         email: data.email,
         password,
       });
-      if (signInErr) throw signInErr;
+      if (signInErr) {
+        throw new Error(signInErr.message || "Invalid username or password");
+      }
       navigate("/");
     } catch (err: any) {
       toast({
         title: "Login failed",
-        description: err.message ?? "Check your Company ID, username, and password.",
+        description: getLoginErrorMessage(err),
         variant: "destructive",
       });
     } finally {
