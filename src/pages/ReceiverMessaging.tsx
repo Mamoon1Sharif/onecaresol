@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Plus, Bell, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Bell, ChevronLeft, ChevronRight, Pencil, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
@@ -25,7 +25,8 @@ export default function ReceiverMessaging() {
   const [pageSize, setPageSize] = useState(10);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
-  const [createOpen, setCreateOpen] = useState(false);
+  const [notificationDialogOpen, setNotificationDialogOpen] = useState(false);
+  const [editingNotification, setEditingNotification] = useState<any | null>(null);
   const [draftNote, setDraftNote] = useState("");
 
   const { data: notifications = [] } = useQuery({
@@ -52,8 +53,42 @@ export default function ReceiverMessaging() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["receiver_push_notifications", id] });
       toast.success("Notification sent");
-      setCreateOpen(false);
+      setNotificationDialogOpen(false);
+      setEditingNotification(null);
       setDraftNote("");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ noteId, note }: { noteId: string; note: string }) => {
+      const { error } = await supabase
+        .from("receiver_push_notifications" as any)
+        .update({ note } as any)
+        .eq("id", noteId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["receiver_push_notifications", id] });
+      toast.success("Notification updated");
+      setNotificationDialogOpen(false);
+      setEditingNotification(null);
+      setDraftNote("");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (noteId: string) => {
+      const { error } = await supabase
+        .from("receiver_push_notifications" as any)
+        .delete()
+        .eq("id", noteId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["receiver_push_notifications", id] });
+      toast.success("Notification deleted");
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -87,7 +122,11 @@ export default function ReceiverMessaging() {
             <Button
               size="sm"
               className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
-              onClick={() => setCreateOpen(true)}
+              onClick={() => {
+                setEditingNotification(null);
+                setDraftNote("");
+                setNotificationDialogOpen(true);
+              }}
             >
               <Plus className="h-3.5 w-3.5" /> Create
             </Button>
@@ -111,19 +150,46 @@ export default function ReceiverMessaging() {
           </div>
 
           <div className="border-t border-b border-foreground/30">
-            <div className="grid grid-cols-[140px_140px_1fr] text-xs font-semibold py-2 px-2 border-b border-foreground/30">
+            <div className="grid grid-cols-[140px_140px_1fr_96px] text-xs font-semibold py-2 px-2 border-b border-foreground/30">
               <div>Created By</div>
               <div>Created</div>
               <div>Note</div>
+              <div className="text-right">Actions</div>
             </div>
             {pageItems.length === 0 ? (
               <div className="py-10 text-center text-xs text-muted-foreground">No notifications yet.</div>
             ) : (
               pageItems.map((n, i) => (
-                <div key={n.id} className={`grid grid-cols-[140px_140px_1fr] text-xs py-2.5 px-2 ${i % 2 === 0 ? "bg-muted/30" : "bg-background"}`}>
+                <div key={n.id} className={`grid grid-cols-[140px_140px_1fr_96px] text-xs py-2.5 px-2 ${i % 2 === 0 ? "bg-muted/30" : "bg-background"}`}> 
                   <div className="text-muted-foreground">{n.created_by || "—"}</div>
                   <div className="text-muted-foreground">{new Date(n.created_at).toLocaleString("en-GB", { timeZone: "Asia/Karachi" })}</div>
                   <div className="text-foreground break-words">{n.note}</div>
+                  <div className="flex items-center justify-end gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 p-0"
+                      onClick={() => {
+                        setEditingNotification(n);
+                        setDraftNote(n.note || "");
+                        setNotificationDialogOpen(true);
+                      }}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 p-0 text-destructive"
+                      onClick={() => {
+                        if (window.confirm("Delete this notification?")) {
+                          deleteMutation.mutate(n.id);
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))
             )}
@@ -148,17 +214,35 @@ export default function ReceiverMessaging() {
         </Card>
       </div>
 
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+      <Dialog open={notificationDialogOpen} onOpenChange={(open) => {
+        if (!open) {
+          setEditingNotification(null);
+          setDraftNote("");
+        }
+        setNotificationDialogOpen(open);
+      }}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Send Notification</DialogTitle></DialogHeader>
+          <DialogHeader>
+            <DialogTitle>{editingNotification ? "Edit Notification" : "Send Notification"}</DialogTitle>
+          </DialogHeader>
           <div className="space-y-3">
             <Label className="text-xs">Note</Label>
             <Textarea value={draftNote} onChange={(e) => setDraftNote(e.target.value)} rows={5} placeholder="Type the message…" />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)}>Cancel</Button>
-            <Button className="bg-emerald-600 hover:bg-emerald-700 text-white" disabled={!draftNote.trim() || createMutation.isPending} onClick={() => createMutation.mutate(draftNote.trim())}>
-              Send
+            <Button variant="outline" onClick={() => { setNotificationDialogOpen(false); setEditingNotification(null); setDraftNote(""); }}>Cancel</Button>
+            <Button
+              className="bg-emerald-600 hover:bg-emerald-700 text-white"
+              disabled={!draftNote.trim() || createMutation.isPending || updateMutation.isPending}
+              onClick={() => {
+                if (editingNotification) {
+                  updateMutation.mutate({ noteId: editingNotification.id, note: draftNote.trim() });
+                } else {
+                  createMutation.mutate(draftNote.trim());
+                }
+              }}
+            >
+              {editingNotification ? "Save" : "Send"}
             </Button>
           </DialogFooter>
         </DialogContent>

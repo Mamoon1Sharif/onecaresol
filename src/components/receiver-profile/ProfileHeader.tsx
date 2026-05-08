@@ -82,20 +82,30 @@ export function ReceiverProfileHeader({ cr, onEdit }: Props) {
               <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-2xl font-bold text-foreground">{cr.name}</h1>
                 {cr.dnacpr && <Badge variant="destructive" className="text-xs">DNACPR</Badge>}
-                <Badge
-                  variant="default"
-                  className={
-                    cr.care_status === "Active" ? "bg-success/15 text-success border-0" :
-                    cr.care_status === "On Hold" ? "bg-warning/15 text-warning border-0" :
-                    "bg-muted text-muted-foreground border-0"
-                  }
-                >
-                  {cr.care_status}
-                </Badge>
+                {(() => {
+                  const status = cr.account_status ?? cr.care_status ?? "Active";
+                  return (
+                    <Badge
+                      variant="default"
+                      className={
+                        status === "Active" ? "bg-success/15 text-success border-0" :
+                        status === "On Hold" ? "bg-warning/15 text-warning border-0" :
+                        "bg-muted text-muted-foreground border-0"
+                      }
+                    >
+                      {status}
+                    </Badge>
+                  );
+                })()}
               </div>
               <p className="text-sm text-muted-foreground mt-1">
                 {cr.care_type} · Age {cr.age ?? "—"}
               </p>
+              {cr.dob && (
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  DOB {new Date(cr.dob).toLocaleDateString("en-GB")}
+                </p>
+              )}
               <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground flex-wrap">
                 {cr.address && <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{cr.address}</span>}
               </div>

@@ -22,8 +22,10 @@ interface CareReceiverProfile {
   id: string;
   name: string;
   age?: number | null;
+  dob?: string | null;
   address?: string | null;
   care_status: string;
+  account_status?: string | null;
   care_type: string;
   dnacpr: boolean;
   next_of_kin?: string | null;
@@ -156,6 +158,8 @@ export function CareReceiverProfileDialog({ open, onOpenChange, receiver }: Prop
         name: receiver.name ?? "",
         age: receiver.age ?? "",
         address: receiver.address ?? "",
+        dob: receiver.dob ?? "",
+        account_status: receiver.account_status ?? null,
         care_status: receiver.care_status ?? "Active",
         care_type: receiver.care_type ?? "",
         dnacpr: receiver.dnacpr ?? false,
@@ -236,6 +240,8 @@ export function CareReceiverProfileDialog({ open, onOpenChange, receiver }: Prop
                 <p className="text-sm text-muted-foreground mt-0.5">
                   {receiver.care_type} · Age {receiver.age ?? "—"}
                 </p>
+
+                
                 {receiver.created_at && (
                   <p className="text-xs text-muted-foreground mt-1">
                     Created: {new Date(receiver.created_at).toLocaleString("en-GB", { timeZone: "Asia/Karachi" })}
@@ -244,18 +250,24 @@ export function CareReceiverProfileDialog({ open, onOpenChange, receiver }: Prop
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Badge
-                variant="default"
-                className={
-                  receiver.care_status === "Active"
-                    ? "bg-success/15 text-success border-0"
-                    : receiver.care_status === "On Hold"
-                    ? "bg-warning/15 text-warning border-0"
-                    : "bg-muted text-muted-foreground border-0"
-                }
-              >
-                {receiver.care_status}
-              </Badge>
+              {(() => {
+                const status = receiver.account_status ?? receiver.care_status ?? "Active";
+                return (
+                  <Badge
+                    variant="default"
+                    className={
+                      status === "Active"
+                        ? "bg-success/15 text-success border-0"
+                        : status === "On Hold"
+                        ? "bg-warning/15 text-warning border-0"
+                        : "bg-muted text-muted-foreground border-0"
+                    }
+                  >
+                    {status}
+                  </Badge>
+                
+                );
+              })()}
               {!editing ? (
                 <Button variant="outline" size="sm" onClick={() => setEditing(true)} className="gap-1.5">
                   <Pencil className="h-3.5 w-3.5" /> Edit

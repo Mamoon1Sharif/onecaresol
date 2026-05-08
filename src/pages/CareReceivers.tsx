@@ -69,9 +69,9 @@ const CareReceivers = () => {
                   </div>
                   <Badge
                     variant="default"
-                    className={`shrink-0 text-[10px] px-2 py-0.5 ${statusStyles[cr.care_status] ?? ""}`}
+                    className={`shrink-0 text-[10px] px-2 py-0.5 ${statusStyles[cr.account_status ?? cr.care_status ?? "Active"] ?? ""}`}
                   >
-                    {cr.care_status}
+                    {cr.account_status ?? cr.care_status ?? "Active"}
                   </Badge>
                 </div>
                 <div className="flex items-start gap-3">
