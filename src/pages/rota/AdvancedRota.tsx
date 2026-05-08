@@ -23,6 +23,7 @@ import {
   GripVertical,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCareGivers, useCareReceivers } from "@/hooks/use-care-data";
 import { EditRotaDialog, type EditRotaShift } from "@/components/EditRotaDialog";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -54,7 +55,7 @@ interface Shift {
   status: ShiftStatus;
 }
 
-const STAFF = [
+const STATIC_STAFF = [
   "Unassigned Shifts",
   "Ewelina Delport",
   "Jodie Hawtin",
@@ -196,7 +197,7 @@ function isSameDay(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
-function buildShiftsForDate(date: Date): Shift[] {
+function buildShiftsForDate(date: Date, receiverNames: string[], staffNameMap: Record<string, string>): Shift[] {
   const today = new Date();
   const todayKey = dayKey(today);
   const dKey = dayKey(date);
@@ -245,12 +246,16 @@ function buildShiftsForDate(date: Date): Shift[] {
       }
 
       // Build per-day unique id
+      const client = receiverNames.length > 0
+        ? receiverNames[idx % receiverNames.length]
+        : t.client;
+      const staff = staffNameMap[t.staff] || t.staff;
       return {
         id: `${dKey}-${idx}`,
-        staff: t.staff,
+        staff,
         start,
         end,
-        client: t.client,
+        client,
         ref: t.ref,
         service: t.service + statusSuffix(status),
         status,
@@ -311,6 +316,33 @@ function statusLabel(s: ShiftStatus): string {
 
 export default function AdvancedRota() {
   const navigate = useNavigate();
+  const { data: careGivers = [] } = useCareGivers();
+  const { data: careReceivers = [] } = useCareReceivers();
+
+  const staffRows = useMemo(
+    () => [
+      "Unassigned Shifts",
+      ...careGivers.map((cg: any) => cg.name || "Unnamed Caregiver"),
+    ],
+    [careGivers]
+  );
+
+  const receiverNames = useMemo(
+    () => careReceivers.map((cr: any) => cr.name || "Unknown Service Member"),
+    [careReceivers]
+  );
+
+  const staffNameMap = useMemo(() => {
+    return STATIC_STAFF.reduce<Record<string, string>>((map, name, index) => {
+      if (index === 0) {
+        map[name] = name;
+      } else {
+        map[name] = staffRows[index] || name;
+      }
+      return map;
+    }, {});
+  }, [staffRows]);
+
   const [date, setDate] = useState(() => new Date());
   const [cancelledIds, setCancelledIds] = useState<Set<string>>(new Set());
   // Overrides per day per shift id (stores edited start/end/staff after drag)
@@ -362,7 +394,7 @@ export default function AdvancedRota() {
 
   // Build shifts for the current day, then apply any user overrides
   const shifts = useMemo<Shift[]>(() => {
-    const base = buildShiftsForDate(date);
+    const base = buildShiftsForDate(date, receiverNames, staffNameMap);
     return base.map((s) => {
       const ov = overrides[s.id];
       return ov ? { ...s, ...ov } : s;
@@ -420,9 +452,9 @@ export default function AdvancedRota() {
 
     const rowIdx = Math.max(
       0,
-      Math.min(STAFF.length - 1, Math.floor((y - HEADER_H) / ROW_HEIGHT))
+      Math.min(staffRows.length - 1, Math.floor((y - HEADER_H) / ROW_HEIGHT))
     );
-    const newStaff = STAFF[rowIdx];
+    const newStaff = staffRows[rowIdx];
 
     setHoverGhost({
       id: shift.id,
@@ -539,10 +571,10 @@ export default function AdvancedRota() {
     const ids = requireSelection();
     if (!ids) return;
     const name = window.prompt(
-      `Reassign ${ids.length} shift(s) to which care giver?\n\n${STAFF.join(", ")}`
+      `Reassign ${ids.length} shift(s) to which care giver?\n\n${staffRows.join(", ")}`
     );
     if (!name) return;
-    const match = STAFF.find((s) => s.toLowerCase() === name.trim().toLowerCase());
+    const match = staffRows.find((s) => s.toLowerCase() === name.trim().toLowerCase());
     if (!match) {
       toast.error("Unknown care giver.");
       return;
@@ -721,7 +753,7 @@ export default function AdvancedRota() {
               >
                 Staff / Today
               </div>
-              {STAFF.map((name) => (
+              {staffRows.map((name) => (
                 <div
                   key={name}
                   className="px-2 flex items-center text-xs font-medium border-b border-border text-foreground"
@@ -761,7 +793,7 @@ export default function AdvancedRota() {
                 </div>
 
                 {/* Rows */}
-                {STAFF.map((staff, rowIdx) => (
+                {staffRows.map((staff, rowIdx) => (
                   <div
                     key={staff}
                     className={cn(

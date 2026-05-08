@@ -11,8 +11,13 @@ export function RosterViewSwitcher() {
   const nav = useNavigate();
   const loc = useLocation();
   const active =
-    loc.pathname === "/roster/daily" ? "daily" :
-    loc.pathname === "/roster/monthly" ? "monthly" : "weekly";
+  loc.pathname === "/roster/daily"
+    ? "daily"
+    : loc.pathname === "/roster/monthly"
+    ? "monthly"
+    : loc.pathname === "/roster"
+    ? "weekly"
+    : "daily";
 
   return (
     <div className="inline-flex rounded-md overflow-hidden border bg-card shadow-sm">
