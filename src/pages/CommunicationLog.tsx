@@ -66,6 +66,7 @@ type CommLog = {
   logged_for: string | null;
   occurred_at: string;
   duration_minutes: number | null;
+  pin: string | null;
 };
 
 type CommReason = {
@@ -255,9 +256,9 @@ export default function CommunicationLog() {
                 <Switch checked={myCallsOn} onCheckedChange={setMyCallsOn} className="scale-75" />
               </div>
             </div>
-            {/* <Button size="sm" variant="secondary" onClick={() => nav("/communication-log/reasons")} className="h-8 bg-amber-500 hover:bg-amber-600 text-white">
+            <Button size="sm" variant="secondary" onClick={() => nav("/communication-log/reasons")} className="h-8 bg-amber-500 hover:bg-amber-600 text-white">
               Custom Reasons
-            </Button> */}
+            </Button>
             <Button size="sm" onClick={() => setLogOpen(true)} className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white">
               <Plus className="h-3.5 w-3.5 mr-1" /> Add
             </Button>
@@ -520,6 +521,7 @@ function AddLogDialog({
   const [commDate, setCommDate] = useState<Date>(new Date());
   const [note, setNote] = useState("");
   const [reasonId, setReasonId] = useState<string>("none");
+  const [pin, setPin] = useState("");
   const [tagsInput, setTagsInput] = useState("");
 
   // Load assignable users (caregivers) for "Assign To"
@@ -540,7 +542,7 @@ function AddLogDialog({
   const reset = () => {
     setTitle(""); setUserType(""); setLogType("outgoing"); setCommType("Phone");
     setPhoneEmail(""); setWaitingOn("Call Back"); setAssignTo(""); setCommDate(new Date());
-    setNote(""); setReasonId("none"); setTagsInput("");
+    setNote(""); setReasonId("none"); setPin(""); setTagsInput("");
   };
 
   const save = useMutation({
@@ -550,6 +552,7 @@ function AddLogDialog({
       if (!logType) throw new Error("Log Type is required");
       if (!commType) throw new Error("Communication Type is required");
       if (!waitingOn) throw new Error("Waiting On is required");
+      if (!pin.trim()) throw new Error("PIN is required");
 
       const reason = reasons.find((r) => r.id === reasonId);
       const isEmail = commType === "Email";
@@ -570,6 +573,7 @@ function AddLogDialog({
         waiting_on: waitingOn,
         assigned_to: assignTo || null,
         occurred_at: commDate.toISOString(),
+        pin: pin.trim(),
         tags,
       });
       if (error) throw error;
@@ -698,20 +702,7 @@ function AddLogDialog({
                 </PopoverContent>
               </Popover>
             </div>
-
-           <div className="space-y-1.5">
-  <label className={labelCls}>
-    Reason{requiredStar}
-  </label>
-
-  <input
-    type="text"
-    value={reasonId}
-    onChange={(e) => setReasonId(e.target.value)}
-    placeholder="Enter reason..."
-    className="w-full h-9 rounded-md border px-3 text-sm outline-none focus:ring-2 focus:ring-primary"
-  />
-</div>
+<div className="space-y-1.5"> <label className={labelCls}>Reason{requiredStar}</label> <Select value={reasonId} onValueChange={setReasonId}> <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Choose one..." /></SelectTrigger> <SelectContent> <SelectItem value="none">Choose one...</SelectItem> {reasons.map((r) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)} </SelectContent> </Select> </div>
 
   {/* PIN Input */}
   <div className="space-y-1.5">
@@ -721,8 +712,9 @@ function AddLogDialog({
 
     <input
       type="password"
-    
-     
+      value={pin}
+      maxLength={50}
+      onChange={(e) => setPin(e.target.value)}
       placeholder="Enter PIN..."
       className="w-full h-9 rounded-md border px-3 text-sm outline-none focus:ring-2 focus:ring-primary"
     />

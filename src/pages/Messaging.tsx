@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import {
   ArrowLeft, LogOut, Plus, Bell, MapPin, Phone, IdCard, Hash,
   CalendarDays, Building2, FileBadge, ChevronLeft, ChevronRight,
+  Pencil, Trash2,
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
@@ -37,6 +38,7 @@ export default function Messaging() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
+  const [editingNotification, setEditingNotification] = useState<any | null>(null);
   const [draftNote, setDraftNote] = useState("");
 
   // Notifications query
@@ -65,7 +67,41 @@ export default function Messaging() {
       qc.invalidateQueries({ queryKey: ["caregiver_push_notifications", id] });
       toast.success("Push notification sent");
       setCreateOpen(false);
+      setEditingNotification(null);
       setDraftNote("");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: async ({ noteId, note }: { noteId: string; note: string }) => {
+      const { error } = await supabase
+        .from("caregiver_push_notifications" as any)
+        .update({ note } as any)
+        .eq("id", noteId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["caregiver_push_notifications", id] });
+      toast.success("Push notification updated");
+      setCreateOpen(false);
+      setEditingNotification(null);
+      setDraftNote("");
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (noteId: string) => {
+      const { error } = await supabase
+        .from("caregiver_push_notifications" as any)
+        .delete()
+        .eq("id", noteId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["caregiver_push_notifications", id] });
+      toast.success("Push notification deleted");
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -247,7 +283,11 @@ export default function Messaging() {
             <Button
               size="sm"
               className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
-              onClick={() => setCreateOpen(true)}
+              onClick={() => {
+                setEditingNotification(null);
+                setDraftNote("");
+                setCreateOpen(true);
+              }}
             >
               <Plus className="h-3.5 w-3.5" />
               Create
@@ -285,10 +325,11 @@ export default function Messaging() {
 
           {/* Table */}
           <div className="border-t border-b border-foreground/30">
-            <div className="grid grid-cols-[140px_140px_1fr] text-xs font-semibold py-2 px-2 border-b border-foreground/30">
+            <div className="grid grid-cols-[140px_140px_1fr_96px] text-xs font-semibold py-2 px-2 border-b border-foreground/30">
               <div>Created By</div>
               <div>Created</div>
               <div>Note</div>
+              <div className="text-right">Actions</div>
             </div>
             {pageItems.length === 0 ? (
               <div className="py-10 text-center text-xs text-muted-foreground">
@@ -298,7 +339,7 @@ export default function Messaging() {
               pageItems.map((n, i) => (
                 <div
                   key={n.id}
-                  className={`grid grid-cols-[140px_140px_1fr] text-xs py-2.5 px-2 ${
+                  className={`grid grid-cols-[140px_140px_1fr_96px] text-xs py-2.5 px-2 ${
                     i % 2 === 0 ? "bg-muted/30" : "bg-background"
                   }`}
                 >
@@ -307,6 +348,32 @@ export default function Messaging() {
                     {new Date(n.created_at).toLocaleString("en-GB", { timeZone: "Asia/Karachi" })}
                   </div>
                   <div className="text-foreground break-words">{n.note}</div>
+                  <div className="flex items-center justify-end gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 p-0"
+                      onClick={() => {
+                        setEditingNotification(n);
+                        setDraftNote(n.note || "");
+                        setCreateOpen(true);
+                      }}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 p-0 text-destructive"
+                      onClick={() => {
+                        if (window.confirm("Delete this notification?")) {
+                          deleteMutation.mutate(n.id);
+                        }
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               ))
             )}
@@ -357,11 +424,17 @@ export default function Messaging() {
         </Card>
       </div>
 
-      {/* Create dialog */}
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
+      {/* Create/edit dialog */}
+      <Dialog open={createOpen} onOpenChange={(open) => {
+        if (!open) {
+          setEditingNotification(null);
+          setDraftNote("");
+        }
+        setCreateOpen(open);
+      }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Send Push Notification</DialogTitle>
+            <DialogTitle>{editingNotification ? "Edit Push Notification" : "Send Push Notification"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
             <Label className="text-xs">Note</Label>
@@ -373,15 +446,25 @@ export default function Messaging() {
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateOpen(false)}>
+            <Button variant="outline" onClick={() => {
+              setCreateOpen(false);
+              setEditingNotification(null);
+              setDraftNote("");
+            }}>
               Cancel
             </Button>
             <Button
               className="bg-emerald-600 hover:bg-emerald-700 text-white"
-              disabled={!draftNote.trim() || createMutation.isPending}
-              onClick={() => createMutation.mutate(draftNote.trim())}
+              disabled={!draftNote.trim() || createMutation.isPending || updateMutation.isPending}
+              onClick={() => {
+                if (editingNotification) {
+                  updateMutation.mutate({ noteId: editingNotification.id, note: draftNote.trim() });
+                } else {
+                  createMutation.mutate(draftNote.trim());
+                }
+              }}
             >
-              Send
+              {editingNotification ? "Save" : "Send"}
             </Button>
           </DialogFooter>
         </DialogContent>

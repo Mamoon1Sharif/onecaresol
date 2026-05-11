@@ -1258,6 +1258,7 @@ export type Database = {
           logged_for: string | null
           notes: string | null
           occurred_at: string
+          pin: string | null
           reason_id: string | null
           reason_label: string | null
           subject: string | null
@@ -1282,6 +1283,7 @@ export type Database = {
           logged_for?: string | null
           notes?: string | null
           occurred_at?: string
+          pin?: string | null
           reason_id?: string | null
           reason_label?: string | null
           subject?: string | null
@@ -1306,6 +1308,7 @@ export type Database = {
           logged_for?: string | null
           notes?: string | null
           occurred_at?: string
+          pin?: string | null
           reason_id?: string | null
           reason_label?: string | null
           subject?: string | null
