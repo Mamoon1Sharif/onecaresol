@@ -5,36 +5,55 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 import { RosterViewSwitcher } from "@/components/RosterViewSwitcher";
-import { useShifts } from "@/hooks/use-care-data";
+import { useDailyVisitsRange } from "@/hooks/use-care-data";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 
 const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-const shiftTypeColors: Record<string, string> = {
-  Morning: "bg-amber-100 text-amber-800 border-amber-200",
-  Afternoon: "bg-sky-100 text-sky-800 border-sky-200",
-  Night: "bg-indigo-100 text-indigo-800 border-indigo-200",
-  "Live-in": "bg-emerald-100 text-emerald-800 border-emerald-200",
+const statusColors: Record<string, string> = {
+  Confirmed: "bg-emerald-100 text-emerald-800 border-emerald-200",
+  Pending: "bg-amber-100 text-amber-800 border-amber-200",
+  Due: "bg-sky-100 text-sky-800 border-sky-200",
+  Cancelled: "bg-rose-100 text-rose-800 border-rose-200",
+  Completed: "bg-indigo-100 text-indigo-800 border-indigo-200",
 };
 
 function getMonthGrid(year: number, month: number) {
-  // month is 0-indexed
   const first = new Date(year, month, 1);
-  const offset = (first.getDay() + 6) % 7; // make Monday the first column
+  const offset = (first.getDay() + 6) % 7;
   const start = new Date(year, month, 1 - offset);
   const cells: Date[] = [];
+
   for (let i = 0; i < 42; i++) {
     const d = new Date(start);
     d.setDate(start.getDate() + i);
     cells.push(d);
   }
+
   return cells;
 }
 
+function dateKey(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function formatVisitTime(visit: any) {
+  const hour = Number(visit.start_hour ?? 0);
+  const minute = Number(visit.start_minute ?? 0);
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+}
+
+function formatVisitEndTime(visit: any) {
+  const startHour = Number(visit.start_hour ?? 0);
+  const startMinute = Number(visit.start_minute ?? 0);
+  const durationMins = Number(visit.duration_minutes ?? Number(visit.duration ?? 0) * 60);
+  const total = startHour * 60 + startMinute + durationMins;
+  return `${String(Math.floor(total / 60) % 24).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+}
+
 export default function MonthlyRoster() {
-  const { data: shifts = [] } = useShifts();
   const [cursor, setCursor] = useState(() => {
     const d = new Date();
     return { year: d.getFullYear(), month: d.getMonth() };
@@ -42,7 +61,11 @@ export default function MonthlyRoster() {
   const [selected, setSelected] = useState<Date | null>(null);
 
   const cells = useMemo(() => getMonthGrid(cursor.year, cursor.month), [cursor]);
-  const monthLabel = new Date(cursor.year, cursor.month, 1).toLocaleDateString("en-GB", {
+  const monthStart = useMemo(() => new Date(cursor.year, cursor.month, 1), [cursor]);
+  const monthEnd = useMemo(() => new Date(cursor.year, cursor.month + 1, 0), [cursor]);
+  const { data: visits = [] } = useDailyVisitsRange(dateKey(monthStart), dateKey(monthEnd));
+
+  const monthLabel = monthStart.toLocaleDateString("en-GB", {
     month: "long",
     year: "numeric",
   });
@@ -53,10 +76,9 @@ export default function MonthlyRoster() {
     d.getMonth() === today.getMonth() &&
     d.getDate() === today.getDate();
 
-  // Map shifts to days in this month — shift.day is 0..6 (Mon..Sun)
-  const shiftsForCell = (d: Date) => {
-    const dow = (d.getDay() + 6) % 7; // Mon=0
-    return shifts.filter((s) => s.day === dow);
+  const visitsForCell = (d: Date) => {
+    const key = dateKey(d);
+    return visits.filter((v: any) => v.visit_date === key);
   };
 
   const goPrev = () =>
@@ -64,17 +86,19 @@ export default function MonthlyRoster() {
       const m = c.month - 1;
       return m < 0 ? { year: c.year - 1, month: 11 } : { year: c.year, month: m };
     });
+
   const goNext = () =>
     setCursor((c) => {
       const m = c.month + 1;
       return m > 11 ? { year: c.year + 1, month: 0 } : { year: c.year, month: m };
     });
+
   const goToday = () => {
     const d = new Date();
     setCursor({ year: d.getFullYear(), month: d.getMonth() });
   };
 
-  const selectedDayShifts = selected ? shiftsForCell(selected) : [];
+  const selectedDayVisits = selected ? visitsForCell(selected) : [];
 
   return (
     <AppLayout>
@@ -117,7 +141,8 @@ export default function MonthlyRoster() {
           <div className="grid grid-cols-7 auto-rows-[110px]">
             {cells.map((d, i) => {
               const inMonth = d.getMonth() === cursor.month;
-              const cellShifts = inMonth ? shiftsForCell(d) : [];
+              const cellVisits = inMonth ? visitsForCell(d) : [];
+
               return (
                 <button
                   key={i}
@@ -131,26 +156,26 @@ export default function MonthlyRoster() {
                     <span className={`text-xs font-semibold ${isToday(d) ? "text-primary" : ""}`}>
                       {d.getDate()}
                     </span>
-                    {cellShifts.length > 0 && (
+                    {cellVisits.length > 0 && (
                       <Badge variant="secondary" className="text-[9px] px-1.5 py-0">
-                        {cellShifts.length}
+                        {cellVisits.length}
                       </Badge>
                     )}
                   </div>
                   <div className="space-y-0.5">
-                    {cellShifts.slice(0, 2).map((s) => (
+                    {cellVisits.slice(0, 2).map((v: any) => (
                       <div
-                        key={s.id}
+                        key={v.id}
                         className={`text-[9px] rounded px-1 py-0.5 truncate border ${
-                          shiftTypeColors[s.shift_type] ?? "bg-muted text-muted-foreground"
+                          statusColors[v.status] ?? "bg-muted text-muted-foreground"
                         }`}
                       >
-                        {s.start_time} {(s.care_givers as any)?.name?.split(" ")[0] ?? "—"}
+                        {formatVisitTime(v)} {(v.care_givers as any)?.name?.split(" ")[0] ?? "Unassigned"}
                       </div>
                     ))}
-                    {cellShifts.length > 2 && (
+                    {cellVisits.length > 2 && (
                       <div className="text-[9px] text-muted-foreground">
-                        +{cellShifts.length - 2} more
+                        +{cellVisits.length - 2} more
                       </div>
                     )}
                   </div>
@@ -174,31 +199,31 @@ export default function MonthlyRoster() {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-2 max-h-[60vh] overflow-y-auto">
-            {selectedDayShifts.length === 0 && (
+            {selectedDayVisits.length === 0 && (
               <p className="text-sm text-muted-foreground py-6 text-center">
                 No shifts scheduled for this day.
               </p>
             )}
-            {selectedDayShifts.map((s) => (
+            {selectedDayVisits.map((v: any) => (
               <div
-                key={s.id}
+                key={v.id}
                 className={`rounded-md border p-3 text-sm ${
-                  shiftTypeColors[s.shift_type] ?? ""
+                  statusColors[v.status] ?? ""
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <span className="font-semibold">
-                    {(s.care_givers as any)?.name ?? "Unassigned"}
+                    {(v.care_givers as any)?.name ?? "Unassigned"}
                   </span>
                   <Badge variant="outline" className="text-[10px] border-current">
-                    {s.shift_type}
+                    {v.status ?? "Visit"}
                   </Badge>
                 </div>
                 <div className="text-xs mt-1 opacity-80">
-                  → {(s.care_receivers as any)?.name ?? "—"}
+                  To {(v.care_receivers as any)?.name ?? "Unknown service member"}
                 </div>
                 <div className="text-xs mt-1 opacity-80">
-                  {s.start_time} – {s.end_time}
+                  {formatVisitTime(v)} - {formatVisitEndTime(v)}
                 </div>
               </div>
             ))}
