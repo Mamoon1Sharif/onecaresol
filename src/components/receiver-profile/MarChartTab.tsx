@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -9,11 +11,12 @@ import {
 import {
   ChevronLeft, ChevronRight, Printer, Calendar as CalendarIcon, Pill,
 } from "lucide-react";
-import { addMonths, endOfMonth, format, isToday, startOfMonth } from "date-fns";
+import { addMonths, endOfMonth, format, isAfter, isBefore, isSameDay, isToday, parseISO, startOfMonth } from "date-fns";
 import { toast } from "sonner";
 import type { Tables } from "@/integrations/supabase/types";
 
 type CareReceiver = Tables<"care_receivers">;
+type Medication = Tables<"medications">;
 
 interface Props {
   cr: CareReceiver;
@@ -31,75 +34,87 @@ interface MarEntry {
   carePlanChanges?: string[]; // dates "yyyy-MM-dd"
 }
 
-// =================== DEMO DATA ===================
-function demoEntries(monthStart: Date): MarEntry[] {
-  // Build a realistic-looking month of dummy data
-  const days = endOfMonth(monthStart).getDate();
-  const fmt = (d: number) => format(new Date(monthStart.getFullYear(), monthStart.getMonth(), d), "yyyy-MM-dd");
+const TIME_OF_DAY_DEFAULTS: Record<string, string> = {
+  morning: "08:00",
+  breakfast: "08:00",
+  afternoon: "14:00",
+  lunch: "12:00",
+  evening: "18:00",
+  dinner: "18:00",
+  night: "20:00",
+  bedtime: "22:00",
+};
 
-  const buildSchedule = (
-    times: string[],
-    pattern: (day: number, time: string) => { status: Status; code?: string; initials?: string }
-  ) => {
-    const out: MarEntry["schedule"] = {};
-    for (let day = 1; day <= days; day++) {
-      for (const t of times) {
-        out[`${fmt(day)}-${t}`] = { time: t, ...pattern(day, t) };
+function initialsFrom(name: string | null) {
+  if (!name?.trim()) return "XX";
+  const parts = name.trim().split(/\s+/);
+  return parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "XX";
+}
+
+function parseMedicationDate(value: string) {
+  try {
+    const parsed = parseISO(value);
+    return Number.isNaN(parsed.getTime()) ? new Date(value) : parsed;
+  } catch {
+    return new Date(value);
+  }
+}
+
+function timesForMedication(med: Medication) {
+  const explicitTimes = (med.scheduled_time || "")
+    .split(/[,\n]/)
+    .map((time) => time.trim())
+    .filter(Boolean);
+
+  if (explicitTimes.length > 0) return explicitTimes;
+
+  const timeOfDay = (med.time_of_day || "").toLowerCase().trim();
+  const defaultTime = TIME_OF_DAY_DEFAULTS[timeOfDay];
+  return [defaultTime || "09:00"];
+}
+
+function isSelfAdministered(med: Medication) {
+  const haystack = `${med.notes || ""} ${med.administered_by || ""}`.toLowerCase();
+  return haystack.includes("self");
+}
+
+function buildEntries(medications: Medication[], monthStart: Date, days: Date[]): MarEntry[] {
+  const monthEnd = endOfMonth(monthStart);
+
+  return medications.filter((med) => {
+    const startDate = parseMedicationDate(med.date);
+    return !Number.isNaN(startDate.getTime()) && !isAfter(startDate, monthEnd);
+  }).map((med) => {
+    const times = timesForMedication(med);
+    const startDate = parseMedicationDate(med.date);
+    const selfAdminister = isSelfAdministered(med);
+    const schedule: MarEntry["schedule"] = {};
+
+    for (const day of days) {
+      if (isBefore(day, startOfMonth(startDate)) && day.getMonth() !== startDate.getMonth()) continue;
+      if (isBefore(day, startDate) && !isSameDay(day, startDate)) continue;
+
+      for (const time of times) {
+        const key = `${format(day, "yyyy-MM-dd")}-${time}`;
+        if (selfAdminister) {
+          schedule[key] = { time, status: "self" };
+        } else if (isSameDay(day, startDate) && med.administered_by) {
+          schedule[key] = { time, status: "completed", initials: initialsFrom(med.administered_by) };
+        } else if (isAfter(day, new Date())) {
+          schedule[key] = { time, status: "future" };
+        }
       }
     }
-    return out;
-  };
 
-  return [
-    {
-      medication: "Paracetamol 500mg",
-      dose: "Take 2 tablets",
-      selfAdminister: false,
-      times: ["08:00", "14:00", "20:00"],
-      carePlanChanges: [fmt(8)],
-      schedule: buildSchedule(["08:00", "14:00", "20:00"], (day, t) => {
-        if (day > new Date().getDate() && monthStart.getMonth() === new Date().getMonth()) return { status: "future" };
-        if (day === 4 && t === "14:00") return { status: "missed" };
-        if (day === 7 && t === "08:00") return { status: "partial", code: "1", initials: "DG" };
-        if (day === 11) return { status: "incomplete", initials: "KL" };
-        if (day === 15 && t === "20:00") return { status: "multiple" };
-        return { status: "completed", initials: "DG" };
-      }),
-    },
-    {
-      medication: "Atorvastatin 20mg",
-      dose: "Take 1 tablet at night",
-      selfAdminister: false,
-      times: ["20:00"],
-      schedule: buildSchedule(["20:00"], (day) => {
-        if (day > new Date().getDate() && monthStart.getMonth() === new Date().getMonth()) return { status: "future" };
-        if (day === 9) return { status: "missed" };
-        if (day === 18) return { status: "partial", code: "5", initials: "CH" };
-        return { status: "completed", initials: "CH" };
-      }),
-    },
-    {
-      medication: "Vitamin D 1000IU",
-      dose: "1 capsule",
-      selfAdminister: true,
-      times: ["09:00"],
-      schedule: buildSchedule(["09:00"], () => ({ status: "self" })),
-    },
-    {
-      medication: "Metformin 500mg",
-      dose: "Take with breakfast & dinner",
-      selfAdminister: false,
-      times: ["08:00", "18:00"],
-      carePlanChanges: [fmt(20)],
-      schedule: buildSchedule(["08:00", "18:00"], (day, t) => {
-        if (day > new Date().getDate() && monthStart.getMonth() === new Date().getMonth()) return { status: "future" };
-        if (day === 6 && t === "18:00") return { status: "missed" };
-        if (day === 13) return { status: "incomplete", initials: "DG" };
-        if (day === 22 && t === "08:00") return { status: "partial", code: "8", initials: "KL" };
-        return { status: "completed", initials: "KL" };
-      }),
-    },
-  ];
+    return {
+      medication: med.medication,
+      dose: med.dosage,
+      selfAdminister,
+      times,
+      schedule,
+      carePlanChanges: [format(startDate, "yyyy-MM-dd")],
+    };
+  });
 }
 
 // =================== STATUS BADGE ===================
@@ -174,13 +189,27 @@ export function MarChartTab({ cr }: Props) {
   const [hideSelf, setHideSelf] = useState(false);
   const [view, setView] = useState<"chart" | "empty">("chart");
 
-  const entries = useMemo(() => demoEntries(monthStart), [monthStart]);
-  const visibleEntries = useMemo(() => hideSelf ? entries.filter((e) => !e.selfAdminister) : entries, [entries, hideSelf]);
+  const { data: medications = [], isLoading } = useQuery({
+    queryKey: ["medications", cr.id],
+    enabled: !!cr.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("medications")
+        .select("*")
+        .eq("care_receiver_id", cr.id)
+        .order("date", { ascending: true });
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const days = useMemo(() => {
     const total = endOfMonth(monthStart).getDate();
     return Array.from({ length: total }, (_, i) => new Date(monthStart.getFullYear(), monthStart.getMonth(), i + 1));
   }, [monthStart]);
+
+  const entries = useMemo(() => buildEntries(medications, monthStart, days), [medications, monthStart, days]);
+  const visibleEntries = useMemo(() => hideSelf ? entries.filter((e) => !e.selfAdminister) : entries, [entries, hideSelf]);
 
   const periodLabel = `${format(monthStart, "EEE MMM dd yyyy")} - ${format(endOfMonth(monthStart), "EEE MMM dd yyyy")}`;
 
@@ -245,7 +274,11 @@ export function MarChartTab({ cr }: Props) {
 
       {/* Chart body */}
       <div className="px-4 py-4 bg-background">
-        {view === "empty" || visibleEntries.length === 0 ? (
+        {isLoading ? (
+          <div className="text-center text-sm text-muted-foreground py-16">
+            Loading medication data...
+          </div>
+        ) : view === "empty" || visibleEntries.length === 0 ? (
           <div className="text-center text-sm text-muted-foreground py-16">
             No medication data for the selected period
           </div>

@@ -64,6 +64,7 @@ type CommLog = {
   reason_label: string | null;
   logged_by: string | null;
   logged_for: string | null;
+  assigned_to: string | null;
   occurred_at: string;
   duration_minutes: number | null;
   pin: string | null;
@@ -232,7 +233,8 @@ export default function CommunicationLog() {
       (l.contact_phone && l.contact_phone.toLowerCase().includes(q)) ||
       (l.contact_email && l.contact_email.toLowerCase().includes(q)) ||
       (l.subject && l.subject.toLowerCase().includes(q)) ||
-      (l.notes && l.notes.toLowerCase().includes(q))
+      (l.notes && l.notes.toLowerCase().includes(q)) ||
+      (l.assigned_to && l.assigned_to.toLowerCase().includes(q))
     );
   }, [logs, searchQuery]);
 
@@ -477,6 +479,7 @@ function LogColumn({
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="text-xs font-semibold text-foreground truncate">{l.contact_name}</div>
+                      {l.assigned_to && <div className="text-[11px] text-primary truncate">Assigned to: {l.assigned_to}</div>}
                       {l.subject && <div className="text-[11px] text-foreground truncate">{l.subject}</div>}
                       {l.notes && <div className="text-[10px] text-muted-foreground line-clamp-2">{l.notes}</div>}
                       <div className="text-[10px] text-muted-foreground mt-1 flex items-center gap-2 flex-wrap">
@@ -704,12 +707,8 @@ function AddLogDialog({
             </div>
 <div className="space-y-1.5"> <label className={labelCls}>Reason{requiredStar}</label> <Select value={reasonId} onValueChange={setReasonId}> <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Choose one..." /></SelectTrigger> <SelectContent> <SelectItem value="none">Choose one...</SelectItem> {reasons.map((r) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)} </SelectContent> </Select> </div>
 
-  {/* PIN Input */}
   <div className="space-y-1.5">
-    <label className={labelCls}>
-      PIN{requiredStar}
-    </label>
-
+    <label className={labelCls}>PIN{requiredStar}</label>
     <input
       type="password"
       value={pin}
