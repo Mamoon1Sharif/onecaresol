@@ -187,6 +187,36 @@ const Dashboard = () => {
   const { data: todaysVisits = [], refetch: refetchToday } = useDailyVisits(todayStr);
   const [selectedVisit, setSelectedVisit] = useState<any>(null);
   const [now, setNow] = useState(() => new Date());
+  const [selectedDateStr, setSelectedDateStr] = useState(todayStr);
+  const { data: selectedDateVisits = [], refetch: refetchSelectedDate } = useDailyVisits(selectedDateStr);
+  
+  // Determine if viewing today or another date
+  const isViewingToday = selectedDateStr === todayStr;
+  
+  // Filter completed visits for the selected date
+  const completedVisitsForDate = selectedDateVisits.filter((v: any) => {
+    const status = (v.status || "").toLowerCase();
+    return status === "completed" || status === "complete" || v.check_out_time;
+  });
+  
+  // Add previous/next date navigation
+  const handlePreviousDate = () => {
+    const date = new Date(selectedDateStr);
+    date.setDate(date.getDate() - 1);
+    setSelectedDateStr(date.toISOString().split("T")[0]);
+  };
+  
+  const handleNextDate = () => {
+    const date = new Date(selectedDateStr);
+    date.setDate(date.getDate() + 1);
+    setSelectedDateStr(date.toISOString().split("T")[0]);
+  };
+  
+  // Format date for display
+  const formatDateDisplay = (dateStr: string) => {
+    const date = new Date(dateStr + "T00:00:00");
+    return date.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  };
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 30_000);
@@ -197,10 +227,10 @@ const Dashboard = () => {
     const channel = supabase
       .channel("dashboard-visits-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "dashboard_visits" }, () => refetch())
-      .on("postgres_changes", { event: "*", schema: "public", table: "daily_visits" }, () => { refetchCompleted(); refetchToday(); })
+      .on("postgres_changes", { event: "*", schema: "public", table: "daily_visits" }, () => { refetchCompleted(); refetchToday(); refetchSelectedDate(); })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [refetch, refetchCompleted, refetchToday]);
+  }, [refetch, refetchCompleted, refetchToday, refetchSelectedDate]);
 
   // Live visits: scheduled start has begun, and shift is not yet completed (no clock-out) and within scheduled window or in progress
   const liveVisits = (todaysVisits as any[]).filter((v) => {
@@ -317,8 +347,28 @@ const Dashboard = () => {
           <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-success" />
-              <CardTitle className="text-base font-semibold">Completed Shifts Today</CardTitle>
-              <Badge variant="secondary" className="ml-1 text-xs">{completedVisits.length}</Badge>
+              <CardTitle className="text-base font-semibold">
+                Completed Shifts {isViewingToday ? "Today" : formatDateDisplay(selectedDateStr)}
+              </CardTitle>
+              <Badge variant="secondary" className="ml-1 text-xs">{completedVisitsForDate.length}</Badge>
+              <div className="ml-auto flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handlePreviousDate}
+                  className="h-8 w-8 p-0"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleNextDate}
+                  className="h-8 w-8 p-0"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -337,11 +387,13 @@ const Dashboard = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {completedVisits.length === 0 ? (
+                {completedVisitsForDate.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">No completed shifts yet today</TableCell>
+                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                      No completed shifts {isViewingToday ? "yet today" : `on ${formatDateDisplay(selectedDateStr)}`}
+                    </TableCell>
                   </TableRow>
-                ) : completedVisits.map((v) => (
+                ) : completedVisitsForDate.map((v) => (
                   <CompletedVisitRow key={v.id} v={v} onClick={() => setSelectedVisit(v)} />
                 ))}
               </TableBody>

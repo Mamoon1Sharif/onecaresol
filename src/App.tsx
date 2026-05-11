@@ -122,6 +122,8 @@ const App = () => (
             <Route path="/reports/:name" element={<ProtectedRoute><ReportDetail /></ProtectedRoute>} />
             <Route path="/invoicing" element={<ProtectedRoute><Invoicing /></ProtectedRoute>} />
             <Route path="/invoicing/invoice-groups" element={<ProtectedRoute><InvoiceGroups /></ProtectedRoute>} />
+            <Route path="/invoicing/invoice-groups/new" element={<ProtectedRoute><InvoicingPlaceholder title="Create Authority Invoice" description="Create a new authority invoice group." /></ProtectedRoute>} />
+            <Route path="/invoicing/invoice-groups/service-member/new" element={<ProtectedRoute><InvoicingPlaceholder title="Create Service Member Invoice" description="Create a new service member invoice." /></ProtectedRoute>} />
             <Route path="/invoicing/invoice-groups/:groupName" element={<ProtectedRoute><InvoiceDetail /></ProtectedRoute>} />
             <Route path="/invoicing/invoice-groups/:groupName/invoice/:invoiceRef" element={<ProtectedRoute><InvoiceFull /></ProtectedRoute>} />
             <Route path="/invoicing/wages" element={<ProtectedRoute><Wages /></ProtectedRoute>} />

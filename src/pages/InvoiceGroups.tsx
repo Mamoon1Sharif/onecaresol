@@ -71,10 +71,14 @@ function GroupTable({
   rows,
   search,
   pageSize,
+  onViewGroup,
+  onDelete,
 }: {
   rows: InvoiceGroup[];
   search: string;
   pageSize: number;
+  onViewGroup?: (groupName: string) => void;
+  onDelete?: (groupName: string) => void;
 }) {
   const navigate = useNavigate();
   const filtered = useMemo(
@@ -132,12 +136,26 @@ function GroupTable({
                     <TableCell className="whitespace-nowrap">{r.startDate}</TableCell>
                     <TableCell className="whitespace-nowrap">{r.endDate}</TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-amber-600">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-amber-600"
+                        onClick={() =>
+                          onViewGroup
+                            ? onViewGroup(r.groupName)
+                            : navigate(`/invoicing/invoice-groups/${encodeURIComponent(r.groupName)}`)
+                        }
+                      >
                         <FileText className="h-4 w-4" />
                       </Button>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 text-destructive"
+                        onClick={() => onDelete?.(r.groupName)}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </TableCell>
@@ -182,6 +200,28 @@ export default function InvoiceGroups() {
   const [authSearch, setAuthSearch] = useState("");
   const [suPageSize, setSuPageSize] = useState("10");
   const [suSearch, setSuSearch] = useState("");
+  const [authorityRowsState, setAuthorityRowsState] = useState<InvoiceGroup[]>(authorityRows);
+  const [serviceUserRowsState, setServiceUserRowsState] = useState<InvoiceGroup[]>(serviceUserRows);
+
+  const handleViewGroup = (groupName: string) => {
+    navigate(`/invoicing/invoice-groups/${encodeURIComponent(groupName)}`);
+  };
+
+  const handleDeleteAuthorityGroup = (groupName: string) => {
+    setAuthorityRowsState((prev) => prev.filter((row) => row.groupName !== groupName));
+  };
+
+  const handleDeleteServiceUserGroup = (groupName: string) => {
+    setServiceUserRowsState((prev) => prev.filter((row) => row.groupName !== groupName));
+  };
+
+  const handleCreateAuthorityInvoice = () => {
+    navigate("/invoicing/invoice-groups/new");
+  };
+
+  const handleCreateServiceMemberInvoice = () => {
+    navigate("/invoicing/invoice-groups/service-member/new");
+  };
 
   return (
     <AppLayout>
@@ -250,7 +290,7 @@ export default function InvoiceGroups() {
                 select the invoice period below.
               </p>
             </div>
-            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={handleCreateAuthorityInvoice}>
               <Plus className="h-4 w-4 mr-1.5" /> Create Authority Invoice
             </Button>
           </div>
@@ -274,7 +314,13 @@ export default function InvoiceGroups() {
             </div>
           </div>
 
-          <GroupTable rows={authorityRows} search={authSearch} pageSize={Number(authPageSize)} />
+          <GroupTable
+            rows={authorityRowsState}
+            search={authSearch}
+            pageSize={Number(authPageSize)}
+            onViewGroup={handleViewGroup}
+            onDelete={handleDeleteAuthorityGroup}
+          />
         </Card>
 
         {/* Service Member Invoice Group */}
@@ -284,7 +330,7 @@ export default function InvoiceGroups() {
               <h2 className="font-semibold">Service Member Invoice Group</h2>
               <p className="text-xs text-muted-foreground mt-1">Bill the service member for an invoice.</p>
             </div>
-            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">
+            <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={handleCreateServiceMemberInvoice}>
               <Plus className="h-4 w-4 mr-1.5" /> Create Service Member Invoice
             </Button>
           </div>
@@ -308,7 +354,13 @@ export default function InvoiceGroups() {
             </div>
           </div>
 
-          <GroupTable rows={serviceUserRows} search={suSearch} pageSize={Number(suPageSize)} />
+          <GroupTable
+            rows={serviceUserRowsState}
+            search={suSearch}
+            pageSize={Number(suPageSize)}
+            onViewGroup={handleViewGroup}
+            onDelete={handleDeleteServiceUserGroup}
+          />
         </Card>
       </div>
     </AppLayout>

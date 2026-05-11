@@ -138,6 +138,7 @@ export default function CommunicationLog() {
   });
   const [defaultView, setDefaultView] = useState<RangePreset>("this_month");
   const [collapsed, setCollapsed] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const range = useMemo(() => rangeFor(preset, customRange), [preset, customRange]);
 
@@ -222,8 +223,20 @@ export default function CommunicationLog() {
     },
   });
 
-  const outgoing = logs.filter((l) => l.direction === "outgoing");
-  const incoming = logs.filter((l) => l.direction === "incoming");
+  const searchLogs = useMemo(() => {
+    if (!searchQuery.trim()) return logs;
+    const q = searchQuery.toLowerCase();
+    return logs.filter((l) =>
+      (l.contact_name && l.contact_name.toLowerCase().includes(q)) ||
+      (l.contact_phone && l.contact_phone.toLowerCase().includes(q)) ||
+      (l.contact_email && l.contact_email.toLowerCase().includes(q)) ||
+      (l.subject && l.subject.toLowerCase().includes(q)) ||
+      (l.notes && l.notes.toLowerCase().includes(q))
+    );
+  }, [logs, searchQuery]);
+
+  const outgoing = searchLogs.filter((l) => l.direction === "outgoing");
+  const incoming = searchLogs.filter((l) => l.direction === "incoming");
   const filteredActions = actions.filter((a) => (actionTab === "active" ? !a.is_completed : a.is_completed));
 
   return (
@@ -272,21 +285,30 @@ export default function CommunicationLog() {
           </div>
           {!collapsed && (
             <div className="p-3 space-y-3 bg-background">
-              <div className="flex flex-wrap items-center gap-1.5">
-                {PRESETS.map((p) => (
-                  <button
-                    key={p.key}
-                    onClick={() => setPreset(p.key)}
-                    className={cn(
-                      "h-7 px-3 text-xs rounded border transition-colors",
-                      preset === p.key
-                        ? "bg-emerald-600 text-white border-emerald-600"
-                        : "bg-background text-foreground border-border hover:bg-muted"
-                    )}
-                  >
-                    {p.label}
-                  </button>
-                ))}
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {PRESETS.map((p) => (
+                    <button
+                      key={p.key}
+                      onClick={() => setPreset(p.key)}
+                      className={cn(
+                        "h-7 px-3 text-xs rounded border transition-colors",
+                        preset === p.key
+                          ? "bg-emerald-600 text-white border-emerald-600"
+                          : "bg-background text-foreground border-border hover:bg-muted"
+                      )}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+                <Input
+                  type="text"
+                  placeholder="Search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="h-7 w-56 text-xs"
+                />
               </div>
               <div className="text-xs flex items-center gap-2">
                 <span className="text-emerald-700 dark:text-emerald-400">▼</span>
@@ -677,16 +699,34 @@ function AddLogDialog({
               </Popover>
             </div>
 
-            <div className="space-y-1.5">
-              <label className={labelCls}>Reason{requiredStar}</label>
-              <Select value={reasonId} onValueChange={setReasonId}>
-                <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Choose one..." /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Choose one...</SelectItem>
-                  {reasons.map((r) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+           <div className="space-y-1.5">
+  <label className={labelCls}>
+    Reason{requiredStar}
+  </label>
+
+  <input
+    type="text"
+    value={reasonId}
+    onChange={(e) => setReasonId(e.target.value)}
+    placeholder="Enter reason..."
+    className="w-full h-9 rounded-md border px-3 text-sm outline-none focus:ring-2 focus:ring-primary"
+  />
+</div>
+
+  {/* PIN Input */}
+  <div className="space-y-1.5">
+    <label className={labelCls}>
+      PIN{requiredStar}
+    </label>
+
+    <input
+      type="password"
+    
+     
+      placeholder="Enter PIN..."
+      className="w-full h-9 rounded-md border px-3 text-sm outline-none focus:ring-2 focus:ring-primary"
+    />
+  </div>
           </div>
 
           <div className="space-y-1.5">

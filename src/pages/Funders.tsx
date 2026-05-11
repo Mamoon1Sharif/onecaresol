@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -57,11 +58,14 @@ import {
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
+type FunderStatus = "Active" | "Pending" | "Inactive" | "Cancelled";
+
 type AuthorityFunder = {
   id: string;
   name: string;
   address: string;
   reference: string;
+  status: FunderStatus;
 };
 
 type DirectFunder = {
@@ -70,6 +74,7 @@ type DirectFunder = {
   clientName: string;
   address: string;
   reference: string;
+  status: FunderStatus;
 };
 
 const initialAuthority: AuthorityFunder[] = [
@@ -78,12 +83,14 @@ const initialAuthority: AuthorityFunder[] = [
     name: "NHS Herefordshire and Worcestershire ICB",
     address: "QGH PAYABLES N245 NHS SHARED FINANCIAL SERVICES P O BOX 312 LEEDS LS11 1HP",
     reference: "ICB-2026-001",
+    status: "Active",
   },
   {
     id: "a2",
     name: "Social Services",
     address: "ADULT AND COMMUNITY EXCHEQUER TEAM COUNTY HALL WORCESTER WR5 2NP",
     reference: "SS-WCC-014",
+    status: "Active",
   },
 ];
 
@@ -129,6 +136,7 @@ const initialDirect: DirectFunder[] = sampleClients.map((c, i) => ({
   clientName: c,
   address: sampleAddresses[i % sampleAddresses.length],
   reference: "",
+  status: i % 5 === 0 ? "Pending" : "Active",
 }));
 
 type SortKey = "name" | "address" | "reference";
@@ -175,6 +183,13 @@ export default function Funders() {
   const [authorityListOpen, setAuthorityListOpen] = useState(false);
 
   const sortIcon = <ArrowUpDown className="h-3 w-3 inline ml-1 opacity-50" />;
+
+const statusStyles: Record<FunderStatus, string> = {
+  Active: "bg-success/15 text-success border-0",
+  Pending: "bg-warning/15 text-warning border-0",
+  Inactive: "bg-muted/15 text-muted-foreground border-0",
+  Cancelled: "bg-destructive/15 text-destructive border-0",
+};
 
   const filteredAuthority = useMemo(() => {
     const q = aSearch.toLowerCase();
@@ -451,13 +466,14 @@ export default function Funders() {
                     Reference {sortIcon}
                   </button>
                 </TableHead>
+                <TableHead className="w-24">Status</TableHead>
                 <TableHead className="w-24 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {pagedAuthority.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                     No authority funders found.
                   </TableCell>
                 </TableRow>
@@ -475,6 +491,11 @@ export default function Funders() {
                     <TableCell className="text-sm text-foreground/80">{f.address}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {f.reference || "—"}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={`${statusStyles[f.status]} text-xs font-semibold`}>
+                        {f.status}
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity inline-flex gap-1">
@@ -595,13 +616,14 @@ export default function Funders() {
                     Reference {sortIcon}
                   </button>
                 </TableHead>
+                <TableHead className="w-24">Status</TableHead>
                 <TableHead className="w-24 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {pagedDirect.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                     No direct funders found.
                   </TableCell>
                 </TableRow>
@@ -620,6 +642,11 @@ export default function Funders() {
                     <TableCell className="text-sm text-foreground/80">{f.address}</TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {f.reference || "—"}
+                    </TableCell>
+                    <TableCell>
+                      <Badge className={`${statusStyles[f.status]} text-xs font-semibold`}>
+                        {f.status}
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity inline-flex gap-1">
