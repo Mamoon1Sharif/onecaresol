@@ -45,17 +45,6 @@ const TYPE_OPTIONS = [
   "All Care Givers",
 ];
 
-const FINANCE_PEOPLE = [
-  "All Invoice Groups",
-  "Local Authority",
-  "Private Clients",
-  "Direct Payments",
-  "Weekly Wages",
-  "Monthly Wages",
-  "Standard Tariffs",
-  "Bank Holiday Rates",
-];
-
 const FINANCE_TYPE_OPTIONS = [
   "Invoices",
   "Wages",
@@ -211,8 +200,8 @@ export default function ReportDetail() {
   const isFinance = category === "Finance Reports";
 
   const typeOptions = isFinance ? FINANCE_TYPE_OPTIONS : TYPE_OPTIONS;
-  const peopleOptions = isFinance ? FINANCE_PEOPLE : PEOPLE;
-  const personLabel = isFinance ? "Finance Group" : category === "Service Member Reports" ? "Service Member" : "Care Giver";
+  const peopleOptions = PEOPLE;
+  const personLabel = category === "Service Member Reports" ? "Service Member" : "Care Giver";
 
   const [type, setType] = useState(typeOptions[0]);
   const [people, setPeople] = useState<string[]>([]);
