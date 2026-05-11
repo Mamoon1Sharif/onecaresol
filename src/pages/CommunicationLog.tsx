@@ -255,9 +255,9 @@ export default function CommunicationLog() {
                 <Switch checked={myCallsOn} onCheckedChange={setMyCallsOn} className="scale-75" />
               </div>
             </div>
-            <Button size="sm" variant="secondary" onClick={() => nav("/communication-log/reasons")} className="h-8 bg-amber-500 hover:bg-amber-600 text-white">
+            {/* <Button size="sm" variant="secondary" onClick={() => nav("/communication-log/reasons")} className="h-8 bg-amber-500 hover:bg-amber-600 text-white">
               Custom Reasons
-            </Button>
+            </Button> */}
             <Button size="sm" onClick={() => setLogOpen(true)} className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white">
               <Plus className="h-3.5 w-3.5 mr-1" /> Add
             </Button>
