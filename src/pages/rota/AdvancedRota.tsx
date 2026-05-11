@@ -197,6 +197,26 @@ function isSameDay(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
+function startOfWeekMonday(d: Date) {
+  const out = new Date(d);
+  const day = (out.getDay() + 6) % 7;
+  out.setHours(0, 0, 0, 0);
+  out.setDate(out.getDate() - day);
+  return out;
+}
+
+function addDays(d: Date, days: number) {
+  const out = new Date(d);
+  out.setDate(out.getDate() + days);
+  return out;
+}
+
+function formatDateShort(d: Date) {
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  return `${day}/${month}/${d.getFullYear()}`;
+}
+
 function buildShiftsForDate(date: Date, receiverNames: string[], staffNameMap: Record<string, string>): Shift[] {
   const today = new Date();
   const todayKey = dayKey(today);
@@ -343,7 +363,7 @@ export default function AdvancedRota() {
     }, {});
   }, [staffRows]);
 
-  const [date, setDate] = useState(() => new Date());
+  const [date, setDate] = useState(() => startOfWeekMonday(new Date()));
   const [cancelledIds, setCancelledIds] = useState<Set<string>>(new Set());
   // Overrides per day per shift id (stores edited start/end/staff after drag)
   const [overrides, setOverrides] = useState<Record<string, Partial<Shift>>>({});
@@ -384,10 +404,8 @@ export default function AdvancedRota() {
   const gridRef = useRef<HTMLDivElement>(null);
 
   const dateLabel = useMemo(() => {
-    const d = String(date.getDate()).padStart(2, "0");
-    const m = String(date.getMonth() + 1).padStart(2, "0");
-    const y = date.getFullYear();
-    return `${d}/${m}/${y}`;
+    const weekEnd = addDays(date, 6);
+    return `${formatDateShort(date)} - ${formatDateShort(weekEnd)}`;
   }, [date]);
 
   const totalGridWidth = 24 * PX_PER_HOUR;
@@ -702,8 +720,8 @@ export default function AdvancedRota() {
             <Button
               variant="outline" size="icon"
               className="h-8 w-8"
-              onClick={() => setDate(new Date(date.getTime() - 86400000))}
-              aria-label="Previous day"
+              onClick={() => setDate((d) => addDays(d, -7))}
+              aria-label="Previous week"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -717,8 +735,8 @@ export default function AdvancedRota() {
             <Button
               variant="outline" size="icon"
               className="h-8 w-8"
-              onClick={() => setDate(new Date(date.getTime() + 86400000))}
-              aria-label="Next day"
+              onClick={() => setDate((d) => addDays(d, 7))}
+              aria-label="Next week"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -751,7 +769,7 @@ export default function AdvancedRota() {
                 className="h-7 px-2 flex items-center text-[11px] font-semibold uppercase border-b border-border bg-muted text-muted-foreground"
                 style={{ height: HEADER_H }}
               >
-                Staff / Today
+                Staff / Week
               </div>
               {staffRows.map((name) => (
                 <div

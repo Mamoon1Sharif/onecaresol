@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Eye, Calendar, FileText, UserMinus, ListChecks, Phone, Clock, Car, AlertCircle, StickyNote, Search, BarChart3, User, Users, ClipboardList, Pill, ShieldCheck, PoundSterling, Activity, ScrollText, FileBarChart, Cake, HeartHandshake, FileCheck, Plane, AlertTriangle, Smartphone, GraduationCap, BookOpen, BellRing, Route, Tag, FileWarning } from "lucide-react";
+import { Eye, Calendar, FileText, UserMinus, ListChecks, Phone, Clock, Car, AlertCircle, StickyNote, Search, BarChart3, User, Users, ClipboardList, Pill, ShieldCheck, PoundSterling, Activity, ScrollText, Cake, HeartHandshake, FileCheck, Plane, AlertTriangle, Smartphone, GraduationCap, BookOpen, BellRing, Route, Tag, Receipt, Wallet, Landmark, Settings, Banknote } from "lucide-react";
 
-type ReportItem = { name: string; icon: any };
+type ReportItem = { name: string; icon: any; url?: string };
 type ReportSection = {
   title: string;
-  color: "purple" | "cyan" | "rose";
+  color: "purple" | "cyan" | "rose" | "emerald";
   items: ReportItem[];
 };
 
@@ -79,12 +79,26 @@ const sections: ReportSection[] = [
       { name: "Tags Report", icon: Tag },
     ],
   },
+  {
+    title: "Finance Reports",
+    color: "emerald",
+    items: [
+      { name: "Invoice Groups", icon: Receipt, url: "/invoicing/invoice-groups" },
+      { name: "Wages", icon: Wallet, url: "/invoicing/wages" },
+      { name: "Tariffs", icon: PoundSterling, url: "/invoicing/tariffs" },
+      { name: "Funders", icon: Landmark, url: "/invoicing/funders" },
+      // { name: "Invoice / Wages Settings", icon: Settings, url: "/invoicing/settings" },
+      { name: "Bank Holidays", icon: Banknote, url: "/invoicing/bank-holidays" },
+      { name: "Holiday Report", icon: Plane, url: "/invoicing/holiday-report" },
+    ],
+  },
 ];
 
 const colorMap = {
   purple: { text: "text-purple-500", border: "border-t-purple-500" },
   cyan: { text: "text-cyan-500", border: "border-t-cyan-500" },
   rose: { text: "text-rose-500", border: "border-t-rose-500" },
+  emerald: { text: "text-emerald-600", border: "border-t-emerald-500" },
 };
 
 function ReportSectionCard({ section }: { section: ReportSection }) {
@@ -97,8 +111,12 @@ function ReportSectionCard({ section }: { section: ReportSection }) {
     [section.items, search],
   );
 
-  const openReport = (name: string) => {
-    nav(`/reports/${encodeURIComponent(name)}?category=${encodeURIComponent(section.title)}`);
+  const openReport = (item: ReportItem) => {
+    if (item.url) {
+      nav(item.url);
+      return;
+    }
+    nav(`/reports/${encodeURIComponent(item.name)}?category=${encodeURIComponent(section.title)}`);
   };
 
   return (
@@ -123,7 +141,7 @@ function ReportSectionCard({ section }: { section: ReportSection }) {
                 <tr
                   key={item.name + idx}
                   className={`border-b last:border-b-0 ${idx % 2 === 0 ? "bg-muted/30" : "bg-background"} hover:bg-muted/60 transition-colors cursor-pointer`}
-                  onClick={() => openReport(item.name)}
+                  onClick={() => openReport(item)}
                 >
                   <td className="w-10 px-3 py-2">
                     <Icon className={`h-4 w-4 ${c.text}`} />
@@ -170,6 +188,7 @@ export default function Reports() {
           <ReportSectionCard section={sections[0]} />
           <ReportSectionCard section={sections[1]} />
           <ReportSectionCard section={sections[2]} />
+          <ReportSectionCard section={sections[3]} />
         </div>
       </div>
     </AppLayout>
