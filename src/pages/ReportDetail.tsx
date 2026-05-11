@@ -45,12 +45,33 @@ const TYPE_OPTIONS = [
   "All Care Givers",
 ];
 
+const FINANCE_PEOPLE = [
+  "All Invoice Groups",
+  "Local Authority",
+  "Private Clients",
+  "Direct Payments",
+  "Weekly Wages",
+  "Monthly Wages",
+  "Standard Tariffs",
+  "Bank Holiday Rates",
+];
+
+const FINANCE_TYPE_OPTIONS = [
+  "Invoices",
+  "Wages",
+  "Tariffs",
+  "Funders",
+  "All Finance",
+];
+
 function MultiSelectPeople({
   selected,
   onChange,
+  options = PEOPLE,
 }: {
   selected: string[];
   onChange: (next: string[]) => void;
+  options?: string[];
 }) {
   const [open, setOpen] = useState(false);
   const label =
@@ -84,7 +105,7 @@ function MultiSelectPeople({
             variant="ghost"
             size="sm"
             className="h-7 text-xs"
-            onClick={() => onChange(PEOPLE)}
+            onClick={() => onChange(options)}
           >
             Select all
           </Button>
@@ -99,7 +120,7 @@ function MultiSelectPeople({
         </div>
         <ScrollArea className="h-56">
           <div className="p-1">
-            {PEOPLE.map((p) => {
+            {options.map((p) => {
               const checked = selected.includes(p);
               return (
                 <button
@@ -121,8 +142,37 @@ function MultiSelectPeople({
   );
 }
 
-function generateDummyRows(people: string[], start?: Date, end?: Date) {
+function generateDummyRows(people: string[], start?: Date, end?: Date, category?: string) {
   if (!people.length || !start || !end) return [];
+  if (category === "Finance Reports") {
+    const financeRows: {
+      name: string;
+      date: string;
+      location: string;
+      duration: string;
+      status: string;
+    }[] = [];
+    const statuses = ["Draft", "Ready", "Approved", "Paid", "Pending"];
+    const days = Math.max(
+      1,
+      Math.min(7, Math.ceil((end.getTime() - start.getTime()) / 86400000) + 1),
+    );
+    people.forEach((group) => {
+      for (let d = 0; d < days; d++) {
+        const date = new Date(start);
+        date.setDate(date.getDate() + d);
+        financeRows.push({
+          name: group,
+          date: format(date, "dd/MM/yyyy"),
+          location: `INV-${date.getFullYear()}${String(d + 1).padStart(3, "0")}`,
+          duration: `£${(125 + group.length * 9 + d * 37).toLocaleString("en-GB")}`,
+          status: statuses[(group.length + d) % statuses.length],
+        });
+      }
+    });
+    return financeRows;
+  }
+
   const rows: {
     name: string;
     date: string;
@@ -158,16 +208,21 @@ export default function ReportDetail() {
   const nav = useNavigate();
   const reportName = name ? decodeURIComponent(name) : "Report";
   const category = params.get("category") ?? "Reports";
+  const isFinance = category === "Finance Reports";
 
-  const [type, setType] = useState(TYPE_OPTIONS[0]);
+  const typeOptions = isFinance ? FINANCE_TYPE_OPTIONS : TYPE_OPTIONS;
+  const peopleOptions = isFinance ? FINANCE_PEOPLE : PEOPLE;
+  const personLabel = isFinance ? "Finance Group" : category === "Service Member Reports" ? "Service Member" : "Care Giver";
+
+  const [type, setType] = useState(typeOptions[0]);
   const [people, setPeople] = useState<string[]>([]);
   const [startDate, setStartDate] = useState<Date | undefined>();
   const [endDate, setEndDate] = useState<Date | undefined>();
   const [hasRun, setHasRun] = useState(false);
 
   const rows = useMemo(
-    () => (hasRun ? generateDummyRows(people, startDate, endDate) : []),
-    [hasRun, people, startDate, endDate],
+    () => (hasRun ? generateDummyRows(people, startDate, endDate, category) : []),
+    [hasRun, people, startDate, endDate, category],
   );
 
   const onRun = () => {
@@ -217,7 +272,7 @@ export default function ReportDetail() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {TYPE_OPTIONS.map((t) => (
+                {typeOptions.map((t) => (
                   <SelectItem key={t} value={t}>
                     {t}
                   </SelectItem>
@@ -226,9 +281,9 @@ export default function ReportDetail() {
             </Select>
 
             <Label className="text-sm font-medium">
-              <span className="text-destructive mr-1">*</span>Care Giver
+              <span className="text-destructive mr-1">*</span>{personLabel}
             </Label>
-            <MultiSelectPeople selected={people} onChange={setPeople} />
+            <MultiSelectPeople selected={people} onChange={setPeople} options={peopleOptions} />
 
             <Label className="text-sm font-medium">
               <span className="text-destructive mr-1">*</span>Start Date
@@ -291,7 +346,7 @@ export default function ReportDetail() {
             </Button>
             {!people.length || !startDate || !endDate ? (
               <span className="text-xs text-muted-foreground">
-                Select care giver, start date and end date to run the report.
+                Select {personLabel.toLowerCase()}, start date and end date to run the report.
               </span>
             ) : null}
           </div>
@@ -306,10 +361,10 @@ export default function ReportDetail() {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-muted/50">
-                      <TableHead className="text-xs">Care Giver</TableHead>
+                      <TableHead className="text-xs">{personLabel}</TableHead>
                       <TableHead className="text-xs">Date</TableHead>
-                      <TableHead className="text-xs">Location</TableHead>
-                      <TableHead className="text-xs">Duration</TableHead>
+                      <TableHead className="text-xs">{isFinance ? "Reference" : "Location"}</TableHead>
+                      <TableHead className="text-xs">{isFinance ? "Amount" : "Duration"}</TableHead>
                       <TableHead className="text-xs">Status</TableHead>
                     </TableRow>
                   </TableHeader>
