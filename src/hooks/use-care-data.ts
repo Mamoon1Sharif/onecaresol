@@ -1,6 +1,27 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+type ReceiverDnarSetting = {
+  care_receiver_id: string;
+  status: string | null;
+  applies_from: string | null;
+  applies_until: string | null;
+};
+
+function todayIsoDate() {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  return now.toISOString().slice(0, 10);
+}
+
+function isActiveDnarSetting(row: ReceiverDnarSetting, today = todayIsoDate()) {
+  return (
+    row.status?.toLowerCase() === "active" &&
+    (!row.applies_from || row.applies_from <= today) &&
+    (!row.applies_until || row.applies_until >= today)
+  );
+}
+
 // ── Care Givers ──
 export function useCareGivers() {
   return useQuery({
@@ -66,7 +87,26 @@ export function useCareReceivers() {
     queryFn: async () => {
       const { data, error } = await supabase.from("care_receivers").select("*").order("name");
       if (error) throw error;
-      return data;
+      const receiverIds = data.map((receiver) => receiver.id);
+      if (receiverIds.length === 0) return data;
+
+      const { data: dnarRows, error: dnarError } = await supabase
+        .from("receiver_dnar_settings" as any)
+        .select("care_receiver_id,status,applies_from,applies_until")
+        .in("care_receiver_id", receiverIds);
+      if (dnarError) throw dnarError;
+
+      const today = todayIsoDate();
+      const activeDnarReceiverIds = new Set(
+        ((dnarRows ?? []) as ReceiverDnarSetting[])
+          .filter((row) => isActiveDnarSetting(row, today))
+          .map((row) => row.care_receiver_id)
+      );
+
+      return data.map((receiver) => ({
+        ...receiver,
+        dnacpr: receiver.dnacpr || activeDnarReceiverIds.has(receiver.id),
+      }));
     },
   });
 }
@@ -121,7 +161,14 @@ export function useCareReceiver(id: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase.from("care_receivers").select("*").eq("id", id!).single();
       if (error) throw error;
-      return data;
+      const { data: dnarRows, error: dnarError } = await supabase
+        .from("receiver_dnar_settings" as any)
+        .select("care_receiver_id,status,applies_from,applies_until")
+        .eq("care_receiver_id", id!);
+      if (dnarError) throw dnarError;
+
+      const hasActiveDnar = ((dnarRows ?? []) as ReceiverDnarSetting[]).some((row) => isActiveDnarSetting(row));
+      return { ...data, dnacpr: data.dnacpr || hasActiveDnar };
     },
   });
 }

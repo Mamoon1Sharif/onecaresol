@@ -25,6 +25,35 @@ type CareReceiver = Tables<"care_receivers">;
 
 /* ------------------------- helpers ------------------------- */
 
+function todayIsoDate() {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  return now.toISOString().slice(0, 10);
+}
+
+function isActiveDnarSetting(row: any, today = todayIsoDate()) {
+  return (
+    row.status?.toLowerCase() === "active" &&
+    (!row.applies_from || row.applies_from <= today) &&
+    (!row.applies_until || row.applies_until >= today)
+  );
+}
+
+async function syncCareReceiverDnarFlag(careReceiverId: string) {
+  const { data, error } = await supabase
+    .from("receiver_dnar_settings" as any)
+    .select("status,applies_from,applies_until")
+    .eq("care_receiver_id", careReceiverId);
+  if (error) throw error;
+
+  const hasActiveDnar = ((data ?? []) as any[]).some((row) => isActiveDnarSetting(row));
+  const { error: updateError } = await supabase
+    .from("care_receivers")
+    .update({ dnacpr: hasActiveDnar } as any)
+    .eq("id", careReceiverId);
+  if (updateError) throw updateError;
+}
+
 const Row = ({ label, value, accentValue }: { label: string; value?: any; accentValue?: boolean }) => (
   <div className="flex flex-wrap items-baseline gap-1.5 py-[3px] text-[12px]">
     <span className="font-semibold text-foreground">{label}:</span>
@@ -337,9 +366,12 @@ function DnarSettingsCard({ careReceiverId }: { careReceiverId: string }) {
         const { error } = await supabase.from("receiver_dnar_settings" as any).insert(payload);
         if (error) throw error;
       }
+      await syncCareReceiverDnarFlag(careReceiverId);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["receiver_dnar_settings", careReceiverId] });
+      qc.invalidateQueries({ queryKey: ["care_receivers", careReceiverId] });
+      qc.invalidateQueries({ queryKey: ["care_receivers"] });
       setOpen(false); setEditing(null);
       toast.success(editing ? "DNAR setting updated" : "DNAR setting added");
     },
@@ -350,9 +382,12 @@ function DnarSettingsCard({ careReceiverId }: { careReceiverId: string }) {
     mutationFn: async (id: string) => {
       const { error } = await supabase.from("receiver_dnar_settings" as any).delete().eq("id", id);
       if (error) throw error;
+      await syncCareReceiverDnarFlag(careReceiverId);
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["receiver_dnar_settings", careReceiverId] });
+      qc.invalidateQueries({ queryKey: ["care_receivers", careReceiverId] });
+      qc.invalidateQueries({ queryKey: ["care_receivers"] });
       setDelId(null);
       toast.success("Removed");
     },
