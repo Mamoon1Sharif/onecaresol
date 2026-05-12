@@ -44,7 +44,7 @@ export function DnarSection({ enabled, onChange }: Props) {
 
   return (
     <>
-      <Card className="border border-destructive/30">
+      {/* <Card className="border border-destructive/30">
         <CardContent className="p-6">
           <div className="flex items-center gap-2 mb-1">
             <ShieldAlert className="h-4 w-4 text-destructive" />
@@ -100,7 +100,7 @@ export function DnarSection({ enabled, onChange }: Props) {
             </Table>
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent>

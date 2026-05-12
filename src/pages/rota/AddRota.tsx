@@ -31,6 +31,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { useCareReceivers, useCareGivers, useUpsertShift, useMedications } from "@/hooks/use-care-data";
+import { useCaregiverHolidayEntries, caregiverUnavailableReason } from "@/hooks/use-caregiver-availability";
 import { savePendingClash } from "./Conflicts";
 import { getCareReceiverAvatar } from "@/lib/avatars";
 import { toast } from "sonner";
@@ -74,6 +75,7 @@ const AddRota = () => {
   const { data: caregivers = [] } = useCareGivers();
   const upsertShift = useUpsertShift();
   const queryClient = useQueryClient();
+  const caregiverHolidayEntries = useCaregiverHolidayEntries();
 
   const [search, setSearch] = useState("");
   const initialId = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("receiverId") : null;
@@ -195,6 +197,17 @@ const AddRota = () => {
     return out;
   }, [form.date, form.recurring, recurUnit, recurCount]);
 
+  const unavailableDates = useMemo(() => {
+    const entries = caregiverHolidayEntries.data ?? [];
+    if (!selectedCaregiver || !form.staff1) return [];
+    return occurrenceDates
+      .map((date) => {
+        const reason = caregiverUnavailableReason(selectedCaregiver, entries, date);
+        return reason ? { date, reason } : null;
+      })
+      .filter(Boolean) as Array<{ date: string; reason: ReturnType<typeof caregiverUnavailableReason> }>;
+  }, [selectedCaregiver, occurrenceDates, caregiverHolidayEntries.data, form.staff1]);
+
   const filteredCaregivers = useMemo(() => {
     const q = caregiverSearch.trim().toLowerCase();
     if (!q) return caregivers;
@@ -206,6 +219,14 @@ const AddRota = () => {
 
   const handleSaveClick = () => {
     if (!selected) return;
+    if (unavailableDates.length > 0) {
+      toast.error(
+        unavailableDates.length === 1
+          ? `${selectedCaregiver?.name ?? "Care giver"} is unavailable on ${unavailableDates[0].date}.`
+          : `${selectedCaregiver?.name ?? "Care giver"} is unavailable on ${unavailableDates.length} selected dates.`,
+      );
+      return;
+    }
     setConfirmOpen(true);
   };
 
@@ -576,6 +597,26 @@ const AddRota = () => {
                   </SelectContent>
                 </Select>
               </Field>
+              {unavailableDates.length > 0 && (
+                <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-3 mt-3 text-sm text-destructive">
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4" />
+                    <span>
+                      {selectedCaregiver?.name ?? "This caregiver"} is unavailable on selected date{unavailableDates.length > 1 ? "s" : ""}.
+                    </span>
+                  </div>
+                  <div className="mt-2 space-y-1">
+                    {unavailableDates.map((item) => (
+                      <div key={item.date}>
+                        <span className="font-medium">{item.date}</span> — {item.reason.label}
+                        {item.reason.from && item.reason.to && item.reason.from !== item.reason.to
+                          ? ` (${item.reason.from} to ${item.reason.to})`
+                          : ""}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
               {form.linkUp && (
                 <div className="space-y-3 rounded-lg border border-primary/30 bg-primary/5 p-4">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
