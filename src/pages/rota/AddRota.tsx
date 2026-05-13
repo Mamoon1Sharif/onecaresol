@@ -191,18 +191,23 @@ const AddRota = () => {
 
   // Build the list of occurrence dates based on recurrence settings.
   const occurrenceDates = useMemo(() => {
-    const base = new Date(form.date);
-    if (!form.recurring || recurCount < 1) return [form.date];
+    if (!form.recurring) return [form.date];
+    const start = new Date(form.date);
+    const end = new Date(recurEndDate || form.date);
+    if (end < start) return [form.date];
     const out: string[] = [];
-    for (let i = 0; i < recurCount; i++) {
-      const d = new Date(base);
-      if (recurUnit === "days") d.setDate(base.getDate() + i);
-      else if (recurUnit === "weeks") d.setDate(base.getDate() + i * 7);
-      else d.setMonth(base.getMonth() + i);
-      out.push(d.toISOString().slice(0, 10));
+    const cursor = new Date(start);
+    while (cursor <= end) {
+      const iso = cursor.toISOString().slice(0, 10);
+      if (recurMode === "days") {
+        out.push(iso);
+      } else if (recurDays.includes(cursor.getDay())) {
+        out.push(iso);
+      }
+      cursor.setDate(cursor.getDate() + 1);
     }
-    return out;
-  }, [form.date, form.recurring, recurUnit, recurCount]);
+    return out.length ? out : [form.date];
+  }, [form.date, form.recurring, recurMode, recurEndDate, recurDays]);
 
   const unavailableDates = useMemo(() => {
     const entries = caregiverHolidayEntries.data ?? [];
