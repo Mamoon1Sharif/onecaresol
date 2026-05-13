@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AppLayout } from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -518,13 +518,13 @@ export default function AdvancedRota() {
     target.setPointerCapture(e.pointerId);
   }
 
-  function onPointerMoveGrid(e: React.PointerEvent) {
+  function updatePointerDrag(clientX: number, clientY: number) {
     if (!drag || !gridRef.current) return;
 
     // Detect actual drag (>4px movement) — anything less is treated as a click
     if (!drag.moved) {
-      const dx = Math.abs(e.clientX - drag.originX);
-      const dy = Math.abs(e.clientY - drag.originY);
+      const dx = Math.abs(clientX - drag.originX);
+      const dy = Math.abs(clientY - drag.originY);
       if (dx < 4 && dy < 4) return;
       setDrag({ ...drag, moved: true });
     }
@@ -537,10 +537,10 @@ export default function AdvancedRota() {
     const unPanel = unassignedPanelRef.current?.getBoundingClientRect();
     if (
       unPanel &&
-      e.clientX >= unPanel.left &&
-      e.clientX <= unPanel.right &&
-      e.clientY >= unPanel.top &&
-      e.clientY <= unPanel.bottom
+      clientX >= unPanel.left &&
+      clientX <= unPanel.right &&
+      clientY >= unPanel.top &&
+      clientY <= unPanel.bottom
     ) {
       setHoverGhost({
         id: shift.id,
@@ -553,8 +553,8 @@ export default function AdvancedRota() {
     }
 
     const grid = gridRef.current.getBoundingClientRect();
-    const x = e.clientX - grid.left + gridRef.current.scrollLeft;
-    const y = e.clientY - grid.top;
+    const x = clientX - grid.left + gridRef.current.scrollLeft;
+    const y = clientY - grid.top;
 
     const dayWidth = 24 * PX_PER_HOUR;
     const dayIdx = Math.floor(x / dayWidth);
@@ -578,7 +578,11 @@ export default function AdvancedRota() {
     });
   }
 
-  function onPointerUpGrid() {
+  function onPointerMoveGrid(e: React.PointerEvent) {
+    updatePointerDrag(e.clientX, e.clientY);
+  }
+
+  function finishPointerDrag() {
     if (drag) {
       if (drag.moved && hoverGhost) {
         const s = shifts.find((x) => x.id === drag.id);
@@ -586,7 +590,8 @@ export default function AdvancedRota() {
           const changed =
             hoverGhost.staff !== s.staff ||
             hoverGhost.start !== s.start ||
-            hoverGhost.end !== s.end;
+            hoverGhost.end !== s.end ||
+            hoverGhost.dayIndex !== s.dayIndex;
           if (changed) {
             setPendingMove({
               id: s.id,
@@ -626,6 +631,27 @@ export default function AdvancedRota() {
     setHoverGhost(null);
   }
 
+  function onPointerUpGrid() {
+    finishPointerDrag();
+  }
+
+  useEffect(() => {
+    if (!drag) return;
+
+    const handlePointerMove = (e: PointerEvent) => updatePointerDrag(e.clientX, e.clientY);
+    const handlePointerUp = () => finishPointerDrag();
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+    window.addEventListener("pointercancel", handlePointerUp);
+
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
+    };
+  }, [drag, hoverGhost, shifts]);
+
   function confirmPendingMove() {
     if (!pendingMove) return;
     setOverrides((prev) => ({
@@ -634,6 +660,7 @@ export default function AdvancedRota() {
         staff: pendingMove.toStaff,
         start: pendingMove.toStart,
         end: pendingMove.toEnd,
+        dayIndex: pendingMove.toDayIndex,
       },
     }));
     const wasUnassigned = pendingMove.fromStaff === "Unassigned Shifts";
@@ -1187,6 +1214,16 @@ export default function AdvancedRota() {
                                   <button
                                     key={s.id}
                                     type="button"
+                                    draggable={!shiftHasStarted(s)}
+                                    onDragStart={(e) => {
+                                      if (shiftHasStarted(s)) {
+                                        e.preventDefault();
+                                        toast.error("Shift time already started — can't reassign or reallocate.");
+                                        return;
+                                      }
+                                      e.dataTransfer.setData("text/plain", s.id);
+                                      e.dataTransfer.effectAllowed = "move";
+                                    }}
                                     title={
                                       hasConflict
                                         ? `⚠ Shift conflict for ${s.staff}\n${s.client} ${fmtTime(s.start)}–${fmtTime(s.end)} overlaps with:\n` +
@@ -1209,7 +1246,7 @@ export default function AdvancedRota() {
                                       })
                                     }
                                     className={cn(
-                                      "w-full text-left rounded-sm border px-1.5 py-1 text-[10px] leading-tight shadow-sm hover:ring-1 hover:ring-primary transition-all",
+                                      "w-full cursor-grab active:cursor-grabbing text-left rounded-sm border px-1.5 py-1 text-[10px] leading-tight shadow-sm hover:ring-1 hover:ring-primary transition-all",
                                       hasConflict
                                         ? "bg-red-200/90 border-red-500 text-red-950 ring-1 ring-red-500 animate-pulse"
                                         : s.staff === "Unassigned Shifts"
