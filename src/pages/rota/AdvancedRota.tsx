@@ -422,6 +422,7 @@ export default function AdvancedRota() {
   } | null>(null);
 
   const gridRef = useRef<HTMLDivElement>(null);
+  const unassignedPanelRef = useRef<HTMLDivElement>(null);
 
   const dateLabel = useMemo(() => {
     if (viewMode === 'daily') return formatDateShort(date);
@@ -519,14 +520,33 @@ export default function AdvancedRota() {
       setDrag({ ...drag, moved: true });
     }
 
+    const shift = shifts.find((s) => s.id === drag.id);
+    if (!shift) return;
+    const length = shift.end - shift.start;
+
+    // If pointer is over the unassigned panel, mark this as unassigning
+    const unPanel = unassignedPanelRef.current?.getBoundingClientRect();
+    if (
+      unPanel &&
+      e.clientX >= unPanel.left &&
+      e.clientX <= unPanel.right &&
+      e.clientY >= unPanel.top &&
+      e.clientY <= unPanel.bottom
+    ) {
+      setHoverGhost({
+        id: shift.id,
+        staff: UNASSIGNED,
+        start: shift.start,
+        end: shift.end,
+        dayIndex: shift.dayIndex,
+      });
+      return;
+    }
+
     const grid = gridRef.current.getBoundingClientRect();
     const x = e.clientX - grid.left + gridRef.current.scrollLeft;
     const y = e.clientY - grid.top;
 
-    const shift = shifts.find((s) => s.id === drag.id);
-    if (!shift) return;
-
-    const length = shift.end - shift.start;
     const dayWidth = 24 * PX_PER_HOUR;
     const dayIdx = Math.floor(x / dayWidth);
     const hourX = x % dayWidth;
@@ -881,7 +901,22 @@ export default function AdvancedRota() {
             (s) => s.staff === UNASSIGNED && (filterCancelled === "show" || !cancelledIds.has(s.id))
           );
           return (
-            <div className="border-2 border-yellow-500/70 rounded-md bg-yellow-50/40 dark:bg-yellow-950/10 overflow-hidden mb-3">
+            <div
+              ref={unassignedPanelRef}
+              className="border-2 border-yellow-500/70 rounded-md bg-yellow-50/40 dark:bg-yellow-950/10 overflow-hidden mb-3"
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                const id = e.dataTransfer.getData("text/plain");
+                if (!id) return;
+                const s = shifts.find((x) => x.id === id);
+                if (!s || s.staff === UNASSIGNED) return;
+                assignDroppedShift(id, UNASSIGNED, s.dayIndex, s.start);
+              }}
+            >
               <div className="px-3 py-1.5 border-b border-yellow-500/50 bg-yellow-100/70 dark:bg-yellow-900/20 flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-yellow-400 border border-yellow-600" />
                 <span className="text-xs font-semibold uppercase tracking-wide text-yellow-900 dark:text-yellow-200">
