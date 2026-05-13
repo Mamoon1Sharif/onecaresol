@@ -640,17 +640,27 @@ export default function AdvancedRota() {
     }));
   }
 
-  function assignDroppedShift(shiftId: string, toStaff: string, toDayIndex: number) {
+  function assignDroppedShift(
+    shiftId: string,
+    toStaff: string,
+    toDayIndex: number,
+    toStart?: number
+  ) {
     const s = shifts.find((x) => x.id === shiftId);
     if (!s) return;
+    const length = s.end - s.start;
+    let start = toStart ?? s.start;
+    // snap to 15 min and clamp into 0..24
+    start = Math.max(0, Math.min(24 - length, Math.round(start * 4) / 4));
+    const end = start + length;
     setPendingMove({
       id: s.id,
       fromStaff: s.staff,
       toStaff,
       fromStart: s.start,
       fromEnd: s.end,
-      toStart: s.start,
-      toEnd: s.end,
+      toStart: start,
+      toEnd: end,
       fromDayIndex: s.dayIndex,
       toDayIndex,
       client: s.client,
