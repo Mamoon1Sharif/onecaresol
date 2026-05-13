@@ -58,6 +58,7 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
+type ChargeTariff = { id: string; name: string };
 type TimeBand = {
   id: string;
   name: string;
@@ -71,6 +72,23 @@ type TimeBand = {
   billingType: string;
   durations: boolean;
   status: "active" | "future" | "expired";
+};
+
+const STORAGE_KEY_TARIFFS = "onecaresol_charge_tariffs_v1";
+const initialTariffs: ChargeTariff[] = [];
+
+const loadTariffs = (): ChargeTariff[] => {
+  if (typeof window === "undefined") return initialTariffs;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_TARIFFS);
+    return raw ? (JSON.parse(raw) as ChargeTariff[]) : initialTariffs;
+  } catch {
+    return initialTariffs;
+  }
+};
+
+const saveTariffs = (tariffs: ChargeTariff[]) => {
+  localStorage.setItem(STORAGE_KEY_TARIFFS, JSON.stringify(tariffs));
 };
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -140,7 +158,9 @@ export default function ChargeTariffDetail() {
   const { tariffName: rawName } = useParams();
   const tariffName = decodeURIComponent(rawName ?? "CHC (HWICB)");
 
-  const [name, setName] = useState(tariffName);
+  const [tariffs, setTariffs] = useState<ChargeTariff[]>(() => loadTariffs());
+  const currentTariff = tariffs.find((t) => t.name === tariffName);
+  const [name, setName] = useState(currentTariff?.name ?? tariffName);
   const [splitBands, setSplitBands] = useState<"Yes" | "No">("Yes");
   const [overrideMaster, setOverrideMaster] = useState<"Yes" | "No">("No");
   const [effectiveDate, setEffectiveDate] = useState<Date>(new Date(2026, 3, 20));
@@ -172,7 +192,20 @@ export default function ChargeTariffDetail() {
       toast.error("Tariff name is required");
       return;
     }
+
+    const exists = tariffs.some((t) => t.name === tariffName);
+    const next = exists
+      ? tariffs.map((t) => (t.name === tariffName ? { ...t, name } : t))
+      : [...tariffs, { id: `t${Date.now()}`, name }];
+
+    setTariffs(next);
+    saveTariffs(next);
+
     toast.success(`Tariff "${name}" saved`);
+
+    if (name !== tariffName) {
+      navigate(`/invoicing/tariffs/${encodeURIComponent(name)}`, { replace: true });
+    }
   };
 
   const handleDeleteTariff = () => {

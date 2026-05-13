@@ -52,6 +52,37 @@ type FunderLink = {
   overrideWageTariff: string;
 };
 
+const STORAGE_KEY_TARIFFS = "onecaresol_charge_tariffs_v1";
+const STORAGE_KEY_LINKS = "onecaresol_funder_links_v1";
+
+const loadTariffs = (): ChargeTariff[] => {
+  if (typeof window === "undefined") return initialTariffs;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_TARIFFS);
+    return raw ? (JSON.parse(raw) as ChargeTariff[]) : initialTariffs;
+  } catch {
+    return initialTariffs;
+  }
+};
+
+const loadLinks = (): FunderLink[] => {
+  if (typeof window === "undefined") return initialLinks;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY_LINKS);
+    return raw ? (JSON.parse(raw) as FunderLink[]) : initialLinks;
+  } catch {
+    return initialLinks;
+  }
+};
+
+const saveTariffs = (tariffs: ChargeTariff[]) => {
+  localStorage.setItem(STORAGE_KEY_TARIFFS, JSON.stringify(tariffs));
+};
+
+const saveLinks = (links: FunderLink[]) => {
+  localStorage.setItem(STORAGE_KEY_LINKS, JSON.stringify(links));
+};
+
 const initialTariffs: ChargeTariff[] = [
   { id: "t1", name: "CHC (HWICB)" },
   { id: "t2", name: "CHC (HWICB) (MM)" },
@@ -175,8 +206,8 @@ function Pagination({
 export default function Tariffs() {
   const navigate = useNavigate();
 
-  const [tariffs, setTariffs] = useState<ChargeTariff[]>(initialTariffs);
-  const [links, setLinks] = useState<FunderLink[]>(initialLinks);
+  const [tariffs, setTariffs] = useState<ChargeTariff[]>(() => loadTariffs());
+  const [links, setLinks] = useState<FunderLink[]>(() => loadLinks());
 
   const [tariffSearch, setTariffSearch] = useState("");
   const [linkSearch, setLinkSearch] = useState("");
@@ -222,19 +253,25 @@ export default function Tariffs() {
       toast.error("Tariff name is required");
       return;
     }
-    setTariffs((prev) => [...prev, { id: `t${Date.now()}`, name: newTariffName.trim() }]);
+    const next = [...tariffs, { id: `t${Date.now()}`, name: newTariffName.trim() }];
+    setTariffs(next);
+    saveTariffs(next);
     toast.success(`Tariff "${newTariffName}" created`);
     setNewTariffName("");
     setAddTariffOpen(false);
   };
 
   const handleDuplicateTariff = (t: ChargeTariff) => {
-    setTariffs((prev) => [...prev, { id: `t${Date.now()}`, name: `${t.name} (Copy)` }]);
+    const next = [...tariffs, { id: `t${Date.now()}`, name: `${t.name} (Copy)` }];
+    setTariffs(next);
+    saveTariffs(next);
     toast.success(`Duplicated "${t.name}"`);
   };
 
   const handleDeleteTariff = (t: ChargeTariff) => {
-    setTariffs((prev) => prev.filter((x) => x.id !== t.id));
+    const next = tariffs.filter((x) => x.id !== t.id);
+    setTariffs(next);
+    saveTariffs(next);
     toast.success(`Removed "${t.name}"`);
   };
 
@@ -243,14 +280,18 @@ export default function Tariffs() {
       toast.error("All fields are required");
       return;
     }
-    setLinks((prev) => [...prev, { id: `l${Date.now()}`, ...newLink }]);
+    const next = [...links, { id: `l${Date.now()}`, ...newLink }];
+    setLinks(next);
+    saveLinks(next);
     toast.success("Funder link created");
     setNewLink({ funder: "", serviceName: "", chargeTariff: "", overrideWageTariff: "Use Role Wage" });
     setAddLinkOpen(false);
   };
 
   const handleDeleteLink = (l: FunderLink) => {
-    setLinks((prev) => prev.filter((x) => x.id !== l.id));
+    const next = links.filter((x) => x.id !== l.id);
+    setLinks(next);
+    saveLinks(next);
     toast.success("Link removed");
   };
 
