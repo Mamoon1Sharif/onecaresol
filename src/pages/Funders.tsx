@@ -274,6 +274,7 @@ const statusStyles: Record<FunderStatus, string> = {
         clientName: "",
         address: "",
         reference: "",
+        status: "Active",
       },
     });
   const openEditDirect = (f: DirectFunder) =>
