@@ -892,7 +892,19 @@ export default function AdvancedRota() {
                             shift={s}
                             selected={selected.has(s.id)}
                             cancelled={cancelledIds.has(s.id)}
-                            onPointerDown={(e) => onPointerDownShift(e, s)}
+                            onClick={() =>
+                              setEditing({
+                                id: s.id,
+                                ref: s.ref,
+                                date: dateLabel,
+                                status: statusLabel(s.status),
+                                client: s.client,
+                                start: s.start,
+                                end: s.end,
+                                staff: s.staff,
+                                service: s.service,
+                              })
+                            }
                           />
                         ))}
                       </>
