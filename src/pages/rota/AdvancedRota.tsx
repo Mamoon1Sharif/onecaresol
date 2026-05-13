@@ -1287,6 +1287,7 @@ function ShiftBlock({
   return (
     <div
       onPointerDown={onPointerDown}
+      onClick={onClick}
       className={cn(
         "absolute top-1 bottom-1 rounded-sm border px-1.5 py-0.5 cursor-grab active:cursor-grabbing overflow-hidden text-[10px] leading-tight shadow-sm",
         hasConflict
