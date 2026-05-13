@@ -1214,6 +1214,16 @@ export default function AdvancedRota() {
                                   <button
                                     key={s.id}
                                     type="button"
+                                    draggable={!shiftHasStarted(s)}
+                                    onDragStart={(e) => {
+                                      if (shiftHasStarted(s)) {
+                                        e.preventDefault();
+                                        toast.error("Shift time already started — can't reassign or reallocate.");
+                                        return;
+                                      }
+                                      e.dataTransfer.setData("text/plain", s.id);
+                                      e.dataTransfer.effectAllowed = "move";
+                                    }}
                                     title={
                                       hasConflict
                                         ? `⚠ Shift conflict for ${s.staff}\n${s.client} ${fmtTime(s.start)}–${fmtTime(s.end)} overlaps with:\n` +
@@ -1236,7 +1246,7 @@ export default function AdvancedRota() {
                                       })
                                     }
                                     className={cn(
-                                      "w-full text-left rounded-sm border px-1.5 py-1 text-[10px] leading-tight shadow-sm hover:ring-1 hover:ring-primary transition-all",
+                                      "w-full cursor-grab active:cursor-grabbing text-left rounded-sm border px-1.5 py-1 text-[10px] leading-tight shadow-sm hover:ring-1 hover:ring-primary transition-all",
                                       hasConflict
                                         ? "bg-red-200/90 border-red-500 text-red-950 ring-1 ring-red-500 animate-pulse"
                                         : s.staff === "Unassigned Shifts"
