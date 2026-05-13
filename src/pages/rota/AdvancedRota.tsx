@@ -520,14 +520,33 @@ export default function AdvancedRota() {
       setDrag({ ...drag, moved: true });
     }
 
+    const shift = shifts.find((s) => s.id === drag.id);
+    if (!shift) return;
+    const length = shift.end - shift.start;
+
+    // If pointer is over the unassigned panel, mark this as unassigning
+    const unPanel = unassignedPanelRef.current?.getBoundingClientRect();
+    if (
+      unPanel &&
+      e.clientX >= unPanel.left &&
+      e.clientX <= unPanel.right &&
+      e.clientY >= unPanel.top &&
+      e.clientY <= unPanel.bottom
+    ) {
+      setHoverGhost({
+        id: shift.id,
+        staff: UNASSIGNED,
+        start: shift.start,
+        end: shift.end,
+        dayIndex: shift.dayIndex,
+      });
+      return;
+    }
+
     const grid = gridRef.current.getBoundingClientRect();
     const x = e.clientX - grid.left + gridRef.current.scrollLeft;
     const y = e.clientY - grid.top;
 
-    const shift = shifts.find((s) => s.id === drag.id);
-    if (!shift) return;
-
-    const length = shift.end - shift.start;
     const dayWidth = 24 * PX_PER_HOUR;
     const dayIdx = Math.floor(x / dayWidth);
     const hourX = x % dayWidth;
