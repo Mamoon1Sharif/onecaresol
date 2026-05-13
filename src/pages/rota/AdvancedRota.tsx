@@ -987,7 +987,9 @@ export default function AdvancedRota() {
                                   }
                                   className={cn(
                                     "w-full text-left rounded-sm border px-1.5 py-1 text-[10px] leading-tight shadow-sm hover:ring-1 hover:ring-primary transition-all",
-                                    statusStyles(s.status),
+                                    s.staff === "Unassigned Shifts"
+                                      ? "bg-yellow-200/90 border-yellow-500 text-yellow-950"
+                                      : statusStyles(s.status),
                                     cancelledIds.has(s.id) && "opacity-50 line-through",
                                     selected.has(s.id) && "ring-2 ring-primary"
                                   )}
