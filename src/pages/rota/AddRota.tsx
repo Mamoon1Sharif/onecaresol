@@ -107,8 +107,15 @@ const AddRota = () => {
   const [savedOpen, setSavedOpen] = useState(false);
   const [clashInfo, setClashInfo] = useState<null | { other: any; staffName: string; otherClient: string }>(null);
   const [caregiverSearch, setCaregiverSearch] = useState("");
-  const [recurUnit, setRecurUnit] = useState<"days" | "weeks" | "months">("weeks");
-  const [recurCount, setRecurCount] = useState<number>(4);
+  const [recurMode, setRecurMode] = useState<"days" | "weeks">("weeks");
+  const [recurEndDate, setRecurEndDate] = useState<string>(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 14);
+    return d.toISOString().slice(0, 10);
+  });
+  // Mon-Sun selected weekdays (JS getDay: Sun=0..Sat=6). Default: weekdays.
+  const [recurDays, setRecurDays] = useState<number[]>([1, 2, 3, 4, 5]);
+  const [recurConfirmed, setRecurConfirmed] = useState(false);
 
   // Dedup MAR medications by name+dosage+time so the same prescription isn't repeated.
   const uniqueMeds = useMemo(() => {
