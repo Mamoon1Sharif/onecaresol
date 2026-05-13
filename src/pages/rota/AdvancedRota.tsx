@@ -422,8 +422,10 @@ export default function AdvancedRota() {
     return Array.from({ length: 7 }, (_, i) => addDays(date, i));
   }, [date, viewMode]);
 
-  const totalGridWidth = days.length * 24 * PX_PER_HOUR;
-  const headerHeight = viewMode === 'weekly' ? HEADER_H * 2 : HEADER_H;
+  const totalGridWidth =
+    viewMode === 'daily' ? 24 * PX_PER_HOUR : days.length * WEEK_DAY_WIDTH;
+  const headerHeight = HEADER_H;
+  const rowHeight = viewMode === 'daily' ? ROW_HEIGHT : WEEKLY_ROW_HEIGHT;
 
   const dayStep = viewMode === 'daily' ? 1 : 7;
 
