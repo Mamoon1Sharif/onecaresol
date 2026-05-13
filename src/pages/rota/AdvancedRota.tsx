@@ -1098,6 +1098,15 @@ export default function AdvancedRota() {
                               key={dayIdx}
                               className="border-r border-border p-1 overflow-y-auto space-y-1"
                               style={{ width: WEEK_DAY_WIDTH }}
+                              onDragOver={(e) => {
+                                e.preventDefault();
+                                e.dataTransfer.dropEffect = "move";
+                              }}
+                              onDrop={(e) => {
+                                e.preventDefault();
+                                const id = e.dataTransfer.getData("text/plain");
+                                if (id) assignDroppedShift(id, staff, dayIdx);
+                              }}
                             >
                               {cellShifts.length === 0 && (
                                 <div className="h-full flex items-center justify-center text-[10px] text-muted-foreground/40">
