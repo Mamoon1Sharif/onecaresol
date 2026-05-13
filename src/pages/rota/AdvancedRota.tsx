@@ -354,13 +354,13 @@ export default function AdvancedRota() {
   const { data: careGivers = [] } = useCareGivers();
   const { data: careReceivers = [] } = useCareReceivers();
 
+  const UNASSIGNED = "Unassigned Shifts";
   const staffRows = useMemo(
-    () => [
-      "Unassigned Shifts",
-      ...careGivers.map((cg: any) => cg.name || "Unnamed Caregiver"),
-    ],
+    () => careGivers.map((cg: any) => cg.name || "Unnamed Caregiver"),
     [careGivers]
   );
+  // All rows used for shift generation (unassigned + caregivers)
+  const allRows = useMemo(() => [UNASSIGNED, ...staffRows], [staffRows]);
 
   const receiverNames = useMemo(
     () => careReceivers.map((cr: any) => cr.name || "Unknown Service Member"),
