@@ -621,7 +621,7 @@ const AddRota = () => {
                     {unavailableDates.map((item) => (
                       <div key={item.date}>
                         <span className="font-medium">{item.date}</span> — {item.reason.label}
-                        {item.reason.from && item.reason.to && item.reason.from !== item.reason.to
+                        {item.reason.kind !== "inactive" && item.reason.from && item.reason.to && item.reason.from !== item.reason.to
                           ? ` (${item.reason.from} to ${item.reason.to})`
                           : ""}
                       </div>
