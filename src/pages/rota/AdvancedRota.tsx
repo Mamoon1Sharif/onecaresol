@@ -995,6 +995,15 @@ export default function AdvancedRota() {
                           rowIdx % 2 === 0 ? "bg-background" : "bg-muted/20"
                         )}
                         style={{ height: ROW_HEIGHT }}
+                        onDragOver={(e) => {
+                          e.preventDefault();
+                          e.dataTransfer.dropEffect = "move";
+                        }}
+                        onDrop={(e) => {
+                          e.preventDefault();
+                          const id = e.dataTransfer.getData("text/plain");
+                          if (id) assignDroppedShift(id, staff, 0);
+                        }}
                       >
                         {HOURS.map((h, i) => (
                           <div
