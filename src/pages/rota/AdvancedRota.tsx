@@ -485,11 +485,20 @@ export default function AdvancedRota() {
 
   /* ---------------------------- Drag & Drop -------------------------------- */
 
+  function shiftHasStarted(s: Shift) {
+    return s.status === "in-progress" || s.status === "complete" || s.status === "missed";
+  }
+
   function onPointerDownShift(e: React.PointerEvent, s: Shift) {
     if (bulkSelect) {
       const next = new Set(selected);
       next.has(s.id) ? next.delete(s.id) : next.add(s.id);
       setSelected(next);
+      return;
+    }
+    if (shiftHasStarted(s)) {
+      e.preventDefault();
+      toast.error("Shift time already started — can't reassign or reallocate.");
       return;
     }
     e.preventDefault();
@@ -668,6 +677,10 @@ export default function AdvancedRota() {
   ) {
     const s = shifts.find((x) => x.id === shiftId);
     if (!s) return;
+    if (shiftHasStarted(s)) {
+      toast.error("Shift time already started — can't reassign or reallocate.");
+      return;
+    }
     const length = s.end - s.start;
     let start = toStart ?? s.start;
     // snap to 15 min and clamp into 0..24
@@ -936,8 +949,13 @@ export default function AdvancedRota() {
                     {unassignedShifts.map((s) => (
                       <div
                         key={s.id}
-                        draggable
+                        draggable={!shiftHasStarted(s)}
                         onDragStart={(e) => {
+                          if (shiftHasStarted(s)) {
+                            e.preventDefault();
+                            toast.error("Shift time already started — can't reassign or reallocate.");
+                            return;
+                          }
                           e.dataTransfer.setData("text/plain", s.id);
                           e.dataTransfer.effectAllowed = "move";
                         }}
