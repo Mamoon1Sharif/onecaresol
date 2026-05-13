@@ -918,6 +918,7 @@ export default function AdvancedRota() {
                               shift={s}
                               selected={selected.has(s.id)}
                               cancelled={cancelledIds.has(s.id)}
+                              conflictsWith={conflicts.get(s.id)}
                               onPointerDown={(e) => onPointerDownShift(e, s)}
                             />
                           ))}
