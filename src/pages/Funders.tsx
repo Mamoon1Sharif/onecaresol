@@ -244,7 +244,7 @@ const statusStyles: Record<FunderStatus, string> = {
   const openAddAuthority = () =>
     setAuthorityDialog({
       open: true,
-      funder: { id: `a${Date.now()}`, name: "", address: "", reference: "" },
+      funder: { id: `a${Date.now()}`, name: "", address: "", reference: "", status: "Active" },
     });
   const openEditAuthority = (f: AuthorityFunder) =>
     setAuthorityDialog({ open: true, funder: { ...f } });
