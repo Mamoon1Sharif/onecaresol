@@ -167,7 +167,7 @@ export function useCareReceiver(id: string | undefined) {
         .eq("care_receiver_id", id!);
       if (dnarError) throw dnarError;
 
-      const hasActiveDnar = ((dnarRows ?? []) as ReceiverDnarSetting[]).some((row) => isActiveDnarSetting(row));
+      const hasActiveDnar = ((dnarRows ?? []) as unknown as ReceiverDnarSetting[]).some((row) => isActiveDnarSetting(row));
       return { ...data, dnacpr: data.dnacpr || hasActiveDnar };
     },
   });
