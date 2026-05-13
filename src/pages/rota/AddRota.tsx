@@ -107,8 +107,15 @@ const AddRota = () => {
   const [savedOpen, setSavedOpen] = useState(false);
   const [clashInfo, setClashInfo] = useState<null | { other: any; staffName: string; otherClient: string }>(null);
   const [caregiverSearch, setCaregiverSearch] = useState("");
-  const [recurUnit, setRecurUnit] = useState<"days" | "weeks" | "months">("weeks");
-  const [recurCount, setRecurCount] = useState<number>(4);
+  const [recurMode, setRecurMode] = useState<"days" | "weeks">("weeks");
+  const [recurEndDate, setRecurEndDate] = useState<string>(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 14);
+    return d.toISOString().slice(0, 10);
+  });
+  // Mon-Sun selected weekdays (JS getDay: Sun=0..Sat=6). Default: weekdays.
+  const [recurDays, setRecurDays] = useState<number[]>([1, 2, 3, 4, 5]);
+  const [recurConfirmed, setRecurConfirmed] = useState(false);
 
   // Dedup MAR medications by name+dosage+time so the same prescription isn't repeated.
   const uniqueMeds = useMemo(() => {
@@ -184,18 +191,23 @@ const AddRota = () => {
 
   // Build the list of occurrence dates based on recurrence settings.
   const occurrenceDates = useMemo(() => {
-    const base = new Date(form.date);
-    if (!form.recurring || recurCount < 1) return [form.date];
+    if (!form.recurring) return [form.date];
+    const start = new Date(form.date);
+    const end = new Date(recurEndDate || form.date);
+    if (end < start) return [form.date];
     const out: string[] = [];
-    for (let i = 0; i < recurCount; i++) {
-      const d = new Date(base);
-      if (recurUnit === "days") d.setDate(base.getDate() + i);
-      else if (recurUnit === "weeks") d.setDate(base.getDate() + i * 7);
-      else d.setMonth(base.getMonth() + i);
-      out.push(d.toISOString().slice(0, 10));
+    const cursor = new Date(start);
+    while (cursor <= end) {
+      const iso = cursor.toISOString().slice(0, 10);
+      if (recurMode === "days") {
+        out.push(iso);
+      } else if (recurDays.includes(cursor.getDay())) {
+        out.push(iso);
+      }
+      cursor.setDate(cursor.getDate() + 1);
     }
-    return out;
-  }, [form.date, form.recurring, recurUnit, recurCount]);
+    return out.length ? out : [form.date];
+  }, [form.date, form.recurring, recurMode, recurEndDate, recurDays]);
 
   const unavailableDates = useMemo(() => {
     const entries = caregiverHolidayEntries.data ?? [];
@@ -912,40 +924,98 @@ const AddRota = () => {
               </div>
 
               {form.recurring && (
-                <div className="space-y-3 rounded-lg border border-primary/30 bg-primary/5 p-3 mt-1">
+                <div className="space-y-4 rounded-lg border border-primary/30 bg-primary/5 p-4 mt-1">
                   <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <Label className="text-xs font-medium flex items-center gap-1.5">
+                    <Label className="text-xs font-semibold flex items-center gap-1.5">
                       <Repeat className="h-3.5 w-3.5 text-primary" /> Recurrence schedule
                     </Label>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] text-muted-foreground">Repeat every</span>
-                      <Select value={recurUnit} onValueChange={(v: any) => setRecurUnit(v)}>
-                        <SelectTrigger className="h-8 w-[110px] text-xs"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="days">Day</SelectItem>
-                          <SelectItem value="weeks">Week</SelectItem>
-                          <SelectItem value="months">Month</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <span className="text-[11px] text-muted-foreground">for</span>
-                      <Input
-                        type="number"
-                        min={1}
-                        max={52}
-                        value={recurCount}
-                        onChange={(e) => setRecurCount(Math.max(1, Math.min(52, Number(e.target.value) || 1)))}
-                        className="h-8 w-16 text-xs"
-                      />
-                      <span className="text-[11px] text-muted-foreground">
-                        {recurUnit === "days" ? "day(s)" : recurUnit === "weeks" ? "week(s)" : "month(s)"}
-                      </span>
+                    <div className="inline-flex rounded-md border border-border bg-background p-0.5">
+                      {(["days", "weeks"] as const).map((m) => (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => setRecurMode(m)}
+                          className={`px-3 h-7 text-xs rounded-sm capitalize transition-colors ${
+                            recurMode === m
+                              ? "bg-primary text-primary-foreground"
+                              : "text-muted-foreground hover:text-foreground"
+                          }`}
+                        >
+                          Recur {m}
+                        </button>
+                      ))}
                     </div>
                   </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px] text-muted-foreground">Start date</Label>
+                      <Input
+                        type="date"
+                        value={form.date}
+                        onChange={(e) => setForm({ ...form, date: e.target.value })}
+                        className="h-9 text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px] text-muted-foreground">End date</Label>
+                      <Input
+                        type="date"
+                        min={form.date}
+                        value={recurEndDate}
+                        onChange={(e) => setRecurEndDate(e.target.value)}
+                        className="h-9 text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  {recurMode === "weeks" && (
+                    <div className="space-y-1.5">
+                      <Label className="text-[11px] text-muted-foreground">Repeat on</Label>
+                      <div className="flex items-center justify-center sm:justify-start gap-1.5 flex-wrap">
+                        {[
+                          { d: 1, l: "M" },
+                          { d: 2, l: "T" },
+                          { d: 3, l: "W" },
+                          { d: 4, l: "T" },
+                          { d: 5, l: "F" },
+                          { d: 6, l: "S" },
+                          { d: 0, l: "S" },
+                        ].map(({ d, l }) => {
+                          const active = recurDays.includes(d);
+                          return (
+                            <button
+                              key={d}
+                              type="button"
+                              onClick={() =>
+                                setRecurDays((prev) =>
+                                  prev.includes(d) ? prev.filter((x) => x !== d) : [...prev, d],
+                                )
+                              }
+                              className={`h-9 w-9 rounded-md text-xs font-semibold border transition-all ${
+                                active
+                                  ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                                  : "bg-background text-muted-foreground border-border hover:border-primary/50 hover:text-foreground"
+                              }`}
+                            >
+                              {l}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="rounded-md border border-border bg-background overflow-hidden">
                     <div className="grid grid-cols-[60px_1fr_120px] text-[10px] uppercase tracking-wide text-muted-foreground bg-muted/40 px-3 py-1.5">
                       <span>#</span><span>Date</span><span className="text-right">Time</span>
                     </div>
                     <div className="max-h-48 overflow-y-auto divide-y divide-border">
+                      {occurrenceDates.length === 0 && (
+                        <div className="px-3 py-3 text-xs text-muted-foreground text-center">
+                          No dates match the current selection.
+                        </div>
+                      )}
                       {occurrenceDates.map((d, i) => (
                         <div key={d + i} className="grid grid-cols-[60px_1fr_120px] px-3 py-1.5 text-xs items-center">
                           <span className="text-muted-foreground">{i + 1}</span>
@@ -959,10 +1029,25 @@ const AddRota = () => {
                       ))}
                     </div>
                   </div>
+
                   <p className="text-[11px] text-muted-foreground flex items-start gap-1.5">
                     <Info className="h-3 w-3 mt-0.5 shrink-0" />
                     {occurrenceDates.length} shift{occurrenceDates.length !== 1 ? "s" : ""} will be created across the schedule above.
                   </p>
+
+                  <label className="flex items-start gap-2 rounded-md border border-primary/30 bg-background p-2.5 cursor-pointer hover:bg-primary/5 transition-colors">
+                    <Checkbox
+                      checked={recurConfirmed}
+                      onCheckedChange={(v) => setRecurConfirmed(!!v)}
+                      className="mt-0.5"
+                    />
+                    <span className="text-xs leading-snug">
+                      I confirm creating <strong>{occurrenceDates.length}</strong> recurring shift
+                      {occurrenceDates.length !== 1 ? "s" : ""} between{" "}
+                      <strong>{new Date(form.date).toLocaleDateString("en-GB")}</strong> and{" "}
+                      <strong>{new Date(recurEndDate).toLocaleDateString("en-GB")}</strong>.
+                    </span>
+                  </label>
                 </div>
               )}
             </Section>
@@ -1087,7 +1172,7 @@ const AddRota = () => {
                   {form.medicationRequired && <div><span className="text-muted-foreground">Medications:</span> <span className="font-medium text-foreground">{selectedMedIds.length} selected</span></div>}
                   {form.tasksRequired && <div><span className="text-muted-foreground">Tasks:</span> <span className="font-medium text-foreground">{selectedTasks.length} selected</span></div>}
                   {form.recurring && (
-                    <div><span className="text-muted-foreground">Recurring:</span> <span className="font-medium text-foreground">Every {recurUnit === "days" ? "day" : recurUnit === "weeks" ? "week" : "month"} for {recurCount} occurrence{recurCount !== 1 ? "s" : ""} ({occurrenceDates.length} shifts)</span></div>
+                    <div><span className="text-muted-foreground">Recurring:</span> <span className="font-medium text-foreground">Recur {recurMode} until {new Date(recurEndDate).toLocaleDateString("en-GB")} ({occurrenceDates.length} shifts)</span></div>
                   )}
                   {form.linkUp && <div><span className="text-muted-foreground">Linked:</span> <span className="font-medium text-foreground">Yes</span></div>}
                 </div>
@@ -1096,7 +1181,10 @@ const AddRota = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleSave} disabled={upsertShift.isPending}>
+            <AlertDialogAction
+              onClick={handleSave}
+              disabled={upsertShift.isPending || (form.recurring && !recurConfirmed)}
+            >
               {upsertShift.isPending ? "Saving…" : "Confirm & Save"}
             </AlertDialogAction>
           </AlertDialogFooter>
