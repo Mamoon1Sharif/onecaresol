@@ -314,7 +314,7 @@ function statusStyles(s: ShiftStatus) {
     case "in-progress":
       return "bg-cyan-200/90 border-cyan-400 text-cyan-900";
     case "scheduled":
-      return "bg-emerald-100 border-emerald-300 text-emerald-900";
+      return "bg-blue-200/90 border-blue-400 text-blue-900";
     case "missed":
       return "bg-rose-200/90 border-rose-400 text-rose-900";
     case "oncall":
@@ -1062,7 +1062,7 @@ export default function AdvancedRota() {
         <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground px-1">
           <LegendDot className="bg-green-300 border-green-500" label="Complete" />
           <LegendDot className="bg-cyan-300 border-cyan-500" label="In Progress" />
-          <LegendDot className="bg-emerald-100 border-emerald-300" label="Scheduled" />
+          <LegendDot className="bg-blue-300 border-blue-500" label="Scheduled" />
           <LegendDot className="bg-rose-300 border-rose-500" label="Missed" />
           <LegendDot className="bg-purple-300 border-purple-500" label="On Call" />
           <LegendDot className="bg-yellow-300 border-yellow-500" label="Unassigned" />
