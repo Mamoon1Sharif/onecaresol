@@ -807,12 +807,12 @@ export default function AdvancedRota() {
           <div className="flex">
             {/* Sticky staff column */}
             <div className="shrink-0 w-44 border-r border-border bg-muted/30">
-              <div
-                className="h-7 px-2 flex items-center text-[11px] font-semibold uppercase border-b border-border bg-muted text-muted-foreground"
-                style={{ height: HEADER_H }}
-              >
-                Staff / {viewMode === 'daily' ? 'Day' : 'Week'}
-              </div>
+             <div
+  className="px-2 flex items-center text-[11px] font-semibold uppercase border-b border-border bg-muted text-muted-foreground"
+  style={{ height: 56 }}
+>
+  Staff / {viewMode === 'daily' ? 'Day' : 'Week'}
+</div>
               {staffRows.map((name) => (
                 <div
                   key={name}
