@@ -294,7 +294,10 @@ export default function ReportDetail() {
                 <Calendar
                   mode="single"
                   selected={startDate}
-                  onSelect={setStartDate}
+                  onSelect={(d) => {
+                    setStartDate(d);
+                    if (d && endDate && endDate < d) setEndDate(undefined);
+                  }}
                   className="pointer-events-auto"
                 />
               </PopoverContent>
@@ -319,7 +322,14 @@ export default function ReportDetail() {
                 <Calendar
                   mode="single"
                   selected={endDate}
-                  onSelect={setEndDate}
+                  onSelect={(d) => {
+                    if (d && startDate && d < startDate) {
+                      toast.error("End date cannot be earlier than start date.");
+                      return;
+                    }
+                    setEndDate(d);
+                  }}
+                  disabled={(date) => (startDate ? date < startDate : false)}
                   className="pointer-events-auto"
                 />
               </PopoverContent>
