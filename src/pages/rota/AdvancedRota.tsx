@@ -949,8 +949,13 @@ export default function AdvancedRota() {
                     {unassignedShifts.map((s) => (
                       <div
                         key={s.id}
-                        draggable
+                        draggable={!shiftHasStarted(s)}
                         onDragStart={(e) => {
+                          if (shiftHasStarted(s)) {
+                            e.preventDefault();
+                            toast.error("Shift time already started — can't reassign or reallocate.");
+                            return;
+                          }
                           e.dataTransfer.setData("text/plain", s.id);
                           e.dataTransfer.effectAllowed = "move";
                         }}
