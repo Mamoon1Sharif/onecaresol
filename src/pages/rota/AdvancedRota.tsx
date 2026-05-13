@@ -846,6 +846,115 @@ export default function AdvancedRota() {
           </div>
         </div>
 
+        {/* Unassigned shifts panel (separate box above the timeline) */}
+        {(() => {
+          const unassignedShifts = shifts.filter(
+            (s) => s.staff === UNASSIGNED && (filterCancelled === "show" || !cancelledIds.has(s.id))
+          );
+          return (
+            <div className="border-2 border-yellow-500/70 rounded-md bg-yellow-50/40 dark:bg-yellow-950/10 overflow-hidden mb-3">
+              <div className="px-3 py-1.5 border-b border-yellow-500/50 bg-yellow-100/70 dark:bg-yellow-900/20 flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-yellow-400 border border-yellow-600" />
+                <span className="text-xs font-semibold uppercase tracking-wide text-yellow-900 dark:text-yellow-200">
+                  Unassigned Shifts
+                </span>
+                <span className="text-[11px] text-muted-foreground ml-auto">
+                  {unassignedShifts.length} pending
+                </span>
+              </div>
+              <div className="flex">
+                <div
+                  className="shrink-0 w-44 border-r border-border bg-muted/30 px-2 flex items-center text-xs font-medium text-foreground"
+                  style={{ height: rowHeight }}
+                >
+                  Unassigned
+                </div>
+                <div className="overflow-x-auto flex-1">
+                  <div
+                    className="relative"
+                    style={{ width: totalGridWidth, height: rowHeight }}
+                  >
+                    {viewMode === 'daily' ? (
+                      <>
+                        {HOURS.map((h, i) => (
+                          <div
+                            key={h}
+                            className={cn(
+                              "absolute top-0 bottom-0 border-r",
+                              i % 2 === 0 ? "border-border/70" : "border-border/30"
+                            )}
+                            style={{ left: h * PX_PER_HOUR, width: 0 }}
+                          />
+                        ))}
+                        {unassignedShifts.map((s) => (
+                          <ShiftBlock
+                            key={s.id}
+                            shift={s}
+                            selected={selected.has(s.id)}
+                            cancelled={cancelledIds.has(s.id)}
+                            onPointerDown={(e) => onPointerDownShift(e, s)}
+                          />
+                        ))}
+                      </>
+                    ) : (
+                      <div className="flex h-full">
+                        {days.map((_, dayIdx) => {
+                          const cellShifts = unassignedShifts
+                            .filter((s) => s.dayIndex === dayIdx)
+                            .sort((a, b) => a.start - b.start);
+                          return (
+                            <div
+                              key={dayIdx}
+                              className="border-r border-border p-1 overflow-y-auto space-y-1"
+                              style={{ width: WEEK_DAY_WIDTH }}
+                            >
+                              {cellShifts.length === 0 && (
+                                <div className="h-full flex items-center justify-center text-[10px] text-muted-foreground/40">
+                                  —
+                                </div>
+                              )}
+                              {cellShifts.map((s) => (
+                                <button
+                                  key={s.id}
+                                  type="button"
+                                  title={`${s.client} • ${fmtTime(s.start)}–${fmtTime(s.end)} • ${s.service}`}
+                                  onClick={() =>
+                                    setEditing({
+                                      id: s.id,
+                                      ref: s.ref,
+                                      date: dateLabel,
+                                      status: statusLabel(s.status),
+                                      client: s.client,
+                                      start: s.start,
+                                      end: s.end,
+                                      staff: s.staff,
+                                      service: s.service,
+                                    })
+                                  }
+                                  className={cn(
+                                    "w-full text-left rounded-sm border px-1.5 py-1 text-[10px] leading-tight shadow-sm hover:ring-1 hover:ring-primary transition-all bg-yellow-200/90 border-yellow-500 text-yellow-950",
+                                    cancelledIds.has(s.id) && "opacity-50 line-through",
+                                    selected.has(s.id) && "ring-2 ring-primary"
+                                  )}
+                                >
+                                  <div className="font-semibold truncate">{s.client}</div>
+                                  <div className="opacity-80 font-mono">
+                                    {fmtTime(s.start)}–{fmtTime(s.end)}
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* Timeline grid */}
         <div className="border border-border rounded-md bg-card overflow-hidden">
           <div className="flex">
