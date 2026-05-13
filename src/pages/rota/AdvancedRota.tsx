@@ -370,9 +370,10 @@ export default function AdvancedRota() {
   const staffNameMap = useMemo(() => {
     return STATIC_STAFF.reduce<Record<string, string>>((map, name, index) => {
       if (index === 0) {
-        map[name] = name;
+        map[name] = name; // Unassigned stays as-is
       } else {
-        map[name] = staffRows[index] || name;
+        // STATIC_STAFF[1..] -> staffRows[0..]
+        map[name] = staffRows[index - 1] || name;
       }
       return map;
     }, {});
