@@ -1065,6 +1065,8 @@ export default function AdvancedRota() {
           <LegendDot className="bg-emerald-100 border-emerald-300" label="Scheduled" />
           <LegendDot className="bg-rose-300 border-rose-500" label="Missed" />
           <LegendDot className="bg-purple-300 border-purple-500" label="On Call" />
+          <LegendDot className="bg-yellow-300 border-yellow-500" label="Unassigned" />
+          <LegendDot className="bg-red-300 border-red-500" label="Conflict" />
           <span className="ml-auto flex items-center gap-1">
             <GripVertical className="h-3.5 w-3.5" /> Drag any block to reschedule or reassign
           </span>
