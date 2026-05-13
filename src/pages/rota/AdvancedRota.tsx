@@ -1265,6 +1265,7 @@ function ShiftBlock({
   cancelled,
   conflictsWith,
   onPointerDown,
+  onClick,
 }: {
   shift: Shift;
   selected: boolean;
@@ -1272,6 +1273,7 @@ function ShiftBlock({
   cancelled?: boolean;
   conflictsWith?: Shift[];
   onPointerDown?: (e: React.PointerEvent) => void;
+  onClick?: (e: React.MouseEvent) => void;
 }) {
   const left = (shift.dayIndex * 24 + shift.start) * PX_PER_HOUR;
   const width = Math.max(40, (shift.end - shift.start) * PX_PER_HOUR);
