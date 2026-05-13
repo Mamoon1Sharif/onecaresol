@@ -1107,7 +1107,9 @@ function ShiftBlock({
       onPointerDown={onPointerDown}
       className={cn(
         "absolute top-1 bottom-1 rounded-sm border px-1.5 py-0.5 cursor-grab active:cursor-grabbing overflow-hidden text-[10px] leading-tight shadow-sm",
-        statusStyles(shift.status),
+        shift.staff === "Unassigned Shifts"
+          ? "bg-yellow-200/90 border-yellow-500 text-yellow-950"
+          : statusStyles(shift.status),
         selected && "ring-2 ring-primary ring-offset-1",
         ghost && "opacity-60 ring-2 ring-primary",
         cancelled && "opacity-50 line-through"
