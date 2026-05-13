@@ -640,6 +640,25 @@ export default function AdvancedRota() {
     }));
   }
 
+  function assignDroppedShift(shiftId: string, toStaff: string, toDayIndex: number) {
+    const s = shifts.find((x) => x.id === shiftId);
+    if (!s) return;
+    setPendingMove({
+      id: s.id,
+      fromStaff: s.staff,
+      toStaff,
+      fromStart: s.start,
+      fromEnd: s.end,
+      toStart: s.start,
+      toEnd: s.end,
+      fromDayIndex: s.dayIndex,
+      toDayIndex,
+      client: s.client,
+      ref: s.ref,
+      service: s.service,
+    });
+  }
+
   /* ----------------------------- Actions ---------------------------------- */
 
   function requireSelection(): string[] | null {
