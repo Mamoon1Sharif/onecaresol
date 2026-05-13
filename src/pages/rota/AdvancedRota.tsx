@@ -997,38 +997,55 @@ export default function AdvancedRota() {
                                   —
                                 </div>
                               )}
-                              {cellShifts.map((s) => (
-                                <button
-                                  key={s.id}
-                                  type="button"
-                                  onClick={() =>
-                                    setEditing({
-                                      id: s.id,
-                                      ref: s.ref,
-                                      date: dateLabel,
-                                      status: statusLabel(s.status),
-                                      client: s.client,
-                                      start: s.start,
-                                      end: s.end,
-                                      staff: s.staff,
-                                      service: s.service,
-                                    })
-                                  }
-                                  className={cn(
-                                    "w-full text-left rounded-sm border px-1.5 py-1 text-[10px] leading-tight shadow-sm hover:ring-1 hover:ring-primary transition-all",
-                                    s.staff === "Unassigned Shifts"
-                                      ? "bg-yellow-200/90 border-yellow-500 text-yellow-950"
-                                      : statusStyles(s.status),
-                                    cancelledIds.has(s.id) && "opacity-50 line-through",
-                                    selected.has(s.id) && "ring-2 ring-primary"
-                                  )}
-                                >
-                                  <div className="font-semibold truncate">{s.client}</div>
-                                  <div className="opacity-80 font-mono">
-                                    {fmtTime(s.start)}–{fmtTime(s.end)}
-                                  </div>
-                                </button>
-                              ))}
+                              {cellShifts.map((s) => {
+                                const conflictList = conflicts.get(s.id);
+                                const hasConflict = !!conflictList?.length;
+                                return (
+                                  <button
+                                    key={s.id}
+                                    type="button"
+                                    title={
+                                      hasConflict
+                                        ? `⚠ Shift conflict for ${s.staff}\n${s.client} ${fmtTime(s.start)}–${fmtTime(s.end)} overlaps with:\n` +
+                                          conflictList!
+                                            .map((c) => `• ${c.client} ${fmtTime(c.start)}–${fmtTime(c.end)} (${c.service})`)
+                                            .join("\n")
+                                        : `${s.client} • ${fmtTime(s.start)}–${fmtTime(s.end)} • ${s.service}`
+                                    }
+                                    onClick={() =>
+                                      setEditing({
+                                        id: s.id,
+                                        ref: s.ref,
+                                        date: dateLabel,
+                                        status: statusLabel(s.status),
+                                        client: s.client,
+                                        start: s.start,
+                                        end: s.end,
+                                        staff: s.staff,
+                                        service: s.service,
+                                      })
+                                    }
+                                    className={cn(
+                                      "w-full text-left rounded-sm border px-1.5 py-1 text-[10px] leading-tight shadow-sm hover:ring-1 hover:ring-primary transition-all",
+                                      hasConflict
+                                        ? "bg-red-200/90 border-red-500 text-red-950 ring-1 ring-red-500 animate-pulse"
+                                        : s.staff === "Unassigned Shifts"
+                                          ? "bg-yellow-200/90 border-yellow-500 text-yellow-950"
+                                          : statusStyles(s.status),
+                                      cancelledIds.has(s.id) && "opacity-50 line-through",
+                                      selected.has(s.id) && "ring-2 ring-primary"
+                                    )}
+                                  >
+                                    <div className="font-semibold truncate flex items-center gap-1">
+                                      {hasConflict && <span aria-hidden>⚠</span>}
+                                      <span className="truncate">{s.client}</span>
+                                    </div>
+                                    <div className="opacity-80 font-mono">
+                                      {fmtTime(s.start)}–{fmtTime(s.end)}
+                                    </div>
+                                  </button>
+                                );
+                              })}
                             </div>
                           );
                         })}
