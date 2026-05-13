@@ -70,8 +70,10 @@ const STATIC_STAFF = [
   "Shaista Rafiq",
 ];
 
-const ROW_HEIGHT = 56; // px
-const PX_PER_HOUR = 64; // 24h * 64 = 1536px
+const ROW_HEIGHT = 56; // px (daily)
+const WEEKLY_ROW_HEIGHT = 140; // px — taller so day cells can stack shifts
+const PX_PER_HOUR = 64; // 24h * 64 = 1536px (daily timeline)
+const WEEK_DAY_WIDTH = 180; // px per day column (weekly)
 const HEADER_H = 28;
 
 // Base shift templates per staff (without status — derived from date)
@@ -420,8 +422,10 @@ export default function AdvancedRota() {
     return Array.from({ length: 7 }, (_, i) => addDays(date, i));
   }, [date, viewMode]);
 
-  const totalGridWidth = days.length * 24 * PX_PER_HOUR;
-  const headerHeight = viewMode === 'weekly' ? HEADER_H * 2 : HEADER_H;
+  const totalGridWidth =
+    viewMode === 'daily' ? 24 * PX_PER_HOUR : days.length * WEEK_DAY_WIDTH;
+  const headerHeight = HEADER_H;
+  const rowHeight = viewMode === 'daily' ? ROW_HEIGHT : WEEKLY_ROW_HEIGHT;
 
   const dayStep = viewMode === 'daily' ? 1 : 7;
 
@@ -807,17 +811,17 @@ export default function AdvancedRota() {
           <div className="flex">
             {/* Sticky staff column */}
             <div className="shrink-0 w-44 border-r border-border bg-muted/30">
-             <div
-  className="px-2 flex items-center text-[11px] font-semibold uppercase border-b border-border bg-muted text-muted-foreground"
-  style={{ height: 56 }}
->
-  Staff / {viewMode === 'daily' ? 'Day' : 'Week'}
-</div>
+              <div
+                className="px-2 flex items-center text-[11px] font-semibold uppercase border-b border-border bg-muted text-muted-foreground"
+                style={{ height: headerHeight + 28 }}
+              >
+                Staff / {viewMode === 'daily' ? 'Time' : 'Day'}
+              </div>
               {staffRows.map((name) => (
                 <div
                   key={name}
                   className="px-2 flex items-center text-xs font-medium border-b border-border text-foreground"
-                  style={{ height: ROW_HEIGHT }}
+                  style={{ height: rowHeight }}
                 >
                   <span className="truncate">{name}</span>
                 </div>
@@ -830,98 +834,177 @@ export default function AdvancedRota() {
                 ref={gridRef}
                 className="relative select-none"
                 style={{ width: totalGridWidth }}
-                onPointerMove={onPointerMoveGrid}
-                onPointerUp={onPointerUpGrid}
+                onPointerMove={viewMode === 'daily' ? onPointerMoveGrid : undefined}
+                onPointerUp={viewMode === 'daily' ? onPointerUpGrid : undefined}
               >
-                {/* Hour header */}
-                <div
-                  className="border-b border-border bg-muted sticky top-0 z-10"
-                  style={{ height: viewMode === 'weekly' ? HEADER_H * 2 : HEADER_H }}
-                >
-                  {viewMode === 'weekly' && (
-                    <div className="flex" style={{ height: HEADER_H }}>
-                      {days.map((d, i) => (
-                        <div
-                          key={i}
-                          className="text-center text-[11px] font-semibold text-muted-foreground flex items-center justify-center"
-                          style={{ width: 24 * PX_PER_HOUR }}
-                        >
-                          {d.getDate()}
-                        </div>
-                      ))}
+                {viewMode === 'daily' ? (
+                  <>
+                    {/* Hour header */}
+                    <div
+                      className="border-b border-border bg-muted sticky top-0 z-10"
+                      style={{ height: HEADER_H }}
+                    >
+                      <div className="flex" style={{ height: HEADER_H }}>
+                        {HOURS.map((h, i) => (
+                          <div
+                            key={i}
+                            className={cn(
+                              "shrink-0 text-[10px] text-center text-muted-foreground border-r border-border/60 flex items-center justify-center",
+                              i % 2 === 0 ? "font-semibold text-foreground" : ""
+                            )}
+                            style={{ width: PX_PER_HOUR / 2 }}
+                          >
+                            {fmtTime(h)}
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  )}
-                  <div className="flex" style={{ height: HEADER_H }}>
-                    {days.map((_, dayIdx) =>
-                      HOURS.map((h, i) => (
-                        <div
-                          key={`${dayIdx}-${i}`}
-                          className={cn(
-                            "shrink-0 text-[10px] text-center text-muted-foreground border-r border-border/60 flex items-center justify-center",
-                            i % 2 === 0 ? "font-semibold text-foreground" : ""
-                          )}
-                          style={{ width: PX_PER_HOUR / 2 }}
-                        >
-                          {fmtTime(h)}
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
 
-                {/* Rows */}
-                {staffRows.map((staff, rowIdx) => (
-                  <div
-                    key={staff}
-                    className={cn(
-                      "relative border-b border-border",
-                      rowIdx % 2 === 0 ? "bg-background" : "bg-muted/20"
-                    )}
-                    style={{ height: ROW_HEIGHT }}
-                  >
-                    {/* hour gridlines */}
-                    {Array.from({ length: days.length }, (_, dayIdx) =>
-                      HOURS.map((h, i) => (
-                        <div
-                          key={`${dayIdx}-${h}`}
-                          className={cn(
-                            "absolute top-0 bottom-0 border-r",
-                            i % 2 === 0 ? "border-border/70" : "border-border/30"
-                          )}
-                          style={{ left: (dayIdx * 24 + h) * PX_PER_HOUR, width: 0 }}
-                        />
-                      ))
-                    )}
+                    {/* Rows (daily) */}
+                    {staffRows.map((staff, rowIdx) => (
+                      <div
+                        key={staff}
+                        className={cn(
+                          "relative border-b border-border",
+                          rowIdx % 2 === 0 ? "bg-background" : "bg-muted/20"
+                        )}
+                        style={{ height: ROW_HEIGHT }}
+                      >
+                        {HOURS.map((h, i) => (
+                          <div
+                            key={h}
+                            className={cn(
+                              "absolute top-0 bottom-0 border-r",
+                              i % 2 === 0 ? "border-border/70" : "border-border/30"
+                            )}
+                            style={{ left: h * PX_PER_HOUR, width: 0 }}
+                          />
+                        ))}
 
-                    {/* shifts in this row */}
-                    {shifts
-                      .filter((s) => s.staff === staff && (!hoverGhost || s.id !== hoverGhost.id))
-                      .filter((s) => filterCancelled === "show" || !cancelledIds.has(s.id))
-                      .map((s) => (
-                        <ShiftBlock
-                          key={s.id}
-                          shift={s}
-                          selected={selected.has(s.id)}
-                          cancelled={cancelledIds.has(s.id)}
-                          onPointerDown={(e) => onPointerDownShift(e, s)}
-                        />
-                      ))}
+                        {shifts
+                          .filter((s) => s.staff === staff && (!hoverGhost || s.id !== hoverGhost.id))
+                          .filter((s) => filterCancelled === "show" || !cancelledIds.has(s.id))
+                          .map((s) => (
+                            <ShiftBlock
+                              key={s.id}
+                              shift={s}
+                              selected={selected.has(s.id)}
+                              cancelled={cancelledIds.has(s.id)}
+                              onPointerDown={(e) => onPointerDownShift(e, s)}
+                            />
+                          ))}
 
-                    {/* ghost while dragging */}
-                    {hoverGhost && hoverGhost.staff === staff && (
-                      <ShiftBlock
-                        shift={{
-                          ...(shifts.find((s) => s.id === hoverGhost.id)!),
-                          start: hoverGhost.start,
-                          end: hoverGhost.end,
-                          staff: hoverGhost.staff,
-                        }}
-                        selected={false}
-                        ghost
-                      />
-                    )}
-                  </div>
-                ))}
+                        {hoverGhost && hoverGhost.staff === staff && (
+                          <ShiftBlock
+                            shift={{
+                              ...(shifts.find((s) => s.id === hoverGhost.id)!),
+                              start: hoverGhost.start,
+                              end: hoverGhost.end,
+                              staff: hoverGhost.staff,
+                            }}
+                            selected={false}
+                            ghost
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </>
+                ) : (
+                  <>
+                    {/* Weekly: 7 day-column header */}
+                    <div
+                      className="border-b border-border bg-muted sticky top-0 z-10 flex"
+                      style={{ height: headerHeight + 28 }}
+                    >
+                      {days.map((d, i) => {
+                        const isToday = isSameDay(d, new Date());
+                        return (
+                          <div
+                            key={i}
+                            className={cn(
+                              "border-r border-border flex flex-col items-center justify-center",
+                              isToday && "bg-primary/10"
+                            )}
+                            style={{ width: WEEK_DAY_WIDTH }}
+                          >
+                            <span className="text-[11px] font-semibold uppercase text-muted-foreground">
+                              {d.toLocaleDateString("en-GB", { weekday: "short" })}
+                            </span>
+                            <span className={cn("text-xs font-medium", isToday && "text-primary")}>
+                              {formatDateShort(d)}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Weekly rows: staff x day grid */}
+                    {staffRows.map((staff, rowIdx) => (
+                      <div
+                        key={staff}
+                        className={cn(
+                          "relative border-b border-border flex",
+                          rowIdx % 2 === 0 ? "bg-background" : "bg-muted/20"
+                        )}
+                        style={{ height: WEEKLY_ROW_HEIGHT }}
+                      >
+                        {days.map((_, dayIdx) => {
+                          const cellShifts = shifts
+                            .filter(
+                              (s) =>
+                                s.staff === staff &&
+                                s.dayIndex === dayIdx &&
+                                (filterCancelled === "show" || !cancelledIds.has(s.id))
+                            )
+                            .sort((a, b) => a.start - b.start);
+                          return (
+                            <div
+                              key={dayIdx}
+                              className="border-r border-border p-1 overflow-y-auto space-y-1"
+                              style={{ width: WEEK_DAY_WIDTH }}
+                            >
+                              {cellShifts.length === 0 && (
+                                <div className="h-full flex items-center justify-center text-[10px] text-muted-foreground/40">
+                                  —
+                                </div>
+                              )}
+                              {cellShifts.map((s) => (
+                                <button
+                                  key={s.id}
+                                  type="button"
+                                  onClick={() =>
+                                    setEditing({
+                                      id: s.id,
+                                      ref: s.ref,
+                                      date: dateLabel,
+                                      status: statusLabel(s.status),
+                                      client: s.client,
+                                      start: s.start,
+                                      end: s.end,
+                                      staff: s.staff,
+                                      service: s.service,
+                                    })
+                                  }
+                                  className={cn(
+                                    "w-full text-left rounded-sm border px-1.5 py-1 text-[10px] leading-tight shadow-sm hover:ring-1 hover:ring-primary transition-all",
+                                    statusStyles(s.status),
+                                    cancelledIds.has(s.id) && "opacity-50 line-through",
+                                    selected.has(s.id) && "ring-2 ring-primary"
+                                  )}
+                                >
+                                  <div className="font-semibold truncate">{s.client}</div>
+                                  <div className="opacity-80 font-mono">
+                                    {fmtTime(s.start)}–{fmtTime(s.end)}
+                                  </div>
+                                </button>
+                              ))}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </>
+                )}
               </div>
             </div>
           </div>
