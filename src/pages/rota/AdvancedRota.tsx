@@ -70,8 +70,10 @@ const STATIC_STAFF = [
   "Shaista Rafiq",
 ];
 
-const ROW_HEIGHT = 56; // px
-const PX_PER_HOUR = 64; // 24h * 64 = 1536px
+const ROW_HEIGHT = 56; // px (daily)
+const WEEKLY_ROW_HEIGHT = 140; // px — taller so day cells can stack shifts
+const PX_PER_HOUR = 64; // 24h * 64 = 1536px (daily timeline)
+const WEEK_DAY_WIDTH = 180; // px per day column (weekly)
 const HEADER_H = 28;
 
 // Base shift templates per staff (without status — derived from date)
