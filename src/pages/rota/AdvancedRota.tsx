@@ -813,7 +813,7 @@ export default function AdvancedRota() {
             <div className="shrink-0 w-44 border-r border-border bg-muted/30">
               <div
                 className="px-2 flex items-center text-[11px] font-semibold uppercase border-b border-border bg-muted text-muted-foreground"
-                style={{ height: headerHeight + 28 }}
+                style={{ height: viewMode === 'daily' ? HEADER_H : headerHeight + 28 }}
               >
                 Staff / {viewMode === 'daily' ? 'Time' : 'Day'}
               </div>
