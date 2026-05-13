@@ -881,7 +881,21 @@ export default function AdvancedRota() {
             (s) => s.staff === UNASSIGNED && (filterCancelled === "show" || !cancelledIds.has(s.id))
           );
           return (
-            <div className="border-2 border-yellow-500/70 rounded-md bg-yellow-50/40 dark:bg-yellow-950/10 overflow-hidden mb-3">
+            <div
+              className="border-2 border-yellow-500/70 rounded-md bg-yellow-50/40 dark:bg-yellow-950/10 overflow-hidden mb-3"
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                const id = e.dataTransfer.getData("text/plain");
+                if (!id) return;
+                const s = shifts.find((x) => x.id === id);
+                if (!s || s.staff === UNASSIGNED) return;
+                assignDroppedShift(id, UNASSIGNED, s.dayIndex, s.start);
+              }}
+            >
               <div className="px-3 py-1.5 border-b border-yellow-500/50 bg-yellow-100/70 dark:bg-yellow-900/20 flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-yellow-400 border border-yellow-600" />
                 <span className="text-xs font-semibold uppercase tracking-wide text-yellow-900 dark:text-yellow-200">
