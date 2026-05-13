@@ -249,9 +249,20 @@ function buildShiftsForDate(date: Date, receiverNames: string[], staffNameMap: R
         end = Math.max(start + 0.25, end + jitter);
       }
 
+      const isUnassigned = t.staff === "Unassigned Shifts";
       let status: ShiftStatus;
       if (t.kind === "oncall") {
         status = isFuture ? "scheduled" : isPast ? "complete" : "oncall";
+      } else if (isUnassigned) {
+        // Unassigned shifts can never be "complete" or "in-progress" — if their
+        // time has passed (or is currently passing) they are missed.
+        if (isFuture) {
+          status = "scheduled";
+        } else if (isPast) {
+          status = "missed";
+        } else {
+          status = start <= nowHours ? "missed" : "scheduled";
+        }
       } else if (isFuture) {
         status = "scheduled";
       } else if (isPast) {
