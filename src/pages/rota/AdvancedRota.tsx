@@ -442,6 +442,34 @@ export default function AdvancedRota() {
     return allShifts;
   }, [days, overrides]);
 
+  // Detect per-caregiver overlapping shifts (conflicts).
+  const conflicts = useMemo(() => {
+    const map = new Map<string, Shift[]>(); // shift.id -> conflicting shifts
+    const buckets = new Map<string, Shift[]>();
+    for (const s of shifts) {
+      if (cancelledIds.has(s.id)) continue;
+      if (!s.staff || s.staff === "Unassigned Shifts") continue;
+      const key = `${s.staff}|${s.dayIndex}`;
+      if (!buckets.has(key)) buckets.set(key, []);
+      buckets.get(key)!.push(s);
+    }
+    for (const list of buckets.values()) {
+      for (let i = 0; i < list.length; i++) {
+        for (let j = i + 1; j < list.length; j++) {
+          const a = list[i];
+          const b = list[j];
+          if (a.start < b.end && b.start < a.end) {
+            if (!map.has(a.id)) map.set(a.id, []);
+            if (!map.has(b.id)) map.set(b.id, []);
+            map.get(a.id)!.push(b);
+            map.get(b.id)!.push(a);
+          }
+        }
+      }
+    }
+    return map;
+  }, [shifts, cancelledIds]);
+
   /* ---------------------------- Drag & Drop -------------------------------- */
 
   function onPointerDownShift(e: React.PointerEvent, s: Shift) {
