@@ -485,11 +485,20 @@ export default function AdvancedRota() {
 
   /* ---------------------------- Drag & Drop -------------------------------- */
 
+  function shiftHasStarted(s: Shift) {
+    return s.status === "in-progress" || s.status === "complete" || s.status === "missed";
+  }
+
   function onPointerDownShift(e: React.PointerEvent, s: Shift) {
     if (bulkSelect) {
       const next = new Set(selected);
       next.has(s.id) ? next.delete(s.id) : next.add(s.id);
       setSelected(next);
+      return;
+    }
+    if (shiftHasStarted(s)) {
+      e.preventDefault();
+      toast.error("Shift time already started — can't reassign or reallocate.");
       return;
     }
     e.preventDefault();
