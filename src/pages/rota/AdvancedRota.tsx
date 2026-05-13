@@ -902,6 +902,7 @@ export default function AdvancedRota() {
           );
           return (
             <div
+              ref={unassignedPanelRef}
               className="border-2 border-yellow-500/70 rounded-md bg-yellow-50/40 dark:bg-yellow-950/10 overflow-hidden mb-3"
               onDragOver={(e) => {
                 e.preventDefault();
