@@ -442,6 +442,34 @@ export default function AdvancedRota() {
     return allShifts;
   }, [days, overrides]);
 
+  // Detect per-caregiver overlapping shifts (conflicts).
+  const conflicts = useMemo(() => {
+    const map = new Map<string, Shift[]>(); // shift.id -> conflicting shifts
+    const buckets = new Map<string, Shift[]>();
+    for (const s of shifts) {
+      if (cancelledIds.has(s.id)) continue;
+      if (!s.staff || s.staff === "Unassigned Shifts") continue;
+      const key = `${s.staff}|${s.dayIndex}`;
+      if (!buckets.has(key)) buckets.set(key, []);
+      buckets.get(key)!.push(s);
+    }
+    for (const list of buckets.values()) {
+      for (let i = 0; i < list.length; i++) {
+        for (let j = i + 1; j < list.length; j++) {
+          const a = list[i];
+          const b = list[j];
+          if (a.start < b.end && b.start < a.end) {
+            if (!map.has(a.id)) map.set(a.id, []);
+            if (!map.has(b.id)) map.set(b.id, []);
+            map.get(a.id)!.push(b);
+            map.get(b.id)!.push(a);
+          }
+        }
+      }
+    }
+    return map;
+  }, [shifts, cancelledIds]);
+
   /* ---------------------------- Drag & Drop -------------------------------- */
 
   function onPointerDownShift(e: React.PointerEvent, s: Shift) {
@@ -890,6 +918,7 @@ export default function AdvancedRota() {
                               shift={s}
                               selected={selected.has(s.id)}
                               cancelled={cancelledIds.has(s.id)}
+                              conflictsWith={conflicts.get(s.id)}
                               onPointerDown={(e) => onPointerDownShift(e, s)}
                             />
                           ))}
@@ -968,38 +997,55 @@ export default function AdvancedRota() {
                                   —
                                 </div>
                               )}
-                              {cellShifts.map((s) => (
-                                <button
-                                  key={s.id}
-                                  type="button"
-                                  onClick={() =>
-                                    setEditing({
-                                      id: s.id,
-                                      ref: s.ref,
-                                      date: dateLabel,
-                                      status: statusLabel(s.status),
-                                      client: s.client,
-                                      start: s.start,
-                                      end: s.end,
-                                      staff: s.staff,
-                                      service: s.service,
-                                    })
-                                  }
-                                  className={cn(
-                                    "w-full text-left rounded-sm border px-1.5 py-1 text-[10px] leading-tight shadow-sm hover:ring-1 hover:ring-primary transition-all",
-                                    s.staff === "Unassigned Shifts"
-                                      ? "bg-yellow-200/90 border-yellow-500 text-yellow-950"
-                                      : statusStyles(s.status),
-                                    cancelledIds.has(s.id) && "opacity-50 line-through",
-                                    selected.has(s.id) && "ring-2 ring-primary"
-                                  )}
-                                >
-                                  <div className="font-semibold truncate">{s.client}</div>
-                                  <div className="opacity-80 font-mono">
-                                    {fmtTime(s.start)}–{fmtTime(s.end)}
-                                  </div>
-                                </button>
-                              ))}
+                              {cellShifts.map((s) => {
+                                const conflictList = conflicts.get(s.id);
+                                const hasConflict = !!conflictList?.length;
+                                return (
+                                  <button
+                                    key={s.id}
+                                    type="button"
+                                    title={
+                                      hasConflict
+                                        ? `⚠ Shift conflict for ${s.staff}\n${s.client} ${fmtTime(s.start)}–${fmtTime(s.end)} overlaps with:\n` +
+                                          conflictList!
+                                            .map((c) => `• ${c.client} ${fmtTime(c.start)}–${fmtTime(c.end)} (${c.service})`)
+                                            .join("\n")
+                                        : `${s.client} • ${fmtTime(s.start)}–${fmtTime(s.end)} • ${s.service}`
+                                    }
+                                    onClick={() =>
+                                      setEditing({
+                                        id: s.id,
+                                        ref: s.ref,
+                                        date: dateLabel,
+                                        status: statusLabel(s.status),
+                                        client: s.client,
+                                        start: s.start,
+                                        end: s.end,
+                                        staff: s.staff,
+                                        service: s.service,
+                                      })
+                                    }
+                                    className={cn(
+                                      "w-full text-left rounded-sm border px-1.5 py-1 text-[10px] leading-tight shadow-sm hover:ring-1 hover:ring-primary transition-all",
+                                      hasConflict
+                                        ? "bg-red-200/90 border-red-500 text-red-950 ring-1 ring-red-500 animate-pulse"
+                                        : s.staff === "Unassigned Shifts"
+                                          ? "bg-yellow-200/90 border-yellow-500 text-yellow-950"
+                                          : statusStyles(s.status),
+                                      cancelledIds.has(s.id) && "opacity-50 line-through",
+                                      selected.has(s.id) && "ring-2 ring-primary"
+                                    )}
+                                  >
+                                    <div className="font-semibold truncate flex items-center gap-1">
+                                      {hasConflict && <span aria-hidden>⚠</span>}
+                                      <span className="truncate">{s.client}</span>
+                                    </div>
+                                    <div className="opacity-80 font-mono">
+                                      {fmtTime(s.start)}–{fmtTime(s.end)}
+                                    </div>
+                                  </button>
+                                );
+                              })}
                             </div>
                           );
                         })}
@@ -1019,6 +1065,8 @@ export default function AdvancedRota() {
           <LegendDot className="bg-emerald-100 border-emerald-300" label="Scheduled" />
           <LegendDot className="bg-rose-300 border-rose-500" label="Missed" />
           <LegendDot className="bg-purple-300 border-purple-500" label="On Call" />
+          <LegendDot className="bg-yellow-300 border-yellow-500" label="Unassigned" />
+          <LegendDot className="bg-red-300 border-red-500" label="Conflict" />
           <span className="ml-auto flex items-center gap-1">
             <GripVertical className="h-3.5 w-3.5" /> Drag any block to reschedule or reassign
           </span>
@@ -1094,33 +1142,47 @@ function ShiftBlock({
   selected,
   ghost,
   cancelled,
+  conflictsWith,
   onPointerDown,
 }: {
   shift: Shift;
   selected: boolean;
   ghost?: boolean;
   cancelled?: boolean;
+  conflictsWith?: Shift[];
   onPointerDown?: (e: React.PointerEvent) => void;
 }) {
   const left = (shift.dayIndex * 24 + shift.start) * PX_PER_HOUR;
   const width = Math.max(40, (shift.end - shift.start) * PX_PER_HOUR);
+  const hasConflict = !!conflictsWith?.length;
+  const title = hasConflict
+    ? `⚠ Shift conflict for ${shift.staff}\n${shift.client} ${fmtTime(shift.start)}–${fmtTime(shift.end)} overlaps with:\n` +
+      conflictsWith!
+        .map((c) => `• ${c.client} ${fmtTime(c.start)}–${fmtTime(c.end)} (${c.service})`)
+        .join("\n")
+    : `${shift.client} • ${fmtTime(shift.start)}–${fmtTime(shift.end)} • ${shift.service}`;
   return (
     <div
       onPointerDown={onPointerDown}
       className={cn(
         "absolute top-1 bottom-1 rounded-sm border px-1.5 py-0.5 cursor-grab active:cursor-grabbing overflow-hidden text-[10px] leading-tight shadow-sm",
-        shift.staff === "Unassigned Shifts"
-          ? "bg-yellow-200/90 border-yellow-500 text-yellow-950"
-          : statusStyles(shift.status),
+        hasConflict
+          ? "bg-red-200/90 border-red-500 text-red-950 ring-1 ring-red-500 animate-pulse z-10"
+          : shift.staff === "Unassigned Shifts"
+            ? "bg-yellow-200/90 border-yellow-500 text-yellow-950"
+            : statusStyles(shift.status),
         selected && "ring-2 ring-primary ring-offset-1",
         ghost && "opacity-60 ring-2 ring-primary",
         cancelled && "opacity-50 line-through"
       )}
       style={{ left, width }}
-      title={`${shift.client} • ${fmtTime(shift.start)}–${fmtTime(shift.end)} • ${shift.service}`}
+      title={title}
     >
-      <div className="font-semibold truncate">
-        {shift.client} <span className="opacity-70 font-normal">{fmtTime(shift.start)}</span>
+      <div className="font-semibold truncate flex items-center gap-1">
+        {hasConflict && <span aria-hidden>⚠</span>}
+        <span className="truncate">
+          {shift.client} <span className="opacity-70 font-normal">{fmtTime(shift.start)}</span>
+        </span>
       </div>
       <div className="truncate opacity-80">{shift.ref}</div>
       <div className="flex items-center gap-0.5 mt-0.5">
