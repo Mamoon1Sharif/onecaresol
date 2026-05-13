@@ -98,7 +98,7 @@ export function useCareReceivers() {
 
       const today = todayIsoDate();
       const activeDnarReceiverIds = new Set(
-        ((dnarRows ?? []) as ReceiverDnarSetting[])
+        ((dnarRows ?? []) as unknown as ReceiverDnarSetting[])
           .filter((row) => isActiveDnarSetting(row, today))
           .map((row) => row.care_receiver_id)
       );
