@@ -813,7 +813,7 @@ export default function AdvancedRota() {
             <div className="shrink-0 w-44 border-r border-border bg-muted/30">
               <div
                 className="px-2 flex items-center text-[11px] font-semibold uppercase border-b border-border bg-muted text-muted-foreground"
-                style={{ height: headerHeight + 28 }}
+                style={{ height: viewMode === 'daily' ? HEADER_H : headerHeight + 28 }}
               >
                 Staff / {viewMode === 'daily' ? 'Time' : 'Day'}
               </div>
@@ -987,7 +987,9 @@ export default function AdvancedRota() {
                                   }
                                   className={cn(
                                     "w-full text-left rounded-sm border px-1.5 py-1 text-[10px] leading-tight shadow-sm hover:ring-1 hover:ring-primary transition-all",
-                                    statusStyles(s.status),
+                                    s.staff === "Unassigned Shifts"
+                                      ? "bg-yellow-200/90 border-yellow-500 text-yellow-950"
+                                      : statusStyles(s.status),
                                     cancelledIds.has(s.id) && "opacity-50 line-through",
                                     selected.has(s.id) && "ring-2 ring-primary"
                                   )}
@@ -1107,7 +1109,9 @@ function ShiftBlock({
       onPointerDown={onPointerDown}
       className={cn(
         "absolute top-1 bottom-1 rounded-sm border px-1.5 py-0.5 cursor-grab active:cursor-grabbing overflow-hidden text-[10px] leading-tight shadow-sm",
-        statusStyles(shift.status),
+        shift.staff === "Unassigned Shifts"
+          ? "bg-yellow-200/90 border-yellow-500 text-yellow-950"
+          : statusStyles(shift.status),
         selected && "ring-2 ring-primary ring-offset-1",
         ghost && "opacity-60 ring-2 ring-primary",
         cancelled && "opacity-50 line-through"
