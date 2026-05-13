@@ -677,6 +677,10 @@ export default function AdvancedRota() {
   ) {
     const s = shifts.find((x) => x.id === shiftId);
     if (!s) return;
+    if (shiftHasStarted(s)) {
+      toast.error("Shift time already started — can't reassign or reallocate.");
+      return;
+    }
     const length = s.end - s.start;
     let start = toStart ?? s.start;
     // snap to 15 min and clamp into 0..24
