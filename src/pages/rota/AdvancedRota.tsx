@@ -53,6 +53,7 @@ interface Shift {
   ref: string;
   service: string;
   status: ShiftStatus;
+  dayIndex: number;
 }
 
 const STATIC_STAFF = [
@@ -217,7 +218,7 @@ function formatDateShort(d: Date) {
   return `${day}/${month}/${d.getFullYear()}`;
 }
 
-function buildShiftsForDate(date: Date, receiverNames: string[], staffNameMap: Record<string, string>): Shift[] {
+function buildShiftsForDate(date: Date, receiverNames: string[], staffNameMap: Record<string, string>, dayIndex: number = 0): Shift[] {
   const today = new Date();
   const todayKey = dayKey(today);
   const dKey = dayKey(date);
@@ -279,6 +280,7 @@ function buildShiftsForDate(date: Date, receiverNames: string[], staffNameMap: R
         ref: t.ref,
         service: t.service + statusSuffix(status),
         status,
+        dayIndex,
       };
     });
 }
@@ -364,6 +366,7 @@ export default function AdvancedRota() {
   }, [staffRows]);
 
   const [date, setDate] = useState(() => startOfWeekMonday(new Date()));
+  const [viewMode, setViewMode] = useState<'daily' | 'weekly'>('weekly');
   const [cancelledIds, setCancelledIds] = useState<Set<string>>(new Set());
   // Overrides per day per shift id (stores edited start/end/staff after drag)
   const [overrides, setOverrides] = useState<Record<string, Partial<Shift>>>({});
@@ -386,6 +389,7 @@ export default function AdvancedRota() {
     staff: string;
     start: number;
     end: number;
+    dayIndex: number;
   } | null>(null);
   const [editing, setEditing] = useState<EditRotaShift | null>(null);
   const [pendingMove, setPendingMove] = useState<{
@@ -396,6 +400,8 @@ export default function AdvancedRota() {
     fromEnd: number;
     toStart: number;
     toEnd: number;
+    fromDayIndex: number;
+    toDayIndex: number;
     client: string;
     ref: string;
     service: string;
@@ -404,20 +410,33 @@ export default function AdvancedRota() {
   const gridRef = useRef<HTMLDivElement>(null);
 
   const dateLabel = useMemo(() => {
+    if (viewMode === 'daily') return formatDateShort(date);
     const weekEnd = addDays(date, 6);
     return `${formatDateShort(date)} - ${formatDateShort(weekEnd)}`;
-  }, [date]);
+  }, [date, viewMode]);
 
-  const totalGridWidth = 24 * PX_PER_HOUR;
+  const days = useMemo(() => {
+    if (viewMode === 'daily') return [date];
+    return Array.from({ length: 7 }, (_, i) => addDays(date, i));
+  }, [date, viewMode]);
 
-  // Build shifts for the current day, then apply any user overrides
+  const totalGridWidth = days.length * 24 * PX_PER_HOUR;
+  const headerHeight = viewMode === 'weekly' ? HEADER_H * 2 : HEADER_H;
+
+  const dayStep = viewMode === 'daily' ? 1 : 7;
+
+  // Build shifts for the current days, then apply any user overrides
   const shifts = useMemo<Shift[]>(() => {
-    const base = buildShiftsForDate(date, receiverNames, staffNameMap);
-    return base.map((s) => {
-      const ov = overrides[s.id];
-      return ov ? { ...s, ...ov } : s;
+    const allShifts: Shift[] = [];
+    days.forEach((d, i) => {
+      const dayShifts = buildShiftsForDate(d, receiverNames, staffNameMap, i);
+      dayShifts.forEach(s => {
+        const ov = overrides[s.id];
+        allShifts.push(ov ? { ...s, ...ov } : s);
+      });
     });
-  }, [date, overrides]);
+    return allShifts;
+  }, [days, overrides]);
 
   /* ---------------------------- Drag & Drop -------------------------------- */
 
@@ -441,7 +460,7 @@ export default function AdvancedRota() {
       originY: e.clientY,
       moved: false,
     });
-    setHoverGhost({ id: s.id, staff: s.staff, start: s.start, end: s.end });
+    setHoverGhost({ id: s.id, staff: s.staff, start: s.start, end: s.end, dayIndex: s.dayIndex });
     target.setPointerCapture(e.pointerId);
   }
 
@@ -464,13 +483,16 @@ export default function AdvancedRota() {
     if (!shift) return;
 
     const length = shift.end - shift.start;
-    let newStart = x / PX_PER_HOUR - drag.offsetHours;
+    const dayWidth = 24 * PX_PER_HOUR;
+    const dayIdx = Math.floor(x / dayWidth);
+    const hourX = x % dayWidth;
+    let newStart = hourX / PX_PER_HOUR - drag.offsetHours;
     // snap to 15 min
     newStart = Math.max(0, Math.min(24 - length, Math.round(newStart * 4) / 4));
 
     const rowIdx = Math.max(
       0,
-      Math.min(staffRows.length - 1, Math.floor((y - HEADER_H) / ROW_HEIGHT))
+      Math.min(staffRows.length - 1, Math.floor((y - headerHeight) / ROW_HEIGHT))
     );
     const newStaff = staffRows[rowIdx];
 
@@ -479,6 +501,7 @@ export default function AdvancedRota() {
       staff: newStaff,
       start: newStart,
       end: newStart + length,
+      dayIndex: dayIdx,
     });
   }
 
@@ -500,6 +523,8 @@ export default function AdvancedRota() {
               fromEnd: s.end,
               toStart: hoverGhost.start,
               toEnd: hoverGhost.end,
+              fromDayIndex: s.dayIndex,
+              toDayIndex: hoverGhost.dayIndex,
               client: s.client,
               ref: s.ref,
               service: s.service,
@@ -720,8 +745,8 @@ export default function AdvancedRota() {
             <Button
               variant="outline" size="icon"
               className="h-8 w-8"
-              onClick={() => setDate((d) => addDays(d, -7))}
-              aria-label="Previous week"
+              onClick={() => setDate((d) => addDays(d, -dayStep))}
+              aria-label="Previous"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -735,8 +760,8 @@ export default function AdvancedRota() {
             <Button
               variant="outline" size="icon"
               className="h-8 w-8"
-              onClick={() => setDate((d) => addDays(d, 7))}
-              aria-label="Next week"
+              onClick={() => setDate((d) => addDays(d, dayStep))}
+              aria-label="Next"
             >
               <ChevronRight className="h-4 w-4" />
             </Button>
@@ -758,6 +783,23 @@ export default function AdvancedRota() {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
+
+          <div className="flex gap-2">
+            <Button
+              variant={viewMode === 'daily' ? 'default' : 'outline'}
+              onClick={() => setViewMode('daily')}
+              size="sm"
+            >
+              Daily
+            </Button>
+            <Button
+              variant={viewMode === 'weekly' ? 'default' : 'outline'}
+              onClick={() => setViewMode('weekly')}
+              size="sm"
+            >
+              Weekly
+            </Button>
+          </div>
         </div>
 
         {/* Timeline grid */}
@@ -769,7 +811,7 @@ export default function AdvancedRota() {
                 className="h-7 px-2 flex items-center text-[11px] font-semibold uppercase border-b border-border bg-muted text-muted-foreground"
                 style={{ height: HEADER_H }}
               >
-                Staff / Week
+                Staff / {viewMode === 'daily' ? 'Day' : 'Week'}
               </div>
               {staffRows.map((name) => (
                 <div
@@ -793,21 +835,38 @@ export default function AdvancedRota() {
               >
                 {/* Hour header */}
                 <div
-                  className="flex border-b border-border bg-muted sticky top-0 z-10"
-                  style={{ height: HEADER_H }}
+                  className="border-b border-border bg-muted sticky top-0 z-10"
+                  style={{ height: viewMode === 'weekly' ? HEADER_H * 2 : HEADER_H }}
                 >
-                  {HOURS.map((h, i) => (
-                    <div
-                      key={h}
-                      className={cn(
-                        "shrink-0 text-[10px] text-center text-muted-foreground border-r border-border/60 flex items-center justify-center",
-                        i % 2 === 0 ? "font-semibold text-foreground" : ""
-                      )}
-                      style={{ width: PX_PER_HOUR / 2 }}
-                    >
-                      {fmtTime(h)}
+                  {viewMode === 'weekly' && (
+                    <div className="flex" style={{ height: HEADER_H }}>
+                      {days.map((d, i) => (
+                        <div
+                          key={i}
+                          className="text-center text-[11px] font-semibold text-muted-foreground flex items-center justify-center"
+                          style={{ width: 24 * PX_PER_HOUR }}
+                        >
+                          {d.getDate()}
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
+                  <div className="flex" style={{ height: HEADER_H }}>
+                    {days.map((_, dayIdx) =>
+                      HOURS.map((h, i) => (
+                        <div
+                          key={`${dayIdx}-${i}`}
+                          className={cn(
+                            "shrink-0 text-[10px] text-center text-muted-foreground border-r border-border/60 flex items-center justify-center",
+                            i % 2 === 0 ? "font-semibold text-foreground" : ""
+                          )}
+                          style={{ width: PX_PER_HOUR / 2 }}
+                        >
+                          {fmtTime(h)}
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
 
                 {/* Rows */}
@@ -821,16 +880,18 @@ export default function AdvancedRota() {
                     style={{ height: ROW_HEIGHT }}
                   >
                     {/* hour gridlines */}
-                    {HOURS.map((h, i) => (
-                      <div
-                        key={h}
-                        className={cn(
-                          "absolute top-0 bottom-0 border-r",
-                          i % 2 === 0 ? "border-border/70" : "border-border/30"
-                        )}
-                        style={{ left: h * PX_PER_HOUR, width: 0 }}
-                      />
-                    ))}
+                    {Array.from({ length: days.length }, (_, dayIdx) =>
+                      HOURS.map((h, i) => (
+                        <div
+                          key={`${dayIdx}-${h}`}
+                          className={cn(
+                            "absolute top-0 bottom-0 border-r",
+                            i % 2 === 0 ? "border-border/70" : "border-border/30"
+                          )}
+                          style={{ left: (dayIdx * 24 + h) * PX_PER_HOUR, width: 0 }}
+                        />
+                      ))
+                    )}
 
                     {/* shifts in this row */}
                     {shifts
@@ -956,7 +1017,7 @@ function ShiftBlock({
   cancelled?: boolean;
   onPointerDown?: (e: React.PointerEvent) => void;
 }) {
-  const left = shift.start * PX_PER_HOUR;
+  const left = (shift.dayIndex * 24 + shift.start) * PX_PER_HOUR;
   const width = Math.max(40, (shift.end - shift.start) * PX_PER_HOUR);
   return (
     <div
