@@ -1140,33 +1140,47 @@ function ShiftBlock({
   selected,
   ghost,
   cancelled,
+  conflictsWith,
   onPointerDown,
 }: {
   shift: Shift;
   selected: boolean;
   ghost?: boolean;
   cancelled?: boolean;
+  conflictsWith?: Shift[];
   onPointerDown?: (e: React.PointerEvent) => void;
 }) {
   const left = (shift.dayIndex * 24 + shift.start) * PX_PER_HOUR;
   const width = Math.max(40, (shift.end - shift.start) * PX_PER_HOUR);
+  const hasConflict = !!conflictsWith?.length;
+  const title = hasConflict
+    ? `⚠ Shift conflict for ${shift.staff}\n${shift.client} ${fmtTime(shift.start)}–${fmtTime(shift.end)} overlaps with:\n` +
+      conflictsWith!
+        .map((c) => `• ${c.client} ${fmtTime(c.start)}–${fmtTime(c.end)} (${c.service})`)
+        .join("\n")
+    : `${shift.client} • ${fmtTime(shift.start)}–${fmtTime(shift.end)} • ${shift.service}`;
   return (
     <div
       onPointerDown={onPointerDown}
       className={cn(
         "absolute top-1 bottom-1 rounded-sm border px-1.5 py-0.5 cursor-grab active:cursor-grabbing overflow-hidden text-[10px] leading-tight shadow-sm",
-        shift.staff === "Unassigned Shifts"
-          ? "bg-yellow-200/90 border-yellow-500 text-yellow-950"
-          : statusStyles(shift.status),
+        hasConflict
+          ? "bg-red-200/90 border-red-500 text-red-950 ring-1 ring-red-500 animate-pulse z-10"
+          : shift.staff === "Unassigned Shifts"
+            ? "bg-yellow-200/90 border-yellow-500 text-yellow-950"
+            : statusStyles(shift.status),
         selected && "ring-2 ring-primary ring-offset-1",
         ghost && "opacity-60 ring-2 ring-primary",
         cancelled && "opacity-50 line-through"
       )}
       style={{ left, width }}
-      title={`${shift.client} • ${fmtTime(shift.start)}–${fmtTime(shift.end)} • ${shift.service}`}
+      title={title}
     >
-      <div className="font-semibold truncate">
-        {shift.client} <span className="opacity-70 font-normal">{fmtTime(shift.start)}</span>
+      <div className="font-semibold truncate flex items-center gap-1">
+        {hasConflict && <span aria-hidden>⚠</span>}
+        <span className="truncate">
+          {shift.client} <span className="opacity-70 font-normal">{fmtTime(shift.start)}</span>
+        </span>
       </div>
       <div className="truncate opacity-80">{shift.ref}</div>
       <div className="flex items-center gap-0.5 mt-0.5">
