@@ -422,6 +422,7 @@ export default function AdvancedRota() {
   } | null>(null);
 
   const gridRef = useRef<HTMLDivElement>(null);
+  const unassignedPanelRef = useRef<HTMLDivElement>(null);
 
   const dateLabel = useMemo(() => {
     if (viewMode === 'daily') return formatDateShort(date);
