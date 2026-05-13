@@ -1012,7 +1012,11 @@ export default function AdvancedRota() {
                         onDrop={(e) => {
                           e.preventDefault();
                           const id = e.dataTransfer.getData("text/plain");
-                          if (id) assignDroppedShift(id, staff, 0);
+                          if (!id) return;
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          const x = e.clientX - rect.left;
+                          const dropHour = x / PX_PER_HOUR;
+                          assignDroppedShift(id, staff, 0, dropHour);
                         }}
                       >
                         {HOURS.map((h, i) => (
