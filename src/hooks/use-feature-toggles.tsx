@@ -60,6 +60,7 @@ const DEFAULTS: Record<FeatureKey, boolean> = {
   notifications: false,
   insights: false,
   bookings: false,
+  locationTracking: false,
   communicationLog: false,
   timeline: false,
   liveRunRoutes: false,
