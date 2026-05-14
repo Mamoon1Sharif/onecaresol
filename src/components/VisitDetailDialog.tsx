@@ -428,38 +428,8 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                   </div>
                   <div className="flex-1 min-w-[240px]">
                     <a className="text-primary hover:underline font-medium text-sm cursor-pointer">{visit.teamMember}</a>
-                    {(editStatus || visit.status || "").toLowerCase() === "missed" ? (
-                      <div className="mt-3 space-y-1.5 text-xs">
-                        <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground">- Clock In:</span>
-                          <span className="font-mono font-semibold text-destructive">No check-in</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground">- Clock Out:</span>
-                          <span className="font-mono font-semibold text-destructive">No check-out</span>
-                        </div>
-                        <div className="text-destructive font-medium">Shift was missed — caregiver did not attend.</div>
-                      </div>
-                    ) : (
-                      <div className="mt-3 space-y-1.5 text-xs">
-                        <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground">- Clock In:</span>
-                          {clockIn ? (
-                            <span className="font-mono font-semibold text-success">{clockIn}</span>
-                          ) : (
-                            <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" onClick={handleClockIn}>Clock In</Button>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-muted-foreground">- Clock Out:</span>
-                          {clockOut ? (
-                            <span className="font-mono font-semibold text-success">{clockOut}</span>
-                          ) : (
-                            <Button size="sm" variant="outline" className="h-6 text-[11px] px-2" disabled={!clockIn} onClick={handleClockOut}>Clock Out</Button>
-                          )}
-                        </div>
-                        <div className="text-orange-600">Duration: {duration}</div>
-                      </div>
+                    {(editStatus || visit.status || "").toLowerCase() === "missed" && (
+                      <div className="mt-3 text-xs text-destructive font-medium">Shift was missed — caregiver did not attend.</div>
                     )}
                   </div>
                 </div>
@@ -846,18 +816,6 @@ function ShiftTasks({ visitId, shiftEnd, clockOut, isMissed = false }: { visitId
         </div>
       </div>
 
-      <div className="flex gap-2 mt-3">
-        <Input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && addTask()}
-          placeholder="Add a new care task..."
-          className="h-8 text-xs"
-        />
-        <Button size="sm" onClick={addTask} className="bg-success hover:bg-success/90 text-success-foreground h-8 text-xs gap-1">
-          <Plus className="h-3.5 w-3.5" /> Add Task
-        </Button>
-      </div>
     </>
   );
 }
