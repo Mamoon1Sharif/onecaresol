@@ -33,8 +33,8 @@ const topItems = [
   { title: "Service Members", url: "/carereceivers", icon: HeartHandshake },
   { title: "Bookings", url: "/bookings", icon: BookMarked, feature: "bookings" as const },
   { title: "Location Tracking", url: "/location-tracking", icon: MapPin },
-  { title: "Communication Log", url: "/communication-log", icon: MessageSquare },
-  { title: "Timeline", url: "/timeline", icon: Activity },
+  { title: "Communication Log", url: "/communication-log", icon: MessageSquare, feature: "communicationLog" as const },
+  { title: "Timeline", url: "/timeline", icon: Activity, feature: "timeline" as const },
   { title: "Reports", url: "/reports", icon: FileBarChart },
 ];
 
@@ -42,10 +42,10 @@ const rotaSubItems = [
   { title: "Add Rota", url: "/rota/add", icon: Plus },
   { title: "Daily Rota", url: "/rota/daily", icon: Circle },
   { title: "Advanced Rota", url: "/rota/advanced", icon: Circle },
-  { title: "Live Run Routes", url: "/rota/live-run-routes", icon: Circle },
-  { title: "The Monitor", url: "/rota/monitor", icon: Eye },
-  { title: "Printable Rota", url: "/rota/printable", icon: Printer },
-  { title: "Build Rota", url: "/rota/build", icon: Wrench },
+  { title: "Live Run Routes", url: "/rota/live-run-routes", icon: Circle, feature: "liveRunRoutes" as const },
+  { title: "The Monitor", url: "/rota/monitor", icon: Eye, feature: "theMonitor" as const },
+  { title: "Printable Rota", url: "/rota/printable", icon: Printer, feature: "printableRota" as const },
+  { title: "Build Rota", url: "/rota/build", icon: Wrench, feature: "buildRota" as const },
   { title: "Conflicts", url: "/rota/conflicts", icon: AlertTriangle },
 ];
 
@@ -71,7 +71,10 @@ export function AppSidebar() {
   const isCompanyAdmin = cu && (cu.role === "owner" || cu.role === "admin");
 
   const visibleTopItems = topItems.filter(
-    (item) => !("feature" in item) || features[item.feature as "insights" | "bookings"],
+    (item) => !("feature" in item) || features[item.feature as keyof typeof features],
+  );
+  const visibleRotaSubItems = rotaSubItems.filter(
+    (item) => !("feature" in item) || features[item.feature as keyof typeof features],
   );
 
   const isActive = (path: string) =>
@@ -145,7 +148,7 @@ export function AppSidebar() {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      {rotaSubItems.map((sub) => (
+                      {visibleRotaSubItems.map((sub) => (
                         <SidebarMenuSubItem key={sub.title}>
                           <SidebarMenuSubButton asChild isActive={isActive(sub.url)}>
                             <NavLink
