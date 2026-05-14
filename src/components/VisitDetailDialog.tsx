@@ -816,18 +816,6 @@ function ShiftTasks({ visitId, shiftEnd, clockOut, isMissed = false }: { visitId
         </div>
       </div>
 
-      <div className="flex gap-2 mt-3">
-        <Input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && addTask()}
-          placeholder="Add a new care task..."
-          className="h-8 text-xs"
-        />
-        <Button size="sm" onClick={addTask} className="bg-success hover:bg-success/90 text-success-foreground h-8 text-xs gap-1">
-          <Plus className="h-3.5 w-3.5" /> Add Task
-        </Button>
-      </div>
     </>
   );
 }
