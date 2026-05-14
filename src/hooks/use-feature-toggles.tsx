@@ -1,6 +1,15 @@
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 
-export type FeatureKey = "notifications" | "insights" | "bookings";
+export type FeatureKey =
+  | "notifications"
+  | "insights"
+  | "bookings"
+  | "communicationLog"
+  | "timeline"
+  | "liveRunRoutes"
+  | "theMonitor"
+  | "printableRota"
+  | "buildRota";
 
 export const FEATURE_LABELS: Record<FeatureKey, { label: string; description: string }> = {
   notifications: {
@@ -15,6 +24,30 @@ export const FEATURE_LABELS: Record<FeatureKey, { label: string; description: st
     label: "Bookings",
     description: "Bookings page in the sidebar",
   },
+  communicationLog: {
+    label: "Communication Log",
+    description: "Communication Log page in the sidebar",
+  },
+  timeline: {
+    label: "Timeline",
+    description: "Timeline page in the sidebar",
+  },
+  liveRunRoutes: {
+    label: "Live Run Routes",
+    description: "Live Run Routes under Rota in the sidebar",
+  },
+  theMonitor: {
+    label: "The Monitor",
+    description: "The Monitor under Rota in the sidebar",
+  },
+  printableRota: {
+    label: "Printable Rota",
+    description: "Printable Rota under Rota in the sidebar",
+  },
+  buildRota: {
+    label: "Build Rota",
+    description: "Build Rota under Rota in the sidebar",
+  },
 };
 
 const STORAGE_KEY = "feature_toggles_v1";
@@ -22,6 +55,12 @@ const DEFAULTS: Record<FeatureKey, boolean> = {
   notifications: false,
   insights: false,
   bookings: false,
+  communicationLog: false,
+  timeline: false,
+  liveRunRoutes: false,
+  theMonitor: false,
+  printableRota: false,
+  buildRota: false,
 };
 
 type Ctx = {
