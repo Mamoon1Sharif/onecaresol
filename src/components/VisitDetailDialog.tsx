@@ -101,6 +101,21 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
     setEditEnd(visit.scheduledEnd ?? "");
     setEditServiceCall(visit.serviceCall ?? "");
     setMemberRemoved(false);
+
+    // Seed sample shift-notes feed for completed shifts
+    if ((visit.status || "").toLowerCase() === "completed") {
+      const dateStr = visit.date;
+      const author = visit.teamMember || "Care Giver";
+      setNotes([
+        { id: "n1", ref: "142920742", tags: [], author, text: ".", hidden: false, createdAt: `${dateStr} 07:59`, visibleOnDevice: true },
+        { id: "n2", ref: "142905460", tags: [], author, text: `${visit.serviceUser} and family member both are confused, they want us to open the door for them and let the go home. We told them this is their house but they are saying no, having a chat with them to make them calm. All care done in their best interest.`, hidden: false, createdAt: `${dateStr} 21:44`, visibleOnDevice: true },
+        { id: "n3", ref: "142902043", tags: [], author, text: `6x medication given to ${visit.serviceUser} with water with her consent seen taken @9:05pm.`, hidden: false, createdAt: `${dateStr} 21:08`, visibleOnDevice: true },
+        { id: "n4", ref: "142900915", tags: [], author, text: `${visit.serviceUser} wanted to use commode, assisted her to stand with frame and walk to the commode. Used commode there was no bowel movement. Wiped bottom and assisted her to stand with frame and walk back to the lounge and sit on the armchair comfortably. Commode emptied and wiped, wipes disposed of in the nappy bag and put in the rubbish bin and made commode ready to use for the next time. Consent gained for all the tasks.`, hidden: false, createdAt: `${dateStr} 20:58`, visibleOnDevice: true },
+        { id: "n5", ref: "142897531", tags: [], author, text: `${visit.serviceUser}'s leg bag emptied (500ml). Consent gained.`, hidden: false, createdAt: `${dateStr} 20:33`, visibleOnDevice: true },
+      ]);
+    } else {
+      setNotes([]);
+    }
   }, [visit]);
 
   if (!visit) return null;
