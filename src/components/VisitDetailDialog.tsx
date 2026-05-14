@@ -498,22 +498,45 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
               {notes.length === 0 ? (
                 <p className="text-xs text-muted-foreground text-center py-3">No notes added.</p>
               ) : (
-                <div className="space-y-2">
-                  {notes.map((n) => (
-                    <div key={n.id} className="bg-muted/40 rounded px-3 py-2 text-xs">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-medium">{n.author} {n.hidden && <span className="text-[10px] text-amber-600 ml-1">(hidden)</span>}</span>
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-muted-foreground">{n.createdAt}</span>
-                          <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setNotes((arr) => arr.filter((x) => x.id !== n.id))}>
-                            <Trash2 className="h-3 w-3 text-destructive" />
-                          </Button>
-                        </div>
-                      </div>
-                      <p>{n.text}</p>
-                    </div>
-                  ))}
-                </div>
+                <Card className="border border-border overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-muted/40 border-b border-border text-left">
+                          <th className="p-2 border-r border-border w-8"><input type="checkbox" className="rounded" /></th>
+                          <th className="p-2 border-r border-border w-12">Edit</th>
+                          <th className="p-2 border-r border-border w-28">Ref</th>
+                          <th className="p-2 border-r border-border w-20">Tags</th>
+                          <th className="p-2 border-r border-border w-32">Created</th>
+                          <th className="p-2 border-r border-border">Note</th>
+                          <th className="p-2 border-r border-border w-32">Created By</th>
+                          <th className="p-2 w-24">Visible On Device</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {notes.map((n, i) => (
+                          <tr key={n.id} className={`border-b border-border ${i % 2 === 0 ? "bg-background" : "bg-muted/20"}`}>
+                            <td className="p-1.5 border-r border-border text-center"><input type="checkbox" /></td>
+                            <td className="p-1.5 border-r border-border">
+                              <Button size="icon" variant="ghost" className="h-6 w-6">
+                                <Pencil className="h-3 w-3 text-orange-500" />
+                              </Button>
+                            </td>
+                            <td className="p-1.5 border-r border-border font-mono text-[11px] text-muted-foreground">{n.ref}</td>
+                            <td className="p-1.5 border-r border-border">{(n.tags || []).join(", ")}</td>
+                            <td className="p-1.5 border-r border-border whitespace-nowrap">{n.createdAt}</td>
+                            <td className="p-1.5 border-r border-border">{n.text}</td>
+                            <td className="p-1.5 border-r border-border">{n.author}</td>
+                            <td className="p-1.5">{n.visibleOnDevice === false ? "No" : "Yes"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="px-3 py-2 text-[11px] text-muted-foreground border-t border-border">
+                    Showing 1 to {notes.length} of {notes.length}
+                  </div>
+                </Card>
               )}
             </section>
 
