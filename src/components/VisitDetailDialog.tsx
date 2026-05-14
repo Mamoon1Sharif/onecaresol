@@ -865,3 +865,106 @@ function ShiftTasks({ visitId, shiftEnd, clockOut, isMissed = false }: { visitId
     </>
   );
 }
+
+interface MedicationRecord {
+  id: string;
+  date: string;
+  medication: string;
+  dosage: string;
+  administered_by: string | null;
+  notes: string | null;
+  time_of_day: string | null;
+  scheduled_time: string | null;
+  created_at: string;
+}
+
+function MedicationFeed({ visitId }: { visitId: string }) {
+  const [meds, setMeds] = useState<MedicationRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const { data: visit, error: vErr } = await supabase
+        .from("daily_visits")
+        .select("care_receiver_id,visit_date")
+        .eq("id", visitId)
+        .maybeSingle();
+      if (vErr || !visit?.care_receiver_id) {
+        if (!cancelled) { setMeds([]); setLoading(false); }
+        return;
+      }
+      const { data, error } = await supabase
+        .from("medications")
+        .select("id,date,medication,dosage,administered_by,notes,time_of_day,scheduled_time,created_at")
+        .eq("care_receiver_id", visit.care_receiver_id)
+        .eq("date", String(visit.visit_date))
+        .order("created_at", { ascending: false });
+      if (cancelled) return;
+      if (error) {
+        toast.error("Failed to load medications: " + error.message);
+        setMeds([]);
+      } else {
+        setMeds((data ?? []) as MedicationRecord[]);
+      }
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [visitId]);
+
+  return (
+    <>
+      <div className="flex items-center justify-between border-b pb-1 mb-3">
+        <h3 className="text-sm font-semibold text-primary flex items-center gap-1.5">
+          <Pill className="h-3.5 w-3.5" /> Medication Feed
+          <span className="text-[11px] font-normal text-muted-foreground ml-1">
+            ({meds.length} administered)
+          </span>
+        </h3>
+      </div>
+
+      {loading ? (
+        <p className="text-xs text-muted-foreground text-center py-3">Loading medication records…</p>
+      ) : meds.length === 0 ? (
+        <p className="text-xs text-muted-foreground text-center py-3">No medication recorded for this shift.</p>
+      ) : (
+        <ol className="relative border-l-2 border-primary/20 ml-2 space-y-4 py-1">
+          {meds.map((m) => (
+            <li key={m.id} className="ml-4 relative">
+              <span className="absolute -left-[22px] top-1 h-4 w-4 rounded-full bg-primary/15 border-2 border-primary flex items-center justify-center">
+                <Pill className="h-2 w-2 text-primary" />
+              </span>
+              <div className="bg-muted/30 rounded-md border border-border p-3">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-foreground">{m.medication}</span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                      {m.dosage}
+                    </span>
+                    {m.time_of_day && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
+                        {m.time_of_day}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[10px] font-mono text-muted-foreground">
+                    {m.scheduled_time || new Date(m.created_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+                  </span>
+                </div>
+                {m.notes && (
+                  <p className="text-[11px] text-muted-foreground mt-1.5 leading-relaxed">{m.notes}</p>
+                )}
+                {m.administered_by && (
+                  <p className="text-[10px] text-muted-foreground mt-1">
+                    Administered by <span className="font-medium text-foreground">{m.administered_by}</span>
+                  </p>
+                )}
+              </div>
+            </li>
+          ))}
+        </ol>
+      )}
+    </>
+  );
+}
