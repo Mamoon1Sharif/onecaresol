@@ -11,29 +11,31 @@ export type VisitStatus =
   | "Pending";
 
 export function getVisitStatus(v: any): VisitStatus {
-  // 1. Explicit status from database
+  // 1. Cancelled always stays cancelled
   if (v.status === "Cancelled") return "Cancelled";
-  if (v.status === "Completed" || v.status === "Complete" || v.status === "Confirmed") return "Completed";
 
-  // 2. Clock-out means it's finished
+  // 2. Actual clock data takes priority over DB status
+  //    - check_out_time present → shift is finished
   if (v.check_out_time) return "Completed";
 
-  // 3. Clock-in means it's in progress
-  if (v.check_in_time) {
-    return "In Progress";
-  }
+  //    - check_in_time present (but no check_out) → shift is in progress
+  if (v.check_in_time) return "In Progress";
 
-  // 4. Calculate based on time if not clocked in
+  // 3. DB status "Completed" or "Complete" (explicit manual completion, no clock data)
+  if (v.status === "Completed" || v.status === "Complete") return "Completed";
+
+  // Note: "Confirmed" means the carer ACCEPTED the shift, not that it's done.
+  // So we do NOT treat "Confirmed" as "Completed".
+
+  // 4. Calculate based on scheduled time (no clock data, not manually completed)
   const now = new Date();
   
-  // Handle start hour/minute
   const startH = v.start_hour ?? 0;
   const startM = v.start_minute ?? 0;
   const duration = v.duration ?? 0;
   const durationMins = v.duration_minutes ?? (duration * 60);
   
   // Construct visit start/end times
-  // Note: visit_date is expected to be YYYY-MM-DD
   const visitDateStr = v.visit_date || new Date().toISOString().split("T")[0];
   const [y, m, d] = visitDateStr.split("-").map(Number);
   const visitStart = new Date(y, m - 1, d, startH, startM);
