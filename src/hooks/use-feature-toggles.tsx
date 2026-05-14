@@ -4,6 +4,7 @@ export type FeatureKey =
   | "notifications"
   | "insights"
   | "bookings"
+  | "locationTracking"
   | "communicationLog"
   | "timeline"
   | "liveRunRoutes"
@@ -23,6 +24,10 @@ export const FEATURE_LABELS: Record<FeatureKey, { label: string; description: st
   bookings: {
     label: "Bookings",
     description: "Bookings page in the sidebar",
+  },
+  locationTracking: {
+    label: "Location Tracking",
+    description: "Location Tracking page in the sidebar",
   },
   communicationLog: {
     label: "Communication Log",
@@ -55,6 +60,7 @@ const DEFAULTS: Record<FeatureKey, boolean> = {
   notifications: false,
   insights: false,
   bookings: false,
+  locationTracking: false,
   communicationLog: false,
   timeline: false,
   liveRunRoutes: false,
