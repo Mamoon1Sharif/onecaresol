@@ -148,7 +148,7 @@ export function AppSidebar() {
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      {rotaSubItems.map((sub) => (
+                      {visibleRotaSubItems.map((sub) => (
                         <SidebarMenuSubItem key={sub.title}>
                           <SidebarMenuSubButton asChild isActive={isActive(sub.url)}>
                             <NavLink
