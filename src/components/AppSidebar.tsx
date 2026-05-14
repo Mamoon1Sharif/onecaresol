@@ -71,7 +71,10 @@ export function AppSidebar() {
   const isCompanyAdmin = cu && (cu.role === "owner" || cu.role === "admin");
 
   const visibleTopItems = topItems.filter(
-    (item) => !("feature" in item) || features[item.feature as "insights" | "bookings"],
+    (item) => !("feature" in item) || features[item.feature as keyof typeof features],
+  );
+  const visibleRotaSubItems = rotaSubItems.filter(
+    (item) => !("feature" in item) || features[item.feature as keyof typeof features],
   );
 
   const isActive = (path: string) =>
