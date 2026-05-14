@@ -14,7 +14,7 @@ import {
   Pencil, Plus, Lock, Info, Calendar, TrendingUp, Clock, ThumbsUp, Link as LinkIcon,
   Map as MapIcon, Users, AlertCircle, User, ArrowRight, FileText, Briefcase, Bell,
   PoundSterling, Camera, ListChecks, XCircle, Trash2, X, CheckCircle2, Activity,
-  LogIn, LogOut, PlayCircle, CircleDot,
+  LogIn, LogOut, PlayCircle, CircleDot, Pill,
 } from "lucide-react";
 
 interface VisitRow {
