@@ -380,6 +380,7 @@ const AddRota = () => {
 
       await queryClient.invalidateQueries({ queryKey: ["daily_visits"] });
       await queryClient.invalidateQueries({ queryKey: ["shift_tasks"] });
+      await queryClient.invalidateQueries({ queryKey: ["shift_task_medician"] });
       toast.success("Shift saved successfully");
 
       if (clashOther && staffId && dvRow?.id) {
