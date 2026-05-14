@@ -2342,6 +2342,63 @@ export type Database = {
           },
         ]
       }
+      shift_task_medician: {
+        Row: {
+          company_id: string
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          daily_visit_id: string
+          dosage: string | null
+          id: string
+          is_completed: boolean
+          medication: string | null
+          medication_id: string | null
+          title: string
+        }
+        Insert: {
+          company_id?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          daily_visit_id: string
+          dosage?: string | null
+          id?: string
+          is_completed?: boolean
+          medication?: string | null
+          medication_id?: string | null
+          title: string
+        }
+        Update: {
+          company_id?: string
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          daily_visit_id?: string
+          dosage?: string | null
+          id?: string
+          is_completed?: boolean
+          medication?: string | null
+          medication_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shift_task_medician_daily_visit_id_fkey"
+            columns: ["daily_visit_id"]
+            isOneToOne: false
+            referencedRelation: "daily_visits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shift_task_medician_medication_id_fkey"
+            columns: ["medication_id"]
+            isOneToOne: false
+            referencedRelation: "medications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shift_tasks: {
         Row: {
           company_id: string
