@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -64,7 +64,18 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
   const [showNotes, setShowNotes] = useState(false);
   const [showTasks, setShowTasks] = useState(false);
   const { data: notes = [] } = useShiftNotes(v.id);
-  const { data: tasks = [] } = useShiftTasks(v.id);
+  const { data: rawTasks = [] } = useShiftTasks(v.id);
+  
+  // Dedup tasks by title for display
+  const tasks = useMemo(() => {
+    const map = new Map<string, any>();
+    for (const t of rawTasks as any[]) {
+      const key = `${t.title}|${t.is_completed}`;
+      if (!map.has(key)) map.set(key, t);
+    }
+    return Array.from(map.values());
+  }, [rawTasks]);
+
   const lateMins = getLateMins(v);
   const completedTasks = tasks.filter((t: any) => t.is_completed).length;
 
@@ -91,11 +102,6 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
         <TableCell>
           <Badge className={visitTypeStyle(v.duration) + " text-xs font-semibold"}>
             {v.duration}h
-          </Badge>
-        </TableCell>
-        <TableCell>
-          <Badge className={(statusStyles[getVisitStatus(v)] || statusStyles.Missed) + " text-xs"}>
-            {getVisitStatus(v)}
           </Badge>
         </TableCell>
         <TableCell className="text-sm">
@@ -375,7 +381,6 @@ const Dashboard = () => {
                   <TableHead className="font-semibold text-foreground">Service Member</TableHead>
                   <TableHead className="font-semibold text-foreground">Scheduled</TableHead>
                   <TableHead className="font-semibold text-foreground">Type</TableHead>
-                  <TableHead className="font-semibold text-foreground">Status</TableHead>
                   <TableHead className="font-semibold text-foreground">Checked In</TableHead>
                   <TableHead className="font-semibold text-foreground">Clocked Out</TableHead>
                   <TableHead className="font-semibold text-foreground">Total Time Worked</TableHead>
@@ -385,7 +390,7 @@ const Dashboard = () => {
               <TableBody>
                 {completedVisitsForDate.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
                       No completed shifts {isViewingToday ? "yet today" : `on ${formatDateDisplay(selectedDateStr)}`}
                     </TableCell>
                   </TableRow>
@@ -414,13 +419,13 @@ const Dashboard = () => {
                   <TableHead className="font-semibold text-foreground">Assigned Member</TableHead>
                   <TableHead className="font-semibold text-foreground">Scheduled Time</TableHead>
                   <TableHead className="font-semibold text-foreground">Clock In</TableHead>
-                  <TableHead className="font-semibold text-foreground">Status</TableHead>
+
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {liveVisits.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">No live visits right now</TableCell>
+                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No live visits right now</TableCell>
                   </TableRow>
                 ) : liveVisits.map((v: any) => {
                   const startMinutes = (v.start_hour ?? 0) * 60 + (v.start_minute ?? 0);
@@ -433,11 +438,7 @@ const Dashboard = () => {
                       <TableCell className="text-sm text-foreground">{(v.care_receivers as any)?.name ?? "—"}</TableCell>
                       <TableCell className="text-sm text-muted-foreground">{schedLabel}</TableCell>
                       <TableCell className="text-sm font-mono">{fmtTime(v.check_in_time)}</TableCell>
-                      <TableCell>
-                        <Badge className={(statusStyles[status] || statusStyles.Due) + " text-xs"}>
-                          In Progress
-                        </Badge>
-                      </TableCell>
+
                     </TableRow>
                   );
                 })}

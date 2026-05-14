@@ -46,7 +46,14 @@ function diffMinutes(start: string | null, end: string | null) {
 
 export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
   const { data: notes = [] } = useShiftNotes(visit?.id);
-  const { data: tasks = [] } = useShiftTasks(visit?.id);
+  const { data: rawTasks = [] } = useShiftTasks(visit?.id);
+
+  // Dedup tasks by title for display
+  const tasks = (rawTasks as any[]).reduce((acc: any[], current) => {
+    const x = acc.find(item => item.title === current.title && item.is_completed === current.is_completed);
+    if (!x) return acc.concat([current]);
+    return acc;
+  }, []);
 
   if (!visit) return null;
 
@@ -72,7 +79,6 @@ export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
                 </p>
               </div>
             </div>
-            <Badge className="bg-success/15 text-success border-0">Completed</Badge>
           </div>
         </div>
 

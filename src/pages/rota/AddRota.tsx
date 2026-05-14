@@ -319,8 +319,12 @@ const AddRota = () => {
           if (m) taskTitles.push(`Administer ${m.medication}${m.dosage ? ` (${m.dosage})` : ""}`);
         }
       }
-      if (taskTitles.length > 0 && dvRows.length > 0) {
-        const rows = dvRows.flatMap((r) => taskTitles.map((title) => ({ daily_visit_id: r.id, title })));
+
+      // Dedup titles to prevent duplicate tasks in the same shift
+      const uniqueTaskTitles = Array.from(new Set(taskTitles));
+
+      if (uniqueTaskTitles.length > 0 && dvRows.length > 0) {
+        const rows = dvRows.flatMap((r) => uniqueTaskTitles.map((title) => ({ daily_visit_id: r.id, title })));
         const { error: stErr } = await supabase.from("shift_tasks").insert(rows);
         if (stErr) throw stErr;
       }
