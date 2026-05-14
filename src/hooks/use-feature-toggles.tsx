@@ -4,6 +4,7 @@ export type FeatureKey =
   | "notifications"
   | "insights"
   | "bookings"
+  | "locationTracking"
   | "communicationLog"
   | "timeline"
   | "liveRunRoutes"
