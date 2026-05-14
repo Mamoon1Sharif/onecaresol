@@ -489,6 +489,7 @@ const AddRota = () => {
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-semibold text-foreground">{selected.name}</span>
+                {selected.dnacpr && <Badge variant="destructive" className="text-[10px]">DNACPR</Badge>}
                 {age !== null && <span className="text-xs text-muted-foreground">· Age {age}</span>}
                 <Badge variant="outline" className="text-[10px]">
                   {selected.care_status || "Active"}
