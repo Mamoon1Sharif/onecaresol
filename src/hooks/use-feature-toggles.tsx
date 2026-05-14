@@ -25,6 +25,10 @@ export const FEATURE_LABELS: Record<FeatureKey, { label: string; description: st
     label: "Bookings",
     description: "Bookings page in the sidebar",
   },
+  locationTracking: {
+    label: "Location Tracking",
+    description: "Location Tracking page in the sidebar",
+  },
   communicationLog: {
     label: "Communication Log",
     description: "Communication Log page in the sidebar",
