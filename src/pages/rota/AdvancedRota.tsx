@@ -23,7 +23,9 @@ import {
   GripVertical,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useCareGivers, useCareReceivers } from "@/hooks/use-care-data";
+import { useCareGivers, useCareReceivers, useDailyVisitsRange } from "@/hooks/use-care-data";
+import { getVisitStatus } from "@/lib/visit-status-utils";
+import { supabase } from "@/integrations/supabase/client";
 import { EditRotaDialog, type EditRotaShift } from "@/components/EditRotaDialog";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -54,151 +56,14 @@ interface Shift {
   service: string;
   status: ShiftStatus;
   dayIndex: number;
+  dbVisit?: any; // original DB row for mutations
 }
-
-const STATIC_STAFF = [
-  "Unassigned Shifts",
-  "Ewelina Delport",
-  "Jodie Hawtin",
-  "Sukhleen Kaur",
-  "Maria Khalil",
-  "Alison McBride",
-  "Ellie Milton",
-  "Rita Muneeb",
-  "Javeria Nisar",
-  "Magdalena Pawelska",
-  "Shaista Rafiq",
-];
 
 const ROW_HEIGHT = 56; // px (daily)
 const WEEKLY_ROW_HEIGHT = 140; // px — taller so day cells can stack shifts
 const PX_PER_HOUR = 64; // 24h * 64 = 1536px (daily timeline)
 const WEEK_DAY_WIDTH = 180; // px per day column (weekly)
 const HEADER_H = 28;
-
-// Base shift templates per staff (without status — derived from date)
-interface ShiftTemplate {
-  staff: string;
-  start: number;
-  end: number;
-  client: string;
-  ref: string;
-  service: string;
-  kind?: "oncall" | "visit"; // oncall stays oncall regardless of date
-}
-
-const SHIFT_TEMPLATES: ShiftTemplate[] = [
-  // Unassigned
-  { staff: "Unassigned Shifts", start: 7.083, end: 8.917, client: "Maryam Tariq", ref: "145632433", service: "CHC - Morning Call" },
-  { staff: "Unassigned Shifts", start: 12.5, end: 13.75, client: "Janet Henda", ref: "145978404", service: "WCC - Lunch" },
-
-  // Ewelina Delport
-  { staff: "Ewelina Delport", start: 6.917, end: 8.917, client: "On Call", ref: "145879338", service: "On Call", kind: "oncall" },
-  { staff: "Ewelina Delport", start: 9, end: 21, client: "On Call", ref: "145978644", service: "On Call", kind: "oncall" },
-  { staff: "Ewelina Delport", start: 7.5, end: 8.25, client: "Raymond Goodall", ref: "145698523", service: "WCC - Morning" },
-  { staff: "Ewelina Delport", start: 7.5, end: 8.25, client: "Peter Booth", ref: "145978721", service: "WCC - Morning" },
-  { staff: "Ewelina Delport", start: 8.5, end: 9.25, client: "Eileen Thorn", ref: "145978856", service: "WCC - Morning" },
-  { staff: "Ewelina Delport", start: 13, end: 13.75, client: "Marion Poulter", ref: "145641212", service: "WCC - Lunch" },
-  { staff: "Ewelina Delport", start: 13.5, end: 14.25, client: "Peter Booth", ref: "145978721", service: "WCC - Lunch" },
-
-  // Jodie Hawtin
-  { staff: "Jodie Hawtin", start: 7.5, end: 8.25, client: "Raymond Goodall", ref: "145978664", service: "WCC - Morning" },
-  { staff: "Jodie Hawtin", start: 8.25, end: 9, client: "Marion Poulter", ref: "145978611", service: "WCC - Morning" },
-  { staff: "Jodie Hawtin", start: 9, end: 9.75, client: "Eileen Thorn", ref: "145978650", service: "WCC - Morning" },
-  { staff: "Jodie Hawtin", start: 11, end: 11.75, client: "Marion Poulter", ref: "145978657", service: "WCC" },
-  { staff: "Jodie Hawtin", start: 12.5, end: 13.25, client: "Raymond Goodall", ref: "145978664", service: "WCC" },
-  { staff: "Jodie Hawtin", start: 16.5, end: 17.25, client: "Marion Poulter", ref: "145978657", service: "WCC" },
-  { staff: "Jodie Hawtin", start: 17.25, end: 18, client: "Colin Evans", ref: "145978701", service: "WCC" },
-  { staff: "Jodie Hawtin", start: 18, end: 18.75, client: "Joan Marcher", ref: "145978731", service: "WCC" },
-  { staff: "Jodie Hawtin", start: 18.75, end: 19.5, client: "Peter Booth", ref: "145978721", service: "WCC" },
-  { staff: "Jodie Hawtin", start: 19.5, end: 20.25, client: "Carol Sawyer", ref: "145978845", service: "WCC" },
-
-  // Sukhleen Kaur
-  { staff: "Sukhleen Kaur", start: 7, end: 7.75, client: "Wendy Rawlins", ref: "145978773", service: "WCC - Morning" },
-  { staff: "Sukhleen Kaur", start: 7.75, end: 8.5, client: "Colin Evans", ref: "145978701", service: "WCC" },
-  { staff: "Sukhleen Kaur", start: 8.5, end: 9.25, client: "Carol Sawyer", ref: "145978710", service: "WCC" },
-  { staff: "Sukhleen Kaur", start: 9.5, end: 10.25, client: "James Hamilton", ref: "145978722", service: "WCC" },
-  { staff: "Sukhleen Kaur", start: 10.25, end: 11, client: "Michael Taylor", ref: "145978745", service: "WCC" },
-  { staff: "Sukhleen Kaur", start: 11, end: 11.75, client: "Dulcie Sadham", ref: "145978721", service: "WCC" },
-
-  // Maria Khalil
-  { staff: "Maria Khalil", start: 7.5, end: 8.25, client: "Norman Iles", ref: "145978827", service: "WCC" },
-  { staff: "Maria Khalil", start: 8.25, end: 9, client: "Helen Hawks", ref: "145978876", service: "WCC" },
-  { staff: "Maria Khalil", start: 9.5, end: 10.25, client: "Michael Taylor", ref: "145978701", service: "WCC" },
-  { staff: "Maria Khalil", start: 11, end: 11.75, client: "Anthony Taylor", ref: "145978701", service: "WCC" },
-  { staff: "Maria Khalil", start: 11.75, end: 12.5, client: "Helen Hawks", ref: "145978735", service: "WCC" },
-  { staff: "Maria Khalil", start: 17, end: 17.75, client: "James Hamilton", ref: "145978744", service: "WCC" },
-  { staff: "Maria Khalil", start: 17.75, end: 18.5, client: "Edna Morris", ref: "145978745", service: "WCC" },
-  { staff: "Maria Khalil", start: 18.5, end: 19.25, client: "Michael Taylor", ref: "145978745", service: "WCC" },
-  { staff: "Maria Khalil", start: 19.25, end: 20, client: "Wendy Rawlins", ref: "145978743", service: "WCC" },
-  { staff: "Maria Khalil", start: 20, end: 20.75, client: "Dulcie Sadham", ref: "145978721", service: "WCC" },
-
-  // Alison McBride
-  { staff: "Alison McBride", start: 8, end: 8.75, client: "Christine Jagger", ref: "145978650", service: "WCC" },
-  { staff: "Alison McBride", start: 8.75, end: 9.5, client: "Marion Such", ref: "145978701", service: "WCC" },
-  { staff: "Alison McBride", start: 9.5, end: 10.25, client: "Brenda Prince", ref: "145978745", service: "WCC" },
-  { staff: "Alison McBride", start: 13.5, end: 14.25, client: "Doreen Mason", ref: "145978701", service: "WCC" },
-  { staff: "Alison McBride", start: 14.25, end: 15, client: "Pamela Davis", ref: "145978745", service: "WCC" },
-  { staff: "Alison McBride", start: 15, end: 15.75, client: "Pamela Johnson", ref: "145978743", service: "WCC" },
-  { staff: "Alison McBride", start: 15.75, end: 16.5, client: "Brenda Prince", ref: "145978745", service: "WCC" },
-  { staff: "Alison McBride", start: 16.5, end: 17.25, client: "Christine Jagger", ref: "145978650", service: "WCC" },
-  { staff: "Alison McBride", start: 17.25, end: 18, client: "Roger Pebar", ref: "145978745", service: "WCC" },
-
-  // Ellie Milton
-  { staff: "Ellie Milton", start: 7.5, end: 8.25, client: "Stella Orgee", ref: "145978611", service: "WCC" },
-  { staff: "Ellie Milton", start: 8.25, end: 9, client: "Christine Jagger", ref: "145978650", service: "WCC" },
-  { staff: "Ellie Milton", start: 9, end: 9.75, client: "Marion Such", ref: "145978701", service: "WCC" },
-  { staff: "Ellie Milton", start: 10, end: 11, client: "Carol Taylor", ref: "145978735", service: "Private Morning" },
-  { staff: "Ellie Milton", start: 11, end: 11.75, client: "Edna Morris", ref: "145978745", service: "WCC" },
-  { staff: "Ellie Milton", start: 11.75, end: 12.5, client: "Christine Taylor", ref: "145978743", service: "WCC" },
-
-  // Rita Muneeb
-  { staff: "Rita Muneeb", start: 7, end: 7.75, client: "Thomas Iles", ref: "145978621", service: "WCC" },
-  { staff: "Rita Muneeb", start: 7.75, end: 8.5, client: "Edna Morris", ref: "145978690", service: "WCC" },
-  { staff: "Rita Muneeb", start: 8.5, end: 9.25, client: "Janet Henda", ref: "145978745", service: "WCC" },
-  { staff: "Rita Muneeb", start: 9.25, end: 10, client: "Thomas Iles", ref: "145978701", service: "WCC" },
-  { staff: "Rita Muneeb", start: 0, end: 8, client: "Betty Miles", ref: "145973330", service: "Private - Live-in Care (Basic)" },
-  { staff: "Rita Muneeb", start: 8, end: 12, client: "Betty Miles", ref: "145978650", service: "Private - Live-in Care (Basic)" },
-  { staff: "Rita Muneeb", start: 12, end: 14, client: "Betty Miles", ref: "145978666", service: "Private - Live-in Care (Basic)" },
-
-  // Javeria Nisar
-  { staff: "Javeria Nisar", start: 14, end: 16, client: "Betty Miles", ref: "145978670", service: "Private - Live-in Care (Basic)" },
-  { staff: "Javeria Nisar", start: 16, end: 20, client: "Betty Miles", ref: "145978680", service: "Private - Live-in Care (Basic)" },
-  { staff: "Javeria Nisar", start: 20, end: 24, client: "Betty Miles", ref: "145978677", service: "Private - Live-in Care (Basic)" },
-
-  // Magdalena Pawelska
-  { staff: "Magdalena Pawelska", start: 20, end: 21, client: "Enid Joyce", ref: "145978691", service: "Private" },
-  { staff: "Magdalena Pawelska", start: 21, end: 22.25, client: "Richard Peplow", ref: "145978763", service: "Private" },
-
-  // Shaista Rafiq
-  { staff: "Shaista Rafiq", start: 7.5, end: 8.25, client: "Winifred Griffiths", ref: "145978672", service: "Private" },
-  { staff: "Shaista Rafiq", start: 8.5, end: 9.25, client: "Dorothy Smith", ref: "145978727", service: "WCC - Morning" },
-  { staff: "Shaista Rafiq", start: 9.5, end: 10.5, client: "Pamela McCaddie", ref: "145978735", service: "WCC - Morning" },
-  { staff: "Shaista Rafiq", start: 11, end: 12, client: "Carol Sawyer", ref: "145978769", service: "WCC" },
-  { staff: "Shaista Rafiq", start: 16.5, end: 17.25, client: "Joan Lewis", ref: "145978721", service: "WCC" },
-  { staff: "Shaista Rafiq", start: 17.25, end: 18, client: "Christine Taylor", ref: "145978745", service: "WCC" },
-  { staff: "Shaista Rafiq", start: 18, end: 18.75, client: "Thomas Iles", ref: "145978701", service: "WCC" },
-  { staff: "Shaista Rafiq", start: 18.75, end: 19.5, client: "Wendy Rawlins", ref: "145978690", service: "WCC" },
-];
-
-// Seeded PRNG for stable per-day variation
-function mulberry32(seed: number) {
-  return function () {
-    seed |= 0;
-    seed = (seed + 0x6D2B79F5) | 0;
-    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function dayKey(d: Date) {
-  return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
-}
-
-function isSameDay(a: Date, b: Date) {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
 
 function startOfWeekMonday(d: Date) {
   const out = new Date(d);
@@ -220,93 +85,52 @@ function formatDateShort(d: Date) {
   return `${day}/${month}/${d.getFullYear()}`;
 }
 
-function buildShiftsForDate(date: Date, receiverNames: string[], staffNameMap: Record<string, string>, dayIndex: number = 0): Shift[] {
-  const today = new Date();
-  const todayKey = dayKey(today);
-  const dKey = dayKey(date);
-  const isPast = dKey < todayKey;
-  const isToday = dKey === todayKey;
-  const isFuture = dKey > todayKey;
-  const nowHours = today.getHours() + today.getMinutes() / 60;
-
-  const rng = mulberry32(dKey);
-
-  return SHIFT_TEMPLATES
-    // For future days, drop a random subset to make every day look different
-    .filter((t) => {
-      if (t.kind === "oncall") return true;
-      if (isFuture) return rng() > 0.15; // ~85% kept
-      if (isPast) return rng() > 0.05;
-      return true;
-    })
-    .map((t, idx) => {
-      // Slight per-day jitter on start time (-15..+15 min) for realism, except live-in/oncall
-      let start = t.start;
-      let end = t.end;
-      if (t.kind !== "oncall" && end - start <= 2) {
-        const jitter = (Math.round((rng() - 0.5) * 2) * 0.25); // -0.25, 0, 0.25
-        start = Math.max(0, Math.min(23.5, start + jitter));
-        end = Math.max(start + 0.25, end + jitter);
-      }
-
-      const isUnassigned = t.staff === "Unassigned Shifts";
-      let status: ShiftStatus;
-      if (t.kind === "oncall") {
-        status = isFuture ? "scheduled" : isPast ? "complete" : "oncall";
-      } else if (isUnassigned) {
-        // Unassigned shifts can never be "complete" or "in-progress" — if their
-        // time has passed (or is currently passing) they are missed.
-        if (isFuture) {
-          status = "scheduled";
-        } else if (isPast) {
-          status = "missed";
-        } else {
-          status = start <= nowHours ? "missed" : "scheduled";
-        }
-      } else if (isFuture) {
-        status = "scheduled";
-      } else if (isPast) {
-        // Mostly complete, occasional missed
-        status = rng() < 0.06 ? "missed" : "complete";
-      } else {
-        // Today: based on current time
-        if (end <= nowHours) {
-          status = rng() < 0.05 ? "missed" : "complete";
-        } else if (start <= nowHours && nowHours < end) {
-          status = "in-progress";
-        } else {
-          status = "scheduled";
-        }
-      }
-
-      // Build per-day unique id
-      const client = receiverNames.length > 0
-        ? receiverNames[idx % receiverNames.length]
-        : t.client;
-      const staff = staffNameMap[t.staff] || t.staff;
-      return {
-        id: `${dKey}-${idx}`,
-        staff,
-        start,
-        end,
-        client,
-        ref: t.ref,
-        service: t.service + statusSuffix(status),
-        status,
-        dayIndex,
-      };
-    });
+function formatDateISO(d: Date) {
+  return d.toISOString().slice(0, 10);
 }
 
-function statusSuffix(s: ShiftStatus) {
-  switch (s) {
-    case "complete": return " - Complete";
-    case "in-progress": return " - In Progress";
-    case "missed": return " - Missed";
-    case "oncall": return " - On Call";
-    default: return "";
-  }
+function isSameDay(a: Date, b: Date) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
+
+/** Convert a raw daily_visit DB row into our Shift shape */
+function dbVisitToShift(v: any, dayIndex: number): Shift {
+  const startH = v.start_hour ?? 0;
+  const startM = v.start_minute ?? 0;
+  const durH = v.duration ?? 1;
+  const durM = v.duration_minutes ?? (durH * 60);
+  const start = startH + startM / 60;
+  const end = start + durM / 60;
+
+  const cgName = v.care_givers?.name ?? null;
+  const crName = v.care_receivers?.name ?? "Unknown";
+
+  // Map visit status to our ShiftStatus using getVisitStatus
+  const vs = getVisitStatus(v);
+  let status: ShiftStatus;
+  if (vs === "Completed") status = "complete";
+  else if (vs === "In Progress") status = "in-progress";
+  else if (vs === "Missed") status = "missed";
+  else if (vs === "Late") status = "in-progress";
+  else status = "scheduled"; // Due, Pending, etc.
+
+  const staff = cgName || "Unassigned Shifts";
+  const service = v.care_receivers?.care_type || "Visit";
+
+  return {
+    id: v.id,
+    staff,
+    start,
+    end,
+    client: crName,
+    ref: v.id.slice(0, 10),
+    service,
+    status,
+    dayIndex,
+    dbVisit: v,
+  };
+}
+
 
 /* -------------------------------------------------------------------------- */
 /*  Helpers                                                                    */
@@ -359,25 +183,6 @@ export default function AdvancedRota() {
     () => careGivers.map((cg: any) => cg.name || "Unnamed Caregiver"),
     [careGivers]
   );
-  // All rows used for shift generation (unassigned + caregivers)
-  const allRows = useMemo(() => [UNASSIGNED, ...staffRows], [staffRows]);
-
-  const receiverNames = useMemo(
-    () => careReceivers.map((cr: any) => cr.name || "Unknown Service Member"),
-    [careReceivers]
-  );
-
-  const staffNameMap = useMemo(() => {
-    return STATIC_STAFF.reduce<Record<string, string>>((map, name, index) => {
-      if (index === 0) {
-        map[name] = name; // Unassigned stays as-is
-      } else {
-        // STATIC_STAFF[1..] -> staffRows[0..]
-        map[name] = staffRows[index - 1] || name;
-      }
-      return map;
-    }, {});
-  }, [staffRows]);
 
   const [date, setDate] = useState(() => startOfWeekMonday(new Date()));
   const [viewMode, setViewMode] = useState<'daily' | 'weekly'>('weekly');
@@ -442,18 +247,35 @@ export default function AdvancedRota() {
 
   const dayStep = viewMode === 'daily' ? 1 : 7;
 
-  // Build shifts for the current days, then apply any user overrides
+  // Fetch real visits from database for the visible date range
+  const fromDateStr = formatDateISO(days[0]);
+  const toDateStr = formatDateISO(days[days.length - 1]);
+  const { data: rawVisits = [], refetch: refetchVisits } = useDailyVisitsRange(fromDateStr, toDateStr);
+
+  // Real-time subscription to daily_visits changes
+  useEffect(() => {
+    if (!autoRefresh) return;
+    const ch = supabase
+      .channel("advanced-rota-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "daily_visits" }, () => refetchVisits())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [refetchVisits, autoRefresh]);
+
+  // Build shifts from database visits, then apply any user overrides
   const shifts = useMemo<Shift[]>(() => {
     const allShifts: Shift[] = [];
-    days.forEach((d, i) => {
-      const dayShifts = buildShiftsForDate(d, receiverNames, staffNameMap, i);
-      dayShifts.forEach(s => {
-        const ov = overrides[s.id];
-        allShifts.push(ov ? { ...s, ...ov } : s);
-      });
+    (rawVisits as any[]).forEach((v) => {
+      // Determine dayIndex based on visit_date
+      const vDate = v.visit_date; // "YYYY-MM-DD"
+      const dayIdx = days.findIndex(d => formatDateISO(d) === vDate);
+      if (dayIdx < 0) return; // outside our visible range
+      const shift = dbVisitToShift(v, dayIdx);
+      const ov = overrides[shift.id];
+      allShifts.push(ov ? { ...shift, ...ov } : shift);
     });
     return allShifts;
-  }, [days, overrides]);
+  }, [rawVisits, days, overrides]);
 
   // Detect per-caregiver overlapping shifts (conflicts).
   const conflicts = useMemo(() => {

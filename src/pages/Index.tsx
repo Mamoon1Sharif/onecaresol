@@ -13,12 +13,16 @@ import { ShiftDetailDialog } from "@/components/ShiftDetailDialog";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-type CheckInStatus = "On Time" | "Late" | "Missed" | "Not Arrived";
+import { getVisitStatus, type VisitStatus } from "@/lib/visit-status-utils";
 
-const statusStyles: Record<CheckInStatus, string> = {
+const statusStyles: Record<string, string> = {
   "On Time": "bg-success/15 text-success border-0 hover:bg-success/20",
+  Completed: "bg-success/15 text-success border-0 hover:bg-success/20",
+  "In Progress": "bg-info/15 text-info border-0 hover:bg-info/20",
   Late: "bg-warning/15 text-warning border-0 hover:bg-warning/20",
   Missed: "bg-destructive/15 text-destructive border-0 hover:bg-destructive/20",
+  Due: "bg-muted text-muted-foreground border-0",
+  Cancelled: "bg-muted text-muted-foreground border-0",
   "Not Arrived": "bg-destructive/15 text-destructive border-0 hover:bg-destructive/20",
 };
 
@@ -90,17 +94,9 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
           </Badge>
         </TableCell>
         <TableCell>
-          {v.check_in_time ? (
-            lateMins > 15 ? (
-              <Badge className={statusStyles.Missed + " text-xs"}>Missed</Badge>
-            ) : lateMins > 0 ? (
-              <Badge className={statusStyles.Late + " text-xs"}>{`Late (-${lateMins} minutes)`}</Badge>
-            ) : (
-              <Badge className={statusStyles["On Time"] + " text-xs"}>On Time</Badge>
-            )
-          ) : (
-            <Badge className={statusStyles["Not Arrived"] + " text-xs"}>Not Arrived</Badge>
-          )}
+          <Badge className={(statusStyles[getVisitStatus(v)] || statusStyles.Missed) + " text-xs"}>
+            {getVisitStatus(v)}
+          </Badge>
         </TableCell>
         <TableCell className="text-sm">
           <span className={lateMins > 0 ? "text-destructive font-semibold" : "text-foreground"}>
@@ -189,29 +185,29 @@ const Dashboard = () => {
   const [now, setNow] = useState(() => new Date());
   const [selectedDateStr, setSelectedDateStr] = useState(todayStr);
   const { data: selectedDateVisits = [], refetch: refetchSelectedDate } = useDailyVisits(selectedDateStr);
-  
+
   // Determine if viewing today or another date
   const isViewingToday = selectedDateStr === todayStr;
-  
+
   // Filter completed visits for the selected date
   const completedVisitsForDate = selectedDateVisits.filter((v: any) => {
     const status = (v.status || "").toLowerCase();
     return status === "completed" || status === "complete" || v.check_out_time;
   });
-  
+
   // Add previous/next date navigation
   const handlePreviousDate = () => {
     const date = new Date(selectedDateStr);
     date.setDate(date.getDate() - 1);
     setSelectedDateStr(date.toISOString().split("T")[0]);
   };
-  
+
   const handleNextDate = () => {
     const date = new Date(selectedDateStr);
     date.setDate(date.getDate() + 1);
     setSelectedDateStr(date.toISOString().split("T")[0]);
   };
-  
+
   // Format date for display
   const formatDateDisplay = (dateStr: string) => {
     const date = new Date(dateStr + "T00:00:00");
@@ -430,10 +426,7 @@ const Dashboard = () => {
                   const startMinutes = (v.start_hour ?? 0) * 60 + (v.start_minute ?? 0);
                   const endHour = v.start_hour + (v.duration ?? 0);
                   const schedLabel = `${String(v.start_hour).padStart(2, "0")}:${String(v.start_minute ?? 0).padStart(2, "0")} – ${String(endHour).padStart(2, "0")}:${String(v.start_minute ?? 0).padStart(2, "0")}`;
-                  const inProgress = !!v.check_in_time;
-                  const lateMins = getLateMins(v);
-                  let statusLabel: CheckInStatus = "Not Arrived";
-                  if (inProgress) statusLabel = "On Time";
+                  const status = getVisitStatus(v);
                   return (
                     <TableRow key={v.id} className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => setSelectedVisit(v)}>
                       <TableCell className="font-medium text-foreground">{(v.care_givers as any)?.name ?? "—"}</TableCell>
@@ -441,11 +434,9 @@ const Dashboard = () => {
                       <TableCell className="text-sm text-muted-foreground">{schedLabel}</TableCell>
                       <TableCell className="text-sm font-mono">{fmtTime(v.check_in_time)}</TableCell>
                       <TableCell>
-                        {inProgress ? (
-                          <Badge className={statusStyles[lateMins > 0 ? "Late" : "On Time"] + " text-xs"}>In Progress</Badge>
-                        ) : (
-                          <Badge className={statusStyles["Not Arrived"] + " text-xs"}>Not Arrived</Badge>
-                        )}
+                        <Badge className={(statusStyles[status] || statusStyles.Due) + " text-xs"}>
+                          In Progress
+                        </Badge>
                       </TableCell>
                     </TableRow>
                   );

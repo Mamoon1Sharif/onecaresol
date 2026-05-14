@@ -31,7 +31,7 @@ function fmt(h: number) {
 function fmtTime(iso: string | null) {
   if (!iso) return "—";
   const d = new Date(iso);
-  return d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" });
 }
 
 function diffMinutes(start: string | null, end: string | null) {
