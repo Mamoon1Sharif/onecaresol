@@ -40,10 +40,13 @@ interface VisitRow {
 
 interface Note {
   id: string;
+  ref?: string;
+  tags?: string[];
   author: string;
   text: string;
   hidden: boolean;
   createdAt: string;
+  visibleOnDevice?: boolean;
 }
 
 interface RotaLock {
