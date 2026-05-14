@@ -118,7 +118,7 @@ function dbVisitToShift(v: any, dayIndex: number): Shift {
   else status = "scheduled"; // Due, Pending, etc.
 
   const staff = cgName || "Unassigned Shifts";
-  const service = v.care_receivers?.care_type || "Visit";
+  const service = v.shift_type || v.care_receivers?.care_type || "Visit";
 
   return {
     id: v.id,
@@ -321,11 +321,6 @@ export default function AdvancedRota() {
       setSelected(next);
       return;
     }
-    if (shiftHasStarted(s)) {
-      e.preventDefault();
-      toast.error("Shift time already started — can't reassign or reallocate.");
-      return;
-    }
     e.preventDefault();
     const target = e.currentTarget as HTMLElement;
     const rect = target.getBoundingClientRect();
@@ -351,6 +346,15 @@ export default function AdvancedRota() {
       const dx = Math.abs(clientX - drag.originX);
       const dy = Math.abs(clientY - drag.originY);
       if (dx < 4 && dy < 4) return;
+
+      const s = shifts.find((x) => x.id === drag.id);
+      if (s && shiftHasStarted(s)) {
+        const msg = s.status === "complete" ? "Shift is complete — can't reassign or reallocate." : "Shift time already started — can't reassign or reallocate.";
+        toast.error(msg);
+        setDrag(null);
+        return;
+      }
+
       setDrag({ ...drag, moved: true });
     }
 
@@ -448,6 +452,15 @@ export default function AdvancedRota() {
             end: s.end,
             staff: s.staff,
             service: s.service,
+            checkIn: s.dbVisit?.check_in_time,
+            checkOut: s.dbVisit?.check_out_time,
+            duration_minutes: s.dbVisit?.duration_minutes,
+            clockHours: s.dbVisit?.check_in_time && s.dbVisit?.check_out_time ? (() => {
+              const mins = Math.round((new Date(s.dbVisit.check_out_time).getTime() - new Date(s.dbVisit.check_in_time).getTime()) / 60000);
+              const h = Math.floor(mins / 60);
+              const m = mins % 60;
+              return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+            })() : "00:00",
           });
         }
       }
@@ -745,14 +758,22 @@ export default function AdvancedRota() {
           <div className="flex gap-2">
             <Button
               variant={viewMode === 'daily' ? 'default' : 'outline'}
-              onClick={() => setViewMode('daily')}
+              onClick={() => {
+                setViewMode('daily');
+                const today = new Date();
+                today.setHours(0,0,0,0);
+                setDate(today);
+              }}
               size="sm"
             >
               Daily
             </Button>
             <Button
               variant={viewMode === 'weekly' ? 'default' : 'outline'}
-              onClick={() => setViewMode('weekly')}
+              onClick={() => {
+                setViewMode('weekly');
+                setDate(startOfWeekMonday(new Date()));
+              }}
               size="sm"
             >
               Weekly
@@ -805,7 +826,8 @@ export default function AdvancedRota() {
                         onDragStart={(e) => {
                           if (shiftHasStarted(s)) {
                             e.preventDefault();
-                            toast.error("Shift time already started — can't reassign or reallocate.");
+                            const msg = s.status === "complete" ? "Shift is complete — can't reassign or reallocate." : "Shift time already started — can't reassign or reallocate.";
+                            toast.error(msg);
                             return;
                           }
                           e.dataTransfer.setData("text/plain", s.id);
@@ -822,6 +844,9 @@ export default function AdvancedRota() {
                             end: s.end,
                             staff: s.staff,
                             service: s.service,
+                            checkIn: s.dbVisit?.check_in_time,
+                            checkOut: s.dbVisit?.check_out_time,
+                            duration_minutes: s.dbVisit?.duration_minutes,
                           })
                         }
                         title={`${s.client} • ${fmtTime(s.start)}–${fmtTime(s.end)} • ${s.service} — drag onto a caregiver to assign`}
@@ -1043,7 +1068,8 @@ export default function AdvancedRota() {
                                     onDragStart={(e) => {
                                       if (shiftHasStarted(s)) {
                                         e.preventDefault();
-                                        toast.error("Shift time already started — can't reassign or reallocate.");
+                                        const msg = s.status === "complete" ? "Shift is complete — can't reassign or reallocate." : "Shift time already started — can't reassign or reallocate.";
+                                        toast.error(msg);
                                         return;
                                       }
                                       e.dataTransfer.setData("text/plain", s.id);
@@ -1068,6 +1094,15 @@ export default function AdvancedRota() {
                                         end: s.end,
                                         staff: s.staff,
                                         service: s.service,
+                                        checkIn: s.dbVisit?.check_in_time,
+                                        checkOut: s.dbVisit?.check_out_time,
+                                        duration_minutes: s.dbVisit?.duration_minutes,
+                                        clockHours: s.dbVisit?.check_in_time && s.dbVisit?.check_out_time ? (() => {
+                                          const mins = Math.round((new Date(s.dbVisit.check_out_time).getTime() - new Date(s.dbVisit.check_in_time).getTime()) / 60000);
+                                          const h = Math.floor(mins / 60);
+                                          const m = mins % 60;
+                                          return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+                                        })() : "00:00",
                                       })
                                     }
                                     className={cn(

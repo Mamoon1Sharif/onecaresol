@@ -60,6 +60,9 @@ export interface EditRotaShift {
   service: string;
   schedHours?: string;
   clockHours?: string;
+  checkIn?: string | null;
+  checkOut?: string | null;
+  duration_minutes?: number;
   week?: number;
   weekNo?: number;
 }
@@ -260,9 +263,20 @@ export function EditRotaDialog({ open, onOpenChange, shift, onSave }: Props) {
                     <td className="px-2 py-2 border-r border-border whitespace-nowrap">
                       {fmtTime(shift.end - shift.start)}
                     </td>
-                    <td className="px-2 py-2 border-r border-border text-muted-foreground">—</td>
-                    <td className="px-2 py-2 border-r border-border text-muted-foreground">—</td>
-                    <td className="px-2 py-2 border-r border-border text-muted-foreground">—</td>
+                    <td className="px-2 py-2 border-r border-border whitespace-nowrap text-success font-medium">
+                      {shift.checkIn ? new Date(shift.checkIn).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" }) : "—"}
+                    </td>
+                    <td className="px-2 py-2 border-r border-border whitespace-nowrap text-destructive font-medium">
+                      {shift.checkOut ? new Date(shift.checkOut).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" }) : "—"}
+                    </td>
+                    <td className="px-2 py-2 border-r border-border whitespace-nowrap font-medium">
+                      {shift.checkIn && shift.checkOut ? (() => {
+                        const mins = Math.round((new Date(shift.checkOut).getTime() - new Date(shift.checkIn).getTime()) / 60000);
+                        const h = Math.floor(mins / 60);
+                        const m = mins % 60;
+                        return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+                      })() : "—"}
+                    </td>
                     <td className={cn("px-2 py-2 border-r border-border whitespace-nowrap", shift.staff === "Unassigned Shifts" ? "text-destructive font-medium" : "text-foreground")}>
                       {shift.staff === "Unassigned Shifts" ? "Unallocated" : shift.staff}
                     </td>
@@ -330,12 +344,26 @@ export function EditRotaDialog({ open, onOpenChange, shift, onSave }: Props) {
                       <Select value={service} onValueChange={setService}>
                         <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="WCC - Lunch Call (Z4-T3)">WCC - Lunch Call (Z4-T3)</SelectItem>
-                          <SelectItem value="WCC - Morning">WCC - Morning</SelectItem>
-                          <SelectItem value="WCC - Tea Call">WCC - Tea Call</SelectItem>
-                          <SelectItem value="WCC - Bedtime">WCC - Bedtime</SelectItem>
-                          <SelectItem value="CHC - Morning Call">CHC - Morning Call</SelectItem>
-                          <SelectItem value="Private - Live-in Care (Basic)">Private - Live-in Care (Basic)</SelectItem>
+                          {[
+                            "WCC - Lunch Call (Z4-T3)",
+                            "WCC - Morning",
+                            "WCC - Tea Call",
+                            "WCC - Bedtime",
+                            "CHC - Morning Call",
+                            "Private - Live-in Care (Basic)",
+                          ].map((opt) => (
+                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                          ))}
+                          {service && ![
+                            "WCC - Lunch Call (Z4-T3)",
+                            "WCC - Morning",
+                            "WCC - Tea Call",
+                            "WCC - Bedtime",
+                            "CHC - Morning Call",
+                            "Private - Live-in Care (Basic)",
+                          ].includes(service) && (
+                            <SelectItem value={service}>{service}</SelectItem>
+                          )}
                         </SelectContent>
                       </Select>
                     </FormRow>

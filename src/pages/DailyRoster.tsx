@@ -26,6 +26,7 @@ import { RosterViewSwitcher } from "@/components/RosterViewSwitcher";
 import { VisitDetailDialog } from "@/components/VisitDetailDialog";
 import { CareGiverProfileDialog } from "@/components/CareGiverProfileDialog";
 import { CareReceiverProfileDialog } from "@/components/CareReceiverProfileDialog";
+import { getVisitStatus } from "@/lib/visit-status-utils";
 
 // Reusable tooltip-wrapped icon for table headers/cells
 function IconCell({
@@ -158,48 +159,7 @@ const DailyRoster = () => {
       const endH = Math.floor(endTotalMin / 60) % 24;
       const endM = endTotalMin % 60;
 
-      // Evaluate check-ins/check-outs against the local visit schedule.
-      const checkInDate = v.check_in_time ? new Date(v.check_in_time) : null;
-      const checkOutDate = v.check_out_time ? new Date(v.check_out_time) : null;
-      const nowMs = now.getTime();
-
-      const hasCheckIn = !!checkInDate;
-      const hasCheckOut = !!checkOutDate;
-      const sameUtcDay = (a: Date, b: Date) =>
-        a.getUTCFullYear() === b.getUTCFullYear() && a.getUTCMonth() === b.getUTCMonth() && a.getUTCDate() === b.getUTCDate();
-      const isBetweenUtcTime = (date: Date, startH: number, startM: number, endH: number, endM: number) => {
-        const hours = date.getUTCHours();
-        const minutes = date.getUTCMinutes();
-        const afterStart = hours > startH || (hours === startH && minutes >= startM);
-        const beforeEnd = hours < endH || (hours === endH && minutes <= endM);
-        return afterStart && beforeEnd;
-      };
-
-      const checkInWithinSchedule = hasCheckIn && sameUtcDay(checkInDate!, visitStartUtc);  // Allow check-in any time on the visit day
-      const checkOutWithinSchedule = hasCheckOut && sameUtcDay(checkOutDate!, visitStartUtc) && isBetweenUtcTime(checkOutDate!, start, startMin, endH, endM);
-      const hasValidCheckOut = hasCheckOut && checkOutWithinSchedule;
-      const hasCompletedWithinRange = hasCheckIn && hasValidCheckOut;
-
-      const hasArrived = nowMs >= visitStart.getTime();
-      const graceEndMs = visitStart.getTime() + 5 * 60 * 1000;
-      const withinGracePeriod = hasArrived && nowMs <= graceEndMs;
-
-      let status: string;
-      if (v.status === "Cancelled") {
-        status = "Cancelled";
-      } else if (hasCompletedWithinRange) {
-        status = "Completed";
-      } else if (hasCheckIn) {
-        status = "In Progress";
-      } else if (!hasArrived) {
-        status = "Due";
-      } else if (withinGracePeriod) {
-        status = "Late";
-      } else {
-        status = "Missed";
-      }
-
-
+      const status = getVisitStatus(v);
       const postcode = (cr.address ?? "").split(" ").slice(-2).join(" ").toUpperCase() || "";
       const serviceCall =
         idx === 0 ? "On Call"
