@@ -136,7 +136,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
     if (!noteText.trim()) return;
     setNotes((n) => [
       ...n,
-      { id: crypto.randomUUID(), author: "You", text: noteText, hidden: noteHidden, createdAt: new Date().toLocaleString("en-GB") },
+      { id: crypto.randomUUID(), ref: String(Math.floor(140000000 + Math.random() * 9999999)), tags: [], author: "You", text: noteText, hidden: noteHidden, createdAt: new Date().toLocaleString("en-GB"), visibleOnDevice: !noteHidden },
     ]);
     setNoteText("");
     setNoteHidden(false);
