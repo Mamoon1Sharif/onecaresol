@@ -428,7 +428,10 @@ const AddRota = () => {
                     />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="font-semibold text-sm truncate">{r.name}</div>
+                    <div className="font-semibold text-sm truncate flex items-center gap-1.5">
+                      <span className="truncate">{r.name}</span>
+                      {r.dnacpr && <Badge variant="destructive" className="text-[9px] px-1.5 py-0 shrink-0">DNACPR</Badge>}
+                    </div>
                     {r.address && (
                       <div className="text-xs text-muted-foreground truncate flex items-center gap-1">
                         <MapPin className="h-3 w-3" /> {r.address}
@@ -486,6 +489,7 @@ const AddRota = () => {
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="font-semibold text-foreground">{selected.name}</span>
+                {selected.dnacpr && <Badge variant="destructive" className="text-[10px]">DNACPR</Badge>}
                 {age !== null && <span className="text-xs text-muted-foreground">· Age {age}</span>}
                 <Badge variant="outline" className="text-[10px]">
                   {selected.care_status || "Active"}
