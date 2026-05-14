@@ -540,6 +540,11 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
               )}
             </section>
 
+            {/* ============== MEDICATION FEED ============== */}
+            <section>
+              <MedicationFeed visitId={visit.id} />
+            </section>
+
             {/* ============== SHADOW SHIFTS ============== */}
             <section>
               <div className="flex items-center justify-between border-b pb-1 mb-2">
