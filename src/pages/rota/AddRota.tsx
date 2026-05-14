@@ -311,22 +311,34 @@ const AddRota = () => {
       }
       const dvRow = dvRows[0];
 
-      const taskTitles: string[] = [];
-      if (form.tasksRequired) taskTitles.push(...selectedTasks);
-      if (form.medicationRequired) {
-        for (const mid of selectedMedIds) {
-          const m = uniqueMeds.find((x: any) => x.id === mid);
-          if (m) taskTitles.push(`Administer ${m.medication}${m.dosage ? ` (${m.dosage})` : ""}`);
-        }
-      }
-
-      // Dedup titles to prevent duplicate tasks in the same shift
+      // Tasks → shift_tasks
+      const taskTitles: string[] = form.tasksRequired ? [...selectedTasks] : [];
       const uniqueTaskTitles = Array.from(new Set(taskTitles));
 
       if (uniqueTaskTitles.length > 0 && dvRows.length > 0) {
         const rows = dvRows.flatMap((r) => uniqueTaskTitles.map((title) => ({ daily_visit_id: r.id, title })));
         const { error: stErr } = await supabase.from("shift_tasks").insert(rows);
         if (stErr) throw stErr;
+      }
+
+      // Medicines → shift_task_medician
+      if (form.medicationRequired && selectedMedIds.length > 0 && dvRows.length > 0) {
+        const meds = selectedMedIds
+          .map((mid) => uniqueMeds.find((x: any) => x.id === mid))
+          .filter(Boolean) as any[];
+        const medRows = dvRows.flatMap((r) =>
+          meds.map((m) => ({
+            daily_visit_id: r.id,
+            medication_id: m.id,
+            title: `Administer ${m.medication}${m.dosage ? ` (${m.dosage})` : ""}`,
+            medication: m.medication,
+            dosage: m.dosage ?? null,
+          })),
+        );
+        if (medRows.length > 0) {
+          const { error: smErr } = await supabase.from("shift_task_medician" as any).insert(medRows as any);
+          if (smErr) throw smErr;
+        }
       }
 
       // Persist selected approved tasks to care_management_tasks, marking them as assigned for shift
