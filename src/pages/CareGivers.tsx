@@ -64,6 +64,10 @@ const CareGivers = () => {
     if (!matchesSearch) return false;
     if (statusFilter === "All") return true;
     if (statusFilter === "Non-Active") return cg.status === "Non-Active" || cg.status === "Inactive";
+    if (statusFilter === "Active") {
+      const reason = caregiverUnavailableReason(cg as any, holidayEntries, todayStr);
+      return cg.status === "Active" && !reason;
+    }
     return cg.status === statusFilter;
   });
 
@@ -116,7 +120,8 @@ const CareGivers = () => {
             {filtered.map((cg) => {
               const reason = caregiverUnavailableReason(cg as any, holidayEntries, todayStr);
               const isOnShift = onShiftIds.has(cg.id);
-              const badgeLabel = reason ? reason.label : cg.status;
+              const unifiedReasonLabel = reason && reason.kind === "holiday" ? "On Leave" : reason?.label;
+              const badgeLabel = reason ? unifiedReasonLabel : cg.status;
               const isActiveAvailable = !reason && cg.status === "Active";
               return (
               <div
@@ -179,8 +184,8 @@ const CareGivers = () => {
                     </div>
                   </div>
                 </div>
-                {Array.isArray((cg as any).tags) && (cg as any).tags.length > 0 && (() => {
-                  const tags = (cg as any).tags as string[];
+                {Array.isArray((cg as any).tags) && ((cg as any).tags as string[]).filter((t) => t.toLowerCase() !== "on leave").length > 0 && (() => {
+                  const tags = ((cg as any).tags as string[]).filter((t) => t.toLowerCase() !== "on leave");
                   const isExpanded = expandedTags[cg.id];
                   const visibleTags = isExpanded ? tags : tags.slice(0, 3);
                   const hasMore = tags.length > 3;
