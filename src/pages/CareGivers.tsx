@@ -16,6 +16,7 @@ const CareGivers = () => {
   const { data: careGivers = [], isLoading } = useCareGivers();
   const todayStr = new Date().toISOString().split("T")[0];
   const { data: todayVisits = [] } = useDailyVisits(todayStr);
+  const { data: holidayEntries = [] } = useCaregiverHolidayEntries();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("All");
   const [expandedTags, setExpandedTags] = useState<Record<string, boolean>>({});
