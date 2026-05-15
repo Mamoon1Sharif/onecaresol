@@ -16,7 +16,7 @@ import {
   PoundSterling, Camera, ListChecks, XCircle, Trash2, X, CheckCircle2, Activity,
   LogIn, LogOut, PlayCircle, CircleDot, Pill, MessageSquare, StickyNote
 } from "lucide-react";
-import { useShiftNotes, useCaregiverPrivateNotes } from "@/hooks/use-care-data";
+import { useShiftNotes, useCaregiverPrivateNotes, useVisitNotesByShift, useCareGivers } from "@/hooks/use-care-data";
 
 interface VisitRow {
   id: string;
@@ -102,6 +102,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
   // Database notes hooks
   const { data: dbShiftNotes = [] } = useShiftNotes(visit?.id);
   const { data: dbPrivateNotes = [] } = useCaregiverPrivateNotes(visit?.rawVisit);
+  const { data: dbVisitNotes = [] } = useVisitNotesByShift(visit?.rawVisit);
 
   useEffect(() => {
     if (!visit) return;
@@ -144,6 +145,20 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
       });
     });
 
+    // Add visit notes from template matching
+    dbVisitNotes.forEach((vn: any) => {
+      merged.push({
+        id: vn.id,
+        ref: vn.id.slice(0, 8).toUpperCase(),
+        tags: [],
+        author: vn.caregiver,
+        text: vn.note,
+        hidden: false,
+        createdAt: new Date(vn.created_at).toLocaleString("en-GB"),
+        visibleOnDevice: true
+      });
+    });
+
     // If no DB notes and status is completed, add the sample notes for demo purposes
     if (merged.length === 0 && (visit.status || "").toLowerCase() === "completed") {
       const dateStr = visit.date;
@@ -158,7 +173,7 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
     }
     
     setNotes(merged);
-  }, [visit, dbShiftNotes, dbPrivateNotes]);
+  }, [visit, dbShiftNotes, dbPrivateNotes, dbVisitNotes]);
 
   if (!visit) return null;
 
@@ -966,6 +981,13 @@ function MedicationFeed({ visitId }: { visitId: string }) {
     return () => { cancelled = true; };
   }, [visitId]);
 
+  const { data: allCareGivers = [] } = useCareGivers();
+  const getCgName = (id: string | null) => {
+    if (!id) return "Unknown";
+    const cg = allCareGivers.find((c: any) => c.id === id);
+    return cg?.name || id;
+  };
+
   return (
     <>
       <div className="flex items-center justify-between border-b pb-1 mb-3">
@@ -1010,7 +1032,7 @@ function MedicationFeed({ visitId }: { visitId: string }) {
                 )}
                 {m.administered_by && (
                   <p className="text-[10px] text-muted-foreground mt-1">
-                    Administered by <span className="font-medium text-foreground">{m.administered_by}</span>
+                    Administered by <span className="font-medium text-foreground">{getCgName(m.administered_by)}</span>
                   </p>
                 )}
               </div>

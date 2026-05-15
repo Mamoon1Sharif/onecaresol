@@ -405,21 +405,21 @@ export function useShiftTableNote(visit: any) {
     enabled: !!visit?.id,
     queryFn: async () => {
       if (!visit) return null;
-      
+
       const day = new Date(visit.visit_date).getDay();
       const startTime = `${String(visit.start_hour).padStart(2, "0")}:${String(visit.start_minute || 0).padStart(2, "0")}`;
-      
+
       let query = supabase
         .from("shifts")
         .select("notes")
         .eq("care_receiver_id", visit.care_receiver_id)
         .eq("day", day)
         .eq("start_time", startTime);
-        
+
       if (visit.care_giver_id) {
         query = query.eq("care_giver_id", visit.care_giver_id);
       }
-      
+
       const { data, error } = await query.maybeSingle();
       if (error) throw error;
       return data?.notes || null;
@@ -441,7 +441,79 @@ export function useCaregiverPrivateNotes(visit: any) {
         .eq("note_date", visit.visit_date)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data || [];
+      if (!data) return [];
+
+      const getMins = (iso: string | null) => {
+        if (!iso) return null;
+        const d = new Date(iso);
+        return d.getUTCHours() * 60 + d.getUTCMinutes();
+      };
+
+      // Calculate shift window based on scheduled times
+      const startH = visit.start_hour ?? 0;
+      const startM = visit.start_minute || 0;
+      const durationMins = visit.duration_minutes ?? ((visit.duration ?? 0) * 60);
+      
+      const schedStart = startH * 60 + startM;
+      const schedEnd = schedStart + (durationMins || 1);
+
+      // Also consider actual clock in/out times if available
+      const actualStart = getMins(visit.check_in_time);
+      const actualEnd = getMins(visit.check_out_time);
+
+      // We use the wider of scheduled vs actual, then add a small buffer
+      const effectiveStart = actualStart !== null ? Math.min(schedStart, actualStart) : schedStart;
+      const effectiveEnd = actualEnd !== null ? Math.max(schedEnd, actualEnd) : schedEnd;
+
+      // Strict buffers: 10 mins before start, 30 mins after end
+      const minMins = effectiveStart - 10;
+      const maxMins = effectiveEnd + 30;
+
+      return data.filter((pn: any) => {
+        const created = new Date(pn.created_at);
+        const noteMins = created.getUTCHours() * 60 + created.getUTCMinutes();
+        
+        // Check if note falls within this shift's specific window
+        return noteMins >= minMins && noteMins <= maxMins;
+      });
+    },
+  });
+}
+
+export function useVisitNotesByShift(visit: any) {
+  return useQuery({
+    queryKey: ["visit_notes_by_shift", visit?.id],
+    enabled: !!visit?.id,
+    queryFn: async () => {
+      if (!visit || !visit.care_receiver_id) return [];
+
+      // 1. Format the visit's scheduled time to match shifts table (e.g. "17:45")
+      const startTime = `${String(visit.start_hour).padStart(2, "0")}:${String(visit.start_minute || 0).padStart(2, "0")}`;
+      
+      // 2. Find matching row in 'shifts' table to get the template caregiver
+      const { data: shiftData, error: shiftError } = await supabase
+        .from("shifts")
+        .select("*, care_givers(name)")
+        .eq("start_time", startTime)
+        .eq("care_receiver_id", visit.care_receiver_id)
+        .maybeSingle();
+      
+      if (shiftError || !shiftData) return [];
+
+      const caregiverName = (shiftData.care_givers as any)?.name;
+      if (!caregiverName) return [];
+
+      // 3. Fetch from 'visit_notes' table matching receiver, caregiver name, and date
+      const { data: notes, error: notesError } = await supabase
+        .from("visit_notes")
+        .select("*")
+        .eq("care_receiver_id", visit.care_receiver_id)
+        .eq("caregiver", caregiverName)
+        .eq("date", visit.visit_date)
+        .order("created_at", { ascending: false });
+
+      if (notesError) throw notesError;
+      return notes || [];
     },
   });
 }
