@@ -96,13 +96,20 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
         <TableCell className="text-sm text-muted-foreground">
           <div className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
-            {String(v.start_hour).padStart(2, "0")}:00 – {String(v.start_hour + v.duration).padStart(2, "0")}:00
+            {(() => {
+              const startH = v.start_hour;
+              const startM = v.start_minute || 0;
+              const durationMins = v.duration_minutes ?? (v.duration * 60);
+              const totalStartMins = startH * 60 + startM;
+              const totalEndMins = totalStartMins + durationMins;
+              const endH = Math.floor(totalEndMins / 60) % 24;
+              const endM = totalEndMins % 60;
+              
+              const startStr = `${String(startH).padStart(2, "0")}:${String(startM).padStart(2, "0")}`;
+              const endStr = `${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}`;
+              return `${startStr} – ${endStr}`;
+            })()}
           </div>
-        </TableCell>
-        <TableCell>
-          <Badge className={visitTypeStyle(v.duration) + " text-xs font-semibold"}>
-            {v.duration}h
-          </Badge>
         </TableCell>
         <TableCell className="text-sm">
           <span className={lateMins > 0 ? "text-destructive font-semibold" : "text-foreground"}>
@@ -136,7 +143,7 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
       </TableRow>
       {showNotes && (
         <TableRow className="bg-muted/20">
-          <TableCell colSpan={9} className="py-2 px-6">
+          <TableCell colSpan={8} className="py-2 px-6">
             <div className="space-y-1.5">
               <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><StickyNote className="h-3 w-3" /> Notes</p>
               {notes.length === 0 ? (
@@ -154,7 +161,7 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
       )}
       {showTasks && (
         <TableRow className="bg-muted/20">
-          <TableCell colSpan={9} className="py-2 px-6">
+          <TableCell colSpan={8} className="py-2 px-6">
             <div className="space-y-1.5">
               <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><ClipboardCheck className="h-3 w-3" /> Tasks</p>
               {tasks.length === 0 ? (
@@ -380,7 +387,6 @@ const Dashboard = () => {
                   <TableHead className="font-semibold text-foreground">Care Giver</TableHead>
                   <TableHead className="font-semibold text-foreground">Service Member</TableHead>
                   <TableHead className="font-semibold text-foreground">Scheduled</TableHead>
-                  <TableHead className="font-semibold text-foreground">Type</TableHead>
                   <TableHead className="font-semibold text-foreground">Checked In</TableHead>
                   <TableHead className="font-semibold text-foreground">Clocked Out</TableHead>
                   <TableHead className="font-semibold text-foreground">Total Time Worked</TableHead>
@@ -390,7 +396,7 @@ const Dashboard = () => {
               <TableBody>
                 {completedVisitsForDate.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                       No completed shifts {isViewingToday ? "yet today" : `on ${formatDateDisplay(selectedDateStr)}`}
                     </TableCell>
                   </TableRow>
@@ -428,9 +434,15 @@ const Dashboard = () => {
                     <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">No live visits right now</TableCell>
                   </TableRow>
                 ) : liveVisits.map((v: any) => {
-                  const startMinutes = (v.start_hour ?? 0) * 60 + (v.start_minute ?? 0);
-                  const endHour = v.start_hour + (v.duration ?? 0);
-                  const schedLabel = `${String(v.start_hour).padStart(2, "0")}:${String(v.start_minute ?? 0).padStart(2, "0")} – ${String(endHour).padStart(2, "0")}:${String(v.start_minute ?? 0).padStart(2, "0")}`;
+                  const startH = v.start_hour;
+                  const startM = v.start_minute || 0;
+                  const durationMins = v.duration_minutes ?? (v.duration * 60);
+                  const totalStartMins = startH * 60 + startM;
+                  const totalEndMins = totalStartMins + durationMins;
+                  const endH = Math.floor(totalEndMins / 60) % 24;
+                  const endM = totalEndMins % 60;
+                  
+                  const schedLabel = `${String(startH).padStart(2, "0")}:${String(startM).padStart(2, "0")} – ${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}`;
                   const status = getVisitStatus(v);
                   return (
                     <TableRow key={v.id} className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => setSelectedVisit(v)}>

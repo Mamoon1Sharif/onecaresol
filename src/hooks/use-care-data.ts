@@ -399,6 +399,53 @@ export function useShiftNotes(dailyVisitId: string | undefined) {
   });
 }
 
+export function useShiftTableNote(visit: any) {
+  return useQuery({
+    queryKey: ["shift_table_note", visit?.id],
+    enabled: !!visit?.id,
+    queryFn: async () => {
+      if (!visit) return null;
+      
+      const day = new Date(visit.visit_date).getDay();
+      const startTime = `${String(visit.start_hour).padStart(2, "0")}:${String(visit.start_minute || 0).padStart(2, "0")}`;
+      
+      let query = supabase
+        .from("shifts")
+        .select("notes")
+        .eq("care_receiver_id", visit.care_receiver_id)
+        .eq("day", day)
+        .eq("start_time", startTime);
+        
+      if (visit.care_giver_id) {
+        query = query.eq("care_giver_id", visit.care_giver_id);
+      }
+      
+      const { data, error } = await query.maybeSingle();
+      if (error) throw error;
+      return data?.notes || null;
+    },
+  });
+}
+
+export function useCaregiverPrivateNotes(visit: any) {
+  return useQuery({
+    queryKey: ["caregiver_private_notes", visit?.id],
+    enabled: !!visit?.id,
+    queryFn: async () => {
+      if (!visit || !visit.care_giver_id || !visit.care_receiver_id) return [];
+      const { data, error } = await supabase
+        .from("caregiver_private_notes")
+        .select("*")
+        .eq("care_giver_id", visit.care_giver_id)
+        .eq("service_user_id", visit.care_receiver_id)
+        .eq("note_date", visit.visit_date)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+  });
+}
+
 export function useAddShiftNote() {
   const qc = useQueryClient();
   return useMutation({

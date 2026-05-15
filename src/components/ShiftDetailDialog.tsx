@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useShiftNotes, useShiftTasks } from "@/hooks/use-care-data";
+import { useShiftNotes, useShiftTasks, useShiftTableNote, useCaregiverPrivateNotes } from "@/hooks/use-care-data";
 import {
   Clock, MessageSquare, ListChecks, User, CheckCircle2, XCircle,
 } from "lucide-react";
@@ -16,6 +16,10 @@ interface CompletedVisit {
   visit_date: string;
   care_givers: { name: string } | null;
   care_receivers: { name: string; dnacpr?: boolean } | null;
+  care_receiver_id: string;
+  care_giver_id: string | null;
+  start_minute: number;
+  duration_minutes: number | null;
 }
 
 interface Props {
@@ -24,8 +28,9 @@ interface Props {
   visit: CompletedVisit | null;
 }
 
-function fmt(h: number) {
-  return `${String(h % 24).padStart(2, "0")}:00`;
+function fmt(h: number, m: number = 0) {
+  const hh = Math.floor(h) % 24;
+  return `${String(hh).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
 function fmtTime(iso: string | null) {
@@ -46,6 +51,8 @@ function diffMinutes(start: string | null, end: string | null) {
 
 export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
   const { data: notes = [] } = useShiftNotes(visit?.id);
+  const { data: shiftTableNote } = useShiftTableNote(visit);
+  const { data: privateNotes = [] } = useCaregiverPrivateNotes(visit);
   const { data: rawTasks = [] } = useShiftTasks(visit?.id);
 
   // Dedup tasks by title for display
@@ -57,8 +64,13 @@ export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
 
   if (!visit) return null;
 
-  const scheduledStart = fmt(visit.start_hour);
-  const scheduledEnd = fmt(visit.start_hour + visit.duration);
+  const scheduledStart = fmt(visit.start_hour, visit.start_minute);
+  
+  const totalDurationMins = visit.duration_minutes ?? (visit.duration * 60);
+  const startTotalMins = (visit.start_hour * 60) + (visit.start_minute || 0);
+  const endTotalMins = startTotalMins + totalDurationMins;
+  
+  const scheduledEnd = fmt(Math.floor(endTotalMins / 60), endTotalMins % 60);
   const totalWorked = diffMinutes(visit.check_in_time, visit.check_out_time);
   const completedCount = tasks.filter((t) => t.is_completed).length;
 
@@ -173,7 +185,26 @@ export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
             </div>
 
             <div className="space-y-3 py-2">
-              {notes.length === 0 && (
+              {shiftTableNote && (
+                <div className="bg-primary/5 border border-primary/20 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-semibold text-primary uppercase tracking-wider">Scheduled Notes</span>
+                  </div>
+                  <p className="text-sm text-foreground italic">{shiftTableNote}</p>
+                </div>
+              )}
+              
+              {privateNotes.map((pn: any) => (
+                <div key={pn.id} className="bg-amber-50/50 dark:bg-amber-950/10 border border-amber-200/50 dark:border-amber-800/30 rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Caregiver Private Note</span>
+                    <span className="text-[10px] text-muted-foreground">{new Date(pn.created_at).toLocaleString("en-GB", { timeZone: "Asia/Karachi" })}</span>
+                  </div>
+                  <p className="text-sm text-foreground">{pn.note}</p>
+                </div>
+              ))}
+
+              {notes.length === 0 && !shiftTableNote && privateNotes.length === 0 && (
                 <p className="text-xs text-muted-foreground text-center py-3">No notes recorded</p>
               )}
               {notes.map((n) => (
