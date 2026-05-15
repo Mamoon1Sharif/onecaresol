@@ -573,6 +573,85 @@ export default function InvoiceFull() {
           </DialogContent>
         </Dialog>
 
+        {/* Logo Upload Dialog */}
+        <Dialog open={logoOpen} onOpenChange={setLogoOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Invoice Logo</DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-20 h-20 rounded border bg-muted/30 flex items-center justify-center overflow-hidden">
+                  {logoUrl ? (
+                    <img src={logoUrl} alt="Current logo" className="w-full h-full object-contain" />
+                  ) : (
+                    <span className="text-xs text-muted-foreground">No logo</span>
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()}>
+                    <Upload className="h-4 w-4 mr-1.5" /> {logoUrl ? "Replace" : "Upload"} Logo
+                  </Button>
+                  {logoUrl && (
+                    <Button size="sm" variant="ghost" className="text-destructive" onClick={removeLogo}>
+                      <X className="h-4 w-4 mr-1.5" /> Remove
+                    </Button>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept={draftTypes.map((t) => "." + t).join(",")}
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleLogoFile(f);
+                      e.target.value = "";
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="max-size">Max file size (KB)</Label>
+                <Input
+                  id="max-size"
+                  type="number"
+                  min={1}
+                  value={draftMaxKb}
+                  onChange={(e) => setDraftMaxKb(Number(e.target.value) || 0)}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label>Allowed file types</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {ALL_TYPES.map((t) => (
+                    <label key={t.ext} className="flex items-center gap-2 text-sm cursor-pointer">
+                      <Checkbox
+                        checked={draftTypes.includes(t.ext)}
+                        onCheckedChange={(checked) => {
+                          setDraftTypes((prev) =>
+                            checked ? [...prev, t.ext] : prev.filter((x) => x !== t.ext)
+                          );
+                        }}
+                      />
+                      .{t.ext}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2 sm:gap-2">
+              <Button variant="outline" onClick={() => setLogoOpen(false)}>Cancel</Button>
+              <Button onClick={saveLogoSettings} disabled={draftTypes.length === 0 || draftMaxKb <= 0}>
+                <Save className="h-4 w-4 mr-1.5" /> Save Settings
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         {/* Status banner */}
         <div
           className={`rounded-md py-2 text-center text-sm font-medium ${
