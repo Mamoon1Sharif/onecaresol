@@ -113,7 +113,12 @@ const CareGivers = () => {
           <div className="text-center py-12 text-muted-foreground">No care givers found.</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map((cg) => (
+            {filtered.map((cg) => {
+              const reason = caregiverUnavailableReason(cg as any, holidayEntries, todayStr);
+              const isOnShift = onShiftIds.has(cg.id);
+              const badgeLabel = reason ? reason.label : cg.status;
+              const isActiveAvailable = !reason && cg.status === "Active";
+              return (
               <div
                 key={cg.id}
                 className="group border border-border rounded-xl bg-card cursor-pointer hover:shadow-md hover:border-primary/30 transition-all duration-200 flex flex-col min-h-[260px]"
@@ -125,12 +130,19 @@ const CareGivers = () => {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-1.5 shrink-0">
                       <Badge
-                        variant={cg.status === "Active" ? "default" : "secondary"}
-                        className={`text-xs px-2.5 py-0.5 ${cg.status === "Active" ? "bg-success/15 text-success border-0" : "bg-muted text-muted-foreground border-0"}`}
+                        className={`text-xs px-2.5 py-0.5 border-0 ${
+                          isActiveAvailable
+                            ? "bg-success/15 text-success"
+                            : reason?.kind === "holiday"
+                            ? "bg-warning/15 text-warning"
+                            : reason?.kind === "training"
+                            ? "bg-info/15 text-info"
+                            : "bg-muted text-muted-foreground"
+                        }`}
                       >
-                        {cg.status}
+                        {badgeLabel}
                       </Badge>
-                      {onShiftIds.has(cg.id) && (
+                      {isOnShift && !reason && (
                         <Badge className="text-xs px-2.5 py-0.5 bg-info/15 text-info border-0 gap-1">
                           <Briefcase className="h-3 w-3" /> On Shift
                         </Badge>
