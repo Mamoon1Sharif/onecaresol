@@ -231,6 +231,10 @@ const AddRota = () => {
 
   const handleSaveClick = () => {
     if (!selected) return;
+    if (!form.staff1) {
+      toast.error("Please choose a caregiver before saving.");
+      return;
+    }
     if (unavailableDates.length > 0) {
       toast.error(
         unavailableDates.length === 1
@@ -613,8 +617,8 @@ const AddRota = () => {
             </Section>
 
             {/* 3. Caregiver */}
-            <Section icon={User} title="Care giver" subtitle="Assign or leave open for later.">
-              <Field label="Assign caregiver">
+            <Section icon={User} title="Care giver" subtitle="Assign a caregiver to this shift.">
+              <Field label="Assign caregiver" required>
                 <Select value={form.staff1} onValueChange={(v) => setForm({ ...form, staff1: v })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Choose a caregiver…" />

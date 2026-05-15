@@ -14,11 +14,18 @@ import {
   Pencil, Plus, Lock, Info, Calendar, TrendingUp, Clock, ThumbsUp, Link as LinkIcon,
   Map as MapIcon, Users, AlertCircle, User, ArrowRight, FileText, Briefcase, Bell,
   PoundSterling, Camera, ListChecks, XCircle, Trash2, X, CheckCircle2, Activity,
-  LogIn, LogOut, PlayCircle, CircleDot, Pill,
+  LogIn, LogOut, PlayCircle, CircleDot, Pill, MessageSquare, StickyNote
 } from "lucide-react";
+import { useShiftNotes, useCaregiverPrivateNotes } from "@/hooks/use-care-data";
 
 interface VisitRow {
   id: string;
+  receiver?: any;
+  caregiver?: any;
+  caregiver_id?: string;
+  receiver_id?: string;
+  rawDate?: string;
+  rawVisit?: any;
   ref: string;
   date: string;
   status: string;
@@ -92,6 +99,10 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
   const [clockOut, setClockOut] = useState<string | null>(null);
   const [memberRemoved, setMemberRemoved] = useState(false);
 
+  // Database notes hooks
+  const { data: dbShiftNotes = [] } = useShiftNotes(visit?.id);
+  const { data: dbPrivateNotes = [] } = useCaregiverPrivateNotes(visit?.rawVisit);
+
   useEffect(() => {
     if (!visit) return;
     setClockIn(visit.actualStart && visit.actualStart !== "—" ? visit.actualStart : null);
@@ -102,21 +113,52 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
     setEditServiceCall(visit.serviceCall ?? "");
     setMemberRemoved(false);
 
-    // Seed sample shift-notes feed for completed shifts
-    if ((visit.status || "").toLowerCase() === "completed") {
+    // Merge database notes with sample notes (if any)
+    const merged: Note[] = [];
+
+    // Add private notes first
+    dbPrivateNotes.forEach((pn: any) => {
+      merged.push({
+        id: pn.id,
+        ref: "PRIVATE",
+        tags: ["Private"],
+        author: visit.teamMember || "Care Giver",
+        text: pn.note,
+        hidden: false,
+        createdAt: new Date(pn.created_at).toLocaleString("en-GB"),
+        visibleOnDevice: true
+      });
+    });
+
+    // Add standard shift notes
+    dbShiftNotes.forEach((n: any) => {
+      merged.push({
+        id: n.id,
+        ref: n.id.slice(0, 8).toUpperCase(),
+        tags: [],
+        author: n.author === visit.caregiver?.id ? (visit.caregiver?.name || n.author) : n.author,
+        text: n.note,
+        hidden: false,
+        createdAt: new Date(n.created_at).toLocaleString("en-GB"),
+        visibleOnDevice: true
+      });
+    });
+
+    // If no DB notes and status is completed, add the sample notes for demo purposes
+    if (merged.length === 0 && (visit.status || "").toLowerCase() === "completed") {
       const dateStr = visit.date;
       const author = visit.teamMember || "Care Giver";
-      setNotes([
+      merged.push(
         { id: "n1", ref: "142920742", tags: [], author, text: ".", hidden: false, createdAt: `${dateStr} 07:59`, visibleOnDevice: true },
         { id: "n2", ref: "142905460", tags: [], author, text: `${visit.serviceUser} and family member both are confused, they want us to open the door for them and let the go home. We told them this is their house but they are saying no, having a chat with them to make them calm. All care done in their best interest.`, hidden: false, createdAt: `${dateStr} 21:44`, visibleOnDevice: true },
         { id: "n3", ref: "142902043", tags: [], author, text: `6x medication given to ${visit.serviceUser} with water with her consent seen taken @9:05pm.`, hidden: false, createdAt: `${dateStr} 21:08`, visibleOnDevice: true },
         { id: "n4", ref: "142900915", tags: [], author, text: `${visit.serviceUser} wanted to use commode, assisted her to stand with frame and walk to the commode. Used commode there was no bowel movement. Wiped bottom and assisted her to stand with frame and walk back to the lounge and sit on the armchair comfortably. Commode emptied and wiped, wipes disposed of in the nappy bag and put in the rubbish bin and made commode ready to use for the next time. Consent gained for all the tasks.`, hidden: false, createdAt: `${dateStr} 20:58`, visibleOnDevice: true },
         { id: "n5", ref: "142897531", tags: [], author, text: `${visit.serviceUser}'s leg bag emptied (500ml). Consent gained.`, hidden: false, createdAt: `${dateStr} 20:33`, visibleOnDevice: true },
-      ]);
-    } else {
-      setNotes([]);
+      );
     }
-  }, [visit]);
+    
+    setNotes(merged);
+  }, [visit, dbShiftNotes, dbPrivateNotes]);
 
   if (!visit) return null;
 
@@ -514,8 +556,10 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                           </tr>
                         </thead>
                         <tbody>
-                          {notes.map((n, i) => (
-                            <tr key={n.id} className={`border-b border-border ${i % 2 === 0 ? "bg-background" : "bg-muted/20"}`}>
+                          {notes.map((n, i) => {
+                          const isPrivate = n.tags?.includes("Private");
+                          return (
+                            <tr key={n.id} className={`border-b border-border ${isPrivate ? "bg-amber-50/50 dark:bg-amber-950/20" : (i % 2 === 0 ? "bg-background" : "bg-muted/20")}`}>
                               <td className="p-1.5 border-r border-border text-center"><input type="checkbox" /></td>
                               <td className="p-1.5 border-r border-border">
                                 <Button size="icon" variant="ghost" className="h-6 w-6">
@@ -523,13 +567,22 @@ export function VisitDetailDialog({ visit, open, onOpenChange }: Props) {
                                 </Button>
                               </td>
                               <td className="p-1.5 border-r border-border font-mono text-[11px] text-muted-foreground">{n.ref}</td>
-                              <td className="p-1.5 border-r border-border">{(n.tags || []).join(", ")}</td>
-                              <td className="p-1.5 border-r border-border whitespace-nowrap">{n.createdAt}</td>
-                              <td className="p-1.5 border-r border-border">{n.text}</td>
-                              <td className="p-1.5 border-r border-border">{n.author}</td>
-                              <td className="p-1.5">{n.visibleOnDevice === false ? "No" : "Yes"}</td>
+                              <td className="p-1.5 border-r border-border">
+                                {isPrivate ? (
+                                  <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-400">
+                                    Private
+                                  </span>
+                                ) : (
+                                  (n.tags || []).join(", ")
+                                )}
+                              </td>
+                              <td className="p-1.5 border-r border-border whitespace-nowrap text-[11px]">{n.createdAt}</td>
+                              <td className="p-1.5 border-r border-border text-[11px] font-medium">{n.text}</td>
+                              <td className="p-1.5 border-r border-border text-[11px]">{n.author}</td>
+                              <td className="p-1.5 text-[11px]">{n.visibleOnDevice === false ? "No" : "Yes"}</td>
                             </tr>
-                          ))}
+                          );
+                        })}
                         </tbody>
                       </table>
                     </div>

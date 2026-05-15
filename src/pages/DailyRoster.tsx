@@ -163,10 +163,10 @@ const DailyRoster = () => {
       const postcode = (cr.address ?? "").split(" ").slice(-2).join(" ").toUpperCase() || "";
       const serviceCall =
         idx === 0 ? "On Call"
-        : cr.care_type === "12h-live-in" ? "Private - Live-in..."
-        : cr.care_type === "8h-night" ? "WCC - Night Call"
-        : idx % 4 === 0 ? "Private Morning..."
-        : "WCC - Morning...";
+          : cr.care_type === "12h-live-in" ? "Private - Live-in..."
+            : cr.care_type === "8h-night" ? "WCC - Night Call"
+              : idx % 4 === 0 ? "Private Morning..."
+                : "WCC - Morning...";
 
       const fmtDur = `${String(Math.floor(durMins / 60)).padStart(2, "0")}:${String(durMins % 60).padStart(2, "0")}`;
 
@@ -186,10 +186,10 @@ const DailyRoster = () => {
         actualEnd: v.check_out_time ? new Date(v.check_out_time).toISOString().slice(11, 16) : "—",
         actualDuration: v.check_in_time && v.check_out_time
           ? (() => {
-              const ms = new Date(v.check_out_time).getTime() - new Date(v.check_in_time).getTime();
-              const mins = Math.max(0, Math.round(ms / 60000));
-              return `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
-            })()
+            const ms = new Date(v.check_out_time).getTime() - new Date(v.check_in_time).getTime();
+            const mins = Math.max(0, Math.round(ms / 60000));
+            return `${String(Math.floor(mins / 60)).padStart(2, "0")}:${String(mins % 60).padStart(2, "0")}`;
+          })()
           : "—",
         checkInLat: v.check_in_lat ?? null,
         checkInLng: v.check_in_lng ?? null,
@@ -197,6 +197,9 @@ const DailyRoster = () => {
         serviceCall,
         week: `Week ${(week % 4) || 1}`,
         weekNum: 17,
+        receiver_id: v.care_receiver_id,
+        rawDate: v.visit_date,
+        rawVisit: v,
         receiver: cr,
         caregiver: v.care_givers ?? null,
       };
@@ -393,221 +396,221 @@ const DailyRoster = () => {
 
         {/* Spreadsheet table */}
         <TooltipProvider delayDuration={150}>
-        <Card className="border border-border overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-xs border-collapse">
-              <thead>
-                <tr className="bg-muted/60 border-b border-border">
-                  <th className="p-2 border-r border-border w-8">
-                    <input type="checkbox" className="rounded" checked={selected.size === rows.length && rows.length > 0} onChange={toggleSelectAll} />
-                  </th>
-                  <th className="p-2 border-r border-border text-center w-20"><IconCell icon={Info} label="Visit reference ID" /></th>
-                  <th className="p-2 border-r border-border text-center w-20"><IconCell icon={Calendar} label="Visit date" /></th>
-                  <th className="p-2 border-r border-border text-left w-20">Status</th>
-                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={XCircle} label="Cancelled / not accepted by carer" /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={ThumbsUp} label="Carer confirmed shift" /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Link2} label="Linked / paired visit" /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Map} label="Run route assigned" /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Users} label="Care team color tag" /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={AlertCircle} label="Visit alert / flag" /></th>
-                  <th className="p-2 border-r border-border text-left">Service Member</th>
-                  <th className="p-2 border-r border-border text-center w-16 bg-emerald-100">
-                    <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Calendar className="h-3.5 w-3.5 text-emerald-700" /></span></TooltipTrigger><TooltipContent className="text-xs">Scheduled start time</TooltipContent></Tooltip>
-                  </th>
-                  <th className="p-2 border-r border-border text-center w-16 bg-rose-100">
-                    <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Calendar className="h-3.5 w-3.5 text-rose-700" /></span></TooltipTrigger><TooltipContent className="text-xs">Scheduled end time</TooltipContent></Tooltip>
-                  </th>
-                  <th className="p-2 border-r border-border text-center w-16"><IconCell icon={TrendingUp} label="Scheduled duration" /></th>
-                  <th className="p-2 border-r border-border text-center w-16 bg-emerald-100">
-                    <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Clock className="h-3.5 w-3.5 text-emerald-700" /></span></TooltipTrigger><TooltipContent className="text-xs">Actual clock-in time</TooltipContent></Tooltip>
-                  </th>
-                  <th className="p-2 border-r border-border text-center w-16 bg-rose-100">
-                    <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Clock className="h-3.5 w-3.5 text-rose-700" /></span></TooltipTrigger><TooltipContent className="text-xs">Actual clock-out time</TooltipContent></Tooltip>
-                  </th>
-                  <th className="p-2 border-r border-border text-center w-16"><IconCell icon={TrendingUp} label="Actual duration worked" /></th>
-                  <th className="p-2 border-r border-border text-center w-28"><IconCell icon={Map} label="Clock-in GPS location (lat, lng)" /></th>
-                  <th className="p-2 border-r border-border text-left">Care Giver</th>
-                  <th className="p-2 border-r border-border text-left">Service Call</th>
-                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Tag} label="Service tag" /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={UserPlus} label="Double-up / shadow" /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Briefcase} label="Care pack required" /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={FileText} label="Care notes recorded" /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Bell} label="Alerts raised" /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={PoundSterling} label="Payroll / charge status" /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={MessageSquare} label="Visit messages" /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Move} label="Reassign / move visit" /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={ArrowRight} label="Visit direction" /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={User} label="Solo visit" /></th>
-                  <th className="p-2 border-r border-border text-left w-20">Week</th>
-                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={CalendarRange} label="Recurring weekly pattern" /></th>
-                  <th className="p-2 border-r border-border text-center w-12 text-[11px]">Wk</th>
-                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={ListChecks} label="Tasks completion" /></th>
-                  <th className="p-2 border-r border-border text-center w-8"><IconCell icon={CalendarDays} label="Care plan" /></th>
-                  <th className="p-2 text-center w-8"><IconCell icon={Lock} label="Rota lock" /></th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.length === 0 && (
-                  <tr><td colSpan={36} className="p-8 text-center text-muted-foreground">No shifts scheduled for this day.</td></tr>
-                )}
-                {rows.map((r, i) => {
-                  const isMissed = r.status === "Missed";
-                  const rowBg = isMissed ? "bg-purple-100/70" : i % 2 === 1 ? "bg-emerald-50/60" : "bg-emerald-50/30";
-                  const dot = dotColors[i % dotColors.length];
-                  const isSel = selected.has(r.id);
-                  const actualStartDisplay = r.actualStart !== "—" ? r.actualStart : (r.isFuture ? "" : "—");
-                  const actualEndDisplay = r.actualEnd !== "—" ? r.actualEnd : (r.isFuture ? "" : "—");
-                  const actualDurationDisplay = r.actualDuration !== "—" ? r.actualDuration : (r.isFuture ? "" : "—");
-                  return (
-                    <tr key={r.id} className={`${rowBg} border-b border-border hover:bg-muted/40 transition-colors`}>
-                      <td className="p-1.5 border-r border-border text-center">
-                        <input type="checkbox" className="rounded" checked={isSel} onChange={() => toggleSelect(r.id)} />
-                      </td>
-                      <td className="p-1.5 border-r border-border text-center">
-                        <button
-                          type="button"
-                          onClick={() => { setDetailVisit(r); setDetailOpen(true); }}
-                          className="text-primary hover:underline cursor-pointer font-mono text-[11px]"
-                          title="View visit details"
-                        >
-                          {r.ref}
-                        </button>
-                      </td>
-                      <td className="p-1.5 border-r border-border font-mono text-[11px] text-center">{r.date}</td>
-                      <td className={`p-1.5 border-r border-border text-[11px] ${statusTone[r.status] ?? ""}`}>{r.status}</td>
-                      <td className="p-1.5 border-r border-border text-center">
-                        {!r.accepted && !isMissed ? (
-                          <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><XCircle className="h-3.5 w-3.5 text-destructive" /></span></TooltipTrigger><TooltipContent className="text-xs">Not yet accepted</TooltipContent></Tooltip>
-                        ) : null}
-                      </td>
-                      <td className="p-1.5 border-r border-border text-center">
-                        {r.accepted ? (
-                          <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><ThumbsUp className="h-3 w-3 text-success" /></span></TooltipTrigger><TooltipContent className="text-xs">Confirmed by carer</TooltipContent></Tooltip>
-                        ) : null}
-                      </td>
-                      <td className="p-1.5 border-r border-border text-center"></td>
-                      <td className="p-1.5 border-r border-border text-center">
-                        {i % 3 === 0 && <IconCell icon={Map} label="On run route" className="h-3 w-3 text-primary" />}
-                      </td>
-                      <td className="p-1.5 border-r border-border text-center">
-                        <Tooltip><TooltipTrigger asChild><span className={`inline-block w-3 h-3 rounded-full cursor-help ${dot}`} /></TooltipTrigger><TooltipContent className="text-xs">Care team tag</TooltipContent></Tooltip>
-                      </td>
-                      <td className="p-1.5 border-r border-border text-center">
-                        {i % 6 === 1 && (
-                          <Tooltip><TooltipTrigger asChild><span className="inline-block w-0 h-0 border-l-[5px] border-r-[5px] border-b-[8px] border-l-transparent border-r-transparent border-b-cyan-500 cursor-help" /></TooltipTrigger><TooltipContent className="text-xs">Priority alert</TooltipContent></Tooltip>
-                        )}
-                      </td>
-                      <td className="p-1.5 border-r border-border">
-                        <button
-                          type="button"
-                          onClick={() => r.receiver?.id && setReceiverProfile(r.receiver)}
-                          className="text-primary hover:underline cursor-pointer text-[11px] text-left"
-                        >
-                          {r.serviceUser}
-                        </button>
-                      </td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{r.scheduledStart}</td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{r.scheduledEnd}</td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{r.duration}</td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{actualStartDisplay}</td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{actualEndDisplay}</td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{actualDurationDisplay}</td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[10px]">
-                        {r.checkInLat != null && r.checkInLng != null ? (
-                          <a
-                            href={`https://www.google.com/maps?q=${r.checkInLat},${r.checkInLng}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline"
-                            title="Open in Google Maps"
-                          >
-                            {r.checkInLat.toFixed(5)}, {r.checkInLng.toFixed(5)}
-                          </a>
-                        ) : "—"}
-                      </td>
-                      <td className="p-1.5 border-r border-border">
-                        {r.caregiver?.id ? (
+          <Card className="border border-border overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs border-collapse">
+                <thead>
+                  <tr className="bg-muted/60 border-b border-border">
+                    <th className="p-2 border-r border-border w-8">
+                      <input type="checkbox" className="rounded" checked={selected.size === rows.length && rows.length > 0} onChange={toggleSelectAll} />
+                    </th>
+                    <th className="p-2 border-r border-border text-center w-20"><IconCell icon={Info} label="Visit reference ID" /></th>
+                    <th className="p-2 border-r border-border text-center w-20"><IconCell icon={Calendar} label="Visit date" /></th>
+                    <th className="p-2 border-r border-border text-left w-20">Status</th>
+                    <th className="p-2 border-r border-border text-center w-8"><IconCell icon={XCircle} label="Cancelled / not accepted by carer" /></th>
+                    <th className="p-2 border-r border-border text-center w-8"><IconCell icon={ThumbsUp} label="Carer confirmed shift" /></th>
+                    <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Link2} label="Linked / paired visit" /></th>
+                    <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Map} label="Run route assigned" /></th>
+                    <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Users} label="Care team color tag" /></th>
+                    <th className="p-2 border-r border-border text-center w-8"><IconCell icon={AlertCircle} label="Visit alert / flag" /></th>
+                    <th className="p-2 border-r border-border text-left">Service Member</th>
+                    <th className="p-2 border-r border-border text-center w-16 bg-emerald-100">
+                      <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Calendar className="h-3.5 w-3.5 text-emerald-700" /></span></TooltipTrigger><TooltipContent className="text-xs">Scheduled start time</TooltipContent></Tooltip>
+                    </th>
+                    <th className="p-2 border-r border-border text-center w-16 bg-rose-100">
+                      <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Calendar className="h-3.5 w-3.5 text-rose-700" /></span></TooltipTrigger><TooltipContent className="text-xs">Scheduled end time</TooltipContent></Tooltip>
+                    </th>
+                    <th className="p-2 border-r border-border text-center w-16"><IconCell icon={TrendingUp} label="Scheduled duration" /></th>
+                    <th className="p-2 border-r border-border text-center w-16 bg-emerald-100">
+                      <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Clock className="h-3.5 w-3.5 text-emerald-700" /></span></TooltipTrigger><TooltipContent className="text-xs">Actual clock-in time</TooltipContent></Tooltip>
+                    </th>
+                    <th className="p-2 border-r border-border text-center w-16 bg-rose-100">
+                      <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><Clock className="h-3.5 w-3.5 text-rose-700" /></span></TooltipTrigger><TooltipContent className="text-xs">Actual clock-out time</TooltipContent></Tooltip>
+                    </th>
+                    <th className="p-2 border-r border-border text-center w-16"><IconCell icon={TrendingUp} label="Actual duration worked" /></th>
+                    <th className="p-2 border-r border-border text-center w-28"><IconCell icon={Map} label="Clock-in GPS location (lat, lng)" /></th>
+                    <th className="p-2 border-r border-border text-left">Care Giver</th>
+                    <th className="p-2 border-r border-border text-left">Service Call</th>
+                    <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Tag} label="Service tag" /></th>
+                    <th className="p-2 border-r border-border text-center w-8"><IconCell icon={UserPlus} label="Double-up / shadow" /></th>
+                    <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Briefcase} label="Care pack required" /></th>
+                    <th className="p-2 border-r border-border text-center w-8"><IconCell icon={FileText} label="Care notes recorded" /></th>
+                    <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Bell} label="Alerts raised" /></th>
+                    <th className="p-2 border-r border-border text-center w-8"><IconCell icon={PoundSterling} label="Payroll / charge status" /></th>
+                    <th className="p-2 border-r border-border text-center w-8"><IconCell icon={MessageSquare} label="Visit messages" /></th>
+                    <th className="p-2 border-r border-border text-center w-8"><IconCell icon={Move} label="Reassign / move visit" /></th>
+                    <th className="p-2 border-r border-border text-center w-8"><IconCell icon={ArrowRight} label="Visit direction" /></th>
+                    <th className="p-2 border-r border-border text-center w-8"><IconCell icon={User} label="Solo visit" /></th>
+                    <th className="p-2 border-r border-border text-left w-20">Week</th>
+                    <th className="p-2 border-r border-border text-center w-8"><IconCell icon={CalendarRange} label="Recurring weekly pattern" /></th>
+                    <th className="p-2 border-r border-border text-center w-12 text-[11px]">Wk</th>
+                    <th className="p-2 border-r border-border text-center w-8"><IconCell icon={ListChecks} label="Tasks completion" /></th>
+                    <th className="p-2 border-r border-border text-center w-8"><IconCell icon={CalendarDays} label="Care plan" /></th>
+                    <th className="p-2 text-center w-8"><IconCell icon={Lock} label="Rota lock" /></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.length === 0 && (
+                    <tr><td colSpan={36} className="p-8 text-center text-muted-foreground">No shifts scheduled for this day.</td></tr>
+                  )}
+                  {rows.map((r, i) => {
+                    const isMissed = r.status === "Missed";
+                    const rowBg = isMissed ? "bg-purple-100/70" : i % 2 === 1 ? "bg-emerald-50/60" : "bg-emerald-50/30";
+                    const dot = dotColors[i % dotColors.length];
+                    const isSel = selected.has(r.id);
+                    const actualStartDisplay = r.actualStart !== "—" ? r.actualStart : (r.isFuture ? "" : "—");
+                    const actualEndDisplay = r.actualEnd !== "—" ? r.actualEnd : (r.isFuture ? "" : "—");
+                    const actualDurationDisplay = r.actualDuration !== "—" ? r.actualDuration : (r.isFuture ? "" : "—");
+                    return (
+                      <tr key={r.id} className={`${rowBg} border-b border-border hover:bg-muted/40 transition-colors`}>
+                        <td className="p-1.5 border-r border-border text-center">
+                          <input type="checkbox" className="rounded" checked={isSel} onChange={() => toggleSelect(r.id)} />
+                        </td>
+                        <td className="p-1.5 border-r border-border text-center">
                           <button
                             type="button"
-                            onClick={() => setCaregiverProfile(r.caregiver)}
+                            onClick={() => { setDetailVisit(r); setDetailOpen(true); }}
+                            className="text-primary hover:underline cursor-pointer font-mono text-[11px]"
+                            title="View visit details"
+                          >
+                            {r.ref}
+                          </button>
+                        </td>
+                        <td className="p-1.5 border-r border-border font-mono text-[11px] text-center">{r.date}</td>
+                        <td className={`p-1.5 border-r border-border text-[11px] ${statusTone[r.status] ?? ""}`}>{r.status}</td>
+                        <td className="p-1.5 border-r border-border text-center">
+                          {!r.accepted && !isMissed ? (
+                            <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><XCircle className="h-3.5 w-3.5 text-destructive" /></span></TooltipTrigger><TooltipContent className="text-xs">Not yet accepted</TooltipContent></Tooltip>
+                          ) : null}
+                        </td>
+                        <td className="p-1.5 border-r border-border text-center">
+                          {r.accepted ? (
+                            <Tooltip><TooltipTrigger asChild><span className="inline-flex cursor-help"><ThumbsUp className="h-3 w-3 text-success" /></span></TooltipTrigger><TooltipContent className="text-xs">Confirmed by carer</TooltipContent></Tooltip>
+                          ) : null}
+                        </td>
+                        <td className="p-1.5 border-r border-border text-center"></td>
+                        <td className="p-1.5 border-r border-border text-center">
+                          {i % 3 === 0 && <IconCell icon={Map} label="On run route" className="h-3 w-3 text-primary" />}
+                        </td>
+                        <td className="p-1.5 border-r border-border text-center">
+                          <Tooltip><TooltipTrigger asChild><span className={`inline-block w-3 h-3 rounded-full cursor-help ${dot}`} /></TooltipTrigger><TooltipContent className="text-xs">Care team tag</TooltipContent></Tooltip>
+                        </td>
+                        <td className="p-1.5 border-r border-border text-center">
+                          {i % 6 === 1 && (
+                            <Tooltip><TooltipTrigger asChild><span className="inline-block w-0 h-0 border-l-[5px] border-r-[5px] border-b-[8px] border-l-transparent border-r-transparent border-b-cyan-500 cursor-help" /></TooltipTrigger><TooltipContent className="text-xs">Priority alert</TooltipContent></Tooltip>
+                          )}
+                        </td>
+                        <td className="p-1.5 border-r border-border">
+                          <button
+                            type="button"
+                            onClick={() => r.receiver?.id && setReceiverProfile(r.receiver)}
                             className="text-primary hover:underline cursor-pointer text-[11px] text-left"
                           >
-                            {r.teamMember}
+                            {r.serviceUser}
                           </button>
-                        ) : (
-                          <span className="text-[11px] text-muted-foreground">{r.teamMember}</span>
-                        )}
-                      </td>
-                      <td className="p-1.5 border-r border-border text-[11px] text-foreground/80">{r.serviceCall}</td>
-                      <td className="p-1.5 border-r border-border text-center">
-                        {i % 2 === 0 && <IconCell icon={Tag} label="Service tag" className="h-3 w-3 text-muted-foreground" />}
-                      </td>
-                      <td className="p-1.5 border-r border-border text-center">
-                        {i % 4 === 1 && <IconCell icon={UserPlus} label="Double-up shift" className="h-3 w-3 text-primary" />}
-                      </td>
-                      <td className="p-1.5 border-r border-border text-center">
-                        <IconCell icon={Briefcase} label="Care pack" className="h-3 w-3 text-emerald-600" />
-                      </td>
-                      <td className="p-1.5 border-r border-border text-center">
-                        {i % 3 === 0 && <IconCell icon={FileText} label="Care notes recorded" className="h-3 w-3 text-emerald-600" />}
-                      </td>
-                      <td className="p-1.5 border-r border-border text-center">
-                        <IconCell icon={Bell} label="No alerts" className="h-3 w-3 text-muted-foreground/60" />
-                      </td>
-                      <td className="p-1.5 border-r border-border text-center">
-                        <IconCell icon={PoundSterling} label="Payroll pending" className="h-3 w-3 text-muted-foreground/60" />
-                      </td>
-                      <td className="p-1.5 border-r border-border text-center">
-                        {i % 5 === 2 && <IconCell icon={MessageSquare} label="Has messages" className="h-3 w-3 text-primary" />}
-                      </td>
-                      <td className="p-1.5 border-r border-border text-center">
-                        {i % 7 === 0 && <IconCell icon={Move} label="Move visit" className="h-3 w-3 text-muted-foreground" />}
-                      </td>
-                      <td className="p-1.5 border-r border-border text-center">
-                        <IconCell icon={ArrowRight} label="Continues to next" className="h-3 w-3 text-muted-foreground" />
-                      </td>
-                      <td className="p-1.5 border-r border-border text-center">
-                        {i % 4 === 0 && <IconCell icon={User} label="Solo visit" className="h-3 w-3 text-muted-foreground" />}
-                      </td>
-                      <td className="p-1.5 border-r border-border text-[11px]">{r.week}</td>
-                      <td className="p-1.5 border-r border-border text-center">
-                        <IconCell icon={CalendarRange} label="Weekly pattern" className="h-3 w-3 text-muted-foreground/70" />
-                      </td>
-                      <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{r.weekNum}</td>
-                      <td className="p-1.5 border-r border-border text-center">
-                        <IconCell icon={ListChecks} label="Tasks tracked" className="h-3 w-3 text-success" />
-                      </td>
-                      <td className="p-1.5 border-r border-border text-center">
-                        <IconCell icon={CalendarDays} label="Care plan" className="h-3 w-3 text-muted-foreground/70" />
-                      </td>
-                      <td className="p-1.5 text-center">
-                        <IconCell icon={Lock} label="Lock visit" className="h-3 w-3 text-muted-foreground/70" />
+                        </td>
+                        <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{r.scheduledStart}</td>
+                        <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{r.scheduledEnd}</td>
+                        <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{r.duration}</td>
+                        <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-emerald-50">{actualStartDisplay}</td>
+                        <td className="p-1.5 border-r border-border text-center font-mono text-[11px] bg-rose-50">{actualEndDisplay}</td>
+                        <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{actualDurationDisplay}</td>
+                        <td className="p-1.5 border-r border-border text-center font-mono text-[10px]">
+                          {r.checkInLat != null && r.checkInLng != null ? (
+                            <a
+                              href={`https://www.google.com/maps?q=${r.checkInLat},${r.checkInLng}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline"
+                              title="Open in Google Maps"
+                            >
+                              {r.checkInLat.toFixed(5)}, {r.checkInLng.toFixed(5)}
+                            </a>
+                          ) : "—"}
+                        </td>
+                        <td className="p-1.5 border-r border-border">
+                          {r.caregiver?.id ? (
+                            <button
+                              type="button"
+                              onClick={() => setCaregiverProfile(r.caregiver)}
+                              className="text-primary hover:underline cursor-pointer text-[11px] text-left"
+                            >
+                              {r.teamMember}
+                            </button>
+                          ) : (
+                            <span className="text-[11px] text-muted-foreground">{r.teamMember}</span>
+                          )}
+                        </td>
+                        <td className="p-1.5 border-r border-border text-[11px] text-foreground/80">{r.serviceCall}</td>
+                        <td className="p-1.5 border-r border-border text-center">
+                          {i % 2 === 0 && <IconCell icon={Tag} label="Service tag" className="h-3 w-3 text-muted-foreground" />}
+                        </td>
+                        <td className="p-1.5 border-r border-border text-center">
+                          {i % 4 === 1 && <IconCell icon={UserPlus} label="Double-up shift" className="h-3 w-3 text-primary" />}
+                        </td>
+                        <td className="p-1.5 border-r border-border text-center">
+                          <IconCell icon={Briefcase} label="Care pack" className="h-3 w-3 text-emerald-600" />
+                        </td>
+                        <td className="p-1.5 border-r border-border text-center">
+                          {i % 3 === 0 && <IconCell icon={FileText} label="Care notes recorded" className="h-3 w-3 text-emerald-600" />}
+                        </td>
+                        <td className="p-1.5 border-r border-border text-center">
+                          <IconCell icon={Bell} label="No alerts" className="h-3 w-3 text-muted-foreground/60" />
+                        </td>
+                        <td className="p-1.5 border-r border-border text-center">
+                          <IconCell icon={PoundSterling} label="Payroll pending" className="h-3 w-3 text-muted-foreground/60" />
+                        </td>
+                        <td className="p-1.5 border-r border-border text-center">
+                          {i % 5 === 2 && <IconCell icon={MessageSquare} label="Has messages" className="h-3 w-3 text-primary" />}
+                        </td>
+                        <td className="p-1.5 border-r border-border text-center">
+                          {i % 7 === 0 && <IconCell icon={Move} label="Move visit" className="h-3 w-3 text-muted-foreground" />}
+                        </td>
+                        <td className="p-1.5 border-r border-border text-center">
+                          <IconCell icon={ArrowRight} label="Continues to next" className="h-3 w-3 text-muted-foreground" />
+                        </td>
+                        <td className="p-1.5 border-r border-border text-center">
+                          {i % 4 === 0 && <IconCell icon={User} label="Solo visit" className="h-3 w-3 text-muted-foreground" />}
+                        </td>
+                        <td className="p-1.5 border-r border-border text-[11px]">{r.week}</td>
+                        <td className="p-1.5 border-r border-border text-center">
+                          <IconCell icon={CalendarRange} label="Weekly pattern" className="h-3 w-3 text-muted-foreground/70" />
+                        </td>
+                        <td className="p-1.5 border-r border-border text-center font-mono text-[11px]">{r.weekNum}</td>
+                        <td className="p-1.5 border-r border-border text-center">
+                          <IconCell icon={ListChecks} label="Tasks tracked" className="h-3 w-3 text-success" />
+                        </td>
+                        <td className="p-1.5 border-r border-border text-center">
+                          <IconCell icon={CalendarDays} label="Care plan" className="h-3 w-3 text-muted-foreground/70" />
+                        </td>
+                        <td className="p-1.5 text-center">
+                          <IconCell icon={Lock} label="Lock visit" className="h-3 w-3 text-muted-foreground/70" />
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+                {rows.length > 0 && (
+                  <tfoot>
+                    <tr className="bg-muted/30 border-t-2 border-border">
+                      <td colSpan={36} className="p-2">
+                        <div className="flex items-center gap-8">
+                          <div>
+                            <div className="font-bold text-sm">{fmtTotal(schedHours)}</div>
+                            <div className="text-[10px] text-muted-foreground">Sched hrs</div>
+                          </div>
+                          <div>
+                            <div className="font-bold text-sm">{fmtTotal(clockHours)}</div>
+                            <div className="text-[10px] text-muted-foreground">Clock hrs</div>
+                          </div>
+                        </div>
                       </td>
                     </tr>
-                  );
-                })}
-              </tbody>
-              {rows.length > 0 && (
-                <tfoot>
-                  <tr className="bg-muted/30 border-t-2 border-border">
-                    <td colSpan={36} className="p-2">
-                      <div className="flex items-center gap-8">
-                        <div>
-                          <div className="font-bold text-sm">{fmtTotal(schedHours)}</div>
-                          <div className="text-[10px] text-muted-foreground">Sched hrs</div>
-                        </div>
-                        <div>
-                          <div className="font-bold text-sm">{fmtTotal(clockHours)}</div>
-                          <div className="text-[10px] text-muted-foreground">Clock hrs</div>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                </tfoot>
-              )}
-            </table>
-          </div>
-        </Card>
+                  </tfoot>
+                )}
+              </table>
+            </div>
+          </Card>
         </TooltipProvider>
 
         <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
