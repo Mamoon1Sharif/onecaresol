@@ -589,9 +589,18 @@ export default function InvoiceFull() {
           <div className="flex items-start justify-between gap-6">
             <div>
               <h2 className="text-xl font-semibold mb-3">Invoice</h2>
-              <div className="w-20 h-20 rounded bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
-                LOGO
-              </div>
+              <button
+                type="button"
+                onClick={() => setLogoOpen(true)}
+                className="w-20 h-20 rounded bg-primary/10 hover:bg-primary/20 transition flex items-center justify-center text-primary font-bold text-xs overflow-hidden border border-dashed border-primary/30 print:border-0"
+                title="Click to upload logo / set restrictions"
+              >
+                {logoUrl ? (
+                  <img src={logoUrl} alt="Invoice logo" className="w-full h-full object-contain" />
+                ) : (
+                  "LOGO"
+                )}
+              </button>
             </div>
             <div className="text-right text-xs space-y-0.5">
               <div className="font-semibold text-sm">Mayfair Care Agency Ltd</div>
