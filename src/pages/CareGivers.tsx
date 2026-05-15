@@ -120,7 +120,8 @@ const CareGivers = () => {
             {filtered.map((cg) => {
               const reason = caregiverUnavailableReason(cg as any, holidayEntries, todayStr);
               const isOnShift = onShiftIds.has(cg.id);
-              const badgeLabel = reason ? reason.label : cg.status;
+              const unifiedReasonLabel = reason && reason.kind === "holiday" ? "On Leave" : reason?.label;
+              const badgeLabel = reason ? unifiedReasonLabel : cg.status;
               const isActiveAvailable = !reason && cg.status === "Active";
               return (
               <div
