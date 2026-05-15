@@ -64,11 +64,11 @@ export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
   if (!visit) return null;
 
   const scheduledStart = fmt(visit.start_hour, visit.start_minute);
-  
+
   const totalDurationMins = visit.duration_minutes ?? (visit.duration * 60);
   const startTotalMins = (visit.start_hour * 60) + (visit.start_minute || 0);
   const endTotalMins = startTotalMins + totalDurationMins;
-  
+
   const scheduledEnd = fmt(Math.floor(endTotalMins / 60), endTotalMins % 60);
   const totalWorked = diffMinutes(visit.check_in_time, visit.check_out_time);
   const completedCount = tasks.filter((t) => t.is_completed).length;
@@ -184,23 +184,15 @@ export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
             </div>
 
             <div className="space-y-3 py-2">
-              {privateNotes.map((pn: any) => (
-                <div key={pn.id} className="bg-amber-50/50 dark:bg-amber-950/10 border border-amber-200/50 dark:border-amber-800/30 rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider">Caregiver Private Note</span>
-                    <span className="text-[10px] text-muted-foreground">{new Date(pn.created_at).toLocaleString("en-GB", { timeZone: "Asia/Karachi" })}</span>
-                  </div>
-                  <p className="text-sm text-foreground">{pn.note}</p>
-                </div>
-              ))}
-
-              {notes.length === 0 && privateNotes.length === 0 && (
+              {notes.length === 0 && (
                 <p className="text-xs text-muted-foreground text-center py-3">No notes recorded</p>
               )}
               {notes.map((n) => (
                 <div key={n.id} className="bg-muted/50 rounded-lg p-3">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-medium text-foreground">{n.author}</span>
+                    <span className="text-xs font-medium text-foreground">
+                      {n.author === visit.care_giver_id ? (visit.care_givers as any)?.name : n.author}
+                    </span>
                     <span className="text-[10px] text-muted-foreground">{new Date(n.created_at).toLocaleString("en-GB", { timeZone: "Asia/Karachi" })}</span>
                   </div>
                   <p className="text-sm text-foreground">{n.note}</p>

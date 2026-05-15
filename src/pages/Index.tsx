@@ -66,7 +66,7 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
   const { data: notes = [] } = useShiftNotes(v.id);
   const { data: privateNotes = [] } = useCaregiverPrivateNotes(v);
   const { data: rawTasks = [] } = useShiftTasks(v.id);
-  
+
   // Dedup tasks by title for display
   const tasks = useMemo(() => {
     const map = new Map<string, any>();
@@ -105,7 +105,7 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
               const totalEndMins = totalStartMins + durationMins;
               const endH = Math.floor(totalEndMins / 60) % 24;
               const endM = totalEndMins % 60;
-              
+
               const startStr = `${String(startH).padStart(2, "0")}:${String(startM).padStart(2, "0")}`;
               const endStr = `${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}`;
               return `${startStr} – ${endStr}`;
@@ -130,7 +130,7 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${showNotes ? "bg-primary/15 text-primary shadow-sm" : "hover:bg-muted/80 text-muted-foreground hover:text-foreground"}`}
             >
               <StickyNote className="h-4 w-4" />
-              {notes.length + privateNotes.length}
+              {privateNotes.length}
             </button>
             <button
               onClick={() => setShowTasks(!showTasks)}
@@ -147,18 +147,13 @@ function CompletedVisitRow({ v, onClick }: { v: any; onClick: () => void }) {
           <TableCell colSpan={8} className="py-2 px-6">
             <div className="space-y-1.5">
               <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1"><StickyNote className="h-3 w-3" /> Notes</p>
-              {notes.length === 0 && privateNotes.length === 0 ? (
+              {privateNotes.length === 0 ? (
                 <div className="text-xs text-muted-foreground italic px-3 py-1.5">No notes recorded for this shift.</div>
               ) : (
                 <>
                   {privateNotes.map((pn: any) => (
                     <div key={pn.id} className="text-sm text-foreground bg-amber-50 dark:bg-amber-950/20 rounded px-3 py-1.5 border border-amber-200/50 dark:border-amber-800/30">
                       <span className="font-semibold text-amber-700 dark:text-amber-400 text-xs">Caregiver Private Note:</span> {pn.note}
-                    </div>
-                  ))}
-                  {notes.map((n: any) => (
-                    <div key={n.id} className="text-sm text-foreground bg-background rounded px-3 py-1.5 border border-border">
-                      <span className="font-medium text-primary text-xs">{n.author}:</span> {n.note}
                     </div>
                   ))}
                 </>
@@ -453,7 +448,7 @@ const Dashboard = () => {
                   const totalEndMins = totalStartMins + durationMins;
                   const endH = Math.floor(totalEndMins / 60) % 24;
                   const endM = totalEndMins % 60;
-                  
+
                   const schedLabel = `${String(startH).padStart(2, "0")}:${String(startM).padStart(2, "0")} – ${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}`;
                   const status = getVisitStatus(v);
                   return (
