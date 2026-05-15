@@ -12,6 +12,7 @@ import { AvatarUpload } from "@/components/AvatarUpload";
 import { useDeleteCareGiver } from "@/hooks/use-care-data";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, CalendarDays, Phone, Mail, Trash2, Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { Tables } from "@/integrations/supabase/types";
 
 type CareGiver = Tables<"care_givers">;
@@ -73,8 +74,11 @@ export function ProfileHeader({ cg }: Props) {
               <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-2xl font-bold text-foreground">{cg.name}</h1>
                 <Badge
-                  variant={cg.status === "Active" ? "default" : "secondary"}
-                  className={cg.status === "Active" ? "bg-success/15 text-success border-0" : ""}
+                  variant={cg.status === "Active" ? "default" : (cg.status === "Onboarding" ? "outline" : "secondary")}
+                  className={cn(
+                    cg.status === "Active" && "bg-success/15 text-success border-0",
+                    cg.status === "Onboarding" && "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-900/40 dark:text-amber-400 dark:border-amber-800"
+                  )}
                 >
                   {cg.status}
                 </Badge>

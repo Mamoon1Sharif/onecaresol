@@ -28,6 +28,7 @@ import {
   PhoneCall,
   StickyNote,
   Clock,
+  Activity,
 } from "lucide-react";
 import {
   TITLE_OPTIONS,
@@ -44,6 +45,7 @@ import {
   PERMISSION_OPTIONS,
   ROLE_TITLE_OPTIONS,
   RELATIONSHIP_OPTIONS,
+  CAREGIVER_STATUS_OPTIONS,
 } from "@/lib/profile-options";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -86,7 +88,23 @@ export function DetailedProfileTab({ cg }: Props) {
 
   const save = async (field: string, value: any) => {
     try {
-      await updateMutation.mutateAsync({ id: cg.id, [field]: value } as any);
+      const updates: any = { id: cg.id, [field]: value };
+      
+      // Auto-sync full name when forename or surname changes
+      if (field === "forename") {
+        updates.name = `${value} ${cg.surname || ""}`.trim();
+      } else if (field === "surname") {
+        updates.name = `${cg.forename || ""} ${value}`.trim();
+      }
+      
+      // Auto-sync contact info when work contact details change
+      if (field === "work_number") {
+        updates.phone = value;
+      } else if (field === "work_email") {
+        updates.email = value;
+      }
+
+      await updateMutation.mutateAsync(updates);
       toast({ title: "Updated", description: `${field.replace(/_/g, " ")} updated.` });
     } catch {
       toast({ title: "Error", description: "Failed to update.", variant: "destructive" });
@@ -187,6 +205,13 @@ export function DetailedProfileTab({ cg }: Props) {
               label="Allergies"
               value={cg.allergies}
               onSave={(v) => save("allergies", v)}
+            />
+            <EditableField
+              icon={Activity}
+              label="Profile Status"
+              value={cg.status}
+              onSave={(v) => save("status", v)}
+              options={CAREGIVER_STATUS_OPTIONS}
             />
           </div>
         </CardContent>

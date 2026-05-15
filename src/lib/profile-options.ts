@@ -38,3 +38,5 @@ export const RELATIONSHIP_OPTIONS = [
   "Spouse", "Partner", "Parent", "Child", "Sibling", "Grandparent",
   "Grandchild", "Friend", "Neighbour", "Guardian", "Other",
 ];
+
+export const CAREGIVER_STATUS_OPTIONS = ["Active", "Inactive", "Onboarding"];
