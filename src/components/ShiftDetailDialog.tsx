@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useShiftNotes, useShiftTasks, useShiftTableNote, useCaregiverPrivateNotes } from "@/hooks/use-care-data";
+import { useShiftNotes, useShiftTasks, useCaregiverPrivateNotes } from "@/hooks/use-care-data";
 import {
   Clock, MessageSquare, ListChecks, User, CheckCircle2, XCircle,
 } from "lucide-react";
@@ -51,7 +51,6 @@ function diffMinutes(start: string | null, end: string | null) {
 
 export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
   const { data: notes = [] } = useShiftNotes(visit?.id);
-  const { data: shiftTableNote } = useShiftTableNote(visit);
   const { data: privateNotes = [] } = useCaregiverPrivateNotes(visit);
   const { data: rawTasks = [] } = useShiftTasks(visit?.id);
 
@@ -168,7 +167,7 @@ export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
                     </p>
                     {task.is_completed && task.completed_by && (
                       <p className="text-[10px] text-muted-foreground">
-                        Done by {task.completed_by} · {task.completed_at ? new Date(task.completed_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : ""}
+                        Done by {task.completed_by === visit.care_giver_id ? (visit.care_givers as any)?.name : task.completed_by} · {task.completed_at ? new Date(task.completed_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }) : ""}
                       </p>
                     )}
                   </div>
@@ -185,15 +184,6 @@ export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
             </div>
 
             <div className="space-y-3 py-2">
-              {shiftTableNote && (
-                <div className="bg-primary/5 border border-primary/20 rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs font-semibold text-primary uppercase tracking-wider">Scheduled Notes</span>
-                  </div>
-                  <p className="text-sm text-foreground italic">{shiftTableNote}</p>
-                </div>
-              )}
-              
               {privateNotes.map((pn: any) => (
                 <div key={pn.id} className="bg-amber-50/50 dark:bg-amber-950/10 border border-amber-200/50 dark:border-amber-800/30 rounded-lg p-3">
                   <div className="flex items-center justify-between mb-1">
@@ -204,7 +194,7 @@ export function ShiftDetailDialog({ open, onOpenChange, visit }: Props) {
                 </div>
               ))}
 
-              {notes.length === 0 && !shiftTableNote && privateNotes.length === 0 && (
+              {notes.length === 0 && privateNotes.length === 0 && (
                 <p className="text-xs text-muted-foreground text-center py-3">No notes recorded</p>
               )}
               {notes.map((n) => (
