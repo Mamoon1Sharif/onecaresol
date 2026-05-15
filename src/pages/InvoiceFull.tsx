@@ -150,6 +150,66 @@ export default function InvoiceFull() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [draftSettings, setDraftSettings] = useState<SettingsState>(initialSettings);
 
+  // Logo upload + restrictions
+  const ALL_TYPES = [
+    { ext: "png", mime: "image/png" },
+    { ext: "jpg", mime: "image/jpeg" },
+    { ext: "svg", mime: "image/svg+xml" },
+    { ext: "webp", mime: "image/webp" },
+    { ext: "gif", mime: "image/gif" },
+  ];
+  const [logoUrl, setLogoUrl] = useState<string | null>(() => localStorage.getItem("invoice_logo_url"));
+  const [maxSizeKb, setMaxSizeKb] = useState<number>(() => Number(localStorage.getItem("invoice_logo_max_kb")) || 500);
+  const [allowedTypes, setAllowedTypes] = useState<string[]>(() => {
+    const saved = localStorage.getItem("invoice_logo_allowed_types");
+    return saved ? JSON.parse(saved) : ["png", "jpg", "svg"];
+  });
+  const [logoOpen, setLogoOpen] = useState(false);
+  const [draftMaxKb, setDraftMaxKb] = useState(maxSizeKb);
+  const [draftTypes, setDraftTypes] = useState<string[]>(allowedTypes);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (logoOpen) {
+      setDraftMaxKb(maxSizeKb);
+      setDraftTypes(allowedTypes);
+    }
+  }, [logoOpen, maxSizeKb, allowedTypes]);
+
+  const handleLogoFile = (file: File) => {
+    const ext = file.name.split(".").pop()?.toLowerCase() || "";
+    if (!draftTypes.includes(ext)) {
+      toast({ title: "File type not allowed", description: `Allowed: ${draftTypes.join(", ")}`, variant: "destructive" });
+      return;
+    }
+    if (file.size > draftMaxKb * 1024) {
+      toast({ title: "File too large", description: `Max size is ${draftMaxKb} KB.`, variant: "destructive" });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const url = reader.result as string;
+      setLogoUrl(url);
+      localStorage.setItem("invoice_logo_url", url);
+      toast({ title: "Logo updated" });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const saveLogoSettings = () => {
+    setMaxSizeKb(draftMaxKb);
+    setAllowedTypes(draftTypes);
+    localStorage.setItem("invoice_logo_max_kb", String(draftMaxKb));
+    localStorage.setItem("invoice_logo_allowed_types", JSON.stringify(draftTypes));
+    toast({ title: "Logo settings saved" });
+    setLogoOpen(false);
+  };
+
+  const removeLogo = () => {
+    setLogoUrl(null);
+    localStorage.removeItem("invoice_logo_url");
+  };
+
   const openSettings = () => {
     setDraftSettings(settings);
     setSettingsOpen(true);
