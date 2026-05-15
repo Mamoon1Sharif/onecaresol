@@ -9,9 +9,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Check, Pencil, Plus, Printer, Save, X } from "lucide-react";
+import { ArrowLeft, Check, Pencil, Plus, Printer, Save, Upload, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -148,6 +149,66 @@ export default function InvoiceFull() {
   const [settings, setSettings] = useState<SettingsState>(initialSettings);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [draftSettings, setDraftSettings] = useState<SettingsState>(initialSettings);
+
+  // Logo upload + restrictions
+  const ALL_TYPES = [
+    { ext: "png", mime: "image/png" },
+    { ext: "jpg", mime: "image/jpeg" },
+    { ext: "svg", mime: "image/svg+xml" },
+    { ext: "webp", mime: "image/webp" },
+    { ext: "gif", mime: "image/gif" },
+  ];
+  const [logoUrl, setLogoUrl] = useState<string | null>(() => localStorage.getItem("invoice_logo_url"));
+  const [maxSizeKb, setMaxSizeKb] = useState<number>(() => Number(localStorage.getItem("invoice_logo_max_kb")) || 500);
+  const [allowedTypes, setAllowedTypes] = useState<string[]>(() => {
+    const saved = localStorage.getItem("invoice_logo_allowed_types");
+    return saved ? JSON.parse(saved) : ["png", "jpg", "svg"];
+  });
+  const [logoOpen, setLogoOpen] = useState(false);
+  const [draftMaxKb, setDraftMaxKb] = useState(maxSizeKb);
+  const [draftTypes, setDraftTypes] = useState<string[]>(allowedTypes);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (logoOpen) {
+      setDraftMaxKb(maxSizeKb);
+      setDraftTypes(allowedTypes);
+    }
+  }, [logoOpen, maxSizeKb, allowedTypes]);
+
+  const handleLogoFile = (file: File) => {
+    const ext = file.name.split(".").pop()?.toLowerCase() || "";
+    if (!draftTypes.includes(ext)) {
+      toast({ title: "File type not allowed", description: `Allowed: ${draftTypes.join(", ")}`, variant: "destructive" });
+      return;
+    }
+    if (file.size > draftMaxKb * 1024) {
+      toast({ title: "File too large", description: `Max size is ${draftMaxKb} KB.`, variant: "destructive" });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const url = reader.result as string;
+      setLogoUrl(url);
+      localStorage.setItem("invoice_logo_url", url);
+      toast({ title: "Logo updated" });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const saveLogoSettings = () => {
+    setMaxSizeKb(draftMaxKb);
+    setAllowedTypes(draftTypes);
+    localStorage.setItem("invoice_logo_max_kb", String(draftMaxKb));
+    localStorage.setItem("invoice_logo_allowed_types", JSON.stringify(draftTypes));
+    toast({ title: "Logo settings saved" });
+    setLogoOpen(false);
+  };
+
+  const removeLogo = () => {
+    setLogoUrl(null);
+    localStorage.removeItem("invoice_logo_url");
+  };
 
   const openSettings = () => {
     setDraftSettings(settings);
@@ -512,6 +573,85 @@ export default function InvoiceFull() {
           </DialogContent>
         </Dialog>
 
+        {/* Logo Upload Dialog */}
+        <Dialog open={logoOpen} onOpenChange={setLogoOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Invoice Logo</DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-20 h-20 rounded border bg-muted/30 flex items-center justify-center overflow-hidden">
+                  {logoUrl ? (
+                    <img src={logoUrl} alt="Current logo" className="w-full h-full object-contain" />
+                  ) : (
+                    <span className="text-xs text-muted-foreground">No logo</span>
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()}>
+                    <Upload className="h-4 w-4 mr-1.5" /> {logoUrl ? "Replace" : "Upload"} Logo
+                  </Button>
+                  {logoUrl && (
+                    <Button size="sm" variant="ghost" className="text-destructive" onClick={removeLogo}>
+                      <X className="h-4 w-4 mr-1.5" /> Remove
+                    </Button>
+                  )}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept={draftTypes.map((t) => "." + t).join(",")}
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      if (f) handleLogoFile(f);
+                      e.target.value = "";
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="max-size">Max file size (KB)</Label>
+                <Input
+                  id="max-size"
+                  type="number"
+                  min={1}
+                  value={draftMaxKb}
+                  onChange={(e) => setDraftMaxKb(Number(e.target.value) || 0)}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label>Allowed file types</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {ALL_TYPES.map((t) => (
+                    <label key={t.ext} className="flex items-center gap-2 text-sm cursor-pointer">
+                      <Checkbox
+                        checked={draftTypes.includes(t.ext)}
+                        onCheckedChange={(checked) => {
+                          setDraftTypes((prev) =>
+                            checked ? [...prev, t.ext] : prev.filter((x) => x !== t.ext)
+                          );
+                        }}
+                      />
+                      .{t.ext}
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter className="gap-2 sm:gap-2">
+              <Button variant="outline" onClick={() => setLogoOpen(false)}>Cancel</Button>
+              <Button onClick={saveLogoSettings} disabled={draftTypes.length === 0 || draftMaxKb <= 0}>
+                <Save className="h-4 w-4 mr-1.5" /> Save Settings
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         {/* Status banner */}
         <div
           className={`rounded-md py-2 text-center text-sm font-medium ${
@@ -528,9 +668,18 @@ export default function InvoiceFull() {
           <div className="flex items-start justify-between gap-6">
             <div>
               <h2 className="text-xl font-semibold mb-3">Invoice</h2>
-              <div className="w-20 h-20 rounded bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
-                LOGO
-              </div>
+              <button
+                type="button"
+                onClick={() => setLogoOpen(true)}
+                className="w-20 h-20 rounded bg-primary/10 hover:bg-primary/20 transition flex items-center justify-center text-primary font-bold text-xs overflow-hidden border border-dashed border-primary/30 print:border-0"
+                title="Click to upload logo / set restrictions"
+              >
+                {logoUrl ? (
+                  <img src={logoUrl} alt="Invoice logo" className="w-full h-full object-contain" />
+                ) : (
+                  "LOGO"
+                )}
+              </button>
             </div>
             <div className="text-right text-xs space-y-0.5">
               <div className="font-semibold text-sm">Mayfair Care Agency Ltd</div>
