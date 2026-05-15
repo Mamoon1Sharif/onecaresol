@@ -64,6 +64,10 @@ const CareGivers = () => {
     if (!matchesSearch) return false;
     if (statusFilter === "All") return true;
     if (statusFilter === "Non-Active") return cg.status === "Non-Active" || cg.status === "Inactive";
+    if (statusFilter === "Active") {
+      const reason = caregiverUnavailableReason(cg as any, holidayEntries, todayStr);
+      return cg.status === "Active" && !reason;
+    }
     return cg.status === statusFilter;
   });
 
