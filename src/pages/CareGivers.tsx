@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, Plus, Phone, User, Clock, CalendarDays, Filter, Briefcase } from "lucide-react";
 import { useCareGivers, useDailyVisits } from "@/hooks/use-care-data";
+import { useCaregiverHolidayEntries, caregiverUnavailableReason } from "@/hooks/use-caregiver-availability";
 import { getCareGiverAvatar } from "@/lib/avatars";
 
 const STATUS_FILTERS = ["All", "Active", "Non-Active", "Onboarding"] as const;
