@@ -206,7 +206,7 @@ const CareGivers = () => {
                   );
                 })()}
               </div>
-            ))}
+            );})}
           </div>
         )}
       </div>
